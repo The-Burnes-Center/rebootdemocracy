@@ -8,7 +8,7 @@ import isFuture from 'date-fns/isFuture';
 // import { $vfm, VueFinalModal, ModalsContainer } from 'vue-final-modal'
 
 import HeaderComponent from "../components/header.vue";
-// import FooterComponent from "../components/footer.vue";
+import FooterComponent from "../components/footer.vue";
 // import { register } from 'swiper/element/bundle';
 // import {useHead } from '@vueuse/head'
 
@@ -16,7 +16,7 @@ import HeaderComponent from "../components/header.vue";
 export default {
   components: {
     "header-comp": HeaderComponent,
-  //   "footer-comp": FooterComponent,
+    "footer-comp": FooterComponent,
   //   "mailing-list-comp": MailingListComponent,
   //   "generative-ai-banner-comp":GenerativeAIBannerComponent,
   //   "ws-banner":WsBanner,
@@ -278,6 +278,6 @@ export default {
     </div>
 </div>
 
-
+<footer-comp></footer-comp>
 
 </template>

@@ -1,32 +1,35 @@
 
-<script>
-import MenuComponent from "../components/menu.vue";
-export default {
-  components: {
-    "menu-comp": MenuComponent
-  }
-}
-</script>
 
 <template>
 <div class="footer-section">
   <div class="footer-contents">
-    <div class="footer-icons">
-      <div class="footer-iconset-1">
-        <div class="icon"><i class="fa-sharp fa-solid fa-bullseye-pointer"></i></div>
-        <div class="icon"><i class="fa-solid fa-lightbulb-exclamation-on"></i></div>
+    <div class="logo-section footer-col">
+      <div class="wordmark">
+        Reboot Democracy
       </div>
-      <div class="wordmark"><img src="../assets/wordmark_dark.svg"></div>
-       <div class="footer-iconset-1">
-        <div class="icon"><i class="fa-sharp fa-solid fa-cubes"></i></div>
-        <div class="icon"><i class="fa-sharp fa-solid fa-clipboard-list-check"></i></div>
-      </div>
+      <p>A Project By</p>
+      <img @click="$router.push('/')" src="../assets/the-govlab-logo-white.svg">
     </div>
-    <div class="separator-line">
-      
+    <div class="footer-col">
+      <h4>Our Work</h4>
+       <a href="../">Equitable Engagement Lab</a>
+       <a href="../">Workplace and Democracy</a>
+       <a href="../">Media and Democracy</a>
     </div>
-    <div class="footer-menu">
-      <menu-comp :menutype="'footermenu'"></menu-comp>
+    <div class="footer-col">
+      <h4>Resources</h4>
+       <a href="../">Reboot Democracy Lecture Series</a>
+       <a href="../">Case Studies</a>
+       <a href="../">Research Questions</a>
+       <a href="../">Writing</a>
+       <a href="../">Teaching</a>
+    </div>
+    <div class="footer-col">
+      <h4>About the GovLab</h4>
+       <a href="../">Our Work</a>
+       <a href="../">Our People</a>
+       <a href="../">Careers</a>
+       <a href="../">Join the Lab</a>
     </div>
   </div>
 </div>

@@ -481,3 +481,63 @@ a.btn {
   align-items: flex-start;
   gap:10px;
 }
+
+.footer-section{
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000;
+  width:100%;
+}
+
+.logo-section.footer-col{
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.logo-section.footer-col img{
+  height:30px;
+}
+.logo-section p{
+  font-size:0.7em;
+  font-weight: 400;
+}
+.footer-contents{
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem;
+  width:100%;
+}
+.footer-col{
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start;;
+  align-items: flex-start;;
+  color: #ffffff;
+  gap:20px;
+  width:25%;
+}
+.footer-col a{
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Red Hat Text', sans-serif;
+  font-size:0.9em;
+}
+.cc-license{
+  background-color: #000000;
+  color: #ffffff;
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap:10px;
+}
+.cc-license p{
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 400;
+  font-size: 0.8em;
+}
