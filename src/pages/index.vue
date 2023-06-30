@@ -158,6 +158,7 @@ export default {
           <h3 class="eyebrow">{{featured_item.resource_type[0]}}</h3>
           <h4>{{featured_item.title}}</h4>
           <p>{{featured_item.short_description}}</p>
+          <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
         </div>
         </div>
       </div>
