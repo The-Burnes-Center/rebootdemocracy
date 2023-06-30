@@ -203,8 +203,9 @@ export default {
 <!-- Equitable Engagement Lab Section-->
 
 <div class="our-work-section">
-
-    <div class="our-work-image equitable-engagement-img"></div>
+    <div class="our-work-image equitable-engagement-img">
+      <img src="../assets/eel-image.png">
+    </div>
     <div class="our-work-layout">
       <div class="our-work-text">
         <h3>{{indexData.equitable_engagement_lab_title}}</h3>
@@ -234,7 +235,9 @@ export default {
 
 <!-- Our Research Section-->
 <div class="our-work-section">
-    <div class="our-work-image research-img"></div>
+    <div class="our-work-image research-img">
+       <img src="../assets/research-image.png">
+    </div>
     <div class="our-work-layout">
       <div class="our-work-text">
         <h3>{{indexData.research_title}}</h3>
@@ -257,7 +260,9 @@ export default {
 
 <!-- Our Writing Section-->
 <div class="our-work-section">
-    <div class="our-work-image writing-img"></div>
+    <div class="our-work-image writing-img">
+       <img src="../assets/writing-image.png">
+    </div>
     <div class="our-work-layout">
       <div class="our-work-text">
         <h3>{{indexData.writing_title}}</h3>

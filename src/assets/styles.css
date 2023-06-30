@@ -227,8 +227,6 @@ a.btn {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
-
   }
 
  .bars {
@@ -240,7 +238,7 @@ a.btn {
 .hero{
   height:70vh;
   width:100%;
-  background: linear-gradient(0deg, #ffffff00, #ffffff), url(../assets/hero.jpeg);
+  background: url(../assets/hero.png);
   background-repeat: no-repeat;
   background-size: cover;
   background-color: #D3D3D350;
@@ -270,6 +268,15 @@ a.btn {
   border: 1px solid #000000;
   height: fit-content;
 }
+
+@media (max-width: 768px) {
+  
+  .hero-content{
+    padding: 0 1rem 10rem 1rem;
+  }
+
+}
+
 
 .featured-layout{
   display:flex;
@@ -358,6 +365,15 @@ a.btn {
   margin:20px;
 }
 
+@media (max-width: 768px) {
+  
+  .featured-box{
+    display: none;
+  }
+
+
+}
+
 .mission-section{
   display:flex;
   flex-direction: row;
@@ -383,6 +399,23 @@ a.btn {
   background-repeat: no-repeat;
   background-size: cover;
 }
+@media (max-width: 768px) {
+  
+  .mission-section{
+    display:flex;
+    flex-direction: column-reverse;
+    height: fit-content;
+    width:fit-content
+  }
+
+  .mission-text{
+    padding: 1rem;
+    width: 100%;
+  }
+  .mission-image{
+    display:none;
+  }
+}
 
 .our-work-separator{
   background-color: var(--teal-text);
@@ -398,7 +431,7 @@ a.btn {
   justify-content: flex-start;
   align-items: center;
   border-bottom: 1px solid #000000;
-  height: 100%;
+  height: fit-content;
 }
 .our-work-layout{
   display:flex;
@@ -408,32 +441,111 @@ a.btn {
   padding: 2rem 2rem;
   gap: 40px;
   width: calc(100% - 4rem);
+}
 
+@media (max-width: 768px) {
+  .our-work-section{
+    justify-content:center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .our-work-layout{
+    flex-direction: column;
+    justify-content:center;
+    align-items: center;
+    width: 100%;
+  }
 }
 .our-work-image{
-  width:4rem;
-  height:100%;
-  background-repeat: no-repeat;
-  background-size: cover;
-  position: relative;
+  width:60px;
+  height: 700px;
 }
+
 .our-work-image.equitable-engagement-img{
-  background-image: url("../assets/eel-image.png");
-  padding-top: 60%;
+  width:60px;
+  height: 900px;
+}
+.our-work-image.our-work-image.equitable-engagement-img img{
+  max-width:60px;
+  height: inherit;
+  object-fit: cover;
+  background-position: center;
 }
 .our-work-image.research-img{
-  background-image: url("../assets/research-image.png");
-  padding-top: 40%;
+  width:60px;
+  height: 600px;
+}
+.our-work-image.research-img img{
+  max-width:60px;
+  height: inherit;
+  object-fit: cover;
+  background-position: center;
 }
 .our-work-image.writing-img{
-  background-image: url("../assets/writing-image.png");
-  padding-top: 40%;
+  width:60px;
+  height: 600px;
+}
+.our-work-image.writing-img img{
+  max-width:60px;
+  height: inherit;
+  object-fit: cover;
+  background-position: center;
 }
 .our-work-text{
  width:30%;
 }
 .two-col-resources{
   width:70%;
+}
+@media (max-width: 768px) {
+  .our-work-text{
+    width:100%;
+   }
+   .two-col-resources{
+     width:100%;
+   }
+
+   .our-work-image{
+    width:700px;
+    height: 60px;
+  }
+  
+  .our-work-image.equitable-engagement-img{
+    max-width:700px;
+    width:700px;
+    height: 60px;
+  }
+  .our-work-image.our-work-image.equitable-engagement-img img{
+    width:700px;
+    height: 60px;
+    max-width:700px;
+    object-fit: cover;
+    background-position: center;
+  }
+  .our-work-image.research-img{
+    max-width:700px;
+    width:700px;
+    height: 60px;
+  }
+  .our-work-image.research-img img{
+    width:700px;
+    height: 60px;
+    max-width:700px;
+    object-fit: cover;
+    background-position: center;
+  }
+  .our-work-image.writing-img{
+    max-width:700px;
+    width:700px;
+    height: 60px;
+  }
+  .our-work-image.writing-img img{
+    width:700px;
+    height: 60px;
+    max-width:700px;
+    object-fit: cover;
+    background-position: center;
+  }
 }
 .resource-row{
   display: flex;
@@ -540,4 +652,44 @@ a.btn {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 400;
   font-size: 0.8em;
+}
+
+
+
+@media (max-width: 768px) {
+  .footer-section{
+    display:flex;
+    flex-direction: column;
+    width:100%;
+  }
+  .footer-contents{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .logo-section.footer-col{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .footer-col{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    gap:20px;
+    width:25%;
+  }
+  .cc-license{
+    background-color: #000000;
+    color: #ffffff;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap:10px;
+  }
 }
