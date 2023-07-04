@@ -1,46 +1,14 @@
-<script>
-import { Directus } from '@directus/sdk';
-
-export default {
-
-  data() {
-    return {
-      aboutData: [],
-      directus: new Directus('https://content.thegovlab.com/'),
-    }
-  },
-  created() {
-    this.fetchAbout();
-  },
-  methods: {
-    fetchAbout: function fetchAbout() {
-    
-      this.directus
-      .items('innovate_us')
-      .readByQuery({
-         meta: 'total_count',
-         limit: -1,
-         fields: [
-          '*.*'
-       ]
-      })
-      .then((item) => {
-      this.aboutData =  item.data;
-      });
-    }
-
-  }
-}
-</script>
 <template>
   <div class="mailing-list-section">
-    <div class="row">
-      <div class="col-60">
-        <h3>Want to be a part of our community of innovators?</h3>
-        <p>We’d love to keep in touch!</p>
+    <div class="mailing-list-row">
+      <div class="col-50">
+        <h3>Never miss a good opportunity</h3>
+        <p>Get our most important updates, delivered straight to your inbox.</p>
       </div>
-      <div class="col-40">
-        <a href="mailinglist" class="btn btn-secondary btn-medium">Sign up to learn about our free programs</a>
+      <div class="col-50">
+        <p>Join our mailing list</p>
+         <input type="text" placeholder="" name="entry.250007595" aria-hidden=”true”>
+        <a href="mailinglist" class="btn btn-primary btn-dark btn-medium">Sign up</a>
       </div>
     </div>
   </div>

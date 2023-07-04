@@ -9,6 +9,7 @@ import isFuture from 'date-fns/isFuture';
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
+import MailingListComponent from "../components/mailing.vue";
 // import { register } from 'swiper/element/bundle';
 // import {useHead } from '@vueuse/head'
 
@@ -17,7 +18,7 @@ export default {
   components: {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
-  //   "mailing-list-comp": MailingListComponent,
+    "mailing-list-comp": MailingListComponent,
   //   "generative-ai-banner-comp":GenerativeAIBannerComponent,
   //   "ws-banner":WsBanner,
   //       VueFinalModal,
@@ -284,6 +285,27 @@ export default {
     </div>
 </div>
 
+<!-- Other practice section. Consider making repeatable and moving to directus-->
+
+<div class="other-practice">
+  <div class="col-50">
+      <div class="other-practice-img workplace-img">
+       <img src="../assets/workplace-image.png">
+    </div>
+    <div class="other-practice-title">
+      <h3>Workplace Democracy <i class="fa-regular fa-arrow-right"></i></h3>
+    </div>
+  </div>
+  <div class="col-50">
+    <div class="other-practice-img media-img">
+       <img src="../assets/media-image.png">
+    </div>
+    <div class="other-practice-title">
+      <h3>Media and Democracy <i class="fa-regular fa-arrow-right"></i></h3>
+    </div>
+  </div>
+</div>
+<mailing-list-comp></mailing-list-comp>
 <footer-comp></footer-comp>
 
 </template>
