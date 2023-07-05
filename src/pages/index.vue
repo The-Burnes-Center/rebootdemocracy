@@ -164,17 +164,52 @@ export default {
         </div>
       </div>
     </div>
-    <div class="featured-column">
-      <div class="featured-items" v-for="(featured_item,index) in featuredData" v-show="index > 2 && index < 7">
-        <div class="featured-item-text">
-          <h3 class="eyebrow">{{featured_item.resource_type[0]}}</h3>
-          <h4>{{featured_item.title}}</h4>
-          <p>{{featured_item.short_description}}</p>
-        </div>
-      </div>
+
+    <div class="featured-column desktop-feature">
+      <v-virtual-scroll  :items="featuredData">
+        <template v-slot:default="{ item }">
+          <div class="featured-items">
+            <div class="featured-item-text">
+              <h3 class="eyebrow">{{item.resource_type[0]}}</h3>
+              <h4>{{item.title}}</h4>
+              <p>{{item.short_description}}</p>
+            </div>
+          </div>
+        </template>
+      </v-virtual-scroll>
+    </div>  
+    <div class="featured-column mobile-feature">
+      <v-sheet
+        class="mx-auto"
+      >
+        <v-slide-group
+          show-arrows
+          selected-class="bg-primary"
+        >
+          <v-slide-group-item
+            v-for="item in featuredData"
+            :key="item"
+            v-slot="{ isSelected, toggle }"
+          >
+              <div class="featured-items">
+                <div class="featured-item-text">
+                  <h3 class="eyebrow">{{item.resource_type[0]}}</h3>
+                  <h4>{{item.title}}</h4>
+                  <p>{{item.short_description}}</p>
+                </div>
+              </div>
+          </v-slide-group-item>
+        </v-slide-group>
+      </v-sheet>
     </div>
+
   </div>
 </div>
+
+
+
+
+
 
 
 <!-- Our Mission Section -->
