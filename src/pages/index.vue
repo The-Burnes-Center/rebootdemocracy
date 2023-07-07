@@ -144,7 +144,7 @@ export default {
     <div class="featured-column">
       <div class="top-feature">
         <div class="top-feature-text">
-          <h3 class="eyebrow">{{featuredData[0].type}}</h3>
+          <h5 class="eyebrow">{{featuredData[0].type}}</h5>
           <h4>{{featuredData[0].title}}</h4>
           <p>{{featuredData[0].description}}</p>
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
@@ -157,7 +157,7 @@ export default {
       <div class="secondary-featured">
         <div class="secondary-featured-column" v-for="(featured_item,index) in featuredData" v-show="index > 0 && index < 3">
         <div class="secondary-featured-text">
-          <h3 class="eyebrow">{{featured_item.type}}</h3>
+          <h5 class="eyebrow">{{featured_item.type}}</h5>
           <h4>{{featured_item.title}}</h4>
           <p>{{featured_item.description}}</p>
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
@@ -171,7 +171,7 @@ export default {
         <template v-slot:default="{ item }">
           <div class="featured-items">
             <div class="featured-item-text">
-              <h3 class="eyebrow">{{item.type}}</h3>
+              <h5 class="eyebrow">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
             </div>
