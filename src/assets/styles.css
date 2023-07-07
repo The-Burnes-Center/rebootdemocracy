@@ -1002,16 +1002,17 @@ a.btn {
 select {
   cursor: pointer;
   font-family: 'Space Mono', monospace !important;
-  text-transform: uppercase !important;
   font-weight: 700  !important;
   letter-spacing: 2.4px  !important;
   padding: 15px;
   font-size: 24px;
 
 }
+
+
 select option{
   font-family: 'Space Mono', monospace !important;
-  text-transform: uppercase !important;
+
 }
 .event-information{
   background-color: var(--peach-rich);

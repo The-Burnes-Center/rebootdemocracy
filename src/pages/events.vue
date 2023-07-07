@@ -254,6 +254,7 @@ this.formatSeriesData();
   <h3>Upcoming Events</h3>
   <div class="event-grid-row">
     <div class="event-grid-col"  v-for="event_item in alleventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
+ 
       <div class="event-grid-item">
         <div class="event-image">
             <img v-if="!event_item.event_element.instructor && event_item.event_element.thumbnail" :src="this.directus._url + 'assets/' + event_item.event_element.thumbnail.id">
