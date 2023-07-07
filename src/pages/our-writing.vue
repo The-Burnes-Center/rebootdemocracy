@@ -1,4 +1,3 @@
-
 <script>
 import { ref, watch } from 'vue';
 import { Directus } from '@directus/sdk';
@@ -219,15 +218,6 @@ this.formatSeriesData();
 </script>
 
 <template>
-
-
- <!-- 
-  This events page is driven by the following collections and is concatenated for the purpose of showing all events. If more event sources are added, this list should be udpated.
-- All items tagged as event under Reboot Democracy 
-- All InnovateUS Workshops  
--->
-
-
 <!-- Header Component -->
 <header-comp></header-comp>
 
