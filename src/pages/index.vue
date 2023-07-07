@@ -110,6 +110,7 @@ export default {
           },
          meta: 'total_count',
          limit: -1,
+         sort:["-id"],
          fields: [
           '*.*','thumbnail.*'
        ],
@@ -143,9 +144,9 @@ export default {
     <div class="featured-column">
       <div class="top-feature">
         <div class="top-feature-text">
-          <h3 class="eyebrow">{{featuredData[0].resource_type[0]}}</h3>
+          <h3 class="eyebrow">{{featuredData[0].type}}</h3>
           <h4>{{featuredData[0].title}}</h4>
-          <p>{{featuredData[0].short_description}}</p>
+          <p>{{featuredData[0].description}}</p>
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
         </div>
         <div class="top-featured-image">
@@ -156,9 +157,9 @@ export default {
       <div class="secondary-featured">
         <div class="secondary-featured-column" v-for="(featured_item,index) in featuredData" v-show="index > 0 && index < 3">
         <div class="secondary-featured-text">
-          <h3 class="eyebrow">{{featured_item.resource_type[0]}}</h3>
+          <h3 class="eyebrow">{{featured_item.type}}</h3>
           <h4>{{featured_item.title}}</h4>
-          <p>{{featured_item.short_description}}</p>
+          <p>{{featured_item.description}}</p>
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
         </div>
         </div>
@@ -170,9 +171,9 @@ export default {
         <template v-slot:default="{ item }">
           <div class="featured-items">
             <div class="featured-item-text">
-              <h3 class="eyebrow">{{item.resource_type[0]}}</h3>
+              <h3 class="eyebrow">{{item.type}}</h3>
               <h4>{{item.title}}</h4>
-              <p>{{item.short_description}}</p>
+              <p>{{item.description}}</p>
             </div>
           </div>
         </template>
@@ -193,9 +194,9 @@ export default {
           >
               <div class="featured-items">
                 <div class="featured-item-text">
-                  <h3 class="eyebrow">{{item.resource_type[0]}}</h3>
+                  <h3 class="eyebrow">{{item.type}}</h3>
                   <h4>{{item.title}}</h4>
-                  <p>{{item.short_description}}</p>
+                  <p>{{item.description}}</p>
                 </div>
               </div>
           </v-slide-group-item>
