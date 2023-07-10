@@ -11,6 +11,8 @@ export default {
     <div class="logo-section">
       <div class="logo">
         <img @click="$router.push('/')" src="../assets/the-govlab-logo-white.svg">
+        <img @click="$router.push('/')" src="../assets/burnes-center-logo.png">
+        
       </div>
       <div class="wordmark">
         Reboot<br>Democracy<br>.AI

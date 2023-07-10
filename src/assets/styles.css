@@ -98,6 +98,8 @@ p, li{
 .logo img{
   height: 30px;
   padding-right: 20px;
+}
+.logo img:nth-child(2){
   border-right: 1px solid #ffffff;
 }
 .bars {
