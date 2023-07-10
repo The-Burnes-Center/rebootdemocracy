@@ -148,7 +148,7 @@ export default {
       <ul>
         <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Research</li>
         <li @click="selectedType = 'Case Study'" :class="{ isActive : selectedType == 'Book' }">Case Study</li>
-        <li @click="selectedType = 'Article'" :class="{ isActive : selectedType == 'Article' }">Articles</li>
+       <li @click="selectedType = 'Article'" :class="{ isActive : selectedType == 'Article' }"><a href="#research">Research Questions</a></li>
         <!-- <li></li> -->
       </ul>
     </div>
@@ -171,6 +171,15 @@ export default {
     </div>
   </div>
   <div class="resource-image">
+  </div>
+</div>
+<div id="research" class="research-questions">
+  <div class="research-questions-description">
+    <h2>Research Questions</h2>
+    <div v-html="indexData.research_questions_description">
+    </div>
+  </div>
+  <div class="research-questions-content" v-html="indexData.research_questions_content">
   </div>
 </div>
 <mailing-list-comp></mailing-list-comp>
