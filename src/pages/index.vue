@@ -173,7 +173,8 @@ export default {
             <div class="featured-item-text">
               <h5 class="eyebrow">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
-              <p>{{item.description}}</p>
+              <p>{{item.description}}</p> 
+              <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </template>

@@ -113,7 +113,7 @@ export default {
          fields: [
           '*.*'
        ],
-                 filter: {
+            filter: {
                 _or: [
             {
               type: {
@@ -122,7 +122,7 @@ export default {
             },
                         {
               type: {
-                _eq: "Book"
+                _eq: "Case Study"
               }
             }
             ]
@@ -141,20 +141,20 @@ export default {
 <template>
 <!-- Header Component -->
 <header-comp></header-comp>
-<div class="resource-page our-writing-page">
+<div class="resource-page our-research-page">
   <div class="resource-description">
-    <h1>Our Writing</h1>
+    <h1>Our Research</h1>
     <div class="resource-menu">
       <ul>
-        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Writing</li>
-        <li @click="selectedType = 'Book'" :class="{ isActive : selectedType == 'Book' }">Books</li>
+        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Research</li>
+        <li @click="selectedType = 'Case Study'" :class="{ isActive : selectedType == 'Book' }">Case Study</li>
         <li @click="selectedType = 'Article'" :class="{ isActive : selectedType == 'Article' }">Articles</li>
         <!-- <li></li> -->
       </ul>
     </div>
-    <p>We write about democracy and technology in a wide array of formats.</p>
   </div>
   <div class="resource-scroll-section">
+    
     <div class="resource-scroller">
       <v-virtual-scroll  :items="articleData">
         <template v-slot:default="{ item }">
