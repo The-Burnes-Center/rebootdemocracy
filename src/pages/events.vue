@@ -253,7 +253,7 @@ this.formatSeriesData();
 <div class="event-grid-section">
   <h3>Upcoming Events</h3>
   <div class="event-grid-row">
-    <div class="event-grid-col"  v-for="event_item in alleventsData">
+    <div class="event-grid-col"  v-for="event_item in alleventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
  
       <div class="event-grid-item">
         <div class="event-image">
