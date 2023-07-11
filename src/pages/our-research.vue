@@ -115,11 +115,6 @@ export default {
        ],
             filter: {
                 _or: [
-            {
-              type: {
-                _eq: "Article"
-              }
-            },
                         {
               type: {
                 _eq: "Case Study"
@@ -143,24 +138,29 @@ export default {
 <header-comp></header-comp>
 <div class="resource-page our-research-page">
   <div class="resource-description">
-    <h1>Our Research</h1>
+    <h1>{{indexData.research_title}}</h1>
+    <div class="our-work-description" v-html="indexData.research_description"></div>
     <div class="resource-menu">
       <ul>
-        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Research</li>
-        <li @click="selectedType = 'Case Study'" :class="{ isActive : selectedType == 'Book' }">Case Study</li>
-       <li @click="selectedType = 'Article'" :class="{ isActive : selectedType == 'Article' }"><a href="#research">Research Questions</a></li>
+        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Case Studies</li>
+        <li @click="selectedType = 'CrowdLaw'" :class="{ isActive : selectedType == 'CrowdLaw' }">CrowdLaw</li>
+         <li @click="selectedType = 'Virtual Communities'" :class="{ isActive : selectedType == 'Virtual Communities' }">Virtual Communities</li>
+          <li @click="selectedType = 'Smarter State'" :class="{ isActive : selectedType == 'Smarter State' }">Smarter State</li>
+           <li @click="selectedType = 'Collective Intelligence'" :class="{ isActive : selectedType == 'Collective Intelligence' }">Collective Intelligence</li>
+            <li @click="selectedType = 'All'" :class="{ isActive : selectedType == '' }"><a href="#research">Research Questions</a></li>
         <!-- <li></li> -->
       </ul>
     </div>
+    
   </div>
   <div class="resource-scroll-section">
     
     <div class="resource-scroller">
       <v-virtual-scroll  :items="articleData">
         <template v-slot:default="{ item }">
-          <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
+          <div class="featured-items"  v-show="item.case_study_type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
-              <h5 class="eyebrow">{{item.type}}</h5>
+              <h5 class="eyebrow">{{item.case_study_type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
                <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>

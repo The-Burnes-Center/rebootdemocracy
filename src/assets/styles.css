@@ -16,6 +16,7 @@
   --peach-text: rgba(214, 53, 18, 1);
   --purple-icon: rgba(219, 198, 254, 1);
   --teal-light: rgba(218, 250, 235, 1);
+  --teal-action: #0BCAC4;
   --teal-text: rgba(4, 120, 127, 1);
   --featured-box-height: 10px;
 }
@@ -31,7 +32,7 @@ h1.eyebrow.blue{
 }
 
 h1{
-  font-size: 62.5px;
+  font-size: 50px;
   font-family: 'Space Mono', monospace;
 }
 h2.eyebrow.peach{
@@ -120,6 +121,7 @@ p, li{
   min-height: 55px;
   font-family: 'Space Mono', monospace;
   gap: 20px;
+  z-index:1000;
 }
 .wordmark{
   font-size:0.8em;
@@ -610,30 +612,34 @@ a.btn {
 
 .our-work-image.equitable-engagement-img{
   width:60px;
-  height:900px;
+  height:1250px;
   overflow: hidden;
 }
 .our-work-image.equitable-engagement-img img{
   object-fit: cover;
   background-position: center;
+  height:100%;
 }
 .our-work-image.research-img{
   width:60px;
-  height:700px;
+  height:900px;
   overflow: hidden;
 }
 .our-work-image.research-img img{
   object-fit: cover;
   background-position: center;
+  height:100%;
 }
 .our-work-image.writing-img{
   width:60px;
   height:700px;
   overflow: hidden;
+  background-position: center;
 }
 .our-work-image.writing-img img{
   object-fit: cover;
   background-position: center;
+  height:100%;
 }
 .our-work-text{
  width:30%;
@@ -718,7 +724,7 @@ a.btn {
   background-color: #ffffff;
   border: 1px solid #000000;
   margin: 0 10px 10px 0px;
-  padding: 10px;
+  padding: 20px;
 }
 
 .join-section{
@@ -1211,7 +1217,7 @@ select option{
   flex-direction: column;
   width:70%;
   padding: 4rem 5rem;
-  gap: 40px;
+  gap: 20px;
 }
 .resource-scroll-section{
   display:flex;
@@ -1280,6 +1286,13 @@ select option{
 .our-writing-page  .resource-scroller{
   background-color: var(--peach-action);
 }
+.our-writing-page .resource-image{
+  background-image: url("../assets/writing-image.png");
+}
+.our-writing-page .resource-menu li.isActive{
+  color: var(--peach-text);
+}
+
 
 .our-research-page .resource-description{
   background-color: var(--blue-light);
@@ -1290,21 +1303,51 @@ select option{
 .our-research-page  .resource-scroller{
   background-color: var(--blue-action);
 }
-.our-writing-page .resource-image{
-  background-image: url("../assets/writing-image.png");
-}
 
 .our-research-page .resource-image{
   background-image: url("../assets/research-image.png");
 }
 
-.our-writing-page .resource-menu li.isActive{
-  color: var(--peach-text);
-}
-
 .our-research-page .resource-menu li.isActive{
   color: var(--blue-text);
 }
+
+.our-engagements-page .resource-description{
+  background-color: var(--peach-light);
+}
+.our-engagements-page .resource-scroll-section{
+  background-color: var(--peach-light);
+}
+.our-engagements-page .resource-scroller{
+  background-color: var(--peach-action);
+}
+
+.our-engagements-page .resource-image{
+  background-image: url("../assets/eel-image.png");
+}
+
+.our-engagements-page .resource-menu li.isActive{
+  color: var(--peach-text);
+}
+
+.our-teaching-page .resource-description{
+  background-color: var(--teal-light);
+}
+.our-teaching-page .resource-scroll-section{
+  background-color: var(--teal-light);
+}
+.our-teaching-page .resource-scroller{
+  background-color: var(--teal-action);
+}
+
+.our-teaching-page .resource-image{
+  background-image: url("../assets/workplace-image.png");
+}
+
+.our-teaching-page .resource-menu li.isActive{
+  color: var(--teal-text);
+}
+
 .resource-menu li:hover {
   cursor: pointer;
 }

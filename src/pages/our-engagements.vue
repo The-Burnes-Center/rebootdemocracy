@@ -117,12 +117,7 @@ export default {
                 _or: [
             {
               type: {
-                _eq: "Article"
-              }
-            },
-                        {
-              type: {
-                _eq: "Book"
+                _eq: "Engagement"
               }
             }
             ]
@@ -141,19 +136,19 @@ export default {
 <template>
 <!-- Header Component -->
 <header-comp></header-comp>
-<div class="resource-page our-writing-page">
+<div class="resource-page our-engagements-page">
   <div class="resource-description">
-    <h1>{{indexData.writing_title}}</h1>
-    <div class="our-work-description" v-html="indexData.writing_description"></div>
+    <h1>{{indexData.engagement_title}}</h1>
+    <div class="our-work-description" v-html="indexData.engagement_description"></div>
     <div class="resource-menu">
       <ul>
-        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Writing</li>
-        <li @click="selectedType = 'Book'" :class="{ isActive : selectedType == 'Book' }">Books</li>
-        <li @click="selectedType = 'Article'" :class="{ isActive : selectedType == 'Article' }">Articles</li>
+        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Engagements</li>
+        <!-- <li @click="selectedType = 'Book'" :class="{ isActive : selectedType == 'Book' }">Books</li>
+        <li @click="selectedType = 'Article'" :class="{ isActive : selectedType == 'Article' }">Articles</li> -->
         <!-- <li></li> -->
       </ul>
     </div>
-    
+
   </div>
   <div class="resource-scroll-section">
     <div class="resource-scroller">

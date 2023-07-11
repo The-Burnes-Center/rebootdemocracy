@@ -32,9 +32,10 @@ export default {
            <i class="fa-regular fa-angle-down"></i>
           </button>
             <div class="dropdown-content">
-              <a href="">Engagements</a>
-              <a href="">Case Studies</a>
-               <a href="">Teaching</a>
+              <a href="/our-engagements">Engagements</a>
+              <a href="/our-research">Research</a>
+              <a href="/our-writing">Writing</a>
+              <a href="/our-teaching">Teaching</a>
             </div>
         </div>
         <a href="" class="btn btn-small btn-primary">Join Us</a>

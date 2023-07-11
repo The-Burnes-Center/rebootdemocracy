@@ -117,12 +117,7 @@ export default {
                 _or: [
             {
               type: {
-                _eq: "Article"
-              }
-            },
-                        {
-              type: {
-                _eq: "Book"
+                _eq: "Teaching"
               }
             }
             ]
@@ -141,15 +136,16 @@ export default {
 <template>
 <!-- Header Component -->
 <header-comp></header-comp>
-<div class="resource-page our-writing-page">
+<div class="resource-page our-teaching-page">
   <div class="resource-description">
-    <h1>{{indexData.writing_title}}</h1>
-    <div class="our-work-description" v-html="indexData.writing_description"></div>
+    <h1>{{indexData.teaching_title}}</h1>
+    <div class="our-work-description" v-html="indexData.teaching_description"></div>
     <div class="resource-menu">
       <ul>
-        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Writing</li>
-        <li @click="selectedType = 'Book'" :class="{ isActive : selectedType == 'Book' }">Books</li>
-        <li @click="selectedType = 'Article'" :class="{ isActive : selectedType == 'Article' }">Articles</li>
+        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Teaching</li>
+        <li @click="selectedType = 'at-your-own-pace'" :class="{ isActive : selectedType == 'at-your-own-pace' }">At-Your-Own-Pace</li>
+        <li @click="selectedType = 'workshop'" :class="{ isActive : selectedType == 'workshop' }">Workshops</li>
+         <li @click="selectedType = 'video'" :class="{ isActive : selectedType == 'video' }">Videos</li>
         <!-- <li></li> -->
       </ul>
     </div>
@@ -159,9 +155,9 @@ export default {
     <div class="resource-scroller">
       <v-virtual-scroll  :items="articleData">
         <template v-slot:default="{ item }">
-          <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
+          <div class="featured-items"  v-show="item.teaching_type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
-              <h5 class="eyebrow">{{item.type}}</h5>
+              <h5 class="eyebrow">{{item.teaching_type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
                <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>

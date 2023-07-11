@@ -31,6 +31,10 @@ export default {
                                  
       indexData: [],
       featuredData:[],
+      researchData: [],
+      writingData: [],
+      teachingData:[],
+      moreresourceData: [],
       directus: new Directus('https://directus9.thegovlab.com/'),
       path:this.$route.fullPath,
     }
@@ -41,7 +45,10 @@ export default {
     this.indexData = this.directus.items("reboot_democracy");
     this.fetchIndex();
     this.fetchFeatured();
-    
+    this.fetchResearch();
+    this.fetchWriting();
+    this.fetchTeaching();
+    this.fetchMoreResources();
   },
 //  mounted()
 
@@ -119,7 +126,126 @@ export default {
       .then((item) => {
       self.featuredData =  item.data;
       });
+    },
+
+    fetchResearch: function fetchResearch() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_resources')
+      .readByQuery({
+            filter: {
+              type: {
+                _eq: "Case Study"
+              }
+          },
+         meta: 'total_count',
+         limit: -1,
+         sort:["-id"],
+         fields: [
+          '*.*','thumbnail.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.researchData =  item.data;
+      });
+    },
+    fetchWriting: function fetchWriting() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_resources')
+      .readByQuery({
+                 filter: {
+                _or: [
+            {
+              type: {
+                _eq: "Article"
+              }
+            },
+                        {
+              type: {
+                _eq: "Book"
+              }
+            }
+            ]
+
+          },
+         meta: 'total_count',
+         limit: -1,
+         sort:["-id"],
+         fields: [
+          '*.*','thumbnail.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.writingData =  item.data;
+      });
+    },
+    fetchTeaching: function fetchTeaching() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_resources')
+      .readByQuery({
+                 filter: {
+                _or: [
+            {
+              type: {
+                _eq: "Teaching"
+              }
+            }
+            ]
+
+          },
+         meta: 'total_count',
+         limit: -1,
+         sort:["-id"],
+         fields: [
+          '*.*','thumbnail.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.teachingData =  item.data;
+      });
+    },
+    fetchMoreResources: function fetchMoreResources() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_resources')
+      .readByQuery({
+                 filter: {
+                _or: [
+            {
+              type: {
+                _eq: "Video"
+              }
+            },
+                        {
+              type: {
+                _eq: "Podcast"
+              }
+            }
+            ]
+
+          },
+         meta: 'total_count',
+         limit: -1,
+         sort:["-id"],
+         fields: [
+          '*.*','thumbnail.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.moreresourceData =  item.data;
+      });
     }
+
 
   }
 }
@@ -255,8 +381,9 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in featuredData" v-show="index < 6">
             <div class="resource-item">
-              <h4>Collective Intelligence</h4>
-              <p>It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with</p>
+              <h4>{{resource_item.title}}</h4>
+              <p>{{resource_item.description}}</p>
+              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -280,19 +407,20 @@ export default {
     <div class="our-work-layout">
       <div class="our-work-text">
         <h3>{{indexData.research_title}}</h3>
-        <!-- <div class="our-work-description" v-html="indexData.equitable_engagement_lab_description"></div> -->
+        <div class="our-work-description" v-html="indexData.research_description"></div>
         
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in featuredData" v-show="index < 6">
+          <div class="resource-col"  v-for="(resource_item,index) in researchData" v-show="index < 6">
             <div class="resource-item">
-              <h4>Collective Intelligence</h4>
-              <p>It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with</p>
+              <h4>{{resource_item.title}}</h4>
+              <p>{{resource_item.description}}</p>
+              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
-        <a class="btn btn-small btn-ghost">More Research<i class="fa-regular fa-arrow-right"></i></a>
+        <a class="btn btn-small btn-ghost" href="/our-research">More Research<i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
 </div>
@@ -305,19 +433,73 @@ export default {
     <div class="our-work-layout">
       <div class="our-work-text">
         <h3>{{indexData.writing_title}}</h3>
-        <!-- <div class="our-work-description" v-html="indexData.equitable_engagement_lab_description"></div> -->
+        <div class="our-work-description" v-html="indexData.writing_description"></div>
         
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in featuredData" v-show="index < 6">
+          <div class="resource-col"  v-for="(resource_item,index) in writingData" v-show="index < 6">
             <div class="resource-item">
-              <h4>Collective Intelligence</h4>
-              <p>It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with</p>
+              <h4>{{resource_item.title}}</h4>
+              <p>{{resource_item.description}}</p>
+              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
-        <a class="btn btn-small btn-ghost">More Writing<i class="fa-regular fa-arrow-right"></i></a>
+        <a class="btn btn-small btn-ghost" href="/our-writing">More Writing<i class="fa-regular fa-arrow-right"></i></a>
+      </div>
+    </div>
+</div>
+
+<!-- Our Teaching Section-->
+<div class="our-work-section">
+    <div class="our-work-image writing-img">
+       <img src="../assets/workplace-image.png">
+    </div>
+    <div class="our-work-layout">
+      <div class="our-work-text">
+        <h3>{{indexData.teaching_title}}</h3>
+        <div class="our-work-description" v-html="indexData.teaching_description"></div>
+        
+      </div>
+      <div class="two-col-resources">
+        <div class="resource-row">
+          <div class="resource-col"  v-for="(resource_item,index) in teachingData" v-show="index < 6">
+            <div class="resource-item">
+              <h4>{{resource_item.title}}</h4>
+              <p>{{resource_item.description}}</p>
+              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <a class="btn btn-small btn-ghost" href="/our-teaching">More Teaching<i class="fa-regular fa-arrow-right"></i></a>
+      </div>
+    </div>
+</div>
+
+
+<!-- Our Other Resources Section-->
+<div class="our-work-section">
+    <div class="our-work-image writing-img">
+       <img src="../assets/media-image.png">
+    </div>
+    <div class="our-work-layout">
+      <div class="our-work-text">
+        <h3>{{indexData.more_resources_title}}</h3>
+        <div class="our-work-description" v-html="indexData.more_resources_description"></div>
+        
+      </div>
+      <div class="two-col-resources">
+        <div class="resource-row">
+          <div class="resource-col"  v-for="(resource_item,index) in moreresourceData" v-show="index < 6">
+            <div class="resource-item">
+              <h4>{{resource_item.title}}</h4>
+              <p>{{resource_item.description}}</p>
+              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <a class="btn btn-small btn-ghost" href="/our-teaching">More Resources<i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
 </div>
