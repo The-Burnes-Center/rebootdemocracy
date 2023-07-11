@@ -98,7 +98,7 @@ export default {
           self.eventTitle = "";
           self.eventDescription = "";
           this.alleventsData = this.eventsData.concat(this.InnovateUSData);
-          this.alleventsData.sort((a, b) => a.event_element.date - b.event_element.date);
+         this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
           
         }
         else if (self.selectedStatus != undefined){
@@ -109,7 +109,7 @@ export default {
               
             //  this.InnovateUSData_elements = this.InnovateUSData.map(obj => obj.event_element);
             this.alleventsData = this.InnovateUSData;
-            this.alleventsData.sort((a, b) => a.event_element.date - b.event_element.date);
+            this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
           }
 
           else if(self.selectedStatus.title != "InnovateUS Workshops"){
@@ -118,7 +118,7 @@ export default {
           return e.event_element.event_series[0].general_events_series_id.title == self.selectedStatus.title
         });
           this.alleventsData = tempData;
-          this.alleventsData.sort((a, b) => a.event_element.date - b.event_element.date);
+          this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
           }
         }
 
@@ -284,6 +284,7 @@ this.formatSeriesData();
       <div class="past-event-col-1">
           <h5 class="eyebrow">{{event_item.series_name}}</h5>
           <h2>{{event_item.event_element.title}}</h2>
+           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
       </div>
       <div class="past-event-col-2">
          <p v-html="event_item.event_element.description"></p>
