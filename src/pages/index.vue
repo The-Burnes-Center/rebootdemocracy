@@ -34,8 +34,10 @@ export default {
       researchData: [],
       writingData: [],
       teachingData:[],
+      engagementData: [],
+      eelData: [],
       moreresourceData: [],
-      directus: new Directus('https://directus9.thegovlab.com/'),
+      directus: new Directus('https://directus10.thegovlab.com/'),
       path:this.$route.fullPath,
     }
   },
@@ -47,6 +49,8 @@ export default {
     this.fetchFeatured();
     this.fetchResearch();
     this.fetchWriting();
+    this.fetchEngagements();
+    this.fetchEEL();
     this.fetchTeaching();
     this.fetchMoreResources();
   },
@@ -112,7 +116,7 @@ export default {
       .readByQuery({
           filter: {
             featured: {
-              _eq: true,
+              _eq: 'true',
             },
           },
          meta: 'total_count',
@@ -212,6 +216,65 @@ export default {
       self.teachingData =  item.data;
       });
     },
+
+    fetchEEL: function fetchEEL() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_resources')
+      .readByQuery({
+                 filter: {
+                _or: [
+            {
+              type: {
+                _eq: "Equitable Engagement Lab"
+              }
+            }
+            ]
+
+          },
+         meta: 'total_count',
+         limit: -1,
+         sort:["-id"],
+         fields: [
+          '*.*','thumbnail.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.eelData =  item.data;
+      });
+    },
+
+    fetchEngagements: function fetchEngagements() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_resources')
+      .readByQuery({
+                 filter: {
+                _or: [
+            {
+              type: {
+                _eq: "Engagement"
+              }
+            }
+            ]
+
+          },
+         meta: 'total_count',
+         limit: -1,
+         sort:["-id"],
+         fields: [
+          '*.*','thumbnail.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.engagementData =  item.data;
+      });
+    },
+
     fetchMoreResources: function fetchMoreResources() {
       self = this;
 
@@ -276,7 +339,8 @@ export default {
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
         </div>
         <div class="top-featured-image">
-          <img :src="this.directus._url+'assets/'+featuredData[0].thumbnail.id">
+          <img v-if="featuredData[0].thumbnail" :src="this.directus._url+'assets/'+featuredData[0].thumbnail.id">
+          <img v-if="!featuredData[0].thumbnail"  src="..//assets/workplace-image.png">
         </div>
 
       </div>
@@ -338,8 +402,6 @@ export default {
 
 
 
-
-
 <!-- Our Mission Section -->
 
 <div class="mission-section">
@@ -379,7 +441,7 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in featuredData" v-show="index < 6">
+          <div class="resource-col"  v-for="(resource_item,index) in eelData" v-show="index < 6">
             <div class="resource-item">
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
@@ -398,6 +460,33 @@ export default {
       </div>
     </div>
 </div>
+
+<!-- Our Past Engagements Section-->
+<div class="our-work-section">
+    <div class="our-work-image research-img">
+       <img src="../assets/media-image.png">
+    </div>
+    <div class="our-work-layout">
+      <div class="our-work-text">
+        <h3>{{indexData.research_title}}</h3>
+        <div class="our-work-description" v-html="indexData.research_description"></div>
+        
+      </div>
+      <div class="two-col-resources">
+        <div class="resource-row">
+          <div class="resource-col"  v-for="(resource_item,index) in engagementData.slice().reverse()" v-show="index < 6">
+            <div class="resource-item">
+              <h4>{{resource_item.title}}</h4>
+              <p>{{resource_item.description}}</p>
+              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <a class="btn btn-small btn-ghost" href="/our-research">More Research<i class="fa-regular fa-arrow-right"></i></a>
+      </div>
+    </div>
+</div>
+
 
 <!-- Our Research Section-->
 <div class="our-work-section">

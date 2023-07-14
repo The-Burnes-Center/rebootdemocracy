@@ -158,6 +158,7 @@ a.btn {
   justify-content: center;
   align-items: center;
   font-family: 'Space Mono', monospace;
+  color: #000000;
 }
 
 .btn-primary{
@@ -632,7 +633,7 @@ a.btn {
 }
 .our-work-image.writing-img{
   width:60px;
-  height:700px;
+  height:900px;
   overflow: hidden;
   background-position: center;
 }
@@ -725,6 +726,14 @@ a.btn {
   border: 1px solid #000000;
   margin: 0 10px 10px 0px;
   padding: 20px;
+  height: 240px;
+}
+.resource-item p{
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* number of lines to show */
+          line-clamp: 4; 
+  -webkit-box-orient: vertical;
 }
 
 .join-section{

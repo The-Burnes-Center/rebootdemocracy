@@ -32,7 +32,7 @@ export default {
       articleData: [],
       indexData: [],
       selectedType: 'All',
-      directus: new Directus('https://directus9.thegovlab.com/'),
+      directus: new Directus('https://directus10.thegovlab.com/'),
       path:this.$route.fullPath,
     }
   },
