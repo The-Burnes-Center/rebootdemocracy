@@ -111,7 +111,7 @@ export default {
          limit: -1,
          sort:["-id"],
          fields: [
-          '*.*'
+          '*.*','thumbnail.*', 'authors.team_id.*'
        ],
                  filter: {
                 _or: [
@@ -163,7 +163,7 @@ export default {
             <div class="featured-item-text">
               <h5 class="eyebrow">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
-              <p>{{item.description}}</p>
+              <p>By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
                <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>

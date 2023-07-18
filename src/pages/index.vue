@@ -180,7 +180,7 @@ export default {
          limit: -1,
          sort:["-id"],
          fields: [
-          '*.*','thumbnail.*'
+          '*.*','thumbnail.*', 'authors.team_id.*'
        ],
        
       })
@@ -527,10 +527,11 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in writingData" v-show="index < 6">
+          <div class="resource-col"  v-for="(resource_item,index) in writingData.slice().reverse()" v-show="index < 6">
             <div class="resource-item">
+              
               <h4>{{resource_item.title}}</h4>
-              <p>{{resource_item.description}}</p>
+              <p>By <span v-for="(author,index) in resource_item.authors">{{author.team_id.name}}<span v-if="index < resource_item.authors.length - 1">, </span></span></p>
               <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
