@@ -6,6 +6,8 @@ import Writing from '../pages/our-writing.vue';
 import Research from '../pages/our-research.vue';
 import Teaching from '../pages/our-teaching.vue';
 import Engagement from '../pages/our-engagements.vue';
+import Resources from '../pages/more-resources.vue';
+
 
 const routes = [
   { path:"/", component: Home },
@@ -14,6 +16,7 @@ const routes = [
   { path:"/our-research", component: Research },
   { path:"/our-teaching", component: Teaching },
   { path:"/our-engagements", component: Engagement },
+  { path:"/more-resources", component: Resources },
 ]
 
 const router = createRouter({
