@@ -111,13 +111,23 @@ export default {
          limit: -1,
          sort:["-id"],
          fields: [
-          '*.*'
+          '*.*','thumbnail.*', 'authors.team_id.*'
        ],
                  filter: {
                 _or: [
             {
               type: {
-                _eq: "Teaching"
+                _eq: "Resources"
+              }
+            },
+                        {
+              type: {
+                _eq: "Video"
+              }
+            },
+                                    {
+              type: {
+                _eq: "Podcast"
               }
             }
             ]
@@ -136,16 +146,16 @@ export default {
 <template>
 <!-- Header Component -->
 <header-comp></header-comp>
-<div class="resource-page our-teaching-page">
+<div class="resource-page our-writing-page">
   <div class="resource-description">
-    <h1>{{indexData.teaching_title}}</h1>
-    <div class="our-work-description" v-html="indexData.teaching_description"></div>
+    <h1>{{indexData.more_resources_title}}</h1>
+    <div class="our-work-description" v-html="indexData.more_resources_description"></div>
     <div class="resource-menu">
       <ul>
-        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Teaching</li>
-        <li @click="selectedType = 'at-your-own-pace'" :class="{ isActive : selectedType == 'at-your-own-pace' }">At-Your-Own-Pace</li>
-        <!-- <li @click="selectedType = 'workshop'" :class="{ isActive : selectedType == 'workshop' }">Workshops</li> -->
-         <li @click="selectedType = 'video'" :class="{ isActive : selectedType == 'video' }">Videos</li>
+        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Resources</li>
+        <li @click="selectedType = 'Resources'" :class="{ isActive : selectedType == 'Resources' }">Prcoess Docs and Worksheets</li>
+        <li @click="selectedType = 'Podcast'" :class="{ isActive : selectedType == 'Podcast' }">Podcast</li>
+        <li @click="selectedType = 'Video'" :class="{ isActive : selectedType == 'Video' }">Video</li>
         <!-- <li></li> -->
       </ul>
     </div>
@@ -155,9 +165,9 @@ export default {
     <div class="resource-scroller">
       <v-virtual-scroll  :items="articleData">
         <template v-slot:default="{ item }">
-          <div class="featured-items"  v-show="item.teaching_type == selectedType || selectedType == 'All' ">
+          <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
-              <h5 class="eyebrow">{{item.teaching_type}}</h5>
+              <h5 class="eyebrow">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
                <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>

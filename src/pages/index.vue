@@ -123,7 +123,7 @@ export default {
          limit: -1,
          sort:["-id"],
          fields: [
-          '*.*','thumbnail.*'
+          '*.*','thumbnail.*', 'authors.team_id.*'
        ],
        
       })
@@ -292,6 +292,11 @@ export default {
               type: {
                 _eq: "Podcast"
               }
+            },
+                                    {
+              type: {
+                _eq: "Resources"
+              }
             }
             ]
 
@@ -335,12 +340,13 @@ export default {
         <div class="top-feature-text">
           <h5 class="eyebrow">{{featuredData[0].type}}</h5>
           <h4>{{featuredData[0].title}}</h4>
-          <p>{{featuredData[0].description}}</p>
+           <p v-if="featuredData[0].authors == ''">{{featuredData[0].description}}</p>
+            <p v-if="featuredData[0].authors != ''">By <span v-for="(author,index) in featuredData[0].authors">{{author.team_id.name}}<span v-if="index < featuredData[0].authors.length - 1">, </span></span></p>
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
         </div>
         <div class="top-featured-image">
           <img v-if="featuredData[0].thumbnail" :src="this.directus._url+'assets/'+featuredData[0].thumbnail.id">
-          <img v-if="!featuredData[0].thumbnail"  src="..//assets/workplace-image.png">
+          <img v-if="!featuredData[0].thumbnail"  src="..//assets/media-image.png">
         </div>
 
       </div>
@@ -349,7 +355,8 @@ export default {
         <div class="secondary-featured-text">
           <h5 class="eyebrow">{{featured_item.type}}</h5>
           <h4>{{featured_item.title}}</h4>
-          <p>{{featured_item.description}}</p>
+          <p v-if="featured_item.authors == ''">{{featured_item.description}}</p>
+          <p v-if="featured_item.authors != ''">By <span v-for="(author,index) in featured_item.authors">{{author.team_id.name}}<span v-if="index < featured_item.authors.length - 1">, </span></span></p>
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
         </div>
         </div>
@@ -363,7 +370,8 @@ export default {
             <div class="featured-item-text">
               <h5 class="eyebrow">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
-              <p>{{item.description}}</p> 
+              <p v-if="item.authors == ''">{{item.description}}</p>
+              <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
               <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
@@ -387,7 +395,8 @@ export default {
                 <div class="featured-item-text">
                   <h3 class="eyebrow">{{item.type}}</h3>
                   <h4>{{item.title}}</h4>
-                  <p>{{item.description}}</p>
+                  <p v-if="item.authors == ''">{{item.description}}</p>
+                  <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
                 </div>
               </div>
           </v-slide-group-item>
@@ -468,14 +477,15 @@ export default {
     </div>
     <div class="our-work-layout">
       <div class="our-work-text">
-        <h3>{{indexData.research_title}}</h3>
-        <div class="our-work-description" v-html="indexData.research_description"></div>
+        <h3>{{indexData.engagement_title}}</h3>
+        <div class="our-work-description" v-html="indexData.engagement_description"></div>
         
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in engagementData.slice().reverse()" v-show="index < 6">
             <div class="resource-item">
+               <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
@@ -503,6 +513,7 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in researchData" v-show="index < 6">
             <div class="resource-item">
+               <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
@@ -529,7 +540,7 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in writingData.slice().reverse()" v-show="index < 6">
             <div class="resource-item">
-              
+               <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>By <span v-for="(author,index) in resource_item.authors">{{author.team_id.name}}<span v-if="index < resource_item.authors.length - 1">, </span></span></p>
               <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
@@ -556,6 +567,7 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in teachingData" v-show="index < 6">
             <div class="resource-item">
+               <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
@@ -583,13 +595,14 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in moreresourceData" v-show="index < 6">
             <div class="resource-item">
+              <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
-        <a class="btn btn-small btn-ghost" href="/our-teaching">More Resources<i class="fa-regular fa-arrow-right"></i></a>
+        <a class="btn btn-small btn-ghost" href="/more-resources">More Resources<i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
 </div>

@@ -623,7 +623,7 @@ a.btn {
 }
 .our-work-image.research-img{
   width:60px;
-  height:900px;
+  height:1000px;
   overflow: hidden;
 }
 .our-work-image.research-img img{
@@ -633,7 +633,7 @@ a.btn {
 }
 .our-work-image.writing-img{
   width:60px;
-  height:900px;
+  height:1000px;
   overflow: hidden;
   background-position: center;
 }
@@ -726,7 +726,7 @@ a.btn {
   border: 1px solid #000000;
   margin: 0 10px 10px 0px;
   padding: 20px;
-  height: 240px;
+  height: 270px;
 }
 .resource-item p{
   overflow: hidden;
