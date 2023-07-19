@@ -413,7 +413,7 @@ export default {
 
 <!-- Our Mission Section -->
 
-<div class="mission-section">
+<div id="about" class="mission-section">
   <div class="mission-text">
       <h2 class="eyebrow peach">{{indexData.mission_title}}</h2>
       <div v-html="indexData.mission_heading"></div>
