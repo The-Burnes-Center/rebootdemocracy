@@ -26,7 +26,7 @@ export default {
 <template>
        <i class="fa-solid fa-bars bars" @click="menutoggle =!menutoggle"></i>
       <div :class="[screenWidth=='mobile' ? 'menu-shadow' : '', 'menu']" v-show="screenWidth=='mobile' && !menutoggle ? true : screenWidth=='desktop' || menutype == 'footermenu'? true : false ">
-        <a href="../">About Us</a>
+        <a href="#about">About Us</a>
         <div class="dropdown">
           <button class="dropbtn">Our Work 
            <i class="fa-regular fa-angle-down"></i>
@@ -36,6 +36,7 @@ export default {
               <a href="/our-research">Research</a>
               <a href="/our-writing">Writing</a>
               <a href="/our-teaching">Teaching</a>
+              <a href="/more-resources">More Resources</a>
             </div>
         </div>
         <a href="" class="btn btn-small btn-primary">Join Us</a>
