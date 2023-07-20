@@ -1123,7 +1123,7 @@ select option{
   display:flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 .past-event-grid-item{
   border-top: 1px solid #000000;
