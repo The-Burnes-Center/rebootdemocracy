@@ -20,6 +20,7 @@ export default {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
     "mailing-list-comp": MailingListComponent,
+
   //   "generative-ai-banner-comp":GenerativeAIBannerComponent,
   //   "ws-banner":WsBanner,
   //       VueFinalModal,
@@ -29,14 +30,18 @@ export default {
   
   data() {
     return {
-                                 
+      iniLoad: 0,  
+      showingFullText: false,  
+      accordionContent: '',             
       indexData: [],
       eventsData:[],
       InnovateUSData:[],
       selectedStatus: undefined,
       eventTitle: "",
       eventDescription: "",
+      eventFullDescription: "",
       seriesData:[],
+      pageslug: this.$route.query,
       alleventsData: [],
       directus: new Directus('https://content.thegovlab.com/'),
       path:this.$route.fullPath,
@@ -49,16 +54,29 @@ export default {
     this.fetchIndex();
     this.fetchEvents();
     this.fetchInnovateUS();
-    this.fetchSeries();  
-    },
+    this.fetchSeries(); 
+    
+   
+  },
+    updated () {
+     this.formattedBody();
+      this.$nextTick(() => {
+      if(this.pageslug && this.iniLoad == 0){
+        this.iniLoad = 1;
+        const queryString = Object.keys(this.$route.query).map(key => `${encodeURIComponent(key)}`).join('&').replace(/%20/g, ' ');
+        let tempData = this.seriesData.filter(function (e) {
+          console.log("Comparing " + e.title + " with " + queryString);
+          return e.title == queryString;
+        });
+        console.log(tempData);
+        this.selectedStatus = tempData[0];
+        
+    }
+    console.log(this.selectedStatus);
+        });
+  },
 
-//  mounted()
 
-//   { 
-//   this.fillMeta();
-//    register();
-//   },
-  
   methods: {
     fillMeta()
     {
@@ -89,7 +107,23 @@ export default {
       FutureDate: function FutureDate(d1) {
         return isFuture(new Date(d1));
       },
+   formattedBody() {
+      if (this.showingFullText) {
+        this.accordionContent = this.eventFullDescription;
+      }
+    else {
+      if(this.eventFullDescription){
 
+          const lines = this.eventFullDescription.split('\n');
+          const truncatedLines = lines.slice(0, 2);
+
+          const truncatedText = truncatedLines.join('\n');
+
+         this.accordionContent  = truncatedText;
+      }
+    }
+     
+    },
       formatSeriesData: async function formatSeriesData() {
 
          self = this;
@@ -97,6 +131,7 @@ export default {
         if(self.selectedStatus == undefined) {
           self.eventTitle = "";
           self.eventDescription = "";
+          self.eventFullDescription = "";
           this.alleventsData = this.eventsData.concat(this.InnovateUSData);
          this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
           
@@ -104,15 +139,17 @@ export default {
         else if (self.selectedStatus != undefined){
           self.eventTitle = self.selectedStatus.title;
           self.eventDescription = self.selectedStatus.description;
+          self.eventFullDescription = self.selectedStatus.full_description;
 
           if(self.selectedStatus.title == "InnovateUS Workshops"){
-              
+       
             //  this.InnovateUSData_elements = this.InnovateUSData.map(obj => obj.event_element);
             this.alleventsData = this.InnovateUSData;
             this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
           }
 
           else if(self.selectedStatus.title != "InnovateUS Workshops"){
+
           // this.eventsData_elements = this.eventsData.map(obj => obj.event_element);
           let tempData = this.eventsData.filter(function (e) {
           return e.event_element.event_series[0].general_events_series_id.title == self.selectedStatus.title
@@ -124,6 +161,13 @@ export default {
 
         
       },
+
+       scrollMeTo(refName) {
+
+    var element = this.$refs[refName];
+    var top = element.offsetTop - 80;
+    window.scrollTo(0, top);
+  },
     forceChange() {
     this.selectedStatus = "Reboot Democracy Lecture Series";
   },
@@ -144,7 +188,7 @@ export default {
       self.indexData =  item.data;
       });
     },
-        fetchSeries: function fetchSeries() {
+      fetchSeries: function fetchSeries() {
       self = this;
 
       this.directus
@@ -244,17 +288,27 @@ this.formatSeriesData();
   </div>
    <div class="events-row">
     <div  v-if="eventTitle != ''" class="event-information">
-      <h3 class="eyebrow" >{{eventTitle}}</h3>
-      <h1>{{eventDescription}}</h1>
+      <div class="event-short-description">
+        <h3 class="eyebrow" >{{eventTitle}}</h3>
+        <h1>{{eventDescription}}</h1>
+      </div>
+      <div class="event-long-description">
+        <div v-html="accordionContent"></div>
+        <a class="btn btn-ghost btn-peach-light" @click="showingFullText = !showingFullText">{{ showingFullText ? "Less" : "More" }} about this event series  <i class="fa-solid" :class="{ 'fa-chevron-up': showingFullText, 'fa-chevron-down': !showingFullText}"></i></a>
+      </div>
+      <!-- <div class="btn-grp">
+        <a  @click="scrollMeTo('about')" class="btn btn-primary btn-dark btn-medium">Learn More</a>
+        <a  @click="scrollMeTo('past-events')" class="btn btn-primary btn-dark btn-medium">Watch Past Events</a>
+      </div> -->
     </div>
   </div>
 </div>
 
-<div class="event-grid-section">
+<div ref="upcoming" class="event-grid-section">
   <h3>Upcoming Events</h3>
   <div class="event-grid-row">
     <div class="event-grid-col"  v-for="event_item in alleventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
- 
+     <!-- <div class="event-grid-col"  v-for="event_item in alleventsData"> -->
       <div class="event-grid-item">
         <div class="event-image">
             <img v-if="!event_item.event_element.instructor && event_item.event_element.thumbnail" :src="this.directus._url + 'assets/' + event_item.event_element.thumbnail.id">
@@ -277,13 +331,14 @@ this.formatSeriesData();
   </div>
 </div>
 
-<div class="event-grid-section">
+<div ref="past-events" class="event-grid-section">
   <h3>Past Events</h3>
   <div class="past-event-grid-row">
     <div class="past-event-grid-item"  v-for="event_item in alleventsData" v-show="PastDate(new Date(event_item.event_element.date))">
       <div class="past-event-col-1">
           <h5 class="eyebrow">{{event_item.series_name}}</h5>
           <h2>{{event_item.event_element.title}}</h2>
+          
            <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
       </div>
       <div class="past-event-col-2">
@@ -293,6 +348,8 @@ this.formatSeriesData();
     </div>
   </div>
 </div>
+
+
 <mailing-list-comp></mailing-list-comp>
 <footer-comp></footer-comp>
 
