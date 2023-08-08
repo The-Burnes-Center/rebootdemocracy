@@ -19,6 +19,7 @@
     "vue-axios": "^3.4.0",
     "vue-final-modal": "^3.4.11",
     "vue-meta": "^3.0.0-alpha.10",
+    "vue-read-more-smooth": "^0.1.8",
     "vue-router": "^4.0.12",
     "vue-slick-carousel": "^1.0.6",
     "vue3-carousel": "^0.2.9",
