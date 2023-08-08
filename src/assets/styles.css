@@ -199,20 +199,20 @@ a.btn:hover{
 .btn-small{
   width:  fit-content;
   padding: 0 15px;
-  max-height: 35px;
   height: 35px;
+  min-height: 35px;
 }
 .btn-medium{
   width:  fit-content;
-  max-height: 42px;
+  min-height: 42px;
   padding: 0 15px;
   height: 42px;
 }
 .btn-large{
   width:  fit-content;
-  max-height: 64px;
   padding: 0 10px;
   height: 64px;
+  min-height: 64px;
 }
 
 .navbar a:hover, .dropdown:hover .dropbtn {
@@ -1124,6 +1124,7 @@ select option{
   -webkit-flex: 0 0 32%;
   -ms-flex: 0 0 32%;
   flex: 0 0 32%;
+  border: 1px solid #000000;
   max-width: 32%;
 }
 
@@ -1133,22 +1134,26 @@ select option{
   background-color: #ffffff;
   display:flex;
   flex-direction: column;
-  gap:20px;
 }
 .event-grid-item p{
+  margin:0;
+}
+.event-grid-item p.event-description{
   overflow: hidden;
    display: -webkit-box;
-   -webkit-line-clamp: 5; /* number of lines to show */
+   -webkit-line-clamp: 5; 
            line-clamp: 5; 
    -webkit-box-orient: vertical;
+
+
 }
-.event-grid-item h2{
+/* .event-grid-item h2{
   overflow: hidden;
    display: -webkit-box;
-   -webkit-line-clamp: 3; /* number of lines to show */
-           line-clamp: 3; 
+   -webkit-line-clamp: 4; 
+           line-clamp: 4; 
    -webkit-box-orient: vertical;
-}
+} */
 .event-image {
   width:100%;
 
@@ -1160,10 +1165,11 @@ select option{
 }
 .event-text{
   min-height:360px;
-  height: 400px;
+  height: 360px;
   display:flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
+  gap:1rem;
 }
 
 .past-event-grid-row{

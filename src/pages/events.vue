@@ -323,7 +323,7 @@ this.formatSeriesData();
           <h2>{{event_item.event_element.title}}</h2>
           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
 
-          <p v-html="event_item.event_element.description"></p>
+          <p class="event-description" v-html="event_item.event_element.description"></p>
           <a class="btn btn-primary btn-dark btn-medium">Register</a>
       </div>
     </div>
