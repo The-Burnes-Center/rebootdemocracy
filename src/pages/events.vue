@@ -324,7 +324,7 @@ this.formatSeriesData();
           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
 
           <p class="event-description" v-html="event_item.event_element.description"></p>
-          <a class="btn btn-primary btn-dark btn-medium">Register</a>
+          <a :href="event_item.event_element.link" target="_blank" class="btn btn-primary btn-dark btn-medium">Register</a>
       </div>
     </div>
     </div>
@@ -343,7 +343,7 @@ this.formatSeriesData();
       </div>
       <div class="past-event-col-2">
          <p v-html="event_item.event_element.description"></p>
-         <a class="btn btn-secondary btn-dark btn-medium">Watch</a>
+         <a  :href="event_item.event_element.link" target="_blank"  class="btn btn-secondary btn-dark btn-medium">Watch</a>
       </div>
     </div>
   </div>
