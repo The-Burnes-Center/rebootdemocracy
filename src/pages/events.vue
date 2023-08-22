@@ -133,7 +133,7 @@ export default {
           self.eventDescription = "";
           self.eventFullDescription = "";
           this.alleventsData = this.eventsData.concat(this.InnovateUSData);
-         this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
+         this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
           
         }
         else if (self.selectedStatus != undefined){
@@ -145,7 +145,7 @@ export default {
        
             //  this.InnovateUSData_elements = this.InnovateUSData.map(obj => obj.event_element);
             this.alleventsData = this.InnovateUSData;
-            this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
+            this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
           }
 
           else if(self.selectedStatus.title != "InnovateUS Workshops"){
@@ -155,7 +155,7 @@ export default {
           return e.event_element.event_series[0].general_events_series_id.title == self.selectedStatus.title
         });
           this.alleventsData = tempData;
-          this.alleventsData.sort((a, b) => new Date(b.event_element.date) - new Date(a.event_element.date))
+          this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
           }
         }
 
