@@ -17,6 +17,7 @@ const routes = [
   { path:"/our-teaching", component: Teaching },
   { path:"/our-engagements", component: Engagement },
   { path:"/more-resources", component: Resources },
+  { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
 ]
 
 const router = createRouter({
