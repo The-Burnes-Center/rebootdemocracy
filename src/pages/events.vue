@@ -291,6 +291,7 @@ this.formatSeriesData();
       <div class="event-short-description">
         <h3 class="eyebrow" >{{eventTitle}}</h3>
         <h1>{{eventDescription}}</h1>
+         <a @click="scrollMeTo('past-events')" class="mt-10 btn btn-primary btn-dark btn-medium">View Past Lectures</a>
       </div>
       <div class="event-long-description">
         <div v-html="accordionContent"></div>
