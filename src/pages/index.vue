@@ -30,6 +30,7 @@ export default {
     return {
                                  
       indexData: [],
+      eventsData: [],
       featuredData:[],
       researchData: [],
       writingData: [],
@@ -47,6 +48,7 @@ export default {
     this.indexData = this.directus.items("reboot_democracy");
     this.fetchIndex();
     this.fetchFeatured();
+    this.fetchEvents();
     this.fetchResearch();
     this.fetchWriting();
     this.fetchEngagements();
@@ -106,6 +108,30 @@ export default {
       })
       .then((item) => {
       self.indexData =  item.data;
+      });
+    },
+        fetchEvents: function fetchEvents() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_resources')
+      .readByQuery({
+          filter: {
+          type: 
+          { 
+            _eq: "Event"
+           }
+          },
+         meta: 'total_count',
+         limit: 3,
+         sort:["date"],
+         fields: [
+          '*.*','thumbnail.*','event_series.general_events_series_id.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.eventsData =  item.data;
       });
     },
     fetchFeatured: function fetchFeatured() {
@@ -424,6 +450,27 @@ export default {
 
   </div>
 
+</div>
+
+
+<!-- Upcoming Events -->
+
+<div class="upcoming-events-section">
+  <div class="upcoming-events-box">
+    <div class="upcoming-events-text">
+        <h3>Upcoming Events</h3>
+        <div class="our-work-description"><p>Upcoming events in the Reboot Democracy Lecture Series</p></div>
+         <a class="btn btn-primary btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
+    </div>
+    <div class="upcoming-events-content">
+      <div class="upcoming-events-item" v-for="resource_item in eventsData">
+              <h4>{{resource_item.title}}</h4>
+              <p>{{resource_item.description}}</p>
+              <p>{{formatDateTime(new Date(resource_item.date))}}</p>
+              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Our Work Separator-->
