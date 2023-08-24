@@ -38,6 +38,7 @@ export default {
       engagementData: [],
       eelData: [],
       moreresourceData: [],
+      item_counter: 0,
       directus: new Directus('https://content.thegovlab.com/'),
       path:this.$route.fullPath,
     }
@@ -46,6 +47,7 @@ export default {
   created() {
 
     this.indexData = this.directus.items("reboot_democracy");
+    this.item_counter = 0;
     this.fetchIndex();
     this.fetchFeatured();
     this.fetchEvents();
@@ -93,6 +95,7 @@ export default {
       FutureDate: function FutureDate(d1) {
         return isFuture(new Date(d1));
       },
+
     fetchIndex: function fetchIndex() {
       self = this;
 
@@ -110,17 +113,25 @@ export default {
       self.indexData =  item.data;
       });
     },
-        fetchEvents: function fetchEvents() {
+    fetchEvents: function fetchEvents() {
       self = this;
 
       this.directus
       .items('reboot_democracy_resources')
       .readByQuery({
           filter: {
-          type: 
-          { 
-            _eq: "Event"
-           }
+            _and: [
+            {
+              type: {
+                _eq: "Event"
+              }
+            },
+              {
+              date: {
+                _gte:  "$NOW"
+              }
+            }
+            ]
           },
          meta: 'total_count',
          limit: 3,
@@ -463,7 +474,7 @@ export default {
          <a class="btn btn-primary btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
     </div>
     <div class="upcoming-events-content">
-      <div class="upcoming-events-item" v-for="resource_item in eventsData">
+      <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <p>{{formatDateTime(new Date(resource_item.date))}}</p>
