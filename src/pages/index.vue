@@ -377,8 +377,10 @@ export default {
         <div class="top-feature-text">
           <h5 class="eyebrow">{{featuredData[0].type}}</h5>
           <h4>{{featuredData[0].title}}</h4>
-           <p v-if="featuredData[0].authors == ''">{{featuredData[0].description}}</p>
-            <p v-if="featuredData[0].authors != ''">By <span v-for="(author,index) in featuredData[0].authors">{{author.team_id.name}}<span v-if="index < featuredData[0].authors.length - 1">, </span></span></p>
+           <p v-if="featuredData[0].authors == '' && featuredData[0].type != 'Event'">{{featuredData[0].description}}</p>
+          <p v-if="featuredData[0].type == 'Event'">{{formatDateTime(new Date(featuredData[0].date))}}</p>
+          <p v-if="featuredData[0].authors != ''">By <span v-for="(author,index) in featuredData[0].authors">{{author.team_id.name}}<span v-if="index < featuredData[0].authors.length - 1">, </span></span></p>
+          <div v-show="featuredData[0].speakers" v-html="featuredData[0].speakers"></div>
           <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
         </div>
         <div class="top-featured-image">
@@ -475,8 +477,9 @@ export default {
     </div>
     <div class="upcoming-events-content">
       <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
+              <img v-if="!resource_item.instructor && resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
               <h4>{{resource_item.title}}</h4>
-              <p>{{resource_item.description}}</p>
+              <div v-html="resource_item.speakers"></div>
               <p>{{formatDateTime(new Date(resource_item.date))}}</p>
               <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
       </div>

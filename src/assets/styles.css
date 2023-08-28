@@ -654,6 +654,11 @@ a.btn:hover{
   height: 350px;
   border: 1px solid #000000;
 }
+.upcoming-events-item img{
+ max-height:140px;
+ object-fit: contain;
+  width: 100%;
+}
 .upcoming-events-item h4{
   overflow: hidden;
   display: -webkit-box;

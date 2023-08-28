@@ -53,47 +53,32 @@ export default {
     this.indexData = this.directus.items("reboot_democracy");
     this.fetchIndex();
     this.fetchEvents();
-    this.fetchInnovateUS();
+    // this.fetchInnovateUS();
     this.fetchSeries(); 
     
    
   },
     updated () {
      this.formattedBody();
-      this.$nextTick(() => {
-      if(this.pageslug && this.iniLoad == 0){
-        this.iniLoad = 1;
-        const queryString = Object.keys(this.$route.query).map(key => `${encodeURIComponent(key)}`).join('&').replace(/%20/g, ' ');
-        let tempData = this.seriesData.filter(function (e) {
-          console.log("Comparing " + e.title + " with " + queryString);
-          return e.title == queryString;
-        });
-        console.log(tempData);
-        this.selectedStatus = tempData[0];
+    //   this.$nextTick(() => {
+    //   if(this.pageslug && this.iniLoad == 0){
+    //     this.iniLoad = 1;
+    //     const queryString = Object.keys(this.$route.query).map(key => `${encodeURIComponent(key)}`).join('&').replace(/%20/g, ' ');
+    //     let tempData = this.seriesData.filter(function (e) {
+    //       console.log("Comparing " + e.title + " with " + queryString);
+    //       return e.title == queryString;
+    //     });
+    //     console.log(tempData);
+    //     this.selectedStatus = tempData[0];
         
-    }
-    console.log(this.selectedStatus);
-        });
+    // }
+    // console.log(this.selectedStatus);
+    //     });
   },
 
 
   methods: {
-    fillMeta()
-    {
-    //  useHead({
-    //   title: "InnovateUS",
-    //   meta: [
-    //     { name: 'title', content:"InnovateUS" },
-    //     { property: 'og:title', content: "InnovateUS" },
-    //     { property: 'og:description', content: "InnovateUS provides no-cost, at-your-own pace, and live learning on data, digital and innovation skills for public servants like you."},
-    //     { property: 'og:image', content: "https://innovate-us.org/innovateus_meta.jpg"},
-    //     { property: 'twitter:title', content: "InnovateUS"},
-    //     { property: 'twitter:description', content: "InnovateUS provides no-cost, at-your-own pace, and live learning on data, digital and innovation skills for public servants like you."},
-    //     { property: 'twitter:image', content: "https://innovate-us.org/innovateus_meta.jpg"},
-    //     { property: 'twitter:card', content: "summary_large_image" },
-    //   ],
-    // })
-    },
+
 
       formatDateTime: function formatDateTime(d1) {
         return format(d1, 'MMMM d, yyyy, h:mm aa');
@@ -124,43 +109,43 @@ export default {
     }
      
     },
-      formatSeriesData: async function formatSeriesData() {
+      // formatSeriesData: async function formatSeriesData() {
 
-         self = this;
+      //    self = this;
 
-        if(self.selectedStatus == undefined) {
-          self.eventTitle = "";
-          self.eventDescription = "";
-          self.eventFullDescription = "";
-          this.alleventsData = this.eventsData.concat(this.InnovateUSData);
-         this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
+      //   if(self.selectedStatus == undefined) {
+      //     self.eventTitle = "";
+      //     self.eventDescription = "";
+      //     self.eventFullDescription = "";
+      //     this.alleventsData = this.eventsData.concat(this.InnovateUSData);
+      //    this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
           
-        }
-        else if (self.selectedStatus != undefined){
-          self.eventTitle = self.selectedStatus.title;
-          self.eventDescription = self.selectedStatus.description;
-          self.eventFullDescription = self.selectedStatus.full_description;
+      //   }
+      //   else if (self.selectedStatus != undefined){
+      //     self.eventTitle = self.selectedStatus.title;
+      //     self.eventDescription = self.selectedStatus.description;
+      //     self.eventFullDescription = self.selectedStatus.full_description;
 
-          if(self.selectedStatus.title == "InnovateUS Workshops"){
+      //     if(self.selectedStatus.title == "InnovateUS Workshops"){
        
-            //  this.InnovateUSData_elements = this.InnovateUSData.map(obj => obj.event_element);
-            this.alleventsData = this.InnovateUSData;
-            this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
-          }
+      //       //  this.InnovateUSData_elements = this.InnovateUSData.map(obj => obj.event_element);
+      //       this.alleventsData = this.InnovateUSData;
+      //       this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
+      //     }
 
-          else if(self.selectedStatus.title != "InnovateUS Workshops"){
+      //     else if(self.selectedStatus.title != "InnovateUS Workshops"){
 
-          // this.eventsData_elements = this.eventsData.map(obj => obj.event_element);
-          let tempData = this.eventsData.filter(function (e) {
-          return e.event_element.event_series[0].general_events_series_id.title == self.selectedStatus.title
-        });
-          this.alleventsData = tempData;
-          this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
-          }
-        }
+      //     // this.eventsData_elements = this.eventsData.map(obj => obj.event_element);
+      //     let tempData = this.eventsData.filter(function (e) {
+      //     return e.event_element.event_series[0].general_events_series_id.title == self.selectedStatus.title
+      //   });
+      //     this.alleventsData = tempData;
+      //     this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
+      //     }
+      //   }
 
         
-      },
+      // },
 
        scrollMeTo(refName) {
 
@@ -168,9 +153,7 @@ export default {
     var top = element.offsetTop - 80;
     window.scrollTo(0, top);
   },
-    forceChange() {
-    this.selectedStatus = "Reboot Democracy Lecture Series";
-  },
+
     fetchIndex: function fetchIndex() {
       self = this;
 
@@ -203,33 +186,36 @@ export default {
       })
       .then((item) => {
       self.seriesData =  item.data;
+          self.eventTitle = self.seriesData[1].title;
+          self.eventDescription = self.seriesData[1].description;
+          self.eventFullDescription = self.seriesData[1].full_description;
 
       });
     },
-        fetchInnovateUS: function fetchInnovateUS() {
-      self = this;
+//         fetchInnovateUS: function fetchInnovateUS() {
+//       self = this;
 
-      this.directus
-      .items('innovate_us_workshops')
-      .readByQuery({
+//       this.directus
+//       .items('innovate_us_workshops')
+//       .readByQuery({
 
-         meta: 'total_count',
-         limit: -1,
-         sort:["-id"],
-         fields: [
-          '*.*',"instructor.innovate_us_instructors_id.*","instructor.innovate_us_instructors_id.headshot.*",
-       ],
+//          meta: 'total_count',
+//          limit: -1,
+//          sort:["-id"],
+//          fields: [
+//           '*.*',"instructor.innovate_us_instructors_id.*","instructor.innovate_us_instructors_id.headshot.*",
+//        ],
        
-      })
-      .then((item) => {
+//       })
+//       .then((item) => {
 
-      let TempInnovateUSData =  item.data;
-      let temp = TempInnovateUSData.map(element => ({ event_element: element, series_name: "InnovateUS Workshop" }));
-       self.InnovateUSData = temp;
-this.formatSeriesData();
-      });
+//       let TempInnovateUSData =  item.data;
+//       let temp = TempInnovateUSData.map(element => ({ event_element: element, series_name: "InnovateUS Workshop" }));
+//        self.InnovateUSData = temp;
+// this.formatSeriesData();
+//       });
 
-    },
+//     },
 
     fetchEvents: function fetchEvents() {
       self = this;
@@ -253,7 +239,14 @@ this.formatSeriesData();
       })
       .then((item) => {
       self.eventsData =  item.data;
-      self.eventsData  = self.eventsData.map(element => ({ event_element: element, series_name: element.event_series[0].general_events_series_id.title }));
+      self.eventsData  = self.eventsData.map(element => ({ event_element: element, series_name: "Reboot Democracy Lecture Series" }));
+      console.log(this.eventsData);
+          let tempData = this.eventsData.filter(function (e) {
+          return e.event_element.event_series[0].general_events_series_id.title == "Reboot Democracy Lecture Series"
+          });
+           this.alleventsData = tempData;
+         this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
+
      this.formatSeriesData();
       });
     }
@@ -278,13 +271,13 @@ this.formatSeriesData();
 <div class="events-hero">
   <div class="events-row">
     <h1>Events</h1>
-    <div class="custom-select">
+    <!-- <div class="custom-select">
       <select v-model="selectedStatus" @change="formatSeriesData()">
         <option :value="undefined">All Events</option>
         <option v-for="series in seriesData" :value="series">{{series.title}}</option>
       </select>
       <i class="fa-solid fa-angle-down"></i>
-    </div>
+    </div> -->
   </div>
    <div class="events-row">
     <div  v-if="eventTitle != ''" class="event-information">
@@ -305,10 +298,12 @@ this.formatSeriesData();
   </div>
 </div>
 
+
+
 <div ref="upcoming" class="event-grid-section">
   <h3>Upcoming Events</h3>
   <div class="event-grid-row">
-    <div class="event-grid-col"  v-for="event_item in alleventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
+    <div class="event-grid-col"  v-for="event_item in eventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
      <!-- <div class="event-grid-col"  v-for="event_item in alleventsData"> -->
       <div class="event-grid-item">
         <div class="event-image">
@@ -323,7 +318,7 @@ this.formatSeriesData();
           <h5 class="eyebrow">{{event_item.series_name}}</h5>
           <h2>{{event_item.event_element.title}}</h2>
           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
-
+          <p class="event-description" v-html="event_item.event_element.speakers"></p>
           <p class="event-description" v-html="event_item.event_element.description"></p>
           <a :href="event_item.event_element.link" target="_blank" class="btn btn-primary btn-dark btn-medium">Register</a>
       </div>
@@ -335,7 +330,7 @@ this.formatSeriesData();
 <div ref="past-events" class="event-grid-section">
   <h3>Past Events</h3>
   <div class="past-event-grid-row">
-    <div class="past-event-grid-item"  v-for="event_item in alleventsData" v-show="PastDate(new Date(event_item.event_element.date))">
+    <div class="past-event-grid-item"  v-for="event_item in eventsData" v-show="PastDate(new Date(event_item.event_element.date))">
       <div class="past-event-col-1">
           <h5 class="eyebrow">{{event_item.series_name}}</h5>
           <h2>{{event_item.event_element.title}}</h2>
