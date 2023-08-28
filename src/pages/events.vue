@@ -31,7 +31,7 @@ export default {
   data() {
     return {
       iniLoad: 0,  
-      showingFullText: false,  
+      showingFullText: true,  
       accordionContent: '',             
       indexData: [],
       eventsData:[],
@@ -231,7 +231,7 @@ export default {
           },
          meta: 'total_count',
          limit: -1,
-         sort:["-id"],
+         sort:["-date"],
          fields: [
           '*.*','thumbnail.*','event_series.general_events_series_id.*'
        ],
@@ -240,6 +240,7 @@ export default {
       .then((item) => {
       self.eventsData =  item.data;
       self.eventsData  = self.eventsData.map(element => ({ event_element: element, series_name: "Reboot Democracy Lecture Series" }));
+      self.eventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
       console.log(this.eventsData);
           let tempData = this.eventsData.filter(function (e) {
           return e.event_element.event_series[0].general_events_series_id.title == "Reboot Democracy Lecture Series"
@@ -288,7 +289,7 @@ export default {
       </div>
       <div class="event-long-description">
         <div v-html="accordionContent"></div>
-        <a class="btn btn-ghost btn-peach-light" @click="showingFullText = !showingFullText">{{ showingFullText ? "Less" : "More" }} about this event series  <i class="fa-solid" :class="{ 'fa-chevron-up': showingFullText, 'fa-chevron-down': !showingFullText}"></i></a>
+        <!-- <a class="btn btn-ghost btn-peach-light" @click="showingFullText = !showingFullText">{{ showingFullText ? "Less" : "More" }} about this event series  <i class="fa-solid" :class="{ 'fa-chevron-up': showingFullText, 'fa-chevron-down': !showingFullText}"></i></a> -->
       </div>
       <!-- <div class="btn-grp">
         <a  @click="scrollMeTo('about')" class="btn btn-primary btn-dark btn-medium">Learn More</a>
@@ -319,6 +320,8 @@ export default {
           <h2>{{event_item.event_element.title}}</h2>
           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
           <p class="event-description" v-html="event_item.event_element.speakers"></p>
+          <p class="event-description" v-if="event_item.event_element.online_event"><i class="fa-solid fa-video"></i> Virtual Event</p>
+          <p class="event-description" v-if="event_item.event_element.inperson_event"><i class="fa-solid fa-building-user"></i>In-person Event</p>
           <p class="event-description" v-html="event_item.event_element.description"></p>
           <a :href="event_item.event_element.link" target="_blank" class="btn btn-primary btn-dark btn-medium">Register</a>
       </div>
