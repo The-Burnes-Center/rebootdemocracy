@@ -233,7 +233,7 @@ export default {
          limit: -1,
          sort:["-date"],
          fields: [
-          '*.*','thumbnail.*','event_series.general_events_series_id.*'
+          '*.*','thumbnail.*','partner_logo.*','event_series.general_events_series_id.*'
        ],
        
       })
@@ -333,12 +333,14 @@ export default {
 <div ref="past-events" class="event-grid-section">
   <h3>Past Events</h3>
   <div class="past-event-grid-row">
-    <div class="past-event-grid-item"  v-for="event_item in eventsData" v-show="PastDate(new Date(event_item.event_element.date))">
+    <div class="past-event-grid-item"  v-for="event_item in eventsData.slice().reverse()" v-show="PastDate(new Date(event_item.event_element.date))">
       <div class="past-event-col-1">
           <h5 class="eyebrow">{{event_item.series_name}}</h5>
           <h2>{{event_item.event_element.title}}</h2>
           
            <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
+           <p class="partnership-label">In Partnership with:</p>
+           <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
       </div>
       <div class="past-event-col-2">
          <p v-html="event_item.event_element.description"></p>

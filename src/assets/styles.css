@@ -1245,6 +1245,13 @@ select option{
 
 
 }
+p.partnership-label{
+  font-size:0.8em;
+  font-weight:600;
+}
+img.partner-logo-img{
+height:80px;
+}
 /* .event-grid-item h2{
   overflow: hidden;
    display: -webkit-box;
