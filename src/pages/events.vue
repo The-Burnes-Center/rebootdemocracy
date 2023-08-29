@@ -323,6 +323,10 @@ export default {
           <p class="event-description" v-if="event_item.event_element.online_event"><i class="fa-solid fa-video"></i> Virtual Event</p>
           <p class="event-description" v-if="event_item.event_element.inperson_event"><i class="fa-solid fa-building-user"></i>In-person Event</p>
           <p class="event-description" v-html="event_item.event_element.description"></p>
+          <div class="partner-logo-section">
+            <p class="partnership-label">In Partnership with:</p>
+           <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
+          </div>
           <a :href="event_item.event_element.link" target="_blank" class="btn btn-primary btn-dark btn-medium">Register</a>
       </div>
     </div>
