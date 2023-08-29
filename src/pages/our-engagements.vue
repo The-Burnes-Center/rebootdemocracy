@@ -156,10 +156,10 @@ export default {
         <template v-slot:default="{ item }">
           <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
-              <h5 class="eyebrow">Partner: {{item.partner}}</h5>
+              <h5 class="eyebrow peach">Partner: {{item.partner}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
-               <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
+               <a class="btn btn-small btn-secondary">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </template>

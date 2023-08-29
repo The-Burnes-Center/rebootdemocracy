@@ -140,6 +140,7 @@ export default {
   <div class="resource-description">
     <h1>{{indexData.research_title}}</h1>
     <div class="our-work-description" v-html="indexData.research_description"></div>
+
     <div class="resource-menu">
       <ul>
         <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Case Studies</li>
@@ -158,12 +159,13 @@ export default {
     <div class="resource-scroller">
       <v-virtual-scroll  :items="articleData">
         <template v-slot:default="{ item }">
+    
           <div class="featured-items"  v-show="item.case_study_type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
               <h5 class="eyebrow">{{item.case_study_type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
-               <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
+               <a class="btn btn-small btn-blue">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </template>
