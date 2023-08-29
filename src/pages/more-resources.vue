@@ -153,7 +153,7 @@ export default {
     <div class="resource-menu">
       <ul>
         <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Resources</li>
-        <li @click="selectedType = 'Resources'" :class="{ isActive : selectedType == 'Resources' }">Prcoess Docs and Worksheets</li>
+        <li @click="selectedType = 'Resources'" :class="{ isActive : selectedType == 'Resources' }">Process Docs and Worksheets</li>
         <li @click="selectedType = 'Podcast'" :class="{ isActive : selectedType == 'Podcast' }">Podcast</li>
         <li @click="selectedType = 'Video'" :class="{ isActive : selectedType == 'Video' }">Video</li>
         <!-- <li></li> -->
