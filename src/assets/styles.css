@@ -1250,7 +1250,18 @@ p.partnership-label{
   font-weight:600;
 }
 img.partner-logo-img{
-height:80px;
+height:100%;
+width:60px;
+object-fit: contain; 
+border-radius: 8px;
+margin-top:1rem;
+}
+.partner-logo-section{
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  text-align: left !important;
 }
 /* .event-grid-item h2{
   overflow: hidden;
