@@ -134,7 +134,7 @@ export default {
             ]
           },
          meta: 'total_count',
-         limit: -1,
+         limit: 3,
          sort:["date"],
          fields: [
           '*.*','thumbnail.*','event_series.general_events_series_id.*'
