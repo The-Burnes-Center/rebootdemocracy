@@ -28,7 +28,7 @@ export default {
   
   data() {
     return {
-                                 
+      model: 0,                          
       indexData: [],
       eventsData: [],
       featuredData:[],
@@ -48,9 +48,9 @@ export default {
 
     this.indexData = this.directus.items("reboot_democracy");
     this.item_counter = 0;
-    this.fetchIndex();
-    this.fetchFeatured();
     this.fetchEvents();
+    this.fetchFeatured();
+    this.fetchIndex();
     this.fetchResearch();
     this.fetchWriting();
     this.fetchEngagements();
@@ -134,7 +134,7 @@ export default {
             ]
           },
          meta: 'total_count',
-         limit: 3,
+         limit: -1,
          sort:["date"],
          fields: [
           '*.*','thumbnail.*','event_series.general_events_series_id.*'
@@ -157,7 +157,7 @@ export default {
             },
           },
          meta: 'total_count',
-         limit: -1,
+         limit: 3,
          sort:["-id"],
          fields: [
           '*.*','thumbnail.*', 'authors.team_id.*'
@@ -366,88 +366,26 @@ export default {
     <h1 class="eyebrow blue">{{indexData.title}}</h1>
     <h1 class="title" v-html="indexData.subtitle"></h1>
   </div>
-</div>
-
-<!-- Featured Box -->
-<div class="featured-box">
-  <h2 class="eyebrow">The latest</h2>
-  <div class="featured-layout">
-    <div class="featured-column">
-      <div class="top-feature">
-        <div class="top-feature-text">
-          <h5 class="eyebrow">{{featuredData[0].type}}</h5>
-          <h4>{{featuredData[0].title}}</h4>
-           <p v-if="featuredData[0].authors == '' && featuredData[0].type != 'Event'">{{featuredData[0].description}}</p>
-          <p v-if="featuredData[0].type == 'Event'">{{formatDateTime(new Date(featuredData[0].date))}}</p>
-          <p v-if="featuredData[0].authors != ''">By <span v-for="(author,index) in featuredData[0].authors">{{author.team_id.name}}<span v-if="index < featuredData[0].authors.length - 1">, </span></span></p>
-          <div v-show="featuredData[0].speakers" v-html="featuredData[0].speakers"></div>
-          <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
+  <div class="featured-section">
+    <v-carousel  hide-delimiters v-model="model">
+      <v-carousel-item v-for="(item, i) in featuredData" :key="i">
+    <div class="featured-content">
+        <h1 class="eyebrow blue">Featured {{item.type}}</h1>
+        <div class="featured-image">
+          <img v-if="item.thumbnail" :src="this.directus._url+'assets/'+item.thumbnail.id">
+          <img v-if="!item.thumbnail"  src="..//assets/media-image.png">
         </div>
-        <div class="top-featured-image">
-          <img v-if="featuredData[0].thumbnail" :src="this.directus._url+'assets/'+featuredData[0].thumbnail.id">
-          <img v-if="!featuredData[0].thumbnail"  src="..//assets/media-image.png">
-        </div>
-
-      </div>
-      <div class="secondary-featured">
-        <div class="secondary-featured-column" v-for="(featured_item,index) in featuredData" v-show="index > 0 && index < 3">
-        <div class="secondary-featured-text">
-          <h5 class="eyebrow">{{featured_item.type}}</h5>
-          <h4>{{featured_item.title}}</h4>
-          <p v-if="featured_item.authors == ''">{{featured_item.description}}</p>
-          <p v-if="featured_item.authors != ''">By <span v-for="(author,index) in featured_item.authors">{{author.team_id.name}}<span v-if="index < featured_item.authors.length - 1">, </span></span></p>
-          <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
-        </div>
-        </div>
-      </div>
+          <h4>{{item.title}}</h4>
+           <p v-if="item.authors == '' && item.type != 'Event'">{{item.description}}</p>
+          <p v-if="item.type == 'Event'">{{formatDateTime(new Date(item.date))}}</p>
+          <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
+          <div class="speakers-list" v-show="item.speakers" v-html="item.speakers"></div>
+          <a class="btn btn-small btn-blue">Details <i class="fa-regular fa-arrow-right"></i></a>
     </div>
-
-    <div class="featured-column desktop-feature">
-      <v-virtual-scroll  :items="featuredData">
-        <template v-slot:default="{ item }">
-          <div class="featured-items">
-            <div class="featured-item-text">
-              <h5 class="eyebrow">{{item.type}}</h5>
-              <h4>{{item.title}}</h4>
-              <p v-if="item.authors == ''">{{item.description}}</p>
-              <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
-              <a class="btn btn-small btn-ghost">Details <i class="fa-regular fa-arrow-right"></i></a>
-            </div>
-          </div>
-        </template>
-      </v-virtual-scroll>
-    </div>  
-    <div class="featured-column mobile-feature">
-      <v-sheet
-        class="mx-auto"
-      >
-        <v-slide-group
-          show-arrows
-          selected-class="bg-primary"
-        >
-          <v-slide-group-item
-            v-for="item in featuredData"
-            :key="item"
-            v-slot="{ isSelected, toggle }"
-          >
-              <div class="featured-items">
-                <div class="featured-item-text">
-                  <h3 class="eyebrow">{{item.type}}</h3>
-                  <h4>{{item.title}}</h4>
-                  <p v-if="item.authors == ''">{{item.description}}</p>
-                  <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
-                </div>
-              </div>
-          </v-slide-group-item>
-        </v-slide-group>
-      </v-sheet>
-    </div>
-
+    </v-carousel-item>
+    </v-carousel>
   </div>
 </div>
-
-
-
 
 
 <!-- Our Mission Section -->
@@ -481,7 +419,7 @@ export default {
               <h4>{{resource_item.title}}</h4>
               <div v-html="resource_item.speakers"></div>
               <p>{{formatDateTime(new Date(resource_item.date))}}</p>
-              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              <a class="btn btn-small btn-primary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
   </div>
@@ -515,7 +453,7 @@ export default {
             <div class="resource-item">
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More <i class="fa-regular fa-arrow-right"></i></a>
+              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -549,7 +487,7 @@ export default {
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -577,7 +515,7 @@ export default {
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -604,7 +542,7 @@ export default {
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>By <span v-for="(author,index) in resource_item.authors">{{author.team_id.name}}<span v-if="index < resource_item.authors.length - 1">, </span></span></p>
-              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -631,7 +569,7 @@ export default {
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -659,7 +597,7 @@ export default {
               <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-ghost" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
