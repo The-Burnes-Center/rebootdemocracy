@@ -28,7 +28,7 @@ export default {
   
   data() {
     return {
-      model: 0,                          
+      model: 1,                          
       indexData: [],
       eventsData: [],
       featuredData:[],
@@ -158,7 +158,7 @@ export default {
           },
          meta: 'total_count',
          limit: 3,
-         sort:["-id"],
+         sort:["-date"],
          fields: [
           '*.*','thumbnail.*', 'authors.team_id.*'
        ],
