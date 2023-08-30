@@ -271,7 +271,10 @@ export default {
 
 <div class="events-hero">
   <div class="events-row">
-    <h1>Events</h1>
+    <div class="events-title-col">
+    <h2>Lecture Series</h2>
+    <h1>Rebooting Democracy in the Age of AI</h1>
+  </div>
     <!-- <div class="custom-select">
       <select v-model="selectedStatus" @change="formatSeriesData()">
         <option :value="undefined">All Events</option>
@@ -316,7 +319,7 @@ export default {
            
         </div>
         <div class="event-text">
-          <h5 class="eyebrow">{{event_item.series_name}}</h5>
+          <h5 class="eyebrow peach-light">{{event_item.series_name}}</h5>
           <h2>{{event_item.event_element.title}}</h2>
           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
           <p class="event-description" v-html="event_item.event_element.speakers"></p>
