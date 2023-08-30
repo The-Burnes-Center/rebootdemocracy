@@ -41,6 +41,9 @@ h1{
 h2.eyebrow.peach{
   color: var(--peach-text);
 }
+h5.eyebrow.peach-light{
+  background-color: var(--peach-light);
+}
 h2.eyebrow{
   font-size: 14px;
 }
@@ -1105,6 +1108,7 @@ margin-top:1rem;
   flex-direction: column;
   justify-content: space-evenly;
   gap:1rem;
+  padding: 1rem 0;
 }
 .speakers-list a{
   color: var(--blue-text);
