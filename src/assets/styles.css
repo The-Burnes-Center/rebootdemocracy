@@ -544,7 +544,7 @@ h5.eyebrow.peach{
 
 .our-work-image.equitable-engagement-img{
   width:60px;
-  height:1250px;
+  height:1650px;
   overflow: hidden;
 }
 .our-work-image.equitable-engagement-img img{
@@ -554,7 +554,7 @@ h5.eyebrow.peach{
 }
 .our-work-image.research-img{
   width:60px;
-  height:1000px;
+  height:1350px;
   overflow: hidden;
 }
 .our-work-image.research-img img{
@@ -564,7 +564,7 @@ h5.eyebrow.peach{
 }
 .our-work-image.writing-img{
   width:60px;
-  height:1000px;
+  height:1350px;
   overflow: hidden;
   background-position: center;
 }
@@ -577,7 +577,7 @@ h5.eyebrow.peach{
  width:30%;
 }
 .two-col-resources{
-  width:70%;
+  width:80%;
 }
 @media (max-width: 768px) {
   .our-work-text{
@@ -656,13 +656,13 @@ h5.eyebrow.peach{
   background-color: #ffffff;
   border: 1px solid #000000;
   margin: 0 10px 10px 0px;
-  padding: 20px;
-  height: 270px;
+  height: 400px;
   display:flex;
   flex-direction: column;
   gap:1rem;
   justify-content: center;
 }
+
 .resource-item p{
   overflow: hidden;
   display: -webkit-box;
@@ -670,7 +670,30 @@ h5.eyebrow.peach{
           line-clamp: 4; 
   -webkit-box-orient: vertical;
 }
+.resource-item-text{
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0.5rem;
+  height: 270px;
+  padding: 20px;
+}
+.resource-item-img{
+  width:100%;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 
+}
+.resource-item-img img{
+  height: 150px;
+  width:100%;
+  object-fit: cover;
+  object-position: center;
+}
 .join-section{
   display:flex;
   flex-direction: column;
@@ -1261,7 +1284,7 @@ margin-top:1rem;
 }
 .resource-image{
 
-  width:30%;
+  width:20%;
   height: 1000px;
   background-repeat: no-repeat;
   background-size: cover;

@@ -451,9 +451,15 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in eelData" v-show="index < 6">
             <div class="resource-item">
+                <div class="resource-item-img">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                 <img v-if="!resource_item.thumbnail" src="../assets/eel-image.png">
+              </div>
+              <div class="resource-item-text">
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
             </div>
           </div>
         </div>
@@ -484,11 +490,17 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in engagementData.slice().reverse()" v-show="index < 6">
             <div class="resource-item">
+                <div class="resource-item-img">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                   <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+              </div>
+              <div class="resource-item-text">
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
             </div>
+          </div>
           </div>
         </div>
         <a class="btn btn-small btn-ghost" href="/our-engagements">More Engagements<i class="fa-regular fa-arrow-right"></i></a>
@@ -512,10 +524,17 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in researchData" v-show="index < 6">
             <div class="resource-item">
-               <h5 class="eyebrow">{{resource_item.type}}</h5>
-              <h4>{{resource_item.title}}</h4>
-              <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              <div class="resource-item-img">
+                
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                  <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+              </div>
+              <div class="resource-item-text">
+                <h5 class="eyebrow">{{resource_item.type}}</h5>
+                <h4>{{resource_item.title}}</h4>
+                <p>{{resource_item.description}}</p>
+                <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+              </div>
             </div>
           </div>
         </div>
@@ -539,10 +558,16 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in writingData.slice().reverse()" v-show="index < 6">
             <div class="resource-item">
+              <div class="resource-item-img">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                   <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+              </div>
+              <div class="resource-item-text">
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>By <span v-for="(author,index) in resource_item.authors">{{author.team_id.name}}<span v-if="index < resource_item.authors.length - 1">, </span></span></p>
               <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
             </div>
           </div>
         </div>
@@ -566,10 +591,16 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in teachingData" v-show="index < 6">
             <div class="resource-item">
+              <div class="resource-item-img">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                   <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+              </div>
+              <div class="resource-item-text">
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
             </div>
           </div>
         </div>
@@ -594,10 +625,16 @@ export default {
         <div class="resource-row">
           <div class="resource-col"  v-for="(resource_item,index) in moreresourceData" v-show="index < 6">
             <div class="resource-item">
+                <div class="resource-item-img">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                  <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+              </div>
+              <div class="resource-item-text">
               <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
             </div>
           </div>
         </div>
