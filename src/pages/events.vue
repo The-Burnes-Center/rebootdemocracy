@@ -270,10 +270,11 @@ export default {
 <header-comp></header-comp>
 
 <div class="events-hero">
-  <div class="events-row">
+  <div class="events-title-row">
     <div class="events-title-col">
-    <h2>Lecture Series</h2>
-    <h1>Rebooting Democracy in the Age of AI</h1>
+      <h1>Rebooting Democracy in the Age of AI</h1>
+    <h2 class="red-subtitle"><span>Lecture Series</span></h2>
+    
   </div>
     <!-- <div class="custom-select">
       <select v-model="selectedStatus" @change="formatSeriesData()">

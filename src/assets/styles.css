@@ -21,6 +21,7 @@
   --teal-light: rgba(218, 250, 235, 1);
   --teal-action: #0BCAC4;
   --teal-text: rgba(4, 120, 127, 1);
+  --nu-red: #C8102E;
   --featured-box-height: 10px;
 }
 body{
@@ -958,12 +959,56 @@ h5.eyebrow.peach{
 .events-hero h1{
   font-family: 'Space Grotesk', sans-serif;
 }
+
 .events-row{
   display:flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+.events-title-row{
+  display:flex;
+  flex-direction: column;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center;
+  width: 100%;
+}
+h2.red-subtitle{
+  color: var(--nu-red);
+  font-weight: 500;
+  text-transform: uppercase;
+  border-bottom: 3px solid var(--peach-rich);
+  line-height: 0.1em;
+  margin: 20px 0 30px; 
+  font-size:2rem;
+}
+h2.red-subtitle span{
+
+    background: var(--peach-light); 
+    padding:0 2rem; 
+
+}
+h2.red-subtitle span:before {
+  border-left: 3px solid var(--peach-rich);
+  content: "";
+  display: block;
+  height: 80px;
+  left: calc(50% - 250px);
+  position: absolute;
+  width: 1px;
+  z-index: 0;
+}
+h2.red-subtitle span:after {
+  border-left: 3px solid var(--peach-rich);
+  content: "";
+  display: block;
+  height: 80px;
+  right: calc(50% - 250px);
+  position: absolute;
+  width: 1px;
+  z-index: 0;
 }
 .event-grid-section{
   background-color: var(--peach-light);

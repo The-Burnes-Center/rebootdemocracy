@@ -9,14 +9,25 @@ import Engagement from '../pages/our-engagements.vue';
 import Resources from '../pages/more-resources.vue';
 
 
+// const routes = [
+//   { path:"/", component: Home },
+//   { path:"/events", component: Events },
+//   { path:"/our-writing", component: Writing },
+//   { path:"/our-research", component: Research },
+//   { path:"/our-teaching", component: Teaching },
+//   { path:"/our-engagements", component: Engagement },
+//   { path:"/more-resources", component: Resources },
+//   { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
+// ]
+
 const routes = [
-  { path:"/", component: Home },
+  { path:"/", component: Events },
   { path:"/events", component: Events },
-  { path:"/our-writing", component: Writing },
-  { path:"/our-research", component: Research },
-  { path:"/our-teaching", component: Teaching },
-  { path:"/our-engagements", component: Engagement },
-  { path:"/more-resources", component: Resources },
+  { path:"/our-writing", component: Events },
+  { path:"/our-research", component: Events },
+  { path:"/our-teaching", component: Events },
+  { path:"/our-engagements", component: Events },
+  { path:"/more-resources", component: Events },
   { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
 ]
 
