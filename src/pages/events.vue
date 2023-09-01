@@ -79,7 +79,22 @@ export default {
 
   methods: {
 
-
+    fillMeta()
+    {
+     useHead({
+      title: "InnovateUS",
+      meta: [
+        { name: 'title', content:"Reboot Democracy Lecture Series" },
+        { property: 'og:title', content: "Reboot Democracy Lecture Series" },
+        { property: 'og:description', content: "How can we leverage the power of artificial intelligence to reimagine democracy?"},
+        { property: 'og:image', content: "https://rebootdemocracy.ai/meta-temp.png"},
+        { property: 'twitter:title', content: "Reboot Democracy Lecture Series"},
+        { property: 'twitter:description', content: "How can we leverage the power of artificial intelligence to reimagine democracy?"},
+        { property: 'twitter:image', content: "https://rebootdemocracy.ai/meta-temp.png"},
+        { property: 'twitter:card', content: "summary_large_image" },
+      ],
+    })
+    },
       formatDateTime: function formatDateTime(d1) {
         return format(d1, 'MMMM d, yyyy, h:mm aa');
       },
