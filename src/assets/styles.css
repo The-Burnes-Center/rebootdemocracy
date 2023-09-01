@@ -39,12 +39,12 @@ h1{
   font-size: 50px;
   font-family: 'Space Mono', monospace;
 }
-h2.eyebrow.peach{
+/* h2.eyebrow.peach{
   color: var(--peach-text);
 }
 h5.eyebrow.peach-light{
   background-color: var(--peach-light);
-}
+} */
 h2.eyebrow{
   font-size: 14px;
 }
@@ -328,17 +328,17 @@ flex-direction: column;
   letter-spacing: 2.4px;
 }
 h5.eyebrow{
-  background-color: var(--teal-action);
+  /* background-color: var(--teal-action); */
   width:fit-content;
   padding: 0.2em 0.5em;
   font-size: 0.7em;
 }
-h5.eyebrow.blue-eyebrow{
+/* h5.eyebrow.blue-eyebrow{
   background-color: var(--blue-action);
 }
 h5.eyebrow.peach{
   background-color: var(--peach-action) !important;
-}
+} */
 .v-window.v-theme--light.v-carousel{
   height:fit-content !important;
   min-height: 500px;;
