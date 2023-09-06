@@ -23,7 +23,7 @@ export default defineConfig({
       // Google Analytics tag inject
       enableDev: true,
       analytics: {
-        id: 'G-GMTLB057VX',
+        id: 'G-L78LX2HS2N',
       },
     }),
     vue(),
