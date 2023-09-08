@@ -304,7 +304,8 @@ export default {
       <div class="event-short-description">
         <h3 class="eyebrow" >{{eventTitle}}</h3>
         <h1>{{eventDescription}}</h1>
-         <a @click="scrollMeTo('past-events')" class="mt-10 btn btn-primary btn-dark btn-medium">View Past Lectures</a>
+         <!-- <a @click="scrollMeTo('past-events')" class="mt-10 btn btn-primary btn-dark btn-medium">View Past Lectures</a> -->
+         <a href="signup" class="mt-10 btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
       </div>
       <div class="event-long-description">
         <div v-html="accordionContent"></div>
@@ -346,7 +347,7 @@ export default {
             <p class="partnership-label" v-if="event_item.event_element.partner_logo">In Partnership with:</p>
            <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
           </div>
-          <a :href="event_item.event_element.link" target="_blank" class="btn btn-primary btn-dark btn-medium">Register</a>
+          <a :href="event_item.event_element.link" target="_blank" class="btn btn-primary btn-dark btn-medium">Click here to register</a>
       </div>
     </div>
     </div>
