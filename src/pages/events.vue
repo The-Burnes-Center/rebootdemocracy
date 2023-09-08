@@ -319,7 +319,7 @@ export default {
 </div>
 
 
-
+<mailing-list-comp></mailing-list-comp>
 <div ref="upcoming" class="event-grid-section">
   <h3>Upcoming Events</h3>
   <div class="event-grid-row">
@@ -374,7 +374,7 @@ export default {
 </div>
 
 
-<mailing-list-comp></mailing-list-comp>
+
 <footer-comp></footer-comp>
 
 </template>

@@ -7,8 +7,7 @@ import Research from '../pages/our-research.vue';
 import Teaching from '../pages/our-teaching.vue';
 import Engagement from '../pages/our-engagements.vue';
 import Resources from '../pages/more-resources.vue';
-
-
+import Signup from '../pages/signup.vue';
 // const routes = [
 //   { path:"/", component: Home },
 //   { path:"/events", component: Events },
@@ -28,6 +27,7 @@ const routes = [
   { path:"/our-teaching", component: Events },
   { path:"/our-engagements", component: Events },
   { path:"/more-resources", component: Events },
+  { path:"/signup", component: Signup },
   { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
 ]
 

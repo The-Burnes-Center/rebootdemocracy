@@ -168,6 +168,19 @@ a.btn {
   font-family: 'Space Mono', monospace;
   color: #000000;
 }
+input.btn{
+  font-size: 0.8rem;
+  margin:0;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-decoration: none;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Space Mono', monospace;
+  color: #000000;
+}
 a.btn:hover{
   cursor: pointer;
 }
@@ -179,7 +192,7 @@ a.btn:hover{
 }
 .btn-primary{
   color: #ffffff;
-  background: var(--yellow-action);
+  background: var(--yellow-action) !important;
   border: 1px solid #000000;
 }
 
@@ -913,7 +926,7 @@ h5.eyebrow.peach{
   width:50%;
   gap:10px;
 }
-.col-50 input{
+input{
   height: 40px;
   background-color: white !important;
 }
@@ -1011,6 +1024,7 @@ h2.red-subtitle span:after {
   z-index: 0;
 }
 .event-grid-section{
+ 
   background-color: var(--peach-light);
   margin:0
 }
@@ -1090,7 +1104,7 @@ select option{
   flex-direction: column;
   justify-content: center;
   gap: 40px;
-  padding: 0em 5rem 2rem 5rem;
+  padding: 2em 5rem 2rem 5rem;
   width:100%;
 }
 
@@ -1603,4 +1617,24 @@ margin-top:1rem;
 /* Handle on hover */
 .featured-layout  ::-webkit-scrollbar-thumb:hover {
   background: #555; 
+}
+
+.signup-form{
+  background-color: var(--purple-icon);
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 0;
+}
+.mc-field-group{
+  display:flex;
+  flex-direction: column;
+  padding: 1rem 0;
+}
+.mc-field-group input{
+  width: 400px;
+}
+.signup-form h3{
+  padding: 2rem;
 }
