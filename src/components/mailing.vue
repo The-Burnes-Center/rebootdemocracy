@@ -2,8 +2,8 @@
   <div class="mailing-list-section">
     <div class="mailing-list-row">
       <div class="col-50">
-        <h3>Never miss a good opportunity</h3>
-        <p>Sign up for the Democracy Rebooted Mailing List!</p>
+        <h3>Sign up for the Reboot Democracy Mailing List to Learn about Upcoming Events</h3>
+        <p>Click Below to Register for a Specific Event</p>
       </div>
       <div class="col-50">
         <!-- <p>Join our mailing list</p> -->
