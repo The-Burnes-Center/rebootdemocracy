@@ -3,7 +3,7 @@
     <div class="mailing-list-row">
       <div class="col-50">
         <h3>Never miss a good opportunity</h3>
-        <p>Get our most important updates, delivered straight to your inbox.</p>
+        <p>Sign up for the Democracy Rebooted Mailing List!</p>
       </div>
       <div class="col-50">
         <!-- <p>Join our mailing list</p> -->
