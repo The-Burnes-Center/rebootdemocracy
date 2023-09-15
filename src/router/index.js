@@ -20,9 +20,9 @@ import Signup from '../pages/signup.vue';
 // ]
 
 const routes = [
-  { path:"/", component: Home },
+  { path:"/", component: Events },
   { path:"/events", component: Events },
-  { path:"/our-writing", component: Writing },
+  { path:"/our-writing", component: Events },
   { path:"/our-research", component: Events },
   { path:"/our-teaching", component: Events },
   { path:"/our-engagements", component: Events },
