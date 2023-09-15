@@ -124,43 +124,7 @@ export default {
     }
      
     },
-      // formatSeriesData: async function formatSeriesData() {
 
-      //    self = this;
-
-      //   if(self.selectedStatus == undefined) {
-      //     self.eventTitle = "";
-      //     self.eventDescription = "";
-      //     self.eventFullDescription = "";
-      //     this.alleventsData = this.eventsData.concat(this.InnovateUSData);
-      //    this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
-          
-      //   }
-      //   else if (self.selectedStatus != undefined){
-      //     self.eventTitle = self.selectedStatus.title;
-      //     self.eventDescription = self.selectedStatus.description;
-      //     self.eventFullDescription = self.selectedStatus.full_description;
-
-      //     if(self.selectedStatus.title == "InnovateUS Workshops"){
-       
-      //       //  this.InnovateUSData_elements = this.InnovateUSData.map(obj => obj.event_element);
-      //       this.alleventsData = this.InnovateUSData;
-      //       this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
-      //     }
-
-      //     else if(self.selectedStatus.title != "InnovateUS Workshops"){
-
-      //     // this.eventsData_elements = this.eventsData.map(obj => obj.event_element);
-      //     let tempData = this.eventsData.filter(function (e) {
-      //     return e.event_element.event_series[0].general_events_series_id.title == self.selectedStatus.title
-      //   });
-      //     this.alleventsData = tempData;
-      //     this.alleventsData.sort((b, a) => new Date(b.event_element.date) - new Date(a.event_element.date))
-      //     }
-      //   }
-
-        
-      // },
 
        scrollMeTo(refName) {
 
@@ -207,30 +171,6 @@ export default {
 
       });
     },
-//         fetchInnovateUS: function fetchInnovateUS() {
-//       self = this;
-
-//       this.directus
-//       .items('innovate_us_workshops')
-//       .readByQuery({
-
-//          meta: 'total_count',
-//          limit: -1,
-//          sort:["-id"],
-//          fields: [
-//           '*.*',"instructor.innovate_us_instructors_id.*","instructor.innovate_us_instructors_id.headshot.*",
-//        ],
-       
-//       })
-//       .then((item) => {
-
-//       let TempInnovateUSData =  item.data;
-//       let temp = TempInnovateUSData.map(element => ({ event_element: element, series_name: "InnovateUS Workshop" }));
-//        self.InnovateUSData = temp;
-// this.formatSeriesData();
-//       });
-
-//     },
 
     fetchEvents: function fetchEvents() {
       self = this;
@@ -274,12 +214,6 @@ export default {
 <template>
 
 
- <!-- 
-  This events page is driven by the following collections and is concatenated for the purpose of showing all events. If more event sources are added, this list should be udpated.
-- All items tagged as event under Reboot Democracy 
-- All InnovateUS Workshops  
--->
-
 
 <!-- Header Component -->
 <header-comp></header-comp>
@@ -291,65 +225,70 @@ export default {
     <h2 class="red-subtitle"><span>Lecture Series</span></h2>
     
   </div>
-    <!-- <div class="custom-select">
-      <select v-model="selectedStatus" @change="formatSeriesData()">
-        <option :value="undefined">All Events</option>
-        <option v-for="series in seriesData" :value="series">{{series.title}}</option>
-      </select>
-      <i class="fa-solid fa-angle-down"></i>
-    </div> -->
   </div>
    <div class="events-row">
     <div  v-if="eventTitle != ''" class="event-information">
       <div class="event-short-description">
-        <h3 class="eyebrow" >{{eventTitle}}</h3>
         <h1>{{eventDescription}}</h1>
          <!-- <a @click="scrollMeTo('past-events')" class="mt-10 btn btn-primary btn-dark btn-medium">View Past Lectures</a> -->
-         <a href="signup" class="mt-10 btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+         <div class="btn-row">
+         <a href="signup" target="_blank" class="mt-10 btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+         </div>
       </div>
       <div class="event-long-description">
         <div v-html="accordionContent"></div>
         <!-- <a class="btn btn-ghost btn-peach-light" @click="showingFullText = !showingFullText">{{ showingFullText ? "Less" : "More" }} about this event series  <i class="fa-solid" :class="{ 'fa-chevron-up': showingFullText, 'fa-chevron-down': !showingFullText}"></i></a> -->
       </div>
-      <!-- <div class="btn-grp">
-        <a  @click="scrollMeTo('about')" class="btn btn-primary btn-dark btn-medium">Learn More</a>
-        <a  @click="scrollMeTo('past-events')" class="btn btn-primary btn-dark btn-medium">Watch Past Events</a>
-      </div> -->
+
     </div>
   </div>
 </div>
 
-
-<mailing-list-comp></mailing-list-comp>
+<div class="event-selection-row">
+  <h2 class="event-selector active" @click="scrollMeTo('upcoming')">Upcoming Events</h2>
+  <h2 class="event-selector" @click="scrollMeTo('past-events')" >Past Events</h2>
+</div>
+<!-- <mailing-list-comp></mailing-list-comp> -->
 <div ref="upcoming" class="event-grid-section">
-  <h3>Upcoming Events</h3>
   <div class="event-grid-row">
     <div class="event-grid-col"  v-for="event_item in eventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
-     <!-- <div class="event-grid-col"  v-for="event_item in alleventsData"> -->
       <div class="event-grid-item">
-        <div class="event-image">
-            <img v-if="!event_item.event_element.instructor && event_item.event_element.thumbnail" :src="this.directus._url + 'assets/' + event_item.event_element.thumbnail.id">
-            <div v-for="(instructor_item,index) in event_item.event_element.instructor" v-show="index < 1"> 
-                <img :src="this.directus._url + 'assets/' + instructor_item.innovate_us_instructors_id.headshot.id">
-            </div>
-
-           
-        </div>
-        <div class="event-text">
-          <h5 class="eyebrow peach-light">{{event_item.series_name}}</h5>
-          <h2>{{event_item.event_element.title}}</h2>
-          <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
-          <p class="event-description" v-html="event_item.event_element.speakers"></p>
-          <p class="event-description" v-if="event_item.event_element.online_event"><i class="fa-solid fa-video"></i> Virtual Event</p>
-          <p class="event-description" v-if="event_item.event_element.inperson_event"><i class="fa-solid fa-building-user"></i>In-person Event</p>
-          <p class="event-description" v-html="event_item.event_element.description"></p>
-          <div class="partner-logo-section">
-            <p class="partnership-label" v-if="event_item.event_element.partner_logo">In Partnership with:</p>
-           <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
+        <div class="event-grid-padding">
+          <div class="event-tag-row">
+            <div class="dot"></div>
+            <p>Innovation Mindset</p>
           </div>
-          <a :href="event_item.event_element.link" target="_blank" class="btn btn-primary btn-dark btn-medium">Click here to register</a>
-      </div>
-    </div>
+          <div class="event-title">
+          <h2>{{event_item.event_element.title}}</h2>
+          </div>
+          <div class="event-item-row">
+              <div class="event-image">
+                <img v-if="!event_item.event_element.instructor && event_item.event_element.thumbnail" :src="this.directus._url + 'assets/' + event_item.event_element.thumbnail.id">
+                <div v-for="(instructor_item,index) in event_item.event_element.instructor" v-show="index < 1"> 
+                  <img :src="this.directus._url + 'assets/' + instructor_item.innovate_us_instructors_id.headshot.id">
+                </div>
+              </div>
+
+              <div class="event-text">
+                  <div class="event-speakers">
+                    <p v-if="event_item.event_element.speakers">Speaker(s):&nbsp</p> 
+                    <div v-html="event_item.event_element.speakers"></div> 
+                  </div>
+                  <p class="event-description" v-html="event_item.event_element.description"></p>
+                  <p class="event-date"> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>   
+              </div>
+          </div>
+         </div>
+         <div class="event-item-btn-row">
+              <div class="partner-logo-section">
+                <p class="partnership-label" v-if="event_item.event_element.partner_logo">In Partnership with:</p>
+                <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
+             </div>
+             <p class="event-type" v-if="event_item.event_element.online_event && !event_item.event_element.inperson_event"><i class="fa-solid fa-video"></i> Online</p>
+             <p class="event-type" v-if="event_item.event_element.inperson_event"><i class="fa-solid fa-building-user"></i> Hybrid</p>
+             <a :href="event_item.event_element.link" target="_blank" class="btn btn-spl btn-dark btn-medium">Register</a>
+         </div>
+        </div>
     </div>
   </div>
 </div>
