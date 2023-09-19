@@ -156,6 +156,8 @@ p, li{
   gap: 10px;
 }
 
+
+
 a.btn {
   font-size: 0.8rem;
   margin:0;
@@ -1671,6 +1673,16 @@ border-radius: 8px;
 }
 @media (max-width: 768px) {
 
+.teamContainer {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    width: 250px;
+}
+
+.imageContainer img {
+    width: 200px;
+}
+
   .top-feature{
     display:none;
     flex-direction: column-reverse;
@@ -1791,4 +1803,57 @@ border-radius: 8px;
 }
 .signup-form h3{
   padding: 2rem;
+}
+
+.team-title{
+  margin-left: 1rem;
+}
+
+.teamContainer{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  width: 350px;
+  gap: 2rem;
+}
+
+.imageContainer img{
+  margin: 1rem;
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  overflow: hidden;
+  border: 2px solid black;
+}
+
+.card-name{
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-title{
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-bio-link{
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card-bio-link a{
+  text-decoration: none;
+  color: black;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.card-bio-link img{
+  width: 30px;
+  height: 15px;
+  margin-top: 5px;
 }

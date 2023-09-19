@@ -13,7 +13,6 @@ import MailingListComponent from "../components/mailing.vue";
 // import { register } from 'swiper/element/bundle';
 // import {useHead } from '@vueuse/head'
 
-
 export default {
   components: {
     "header-comp": HeaderComponent,
@@ -25,6 +24,7 @@ export default {
   //   ModalsContainer,
   //   ModalComp,
   },
+ 
   
   data() {
     return {
@@ -36,6 +36,8 @@ export default {
       path:this.$route.fullPath,
     }
   },
+
+
 
   created() {
 
