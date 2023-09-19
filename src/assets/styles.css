@@ -1857,3 +1857,11 @@ border-radius: 8px;
   height: 15px;
   margin-top: 5px;
 }
+
+.engagement_dot {
+  height: 15px;
+  width: 15px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
+}

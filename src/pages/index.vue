@@ -495,6 +495,7 @@ export default {
                    <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
               </div>
               <div class="resource-item-text">
+                
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
