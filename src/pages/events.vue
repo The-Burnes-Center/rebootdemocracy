@@ -55,8 +55,6 @@ export default {
     this.fetchEvents();
     // this.fetchInnovateUS();
     this.fetchSeries(); 
-    
-   
   },
     updated () {
      this.formattedBody();
