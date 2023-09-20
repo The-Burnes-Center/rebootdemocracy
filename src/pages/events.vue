@@ -230,7 +230,7 @@ export default {
         <h1>{{eventDescription}}</h1>
          <!-- <a @click="scrollMeTo('past-events')" class="mt-10 btn btn-primary btn-dark btn-medium">View Past Lectures</a> -->
          <div class="btn-row">
-         <a href="signup" target="_blank" class="mt-10 btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+         <a href="/signup" target="_blank" class="mt-10 btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
          </div>
       </div>
       <div class="event-long-description">

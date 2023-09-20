@@ -13,13 +13,13 @@
     </div>
     <div class="footer-col">
       <h4>Our Work</h4>
-       <a href="../">Equitable Engagement Lab</a>
+       <a href="/our-engagements">Equitable Engagement Lab</a>
        <a href="../">Workplace and Democracy</a>
        <a href="../">Media and Democracy</a>
     </div>
     <div class="footer-col">
       <h4>Resources</h4>
-       <a href="../">Reboot Democracy Lecture Series</a>
+       <a href="/event">Reboot Democracy Lecture Series</a>
        <a href="../">Case Studies</a>
        <a href="../">Research Questions</a>
        <a href="../">Writing</a>
