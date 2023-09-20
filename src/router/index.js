@@ -19,6 +19,7 @@ const routes = [
   { path:"/more-resources", component: Resources },
   { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
   { path:"/team", component:Team },
+  { path:"/signup", component:Signup },
 ]
 
 // const routes = [

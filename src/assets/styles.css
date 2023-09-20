@@ -327,11 +327,11 @@ a.btn:hover{
 
 .hero-content{
   padding: 0 0rem 0rem 5rem;
-  width: 50%;
+  width:35%;
 }
 .featured-section{
-  width: 50%;
-  padding: 5rem;
+  width: 65%;
+  padding: 1rem;
 }
 .featured-content{
 background-color: white;
