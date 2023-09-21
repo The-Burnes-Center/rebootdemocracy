@@ -160,7 +160,7 @@ export default {
               <h5 class="eyebrow">{{item.teaching_type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
-               <a class="btn btn-small btn-tertiary">Details <i class="fa-regular fa-arrow-right"></i></a>
+               <a class="btn btn-small btn-tertiary" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </template>

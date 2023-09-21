@@ -19,7 +19,7 @@
     </div>
     <div class="footer-col">
       <h4>Resources</h4>
-       <a href="/event">Reboot Democracy Lecture Series</a>
+       <a href="../">Reboot Democracy Lecture Series</a>
        <a href="../">Case Studies</a>
        <a href="../">Research Questions</a>
        <a href="../">Writing</a>
@@ -28,7 +28,7 @@
     <div class="footer-col">
       <h4>About the GovLab</h4>
        <a href="../">Our Work</a>
-       <a href="../">Our People</a>
+       <a href="/team">Our People</a>
        <a href="../">Careers</a>
        <a href="../">Join the Lab</a>
     </div>
