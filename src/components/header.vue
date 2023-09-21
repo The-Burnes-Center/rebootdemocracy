@@ -18,6 +18,6 @@ export default {
         Reboot<br>Democracy<br>.AI
       </div>
     </div>
-      <!-- <menu-comp></menu-comp> -->
+      <menu-comp></menu-comp>
   </div>
 </template>
