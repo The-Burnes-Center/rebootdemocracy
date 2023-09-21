@@ -38,8 +38,10 @@ export default {
               <a href="/our-writing">Writing</a>
               <a href="/our-teaching">Teaching</a>
               <a href="/more-resources">More Resources</a>
+              
             </div>
         </div>
+        <a href="/team">Our Team</a>
         <a href="" class="btn btn-small btn-primary">Join Us</a>
       </div>
 </template>

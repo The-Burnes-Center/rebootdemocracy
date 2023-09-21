@@ -55,8 +55,6 @@ export default {
     this.fetchEvents();
     // this.fetchInnovateUS();
     this.fetchSeries(); 
-    
-   
   },
     updated () {
      this.formattedBody();
@@ -232,7 +230,7 @@ export default {
         <h1>{{eventDescription}}</h1>
          <!-- <a @click="scrollMeTo('past-events')" class="mt-10 btn btn-primary btn-dark btn-medium">View Past Lectures</a> -->
          <div class="btn-row">
-         <a href="signup" target="_blank" class="mt-10 btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+         <a href="/signup" target="_blank" class="mt-10 btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
          </div>
       </div>
       <div class="event-long-description">
@@ -254,10 +252,11 @@ export default {
     <div class="event-grid-col"  v-for="event_item in eventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
       <div class="event-grid-item">
         <div class="event-grid-padding">
-          <div class="event-tag-row">
+          <!-- <div class="event-tag-row">
             <div class="dot"></div>
             <p>Innovation Mindset</p>
-          </div>
+          </div> -->
+          
           <div class="event-title">
           <h2>{{event_item.event_element.title}}</h2>
           </div>

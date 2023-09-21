@@ -156,6 +156,8 @@ p, li{
   gap: 10px;
 }
 
+
+
 a.btn {
   font-size: 0.8rem;
   margin:0;
@@ -325,11 +327,11 @@ a.btn:hover{
 
 .hero-content{
   padding: 0 0rem 0rem 5rem;
-  width: 50%;
+  width:35%;
 }
 .featured-section{
-  width: 50%;
-  padding: 5rem;
+  width: 65%;
+  padding: 1rem;
 }
 .featured-content{
 background-color: white;
@@ -481,14 +483,14 @@ h5.eyebrow.peach{
   justify-content: center;
   align-items: center;
   width:70%;
-  padding: 2rem 0;
+  padding: 1rem 0;
   gap: 1rem;
 }
 .upcoming-events-item {
   width: 30%;
   background-color: #ffffff;
   padding: 1rem;
-  height: 380px;
+  height: 400px;
   border: 1px solid #000000;
   display:flex;
   flex-direction: column;
@@ -509,7 +511,7 @@ h5.eyebrow.peach{
 .upcoming-events-item p{
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* number of lines to show */
+  -webkit-line-clamp: 1; /* number of lines to show */
           line-clamp: 3; 
   -webkit-box-orient: vertical;
 }
@@ -699,7 +701,7 @@ h5.eyebrow.peach{
   align-items: flex-start;
   gap: 0.5rem;
   height: 270px;
-  padding: 20px;
+  padding: 0px 20px 20px 20px;
 }
 .resource-item-img{
   width:100%;
@@ -711,7 +713,7 @@ h5.eyebrow.peach{
 
 }
 .resource-item-img img{
-  height: 150px;
+  height: 130px;
   width:100%;
   object-fit: cover;
   object-position: center;
@@ -1648,7 +1650,7 @@ border-radius: 8px;
   margin:20px;
   display:flex;
   flex-direction: column;
-  gap:1rem;
+  gap:0.8rem;
 }
 .featured-item-text p{
   overflow: hidden;
@@ -1670,6 +1672,20 @@ border-radius: 8px;
   gap:20px !important;
 }
 @media (max-width: 768px) {
+
+  .resource-item-img img{
+    height: 112px;
+  }
+
+.teamContainer {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    width: 250px;
+}
+
+.imageContainer img {
+    width: 200px;
+}
 
   .top-feature{
     display:none;
@@ -1791,4 +1807,65 @@ border-radius: 8px;
 }
 .signup-form h3{
   padding: 2rem;
+}
+
+.team-title{
+  margin-left: 1rem;
+}
+
+.teamContainer{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  width: 350px;
+  gap: 2rem;
+}
+
+.imageContainer img{
+  margin: 1rem;
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  overflow: hidden;
+  border: 2px solid black;
+}
+
+.card-name{
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-title{
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-bio-link{
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card-bio-link a{
+  text-decoration: none;
+  color: black;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.card-bio-link img{
+  width: 30px;
+  height: 15px;
+  margin-top: 5px;
+}
+
+.engagement_dot {
+  height: 15px;
+  width: 15px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
 }
