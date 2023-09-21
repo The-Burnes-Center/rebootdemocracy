@@ -42,6 +42,6 @@ export default {
             </div>
         </div>
         <a href="/team">Our Team</a>
-        <a href="" class="btn btn-small btn-primary">Join Us</a>
+        <a href="/signup" class="btn btn-small btn-primary">Join Us</a>
       </div>
 </template>
