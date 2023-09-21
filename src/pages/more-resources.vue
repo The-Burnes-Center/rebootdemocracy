@@ -170,7 +170,7 @@ export default {
               <h5 class="eyebrow peach">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
-               <a class="btn btn-small btn-secondary">Details <i class="fa-regular fa-arrow-right"></i></a>
+               <a class="btn btn-small btn-secondary" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </template>
