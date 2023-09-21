@@ -13,7 +13,6 @@ import MailingListComponent from "../components/mailing.vue";
 // import { register } from 'swiper/element/bundle';
 // import {useHead } from '@vueuse/head'
 
-
 export default {
   components: {
     "header-comp": HeaderComponent,
@@ -25,6 +24,7 @@ export default {
   //   ModalsContainer,
   //   ModalComp,
   },
+ 
   
   data() {
     return {
@@ -36,6 +36,8 @@ export default {
       path:this.$route.fullPath,
     }
   },
+
+
 
   created() {
 
@@ -126,6 +128,7 @@ export default {
       })
       .then((item) => {
       self.articleData =  item.data;
+      console.log(item);
       });
     }
 
@@ -156,6 +159,10 @@ export default {
         <template v-slot:default="{ item }">
           <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
+              <div class="event-tag-row">
+            <div class="engagement_dot" v-if="item.stage?.length > 0"></div>
+            <p>{{item.stage?.length > 0 ? item.stage[0]:""}}</p>
+          </div>
               <h5 class="eyebrow peach">Partner: {{item.partner}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>

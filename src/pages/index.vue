@@ -415,7 +415,9 @@ export default {
     </div>
     <div class="upcoming-events-content">
       <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
+
               <img v-if="!resource_item.instructor && resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+              <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <div v-html="resource_item.speakers"></div>
               <p>{{formatDateTime(new Date(resource_item.date))}}</p>
@@ -495,6 +497,7 @@ export default {
                    <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
               </div>
               <div class="resource-item-text">
+                
                <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
@@ -527,7 +530,7 @@ export default {
               <div class="resource-item-img">
                 
                  <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
-                  <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+                  <!-- <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png"> -->
               </div>
               <div class="resource-item-text">
                 <h5 class="eyebrow">{{resource_item.type}}</h5>
