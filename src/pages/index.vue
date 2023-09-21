@@ -395,7 +395,7 @@ export default {
       <h2 class="eyebrow peach">{{indexData.mission_title}}</h2>
       <div v-html="indexData.mission_heading"></div>
       <div class="mission-description" v-html="indexData.mission_description"></div>
-        <a class="btn btn-medium btn-secondary">About Us</a>
+        <!-- <a class="btn btn-medium btn-secondary">About Us</a> -->
   </div>
   <div class="mission-image">
 
