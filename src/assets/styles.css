@@ -483,7 +483,7 @@ h5.eyebrow.peach{
   justify-content: center;
   align-items: center;
   width:70%;
-  padding: 2rem 0;
+  padding: 1rem 0;
   gap: 1rem;
 }
 .upcoming-events-item {
@@ -713,7 +713,7 @@ h5.eyebrow.peach{
 
 }
 .resource-item-img img{
-  height: 150px;
+  height: 130px;
   width:100%;
   object-fit: cover;
   object-position: center;
