@@ -19,11 +19,11 @@
     </div>
     <div class="footer-col">
       <h4>Resources</h4>
-       <a href="../">Reboot Democracy Lecture Series</a>
-       <a href="../">Case Studies</a>
-       <a href="../">Research Questions</a>
-       <a href="../">Writing</a>
-       <a href="../">Teaching</a>
+       <a href="our-engagements">Reboot Democracy Lecture Series</a>
+       <a href="our-research">Case Studies</a>
+       <a href="our-research">Research Questions</a>
+       <a href="our-writing">Writing</a>
+       <a href="our-teaching">Teaching</a>
     </div>
     <div class="footer-col">
       <h4>About the GovLab</h4>
