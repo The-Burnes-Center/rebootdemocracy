@@ -490,7 +490,7 @@ h5.eyebrow.peach{
   width: 30%;
   background-color: #ffffff;
   padding: 1rem;
-  height: 380px;
+  height: 400px;
   border: 1px solid #000000;
   display:flex;
   flex-direction: column;
@@ -511,7 +511,7 @@ h5.eyebrow.peach{
 .upcoming-events-item p{
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* number of lines to show */
+  -webkit-line-clamp: 1; /* number of lines to show */
           line-clamp: 3; 
   -webkit-box-orient: vertical;
 }
@@ -701,7 +701,7 @@ h5.eyebrow.peach{
   align-items: flex-start;
   gap: 0.5rem;
   height: 270px;
-  padding: 20px;
+  padding: 0px 20px 20px 20px;
 }
 .resource-item-img{
   width:100%;

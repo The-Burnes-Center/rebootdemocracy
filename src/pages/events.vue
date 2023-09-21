@@ -252,10 +252,11 @@ export default {
     <div class="event-grid-col"  v-for="event_item in eventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
       <div class="event-grid-item">
         <div class="event-grid-padding">
-          <div class="event-tag-row">
+          <!-- <div class="event-tag-row">
             <div class="dot"></div>
             <p>Innovation Mindset</p>
-          </div>
+          </div> -->
+          
           <div class="event-title">
           <h2>{{event_item.event_element.title}}</h2>
           </div>
