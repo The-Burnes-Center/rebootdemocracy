@@ -164,7 +164,7 @@ export default {
               <h5 class="eyebrow peach">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
               <p>By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
-               <a class="btn btn-small btn-secondary">Details <i class="fa-regular fa-arrow-right"></i></a>
+               <a class="btn btn-small btn-secondary" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
             </div>
           </div>
         </template>
