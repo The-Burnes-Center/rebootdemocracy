@@ -1,2 +1,2 @@
-# Innovate US with Vite.js
+# Reboot Democracy with Vite.js
 
