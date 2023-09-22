@@ -1,2 +1,1 @@
-# Reboot Democracy with Vite.js
-
+# Reboot Democracy.AI with Vite.js
