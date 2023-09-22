@@ -1203,6 +1203,9 @@ p.event-date{
   flex-direction: column;
   justify-content: flex-end;
 }
+
+
+
 .event-grid-item p{
   margin:0;
 }
@@ -1278,6 +1281,7 @@ border-radius: 8px;
   height: 250px;
 }
 
+
 .event-item-btn-row{
   display:flex;
   flex-direction: row;
@@ -1314,6 +1318,8 @@ border-radius: 8px;
   padding: 1rem 0;
 
 }
+
+
 .speakers-list a{
   color: var(--blue-text);
 
@@ -1345,6 +1351,7 @@ border-radius: 8px;
   height:fit-content;
 }
 
+
 @media (max-width: 768px) {
   h2.red-subtitle span:before {
 
@@ -1359,6 +1366,21 @@ border-radius: 8px;
     width: 60px; 
 
   }
+
+  .event-grid-item{
+    height: auto;
+  }
+  .event-item-row
+  {
+    flex-direction: column;
+    gap: 0;
+    height: auto;
+  }
+
+  .event-title{
+    height: auto;
+  }
+
   .events-row{
     display:flex;
     padding: 0 1rem;
