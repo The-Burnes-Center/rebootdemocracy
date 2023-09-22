@@ -447,7 +447,7 @@ export default {
       <div class="our-work-text">
         <h3>{{indexData.equitable_engagement_lab_title}}</h3>
         <div class="our-work-description" v-html="indexData.equitable_engagement_lab_description"></div>
-        <a class="btn btn-small btn-ghost">About the lab <i class="fa-regular fa-arrow-right"></i></a>
+        <!-- <a class="btn btn-small btn-ghost">About the lab <i class="fa-regular fa-arrow-right"></i></a> -->
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
@@ -648,7 +648,7 @@ export default {
 
 <!-- Other practice section. Consider making repeatable and moving to directus-->
 
-<div class="other-practice">
+<!-- <div class="other-practice">
   <div class="col-50">
       <div class="other-practice-img workplace-img">
        <img src="../assets/workplace-image.png">
@@ -665,7 +665,7 @@ export default {
       <h3>Media and Democracy <i class="fa-regular fa-arrow-right"></i></h3>
     </div>
   </div>
-</div>
+</div> -->
 <mailing-list-comp></mailing-list-comp>
 <footer-comp></footer-comp>
 
