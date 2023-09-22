@@ -1875,6 +1875,12 @@ border-radius: 8px;
 .mc-field-group input{
   width: 400px;
 }
+
+@media (max-width: 768px) {
+  .mc-field-group input{
+    width: 350px;
+  }
+}
 .signup-form h3{
   padding: 2rem;
 }
