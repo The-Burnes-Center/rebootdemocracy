@@ -125,6 +125,13 @@ export default {
       .then((item) => {
       self.articleData =  item.data;
       });
+    },
+    scrollTop() {
+
+       const div = this.$refs.resourceScroller;
+      // Scroll to the top
+      div.scrollTop = 0;
+
     }
 
   }
@@ -141,12 +148,12 @@ export default {
 
     <div class="resource-menu">
       <ul>
-        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == 'All' }">All Case Studies</li>
-        <li @click="selectedType = 'CrowdLaw'" :class="{ isActive : selectedType == 'CrowdLaw' }">CrowdLaw</li>
-        <li @click="selectedType = 'Virtual Communities'" :class="{ isActive : selectedType == 'Virtual Communities' }">Virtual Communities</li>
-        <li @click="selectedType = 'Smarter State'" :class="{ isActive : selectedType == 'Smarter State' }">Smarter State</li>
-        <li @click="selectedType = 'Collective Intelligence'" :class="{ isActive : selectedType == 'Collective Intelligence' }">Collective Intelligence</li>
-        <li @click="selectedType = 'All'" :class="{ isActive : selectedType == '' }"><a href="#research">Research Questions</a></li>
+        <li @click="selectedType = 'All';scrollTop()" :class="{ isActive : selectedType == 'All' }">All Case Studies</li>
+        <li @click="selectedType = 'CrowdLaw';scrollTop()" :class="{ isActive : selectedType == 'CrowdLaw' }">CrowdLaw</li>
+        <li @click="selectedType = 'Virtual Communities';scrollTop()" :class="{ isActive : selectedType == 'Virtual Communities' }">Virtual Communities</li>
+        <li @click="selectedType = 'Smarter State';scrollTop()" :class="{ isActive : selectedType == 'Smarter State' }">Smarter State</li>
+        <li @click="selectedType = 'Collective Intelligence';scrollTop()" :class="{ isActive : selectedType == 'Collective Intelligence' }">Collective Intelligence</li>
+        <li @click="selectedType = 'All';scrollTop()" :class="{ isActive : selectedType == '' }"><a href="#research">Research Questions</a></li>
         <!-- <li></li> -->
       </ul>
     </div>
@@ -155,7 +162,7 @@ export default {
 
   <div class="resource-scroll-section">
 
-    <div class="resource-scroller">
+    <div class="resource-scroller" ref="resourceScroller">
         <template v-for="item in articleData">
           <div class="featured-items"  v-if="item.case_study_type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
