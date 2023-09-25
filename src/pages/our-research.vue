@@ -156,10 +156,8 @@ export default {
   <div class="resource-scroll-section">
 
     <div class="resource-scroller">
-      <v-virtual-scroll  :items="articleData">
-        <template v-slot:default="{ item }">
-
-          <div class="featured-items"  v-show="item.case_study_type == selectedType || selectedType == 'All' ">
+        <template v-for="item in articleData">
+          <div class="featured-items"  v-if="item.case_study_type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
               <h5 class="eyebrow">{{item.case_study_type}}</h5>
               <h4>{{item.title}}</h4>
@@ -168,7 +166,6 @@ export default {
             </div>
           </div>
         </template>
-      </v-virtual-scroll>
     </div>
   </div>
   <div class="resource-image">
