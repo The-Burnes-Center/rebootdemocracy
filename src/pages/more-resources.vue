@@ -167,6 +167,11 @@ export default {
         <template v-slot:default="{ item }">
           <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
+              <div class="resource-item-img">
+                
+                <img v-if="item.thumbnail" :src="this.directus._url + 'assets/' + item.thumbnail.id">
+                 <!-- <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png"> -->
+             </div>
               <h5 class="eyebrow peach">{{item.type}}</h5>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
