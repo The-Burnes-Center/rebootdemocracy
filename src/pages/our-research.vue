@@ -167,6 +167,11 @@ export default {
           <div class="featured-items"  v-if="item.case_study_type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
               <h5 class="eyebrow">{{item.case_study_type}}</h5>
+              <div class="resource-item-img">
+                
+                 <img v-if="item.thumbnail" :src="this.directus._url + 'assets/' + item.thumbnail.id">
+                  <!-- <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png"> -->
+              </div>
               <h4>{{item.title}}</h4>
               <p>{{item.description}}</p>
                <a class="btn btn-small btn-blue" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
