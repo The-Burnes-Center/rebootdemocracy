@@ -162,6 +162,10 @@ export default {
           <div class="featured-items"  v-if="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
               <h5 class="eyebrow">{{item.type}}</h5>
+              <div class="resource-item-img">
+                 <img v-if="item.thumbnail" :src="this.directus._url + 'assets/' + item.thumbnail.id">
+                   <img v-if="!item.thumbnail" src="../assets/workplace-image.png">
+              </div>
               <h4>{{item.title}}</h4>
               <p>By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
               <!-- <p>{{item.description}}</p> -->
