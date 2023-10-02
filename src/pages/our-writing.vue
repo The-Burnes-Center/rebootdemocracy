@@ -156,8 +156,20 @@ export default {
     
   </div>
   <div class="resource-scroll-section">
-    <div class="resource-scroller">
-      <v-virtual-scroll  :items="articleData">
+    <div class="resource-scroller" ref="resourceScroller">
+
+      <template v-for="item in articleData">
+          <div class="featured-items"  v-if="item.type == selectedType || selectedType == 'All' ">
+            <div class="featured-item-text">
+              <h5 class="eyebrow">{{item.type}}</h5>
+              <h4>{{item.title}}</h4>
+              <p>By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
+              <!-- <p>{{item.description}}</p> -->
+               <a class="btn btn-small btn-blue" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
+            </div>
+          </div>
+        </template>
+      <!-- <v-virtual-scroll  :items="articleData">
         <template v-slot:default="{ item }">
           <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
@@ -168,7 +180,7 @@ export default {
             </div>
           </div>
         </template>
-      </v-virtual-scroll>
+      </v-virtual-scroll> -->
     </div>
   </div>
   <div class="resource-image">
