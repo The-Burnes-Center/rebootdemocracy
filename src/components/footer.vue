@@ -14,7 +14,7 @@
     <div class="footer-col">
       <h4>Our Work</h4>
        <a href="/our-engagements">Equitable Engagement Lab</a>
-       <a href="../">Workplace and Democracy</a>
+       <a href="https://poweratwork.us/" target="_blank">Workplace and Democracy</a>
        <a href="../">Media and Democracy</a>
     </div>
     <div class="footer-col">

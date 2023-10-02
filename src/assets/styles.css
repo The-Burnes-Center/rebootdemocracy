@@ -156,6 +156,9 @@ p, li{
   gap: 10px;
 }
 
+.index_carousel{
+  height: 95vh;
+}
 
 
 a.btn {
@@ -342,7 +345,13 @@ flex-direction: column;
 }
 .featured-image img{
   width:100%;
-  object-fit: cover;
+  height: 380px;
+  object-fit: contain;
+}
+
+.other-practice-title a{
+  text-decoration: none;
+  color: #000000;
 }
 .eyebrow{
   margin:0;

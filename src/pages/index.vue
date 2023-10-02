@@ -368,7 +368,7 @@ export default {
   </div>
   <div class="featured-section">
     <v-carousel  hide-delimiters v-model="model">
-      <v-carousel-item v-for="(item, i) in featuredData" :key="i">
+      <v-carousel-item class="index_carousel" v-for="(item, i) in featuredData" :key="i">
     <div class="featured-content">
         <h1 class="eyebrow blue">Featured {{item.type}}</h1>
         <div class="featured-image">
@@ -648,24 +648,24 @@ export default {
 
 <!-- Other practice section. Consider making repeatable and moving to directus-->
 
-<!-- <div class="other-practice">
+<div class="other-practice">
   <div class="col-50">
       <div class="other-practice-img workplace-img">
        <img src="../assets/workplace-image.png">
     </div>
     <div class="other-practice-title">
-      <h3>Workplace Democracy <i class="fa-regular fa-arrow-right"></i></h3>
+      <h3><a href="https://poweratwork.us/" target="_blank"> Workplace Democracy <i class="fa-regular fa-arrow-right"></i></a></h3>
     </div>
   </div>
-  <div class="col-50">
+  <!-- <div class="col-50">
     <div class="other-practice-img media-img">
        <img src="../assets/media-image.png">
     </div>
     <div class="other-practice-title">
       <h3>Media and Democracy <i class="fa-regular fa-arrow-right"></i></h3>
     </div>
-  </div>
-</div> -->
+  </div> -->
+</div>
 <mailing-list-comp></mailing-list-comp>
 <footer-comp></footer-comp>
 

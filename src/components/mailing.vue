@@ -3,7 +3,7 @@
     <div class="mailing-list-row">
       <div class="col-50">
         <h3>Sign up for the Reboot Democracy Mailing List to Learn about Upcoming Events</h3>
-        <p>Click Below to Register for a Specific Event</p>
+        <!-- <p>Click Below to Register for a Specific Event</p> -->
       </div>
       <div class="col-50">
         <!-- <p>Join our mailing list</p> -->
