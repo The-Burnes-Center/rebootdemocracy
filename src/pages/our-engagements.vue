@@ -163,8 +163,8 @@ export default {
                  <img v-if="item.thumbnail" :src="this.directus._url + 'assets/' + item.thumbnail.id">
                    <img v-if="!item.thumbnail" src="../assets/workplace-image.png">
               </div>
-              <div class="event-tag-row">
-            <div class="engagement_dot" v-if="item.stage?.length > 0"></div>
+              <div class="event-tag-row" v-if="item.stage?.length > 0">
+            <div class="engagement_dot" ></div>
             <p>{{item.stage?.length > 0 ? item.stage[0]:""}}</p>
           </div>
               <h5 class="eyebrow peach">Partner: {{item.partner}}</h5>
