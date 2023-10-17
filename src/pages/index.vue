@@ -364,13 +364,13 @@ export default {
 <div class="hero">
   <div class="hero-content">
     <h1 class="eyebrow blue">{{indexData.title}}</h1>
-    <h1 class="title" v-html="indexData.subtitle"></h1>
+    <div class="title" v-html="indexData.subtitle"></div>
   </div>
   <div class="featured-section">
     <v-carousel  hide-delimiters v-model="model">
       <v-carousel-item class="index_carousel" v-for="(item, i) in featuredData" :key="i">
     <div class="featured-content">
-        <h1 class="eyebrow blue">Featured {{item.type}}</h1>
+        <!-- <h1 class="eyebrow blue">Featured {{item.type}}</h1> -->
         <div class="featured-image">
           <img v-if="item.thumbnail" :src="this.directus._url+'assets/'+item.thumbnail.id">
           <img v-if="!item.thumbnail"  src="..//assets/media-image.png">
@@ -409,9 +409,14 @@ export default {
 <div class="upcoming-events-section">
   <div class="upcoming-events-box">
     <div class="upcoming-events-text">
-        <h3>Upcoming Events</h3>
+        <h3>Reboot Democracy Lecture Series</h3>
         <div class="our-work-description"><p>Upcoming events in the Reboot Democracy Lecture Series</p></div>
          <a class="btn btn-primary btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
+         <div class="col-50-home">
+        <!-- <p>Join our mailing list</p> -->
+         <!-- <input type="text" placeholder="" name="entry.250007595" aria-hidden=”true”> -->
+        <a href="/signup" class="btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+      </div>
     </div>
     <div class="upcoming-events-content">
       <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
@@ -443,6 +448,12 @@ export default {
     <div class="our-work-image equitable-engagement-img">
       <img src="../assets/eel-image.png">
     </div>
+    <!-- <div class="our-work-separator">
+  <div class="our-work-separator-text">
+    <h2 class="eyebrow white">{{indexData.our_work_title}}</h2>
+    <p>{{indexData.our_work_subtitle}}</p>
+  </div>
+</div> -->
     <div class="our-work-layout">
       <div class="our-work-text">
         <h3>{{indexData.equitable_engagement_lab_title}}</h3>
@@ -498,7 +509,11 @@ export default {
               </div>
               <div class="resource-item-text">
                 
-               <h5 class="eyebrow">{{resource_item.type}}</h5>
+               <!-- <h5 class="eyebrow">{{resource_item.type}}</h5> -->
+               <div class="event-tag-row" v-if="resource_item.stage?.length > 0">
+            <div class="engagement_dot" ></div>
+            <p>{{resource_item.stage?.length > 0 ? resource_item.stage[0]:""}}</p>
+          </div>
               <h4>{{resource_item.title}}</h4>
               <p>{{resource_item.description}}</p>
               <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
