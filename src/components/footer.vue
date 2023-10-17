@@ -8,8 +8,8 @@
         Reboot Democracy
       </div>
       <p>A Project By</p>
-      <img @click="$router.push('/')" src="../assets/the-govlab-logo-white.svg">
-      <img @click="$router.push('/')" src="../assets/burnes-center-logo.png">
+      <img @click="$router.push('../')" src="../assets/the-govlab-logo-white.svg">
+      <img @click="$router.push('../')" src="../assets/burnes-center-logo.png">
     </div>
     <div class="footer-col">
       <h4>Our Work</h4>
