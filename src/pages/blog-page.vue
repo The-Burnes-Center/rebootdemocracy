@@ -12,7 +12,6 @@ import FooterComponent from "../components/footer.vue";
 import { register } from 'swiper/element/bundle';
 import {useHead } from '@vueuse/head'
 
-
 export default {
   components: {
     "header-comp": HeaderComponent,
@@ -45,7 +44,7 @@ export default {
   watch :{
   '$route': {
     handler: function(r) {
-     this.fetchWorkshops();
+
        this.loadModal(); 
     },
     deep: true,
@@ -55,8 +54,8 @@ export default {
   created() {
   
     this.loadModal(); 
-    this.blogData = this.directus.items("innovate_us");
-    this.fetchAbout();
+    this.blogData = this.directus.items("reboot_democracy_blog");
+    this.fetchBlog();
     
   },
  mounted()
@@ -164,11 +163,11 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       FutureDate: function FutureDate(d1) {
         return isFuture(new Date(d1));
       },
-    fetchAbout: function fetchAbout() {
+    fetchBlog: function fetchBlog() {
       self = this;
 
       this.directus
-      .items('blog')
+      .items('reboot_democracy_blog')
       .readByQuery({
          meta: 'total_count',
          limit: 10,
@@ -176,46 +175,15 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           '*.*',
           'authors.team_id.*'
        ],
-       sort:["-publication_date"]
+       sort:["-date"]
        
       })
       .then((item) => {
-      self.blogData =  item.data.slice().reverse();
+      self.blogData =  item.data;
       console.log(self.blogData )
       // self.testimonialsLength = self.blogData.testimonials.length;
       });
     },
-    fetchWorkshops: function fetchWorkshops() {
-      self = this;
-      this.directus
-        .items("innovate_us_workshops")
-        .readByQuery({
-          meta: "total_count",
-          limit: -1,
-          fields: [
-            "*.*",
-            "instructor.innovate_us_instructors_id.*",
-            "thumbnail.*",
-          ],
-        })
-        .then((item) => {
-          
-          self.oldWsAr = item.data.sort((a, b) => {
-                return  new Date(a.date) - new Date(b.date)
-          });
-          self.upcWsAr = item.data.sort((a, b) => {
-                return  new Date(a.date) - new Date(b.date)
-          });
-          
-
-          self.workshopData = self.upcWsAr.concat(self.oldWsAr.concat(self.upcWsAr));
-          self.totalPageNumber = Math.ceil(self.workshopData.length / 5);
-
-   
-
-
-        });
-    }
 
   }
 }
@@ -251,7 +219,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       >        <div class="blog-item">
           <div v-if="blog_item.image" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+blog_item.image.id+ ')' }"></div>
           <h4>{{blog_item.title}}</h4>
-          <p><span v-for="author in blog_item.authors">{{author.team_id.name}}, </span></p>
+          
+          <p><span v-for="(author,i) in blog_item.authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="i<blog_item.authors.length-1">,</span></span></p>
         </div>
       </a> 
 
