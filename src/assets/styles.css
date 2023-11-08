@@ -332,10 +332,14 @@ a.btn:hover{
   flex-direction: column;
   justify-content: center; /* This centers any content inside your header horizontally */
   align-items: center; /* This centers any content inside your header vertically */
-  text-align: left; /* Centers the text horizontally */
+  text-align: center; /* Centers the text horizontally */
   padding-top: 80px; 
   
 }
+.blog-hero .eyebrow {
+  max-width: 1100px; 
+  
+  }
 .blog-img
 {
   background-size: cover; /* This will ensure that your background covers the header area */
@@ -343,7 +347,7 @@ a.btn:hover{
   max-width: 1100px; /* Maximum width of the content */
   width: 100%; /* Maximum width of the content */
   height:534.5px;
-  margin-bottom: 40px; 
+  
 
 }
 .blog-details {
@@ -525,6 +529,13 @@ h5.eyebrow.peach{
 }
 
 @media (max-width: 768px) {
+
+  .blog-hero .eyebrow {
+    
+    font-size: 0.6rem;
+    margin-bottom: 0px; 
+    }
+
   .hero{
     height: 100%;
     flex-direction: column;
@@ -563,11 +574,16 @@ background-repeat: no-repeat;
     }
     .blog-details{
       width: 100%;
-      padding: 2rem 2rem 0rem 2rem;
+      padding: 1rem 1rem 0rem 1rem;
     }
     .blog-body{
       padding: 2rem 2rem;
       line-height: 1.8;
+    }
+    .lede{
+      padding-top: 10px;
+      font-size: 16.5px;
+      
     }
 }
 
