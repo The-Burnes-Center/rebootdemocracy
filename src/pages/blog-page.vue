@@ -28,7 +28,7 @@ export default {
       currentItem: 1,
       nextItem: 2,
       testimonialsLength:0,                               
-      aboutData: [],
+      blogData: [],
       modalData: [],
       workshopData: [],
       playpause:true,
@@ -55,7 +55,7 @@ export default {
   created() {
   
     this.loadModal(); 
-    this.aboutData = this.directus.items("innovate_us");
+    this.blogData = this.directus.items("innovate_us");
     this.fetchAbout();
     
   },
@@ -70,15 +70,31 @@ export default {
     fillMeta()
     {
      useHead({
-      title: "InnovateUS",
+      title: "RebootDemocracy.AI",
       meta: [
-        { name: 'title', content:"InnovateUS" },
-        { property: 'og:title', content: "InnovateUS" },
-        { property: 'og:description', content: "InnovateUS provides no-cost, at-your-own pace, and live learning on data, digital and innovation skills for public servants like you."},
-        { property: 'og:image', content: "https://innovate-us.org/innovateus_meta.jpg"},
-        { property: 'twitter:title', content: "InnovateUS"},
-        { property: 'twitter:description', content: "InnovateUS provides no-cost, at-your-own pace, and live learning on data, digital and innovation skills for public servants like you."},
-        { property: 'twitter:image', content: "https://innovate-us.org/innovateus_meta.jpg"},
+        { name: 'title', content:"RebootDemocracy.AI" },
+        { property: 'og:title', content: "RebootDemocracy.AI" },
+        { property: 'og:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to “do democracy” in practice.
+
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
+        { property: 'og:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
+        { property: 'twitter:title', content: "RebootDemocracy.AI"},
+        { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to “do democracy” in practice.
+
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
+        { property: 'twitter:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })
@@ -152,34 +168,21 @@ export default {
       self = this;
 
       this.directus
-      .items('innovate_us')
+      .items('blog')
       .readByQuery({
          meta: 'total_count',
-         limit: -1,
+         limit: 10,
          fields: [
           '*.*',
-          'metaimg.*',
-          'favicon.*',
-          'featured_images.*',
-          'services.innovate_us_services_id.icon.*',
-          'services.innovate_us_services_id.*',
-          'instructors.innovate_us_instructors_id.*',
-          'instructors.innovate_us_instructors_id.headshot.*',
-          'blog.innovate_us_blog_id.*',
-          'blog.innovate_us_blog_id.thumbnail.*',
-          'logos.innovate_us_partner_logos_id.*',
-          'logos.innovate_us_partner_logos_id.logo.*',
-          'partners.innovate_us_partner_logos_id.*',
-          'partners.innovate_us_partner_logos_id.logo.*',
-          'testimonials.innovate_us_testimonials_id.*',
-          'impact.innovate_us_impact_id.*',
-          'featured_instructors.innovate_us_instructors_id.headshot.*'
+          'authors.team_id.*'
        ],
+       sort:["-publication_date"]
        
       })
       .then((item) => {
-      self.aboutData =  item.data;
-      self.testimonialsLength = self.aboutData.testimonials.length;
+      self.blogData =  item.data.slice().reverse();
+      console.log(self.blogData )
+      // self.testimonialsLength = self.blogData.testimonials.length;
       });
     },
     fetchWorkshops: function fetchWorkshops() {
@@ -234,21 +237,21 @@ export default {
     <div class="row">
       <a
         :href="
-          blog_item.innovate_us_blog_id.slug
-            ? 'blog/' + blog_item.innovate_us_blog_id.slug
-            : blog_item.innovate_us_blog_id.url
+          blog_item.slug
+            ? '/blog/'+ blog_item.slug
+            : blog_item.url
         "
         :target="
-          blog_item.innovate_us_blog_id.slug
+          blog_item.slug
             ? '_self' 
             :'_blank'
         "
         class="col-3"
-        v-for="blog_item in aboutData.blog.slice().reverse()"
+        v-for="blog_item in blogData.slice().reverse()"
       >        <div class="blog-item">
-          <div v-if="blog_item.innovate_us_blog_id.id" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+blog_item.innovate_us_blog_id.thumbnail.id+ ')' }"></div>
-          <h4>{{blog_item.innovate_us_blog_id.title}}</h4>
-          <p>{{blog_item.innovate_us_blog_id.author}}</p>
+          <div v-if="blog_item.image" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+blog_item.image.id+ ')' }"></div>
+          <h4>{{blog_item.title}}</h4>
+          <p><span v-for="author in blog_item.authors">{{author.team_id.name}}, </span></p>
         </div>
       </a> 
 

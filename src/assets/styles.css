@@ -39,6 +39,7 @@ h1.eyebrow.blue{
 h1{
   font-size: 50px;
   font-family: 'Space Mono', monospace;
+  margin: 2rem;
 }
 /* h2.eyebrow.peach{
   color: var(--peach-text);
@@ -297,6 +298,12 @@ a.btn:hover{
   display: block;
 }
 @media (max-width: 768px) {
+  h1{
+    font-size: 30px;
+    font-family: 'Space Mono', monospace;
+    
+
+  }
   .header-section{
     justify-content: flex-end;
   }
