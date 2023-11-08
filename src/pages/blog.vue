@@ -106,9 +106,12 @@ export default {
     <h1 v-if="postData[0].title.length < 80">{{postData[0].title}}</h1>
     <h1 v-if="postData[0].title.length > 81" class="small-title">{{postData[0].title}}</h1>
 
-    <h5 class="lede">
-   <span v-for="(author,i) in postData[0].authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="i<postData[0].authors.length-1">,</span></span></h5>
-
+    <div class="lede">
+   <div v-for="(author,i) in postData[0].authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="i<postData[0].authors.length-1">,</span>
+    <a class="btn btn-small btn-blue" :href="author.team_id.Link_to_bio">Bio <i class="fa-regular fa-arrow-right"></i></a>
+    
+  </div></div>
+   
   </div>
 
   
