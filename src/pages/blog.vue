@@ -108,7 +108,7 @@ export default {
 
     <div class="lede">
    <div v-for="(author,i) in postData[0].authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="i<postData[0].authors.length-1">,</span>
-    <a class="btn btn-small btn-blue" :href="author.team_id.Link_to_bio">Bio <i class="fa-regular fa-arrow-right"></i></a>
+    <a class="btn btn-small " :href="author.team_id.Link_to_bio">Bio <i class="fa-regular fa-arrow-right"></i></a>
     
   </div></div>
    
