@@ -531,6 +531,37 @@ h5.eyebrow.peach{
     padding: 5rem 1rem;
   }
 
+  .rdblog-section .row{
+    flex-direction: column;
+    max-width: none;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column wrap;
+  -ms-flex-flow: column wrap;
+  flex-flow: column wrap;
+  }
+  .rdblog-section .row .col-3{
+    width:100%;
+    -webkit-flex: 0 0 100% !important;
+  -ms-flex: 0 0 100% !important;
+  flex: 0 0  100% !important;
+  max-width: 100% !important;
+  }
+  .blog-img{
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+background-repeat: no-repeat;
+    }
+    .blog-details{
+      width: 100%;
+      padding: 2rem 2rem 0rem 2rem;
+    }
+    .blog-body{
+      padding: 2rem 2rem;
+      line-height: 1.8;
+    }
 }
 
 
