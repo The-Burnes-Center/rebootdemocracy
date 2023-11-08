@@ -316,6 +316,144 @@ a.btn:hover{
 
 }
 
+
+.blog-hero {
+  
+  width: 100%; /* This will make sure the header extends full width */
+  display: flex;
+  background-color: #DAFAEB;
+  flex-direction: column;
+  justify-content: center; /* This centers any content inside your header horizontally */
+  align-items: center; /* This centers any content inside your header vertically */
+  text-align: left; /* Centers the text horizontally */
+  padding-top: 80px; 
+  
+}
+.blog-img
+{
+  background-size: cover; /* This will ensure that your background covers the header area */
+  background-position: center; 
+  max-width: 1100px; /* Maximum width of the content */
+  width: 100%; /* Maximum width of the content */
+  height:534.5px;
+  margin-bottom: 40px; 
+
+}
+.blog-details {
+  max-width: 1100px; /* Maximum width of the content */
+  width: 100%; /* Makes the content fill the container up to the maximum width */
+  text-align: left; /* Centers the text within the content container */
+  font-size: 2em; /* Example size, adjust as needed */
+  font-weight: bold; /* Example font weight, adjust as needed */
+  margin: 0; /* Removes default margin */
+  padding: 0.5em; /* Adds padding within the content container */
+}
+
+.blog-body
+{
+  margin: 0 auto;
+  text-align: left; /* Centers the text horizontally */
+  max-width: 750px; /* Maximum width of the content */
+  width: 100%; /* Makes the content fill the container up to the maximum width */
+  padding-top: 110px;
+  padding-bottom: 170px;
+  line-height: 35.2px;
+}
+.blog-body h3 
+{
+  padding-top:30px;
+  padding-bottom:14px;
+  
+}
+
+.blog-body a
+{
+  color: #000000;
+}
+.blog-body p
+{
+  padding-top: 10px;
+  padding-bottom: 10px;
+ 
+}
+.lede{
+  padding-top: 65px;
+  font-size: 22.5px;
+  
+}
+.rdblog-section{
+  padding: 5em;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.rdblog-section a{
+  text-decoration: none;
+}
+.rdblog-section .row{
+  display: flex;
+  flex-direction: row ;
+  max-width: none;
+display: -webkit-flex;
+display: -ms-flexbox;
+display: flex;
+-webkit-flex-flow: row wrap;
+-ms-flex-flow: row wrap;
+flex-flow: row wrap;
+justify-content: flex-start;
+align-items: flex-start;
+text-align: center;
+gap: 2em;
+}
+.rdblog-section .row .col-3{
+  -webkit-flex: 0 0 30% !important;
+  -ms-flex: 0 0 30% !important;
+  flex: 0 0  30% !important;
+  max-width: 30% !important;
+  width:unset;
+  position: relative;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  padding-top: 2em;
+  }
+
+.rdblog-section .row .col-3 .blog-item {
+  display:flex;
+  flex-direction: column;
+  gap: 1em;
+  text-decoration: none;
+}
+
+.rdblog-section .row .col-3 .blog-item h4{
+  margin:0;
+  height: 100px;
+  color: black;
+  text-decoration: none;
+
+  
+}
+.rdblog-section .row .col-3 .blog-item p{
+  margin:0;
+  color: black;
+  text-decoration: none;
+}
+
+
+
+
+
+
+
+/* You might want to add some more specific styling for the title */
+
+
+
+
+
 .hero{
   height:fit-content;
   width:100%;
