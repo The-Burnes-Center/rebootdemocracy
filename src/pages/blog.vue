@@ -100,8 +100,9 @@ export default {
 <div class="blog-hero">
 
   <div v-if="postData[0].image" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+postData[0].image.id+ ')' }">
-
+    
   </div>
+  <h5 class="eyebrow">{{postData[0].image.title}}</h5>
   <div class="blog-details">
     <h1 v-if="postData[0].title.length < 80">{{postData[0].title}}</h1>
     <h1 v-if="postData[0].title.length > 81" class="small-title">{{postData[0].title}}</h1>
