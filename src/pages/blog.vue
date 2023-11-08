@@ -15,20 +15,20 @@ export default {
 
   },
   props: {
-    blogslug: String,
+    slug: String,
     name: String,
   },
   data() {
     return {
       postData: [],
-      blogslug: this.$route.params.name,
+      slug: this.$route.params.name,
       directus: new Directus("https://content.thegovlab.com/"),
       path: this.$route.fullPath,
     };
   },
   created() {
     
-    this.fetchAbout();
+    this.fetchBlog();
   },
 
   methods: {
@@ -45,11 +45,11 @@ export default {
       return isPast(d1);
     },
 
-    fetchAbout: function fetchAbout() {
+    fetchBlog: function fetchBlog() {
       self = this;
 
       this.directus
-        .items("blog")
+        .items("reboot_democracy_blog")
         .readByQuery({
           meta: "total_count",
           limit: -1,
@@ -59,12 +59,13 @@ export default {
           ],
           filter: {
             slug: {
-              _eq: this.blogslug,
+              _eq: this.slug,
             },
           },
         })
         .then((item) => {
           self.postData = item.data;
+          console.log( self.postData[0])
           this.fillMeta();
         });
     },
@@ -72,7 +73,7 @@ export default {
     {
       // convert HTML body of Blog Entry into plain text
       var htmlToText = document.createElement('div');
-      htmlToText.innerHTML = this.postData[0].post_content;
+      htmlToText.innerHTML = this.postData[0].content;
 
      useHead({
       title: "RebootDemocracy.AI Blog | "+this.postData[0].title,
@@ -104,9 +105,10 @@ export default {
   <div class="blog-details">
     <h1 v-if="postData[0].title.length < 80">{{postData[0].title}}</h1>
     <h1 v-if="postData[0].title.length > 81" class="small-title">{{postData[0].title}}</h1>
-    <!-- {{ postData[0].authors }} -->
-    <h5 class="lede"><span v-for="author in postData[0].authors">{{author.team_id.name}}</span> </h5>
-    <!-- <h6 class="lede">{{ formatDateOnly(new Date(postData[0].date)) }}</h6> -->
+
+    <h5 class="lede">
+   <span v-for="(author,i) in postData[0].authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="i<postData[0].authors.length-1">,</span></span></h5>
+
   </div>
 
   
