@@ -20,7 +20,7 @@ export default {
   },
   data() {
     return {
-      aboutData: [],
+      postData: [],
       blogslug: this.$route.params.name,
       directus: new Directus("https://content.thegovlab.com/"),
       path: this.$route.fullPath,
@@ -49,13 +49,13 @@ export default {
       self = this;
 
       this.directus
-        .items("innovate_us_blog")
+        .items("blog")
         .readByQuery({
           meta: "total_count",
           limit: -1,
           
           fields: ["*.*",
-                  "thumbnail.*",
+          'authors.team_id.*'
           ],
           filter: {
             slug: {
@@ -64,7 +64,7 @@ export default {
           },
         })
         .then((item) => {
-          self.aboutData = item.data;
+          self.postData = item.data;
           this.fillMeta();
         });
     },
@@ -72,18 +72,18 @@ export default {
     {
       // convert HTML body of Blog Entry into plain text
       var htmlToText = document.createElement('div');
-      htmlToText.innerHTML = this.aboutData[0].post_content;
+      htmlToText.innerHTML = this.postData[0].post_content;
 
      useHead({
-      title: "RebootDemocracy.AI Blog | "+this.aboutData[0].title,
+      title: "RebootDemocracy.AI Blog | "+this.postData[0].title,
       meta: [
-        { name: 'title', content:"RebootDemocracy.AI  Blog | "+this.aboutData[0].title },
-        { property: 'og:title', content: "RebootDemocracy.AI  Blog | "+this.aboutData[0].title },
+        { name: 'title', content:"RebootDemocracy.AI  Blog | "+this.postData[0].title },
+        { property: 'og:title', content: "RebootDemocracy.AI  Blog | "+this.postData[0].title },
         { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
-        // { property: 'og:image', content: "https://innovate-us.org/innovateus_meta.jpg"},
+        { property: 'og:image', content: this.directus._url+'assets/'+postData[0].image.id},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
         { property: 'twitter:description', content: htmlToText.textContent.substring(0,200)+'...'},
-        // { property: 'twitter:image', content: "https://innovate-us.org/innovateus_meta.jpg"},
+        { property: 'twitter:image', content:  this.directus._url+'assets/'+postData[0].image.id},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })
@@ -98,20 +98,21 @@ export default {
 <header-comp></header-comp>
 <div class="blog-hero">
 
-  <div v-if="aboutData[0].thumbnail" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+aboutData[0].thumbnail.id+ ')' }">
+  <div v-if="postData[0].image" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+postData[0].image.id+ ')' }">
 
   </div>
   <div class="blog-details">
-    <h1 v-if="aboutData[0].title.length < 80">{{aboutData[0].title}}</h1>
-    <h1 v-if="aboutData[0].title.length > 81" class="small-title">{{aboutData[0].title}}</h1>
-    <h5 class="lede">{{aboutData[0].author}}</h5>
-    <!-- <h6 class="lede">{{ formatDateOnly(new Date(aboutData[0].date)) }}</h6> -->
+    <h1 v-if="postData[0].title.length < 80">{{postData[0].title}}</h1>
+    <h1 v-if="postData[0].title.length > 81" class="small-title">{{postData[0].title}}</h1>
+    <!-- {{ postData[0].authors }} -->
+    <h5 class="lede"><span v-for="author in postData[0].authors">{{author.team_id.name}}</span> </h5>
+    <!-- <h6 class="lede">{{ formatDateOnly(new Date(postData[0].date)) }}</h6> -->
   </div>
 
   
 </div>
 
-<div class="blog-body" v-html="aboutData[0].post_content">
+<div class="blog-body" v-html="postData[0].content">
 
 </div>
 
