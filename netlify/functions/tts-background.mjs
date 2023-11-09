@@ -40,8 +40,6 @@ function splitText(text, maxLength) {
   return chunks;
 }
 
-
-// Function to make requests to Directus API
 // Function to make requests to Directus API
 async function directusFetch(endpoint, method = 'GET', body = null) {
   const url = `${DIRECTUS_URL}${endpoint}`;
@@ -138,16 +136,16 @@ async function runProcess(bodyres) {
     console.log('Retrieved article:', article);
 
     // Extract the content and date updated from the article
-    const { content, date_updated } = article.data;
+    const { text_to_speech, date_updated } = article.data;
 
     // Check the content length and split if necessary
-    if (content.length > 4096) {
-      const chunks = splitText(content, 4096);
+    if (text_to_speech.length > 4096) {
+      const chunks = splitText(text_to_speech, 4096);
       for (const chunk of chunks) {
         await generateAndUploadSpeech(chunk, date_updated);
       }
     } else {
-      await generateAndUploadSpeech(content, date_updated);
+      await generateAndUploadSpeech(text_to_speech, date_updated);
     }
   } catch (error) {
     console.error('Error in processing article and generating speech:', error);
