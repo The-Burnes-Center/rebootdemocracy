@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
+import { JSDOM } from 'jsdom';
 
 // Configuration variables
 const DIRECTUS_URL = process.env.DIRECTUS_URL
@@ -11,46 +12,6 @@ const openai = new OpenAI({
 });
 
 
-// Helper function to split text into chunks by paragraphs or sentences
-function splitText(text, maxLength) {
-  const sentenceEndings = ['.', '!', '?']; // Sentence ending characters
-  let chunks = [];
-  let startIndex = 0;
-
-  while (startIndex < text.length) {
-    let endIndex = Math.min(startIndex + maxLength, text.length);
-    let lastBreakIndex = startIndex; // Store the last index of a sentence or paragraph break
-
-    // Look for the closest sentence or paragraph break within the current chunk
-    for (let i = startIndex; i < endIndex; i++) {
-      if (text[i] === '\n' || (sentenceEndings.includes(text[i]) && text[i + 1] && text[i + 1] === ' ')) {
-        lastBreakIndex = i + 1;
-      }
-    }
-    
-    // If a sentence or paragraph ending was found, use it as the split point
-    if (lastBreakIndex > startIndex) {
-      chunks.push(text.substring(startIndex, lastBreakIndex));
-      startIndex = lastBreakIndex;
-    } else {
-      // If no suitable break was found within the maxLength, look for the next possible break
-      let nextBreakIndex = text.indexOf('\n', endIndex) || text.length;
-      for (const ending of sentenceEndings) {
-        let nextSentenceIndex = text.indexOf(ending + ' ', endIndex);
-        if (nextSentenceIndex !== -1 && (nextSentenceIndex < nextBreakIndex || nextBreakIndex === -1)) {
-          nextBreakIndex = nextSentenceIndex + 1;
-        }
-      }
-
-      // Split at nextBreakIndex or at the end of text if no break is found
-      nextBreakIndex = nextBreakIndex !== -1 ? nextBreakIndex : text.length;
-      chunks.push(text.substring(startIndex, nextBreakIndex));
-      startIndex = nextBreakIndex;
-    }
-  }
-
-  return chunks;
-}
 
 // Function to make requests to Directus API
 async function directusFetch(endpoint, method = 'GET', body = null) {
@@ -95,13 +56,15 @@ async function runProcess(bodyres) {
 
     // Extract the content and date updated from the article
     const { text_to_speech, date_updated } = article.data;
+    
+    let textContent = extractTextFromHTML(text_to_speech);
 
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
-
+    
     // Check the content length and split if necessary
-    if (text_to_speech.length > 4096) {
-      const chunks = splitText(text_to_speech, 4096);
+    if (textContent.length > 4096) {
+      const chunks = splitText(textContent, 4096);
 
    // Process each chunk to generate speech
    for (const chunk of chunks) {
@@ -194,58 +157,72 @@ export default async (req, context) => {
 };
 
 
-//////
+///// HELPER ///// 
+// Function to extract text from HTML
+function extractTextFromHTML(html) {
+  // Parse the HTML content
+  const dom = new JSDOM(html);
+  const document = dom.window.document;
 
-// async function generateAndUploadSpeech(text,date_updated,bodyres) {
-//   const response = await openai.audio.speech.create({
-//     model: "tts-1-hd",
-//     voice: "shimmer",
-//     input: text,
-//   });
+  // Function to walk through DOM nodes and collect text
+  function walkNode(node, text = '') {
+    if (node.nodeType === 3) { // Text node
+      text += node.textContent;
+    } else if (node.nodeType === 1) { // Element
+      if (['P', 'BR', 'DIV', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
+        text += node.textContent + '\n'; // Add a newline for block-level elements
+      } else {
+        // Otherwise recursively check for text nodes
+        for (const childNode of node.childNodes) {
+          text = walkNode(childNode, text);
+        }
+      }
+    }
+    return text;
+  }
 
-//   // Check the response is OK
-//   if (response.status !== 200) {
-//     throw new Error('Failed to generate speech from OpenAI.');
-//   }
+  // Start the walk from the body element
+  return walkNode(document.body);
+}
 
-//   // Collect stream data into a buffer
-//   const chunks = [];
-//   for await (const chunk of response.body) {
-//     chunks.push(chunk instanceof Buffer ? chunk : Buffer.from(chunk));
-//   }
-//   const buffer = Buffer.concat(chunks);
 
-//   // Create form-data instance
-//   const form = new FormData();
-//   form.append('file', buffer, {
-//     filename: bodyres.collection + '_' + bodyres.id +'_'+date_updated+'.mp3', // The filename
-//     contentType: 'audio/mpeg', // The MIME type of the audio
-//     knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
-//   });
+// Helper function to split text into chunks by paragraphs or sentences
+function splitText(text, maxLength) {
+  const sentenceEndings = ['.', '!', '?']; // Sentence ending characters
+  let chunks = [];
+  let startIndex = 0;
 
-//   const directusFileEndpoint = DIRECTUS_URL + '/files';
+  while (startIndex < text.length) {
+    let endIndex = Math.min(startIndex + maxLength, text.length);
+    let lastBreakIndex = startIndex; // Store the last index of a sentence or paragraph break
 
-//   // Prepare the request headers with the Bearer token
-//   const headers = {
-//     'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN, // replace with an actual token
-//   };
+    // Look for the closest sentence or paragraph break within the current chunk
+    for (let i = startIndex; i < endIndex; i++) {
+      if (text[i] === '\n' || (sentenceEndings.includes(text[i]) && text[i + 1] && text[i + 1] === ' ')) {
+        lastBreakIndex = i + 1;
+      }
+    }
+    
+    // If a sentence or paragraph ending was found, use it as the split point
+    if (lastBreakIndex > startIndex) {
+      chunks.push(text.substring(startIndex, lastBreakIndex));
+      startIndex = lastBreakIndex;
+    } else {
+      // If no suitable break was found within the maxLength, look for the next possible break
+      let nextBreakIndex = text.indexOf('\n', endIndex) || text.length;
+      for (const ending of sentenceEndings) {
+        let nextSentenceIndex = text.indexOf(ending + ' ', endIndex);
+        if (nextSentenceIndex !== -1 && (nextSentenceIndex < nextBreakIndex || nextBreakIndex === -1)) {
+          nextBreakIndex = nextSentenceIndex + 1;
+        }
+      }
 
-//   // Merge the headers from form-data with Directus token
-//   const finalHeaders = { ...form.getHeaders(), ...headers };
+      // Split at nextBreakIndex or at the end of text if no break is found
+      nextBreakIndex = nextBreakIndex !== -1 ? nextBreakIndex : text.length;
+      chunks.push(text.substring(startIndex, nextBreakIndex));
+      startIndex = nextBreakIndex;
+    }
+  }
 
-//   // Make the request to Directus to upload the file
-//   const fileResponse = await fetch(directusFileEndpoint, {
-//     method: 'POST',
-//     body: form,
-//     headers: finalHeaders
-//   });
-
-//   if (!fileResponse.ok) {
-//     const errorBody = await fileResponse.text();
-//     throw new Error(`Error uploading file: ${errorBody}`);
-//   }
-
-//   const directusResponse = await fileResponse.json();
-
-//   return directusResponse;
-// }
+  return chunks;
+}
