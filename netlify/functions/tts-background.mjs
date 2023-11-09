@@ -66,6 +66,6 @@ export default async (req, context) => {
               }
               
               // Call the function with your desired text
-              generateAndUploadSpeech(bodyres.body.text).catch(console.error);
+              // generateAndUploadSpeech(bodyres.body.text).catch(console.error);
 
 };
