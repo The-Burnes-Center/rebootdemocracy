@@ -7,7 +7,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@directus/sdk": "^9.5.2",
+    "@directus/sdk": "^9.14.2",
     "@netlify/functions": "^1.6.0",
     "@vueuse/head": "^1.1.23",
     "axios": "^0.24.0",
