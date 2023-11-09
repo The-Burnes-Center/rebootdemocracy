@@ -23,6 +23,7 @@
   --teal-action: #0BCAC4;
   --teal-text: rgba(4, 120, 127, 1);
   --nu-red: #C8102E;
+  --dark-grey: rgba(91, 88, 85, 1);
   --featured-box-height: 10px;
 }
 body{
@@ -37,9 +38,12 @@ h1.eyebrow.blue{
 }
 
 h1{
-  font-size: 50px;
-  font-family: 'Space Mono', monospace;
-  margin: 2rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 62.5px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: -2.5px;
 }
 /* h2.eyebrow.peach{
   color: var(--peach-text);
@@ -328,13 +332,13 @@ a.btn:hover{
   
   width: 100%; /* This will make sure the header extends full width */
   display: flex;
-  background-color: #DAFAEB;
+  padding: 80px 43px 40px 43px;
   flex-direction: column;
-  justify-content: center; /* This centers any content inside your header horizontally */
-  align-items: center; /* This centers any content inside your header vertically */
-  text-align: center; /* Centers the text horizontally */
-  padding-top: 80px; 
-  
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  background: var(--teal-light, #DAFAEB);
+
 }
 .blog-hero .eyebrow {
   max-width: 1100px; 
@@ -342,50 +346,139 @@ a.btn:hover{
   }
 .blog-img
 {
-  background-size: cover; /* This will ensure that your background covers the header area */
-  background-position: center; 
-  max-width: 1100px; /* Maximum width of the content */
-  width: 100%; /* Maximum width of the content */
-  height:534.5px;
-  
 
+  height: 500px;
+  max-width: 1100px;
+  width:1100px;
+  object-fit: cover;
 }
 .blog-details {
   max-width: 1100px; /* Maximum width of the content */
   width: 100%; /* Makes the content fill the container up to the maximum width */
   text-align: left; /* Centers the text within the content container */
-  font-size: 2em; /* Example size, adjust as needed */
-  font-weight: bold; /* Example font weight, adjust as needed */
   margin: 0; /* Removes default margin */
-  padding: 0.5em; /* Adds padding within the content container */
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
 }
 
+p.excerpt{
+  color: var(--black, #000);
+  font-family: Red Hat Text;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 40px;
+}
 .blog-body
 {
-  margin: 0 auto;
-  text-align: left; /* Centers the text horizontally */
-  max-width: 750px; /* Maximum width of the content */
-  width: 100%; /* Makes the content fill the container up to the maximum width */
-  padding-top: 110px;
-  padding-bottom: 170px;
-  line-height: 35.2px;
+  display: flex;
+  padding: 80px 0px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
 }
-.blog-body h3 
-{
-  padding-top:30px;
-  padding-bottom:14px;
+.blog-content {
+  display:flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.blog-content > *{
+  max-width: 850px;
+  flex: 1 0 0;
   
 }
+.blog-content > p{
+  color: var(--black, #000);
+  /* Body-Blog/Desktop */
+  font-family: Red Hat Text;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 38px;
+}
+.blog-content > p > a {
+  color: var(--black, #000);
 
-.blog-body a
-{
+/* Body-Blog/Desktop */
+font-family: Red Hat Text;
+font-size: 22px;
+font-style: normal;
+font-weight: 500;
+line-height: 160%;
+text-decoration-line: underline;
+}
+.blog-content > h3 {
+  color: var(--black, #000);
+
+/* H-m/Desktop */
+font-family: Space Grotesk;
+font-size: 40px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+letter-spacing: -1.6px;
+}
+.hero-author-sm{
+  flex-direction: row;
+  display: flex;
+  width: 1100px;
+  padding-bottom: 0px;
+  align-items:center;
+  justify-content: space-between;
+  gap: 40px;
+
+}
+.sm-tray{
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.sm-tray i{
+  display: flex;
+  font-size: 24px;
+  justify-content: center;
+  align-items: center;
   color: #000000;
 }
-.blog-body p
-{
-  padding-top: 10px;
-  padding-bottom: 10px;
- 
+.sm-tray a{
+  text-decoration: none;
+}
+.author-item{
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+p.author-name{
+  font-family: 'Space Grotesk', sans-serif;
+font-size: 22.5px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+}
+a.author-bio{
+
+font-family: Red Hat Text !important;
+font-size: 20px !important;
+font-style: normal !important;
+font-weight: 500 !important;
+line-height: 140% !important;
+color: var(--dark-grey);
+text-decoration: none;
+border-bottom: 1px solid #000000;
+}
+img.author-headshot{
+  height:64px;
+  width:64px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
 }
 .lede{
   padding-top: 65px;
@@ -529,12 +622,6 @@ h5.eyebrow.peach{
 }
 
 @media (max-width: 768px) {
-
-  .blog-hero .eyebrow {
-    
-    font-size: 0.6rem;
-    margin-bottom: 0px; 
-    }
 
   .hero{
     height: 100%;

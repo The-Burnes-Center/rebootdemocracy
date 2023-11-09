@@ -55,7 +55,8 @@ export default {
           limit: -1,
           
           fields: ["*.*",
-          'authors.team_id.*'
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*'
           ],
           filter: {
             slug: {
@@ -99,27 +100,33 @@ export default {
 <header-comp></header-comp>
 <div class="blog-hero">
 
-  <div v-if="postData[0].image" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+postData[0].image.id+ ')' }">
-    
-  </div>
-  <h5 class="eyebrow">{{postData[0].image.title}}</h5>
+  <img class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id">
   <div class="blog-details">
-    <h1 v-if="postData[0].title.length < 80">{{postData[0].title}}</h1>
-    <h1 v-if="postData[0].title.length > 81" class="small-title">{{postData[0].title}}</h1>
+    <h1>{{postData[0].title}}</h1>
+    <p class="excerpt">{{postData[0].excerpt}}</p>
+    <div v-for="(author,i) in postData[0].authors">
+      <div class="hero-author-sm">
+        <div class="author-item">
+          <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+          <div class="author-details">
+            <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+            <a class="author-bio" :href="author.team_id.Link_to_bio">Read Bio</a>
+          </div>
 
-    <div class="lede">
-   <div v-for="(author,i) in postData[0].authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="i<postData[0].authors.length-1">,</span>
-    <a class="btn btn-small " :href="author.team_id.Link_to_bio">Bio <i class="fa-regular fa-arrow-right"></i></a>
-    
-  </div></div>
-   
+        </div>
+        <div class="sm-tray">
+          <a target="_blank" :href="'http://twitter.com/share?url=https://rebootdemocracy.ai/blog/' + postData[0].slug"><i class="fa-brands fa-square-x-twitter"></i></a>
+          <a target="_blank" :href="'https://www.facebook.com/sharer/sharer.php?u=https://rebootdemocracy.ai/blog/' + postData[0].slug"><i class="fa-brands fa-facebook"></i></a>
+          <a target="_blank" :href="'https://linkedin.com/shareArticle?url=https://rebootdemocracy.ai/blog/' + postData[0].slug + '&title=' + postData[0].title"><i class="fa-brands fa-linkedin"></i></a>
+          <!-- <a><i class="fa-solid fa-link"></i></a> -->
+        </div>
+      </div>
+    </div>
   </div>
-
-  
 </div>
 
-<div class="blog-body" v-html="postData[0].content">
-
+<div class="blog-body">
+  <div class="blog-content" v-html="postData[0].content"></div>
 </div>
 
   <!-- Footer Component -->
