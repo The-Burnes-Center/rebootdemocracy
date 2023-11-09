@@ -42,11 +42,11 @@ export default async (req, context) => {
                   knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
                 });
               
-                const directusFileEndpoint = process.env.DIRECTUS_URL+'/files';
+                const directusFileEndpoint = DIRECTUS_URL+'/files';
               
                 // Prepare the request headers with the Bearer token
                 const headers = {
-                  'Authorization': 'Bearer '+process.env.DIRECTUS_AUTH_TOKEN, // replace with an actual token
+                  'Authorization': 'Bearer '+DIRECTUS_AUTH_TOKEN, // replace with an actual token
                 };
               
                 // Merge the headers from form-data with Directus token
