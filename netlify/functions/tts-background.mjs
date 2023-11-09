@@ -5,6 +5,7 @@ import fetch from 'node-fetch';
 export default async (req, context) => {
         const bodyres = await req.json();
         console.log(bodyres);
+        console.log(bodyres.slug);
 
         
         const openai = new OpenAI({
@@ -33,7 +34,7 @@ export default async (req, context) => {
                 // Create form-data instance
                 const form = new FormData();
                 form.append('file', buffer, {
-                  filename: bodyres.body.slug+'.mp3', // The filename
+                  filename: bodyres.slug+'.mp3', // The filename
                   contentType: 'audio/mpeg', // The MIME type of the audio
                   knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
                 });
@@ -66,6 +67,6 @@ export default async (req, context) => {
               }
               
               // Call the function with your desired text
-              // generateAndUploadSpeech(bodyres.body.text).catch(console.error);
+              generateAndUploadSpeech(bodyres.content).catch(console.error);
 
 };
