@@ -87,7 +87,7 @@ async function readDirectusItem(collection, itemId) {
 }
 
 
-async function generateAndUploadSpeech(text) {
+async function generateAndUploadSpeech(text,date_updated,bodyres) {
   const response = await openai.audio.speech.create({
     model: "tts-1-hd",
     voice: "shimmer",
@@ -109,7 +109,7 @@ async function generateAndUploadSpeech(text) {
   // Create form-data instance
   const form = new FormData();
   form.append('file', buffer, {
-    filename: bodyres.collection + '_' + bodyres.id + '.mp3', // The filename
+    filename: bodyres.collection + '_' + bodyres.id +'_'+date_updated+'.mp3', // The filename
     contentType: 'audio/mpeg', // The MIME type of the audio
     knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
   });
@@ -157,10 +157,10 @@ async function runProcess(bodyres) {
 
       for (const chunk of chunks) {
         console.log(chunk.length);
-        await generateAndUploadSpeech(chunk, date_updated);
+        await generateAndUploadSpeech(chunk, date_updated, bodyres);
       }
     } else {
-      await generateAndUploadSpeech(text_to_speech, date_updated);
+      await generateAndUploadSpeech(text_to_speech, date_updated, bodyres);
     }
   } catch (error) {
     console.error('Error in processing article and generating speech:', error);
