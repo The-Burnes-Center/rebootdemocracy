@@ -141,7 +141,9 @@ async function runProcess(bodyres) {
     // Check the content length and split if necessary
     if (text_to_speech.length > 4096) {
       const chunks = splitText(text_to_speech, 4096);
+
       for (const chunk of chunks) {
+        console.log(chunk.length);
         await generateAndUploadSpeech(chunk, date_updated);
       }
     } else {
