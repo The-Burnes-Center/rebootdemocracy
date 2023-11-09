@@ -160,12 +160,15 @@ export default async (req, context) => {
 ///// HELPER ///// 
 // Function to extract text from HTML
 function extractTextFromHTML(html) {
-  // Parse the HTML content
   const dom = new JSDOM(html);
   const document = dom.window.document;
 
-  // Function to walk through DOM nodes and collect text
   function walkNode(node, text = '') {
+    // Skip script, style, img, and figcaption tags
+    if (node.nodeType === 1 && ['SCRIPT', 'STYLE', 'IMG', 'FIGCAPTION'].includes(node.tagName)) {
+      return text;
+    }
+
     if (node.nodeType === 3) { // Text node
       text += node.textContent;
     } else if (node.nodeType === 1) { // Element
@@ -181,10 +184,8 @@ function extractTextFromHTML(html) {
     return text;
   }
 
-  // Start the walk from the body element
   return walkNode(document.body);
 }
-
 
 // Helper function to split text into chunks by paragraphs or sentences
 function splitText(text, maxLength) {
