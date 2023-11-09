@@ -106,7 +106,7 @@ export default async (req, context) => {
               }
               
               // Function to upload speech (placeholder, replace with your actual implementation)
-              async function generateAndUploadSpeech(text) {
+              async function generateAndUploadSpeech(text,date_updated) {
                 const response = await openai.audio.speech.create({
                   model: "tts-1-hd",
                   voice: "shimmer",
@@ -128,7 +128,7 @@ export default async (req, context) => {
                 // Create form-data instance
                 const form = new FormData();
                 form.append('file', buffer, {
-                  filename: bodyres.collection+'_'+bodyres.id+'.mp3', // The filename
+                  filename: bodyres.collection+'_'+bodyres.id+'_'+date_updated+'.mp3', // The filename
                   contentType: 'audio/mpeg', // The MIME type of the audio
                   knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
                 });
@@ -169,9 +169,9 @@ export default async (req, context) => {
                   
                   // Extract the content field from the article
                   const content = article.data.text_to_speech; // Adjust 'content' to the field you want
-              
+                  const date_updated = article.data.date_updated; // Adjust 'content' to the field you want
                   // Call the next function with the article content
-                  await generateAndUploadSpeech(content);
+                  await generateAndUploadSpeech(content,date_updated);
                 } catch (error) {
                   console.error('Error in process:', error);
                 }
