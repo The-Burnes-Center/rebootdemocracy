@@ -166,12 +166,26 @@ export default async (req, context) => {
                   // Read an item from the 'articles' collection with an ID of 5
                   const article = await readDirectusItem(bodyres.collection, bodyres.id);
                   console.log('Retrieved article:', article);
-                  
-                  // Extract the content field from the article
-                  const content = article.data.text_to_speech; // Adjust 'content' to the field you want
-                  const date_updated = article.data.date_updated; // Adjust 'content' to the field you want
-                  // Call the next function with the article content
-                  await generateAndUploadSpeech(content,date_updated);
+                  try {
+                    // Read an article from the 'articles' collection with the provided ID
+                    const article = await readDirectusItem('articles', articleId);
+                    console.log('Retrieved article:', article);
+                
+                    // Extract the content and date updated from the article
+                    const { content, date_updated } = article.data;
+                
+                    // Check the content length and split if necessary
+                    if (content.length > 4096) {
+                      const chunks = splitText(content, 4096);
+                      for (const chunk of chunks) {
+                        await generateAndUploadSpeech(chunk, date_updated);
+                      }
+                    } else {
+                      await generateAndUploadSpeech(content, date_updated);
+                    }
+                  } catch (error) {
+                    console.error('Error in processing article and generating speech:', error);
+                  }
                 } catch (error) {
                   console.error('Error in process:', error);
                 }
@@ -179,6 +193,37 @@ export default async (req, context) => {
               
               // Start the process
               runProcess();
+
+
+              //// hELPER FUNCTION 
+
+              // Helper function to split text into chunks by paragraphs or sentences
+function splitText(text, maxLength) {
+  const sentenceEndings = /[.!?]\s/; // Define sentence ending characters
+  let chunks = [];
+  let startIndex = 0;
+  
+  while (startIndex < text.length) {
+    let endIndex = startIndex + maxLength;
+    if (endIndex < text.length) {
+      // Find the last sentence ending before the maxLength
+      let lastSentenceEnd = text.lastIndexOf(sentenceEndings, endIndex) + 1;
+      // If there's no sentence ending, find the next one
+      if (lastSentenceEnd <= startIndex) {
+        lastSentenceEnd = text.indexOf(sentenceEndings, endIndex) + 1 || text.length;
+      }
+      // Add the chunk and increment the startIndex
+      chunks.push(text.substring(startIndex, lastSentenceEnd));
+      startIndex = lastSentenceEnd;
+    } else {
+      // Add the rest of the text as the last chunk
+      chunks.push(text.substring(startIndex));
+      break;
+    }
+  }
+
+  return chunks;
+}
 
 
               /////////////
