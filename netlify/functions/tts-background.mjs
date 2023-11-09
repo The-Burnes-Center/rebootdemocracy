@@ -2,7 +2,6 @@ import OpenAI from 'openai';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 
-
 // Configuration variables
 const DIRECTUS_URL = process.env.DIRECTUS_URL
 const DIRECTUS_AUTH_TOKEN = process.env.DIRECTUS_AUTH_TOKEN
@@ -87,7 +86,52 @@ async function readDirectusItem(collection, itemId) {
 }
 
 
-async function generateAndUploadSpeech(text,date_updated,bodyres) {
+// Main function to run the process
+async function runProcess(bodyres) {
+  try {
+    // Read an item from the Directus collection with the specified ID
+    const article = await readDirectusItem(bodyres.collection, bodyres.id);
+    console.log('Retrieved article:', article);
+
+    // Extract the content and date updated from the article
+    const { text_to_speech, date_updated } = article.data;
+
+    // An array to hold all speech buffers
+    let allSpeechBuffers = [];
+
+    // Check the content length and split if necessary
+    if (text_to_speech.length > 4096) {
+      const chunks = splitText(text_to_speech, 4096);
+
+   // Process each chunk to generate speech
+   for (const chunk of chunks) {
+    console.log(chunk.length);
+    const buffer = await generateSpeech(chunk);
+    allSpeechBuffers.push(buffer);
+  }
+
+      // for (const chunk of chunks) {
+      //   console.log(chunk.length);
+      //   await generateAndUploadSpeech(chunk, date_updated, bodyres);
+      // }
+    } else {
+      // await generateAndUploadSpeech(text_to_speech, date_updated, bodyres);
+      const buffer = await generateSpeech(content);
+      allSpeechBuffers.push(buffer);
+    }
+     // Concatenate all speech buffers into a single buffer
+     const combinedBuffer = Buffer.concat(allSpeechBuffers);
+
+      // Upload combined buffer
+    const uploadResult = await uploadBuffer(combinedBuffer, bodyres, date_updated);
+    return uploadResult;
+
+  } catch (error) {
+    console.error('Error in processing article and generating speech:', error);
+  }
+}
+
+async function generateSpeech(text) {
   const response = await openai.audio.speech.create({
     model: "tts-1-hd",
     voice: "shimmer",
@@ -99,19 +143,21 @@ async function generateAndUploadSpeech(text,date_updated,bodyres) {
     throw new Error('Failed to generate speech from OpenAI.');
   }
 
-  // Collect stream data into a buffer
+  // Collect stream data into a buffer for the chunk
   const chunks = [];
   for await (const chunk of response.body) {
     chunks.push(chunk instanceof Buffer ? chunk : Buffer.from(chunk));
   }
-  const buffer = Buffer.concat(chunks);
+  return Buffer.concat(chunks); // Return the single speech buffer for one chunk
+}
 
+async function uploadBuffer(buffer, bodyres, date_updated) {
   // Create form-data instance
   const form = new FormData();
   form.append('file', buffer, {
-    filename: bodyres.collection + '_' + bodyres.id +'_'+date_updated+'.mp3', // The filename
-    contentType: 'audio/mpeg', // The MIME type of the audio
-    knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
+    filename: bodyres.collection + '_' + bodyres.id + '_' + date_updated + '.mp3',
+    contentType: 'audio/mpeg',
+    knownLength: buffer.length
   });
 
   const directusFileEndpoint = DIRECTUS_URL + '/files';
@@ -141,34 +187,65 @@ async function generateAndUploadSpeech(text,date_updated,bodyres) {
   return directusResponse;
 }
 
-// Main function to run the process
-async function runProcess(bodyres) {
-  try {
-    // Read an item from the Directus collection with the specified ID
-    const article = await readDirectusItem(bodyres.collection, bodyres.id);
-    console.log('Retrieved article:', article);
-
-    // Extract the content and date updated from the article
-    const { text_to_speech, date_updated } = article.data;
-
-    // Check the content length and split if necessary
-    if (text_to_speech.length > 4096) {
-      const chunks = splitText(text_to_speech, 4096);
-
-      for (const chunk of chunks) {
-        console.log(chunk.length);
-        await generateAndUploadSpeech(chunk, date_updated, bodyres);
-      }
-    } else {
-      await generateAndUploadSpeech(text_to_speech, date_updated, bodyres);
-    }
-  } catch (error) {
-    console.error('Error in processing article and generating speech:', error);
-  }
-}
-
 export default async (req, context) => {
   const bodyres = await req.json();
   console.log(bodyres);
   await runProcess(bodyres); // Start the process using the body of the request
 };
+
+
+//////
+
+// async function generateAndUploadSpeech(text,date_updated,bodyres) {
+//   const response = await openai.audio.speech.create({
+//     model: "tts-1-hd",
+//     voice: "shimmer",
+//     input: text,
+//   });
+
+//   // Check the response is OK
+//   if (response.status !== 200) {
+//     throw new Error('Failed to generate speech from OpenAI.');
+//   }
+
+//   // Collect stream data into a buffer
+//   const chunks = [];
+//   for await (const chunk of response.body) {
+//     chunks.push(chunk instanceof Buffer ? chunk : Buffer.from(chunk));
+//   }
+//   const buffer = Buffer.concat(chunks);
+
+//   // Create form-data instance
+//   const form = new FormData();
+//   form.append('file', buffer, {
+//     filename: bodyres.collection + '_' + bodyres.id +'_'+date_updated+'.mp3', // The filename
+//     contentType: 'audio/mpeg', // The MIME type of the audio
+//     knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
+//   });
+
+//   const directusFileEndpoint = DIRECTUS_URL + '/files';
+
+//   // Prepare the request headers with the Bearer token
+//   const headers = {
+//     'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN, // replace with an actual token
+//   };
+
+//   // Merge the headers from form-data with Directus token
+//   const finalHeaders = { ...form.getHeaders(), ...headers };
+
+//   // Make the request to Directus to upload the file
+//   const fileResponse = await fetch(directusFileEndpoint, {
+//     method: 'POST',
+//     body: form,
+//     headers: finalHeaders
+//   });
+
+//   if (!fileResponse.ok) {
+//     const errorBody = await fileResponse.text();
+//     throw new Error(`Error uploading file: ${errorBody}`);
+//   }
+
+//   const directusResponse = await fileResponse.json();
+
+//   return directusResponse;
+// }
