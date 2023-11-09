@@ -2,11 +2,14 @@ import OpenAI from 'openai';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 
+
 export default async (req, context) => {
         const bodyres = await req.json();
         console.log(bodyres);
-        console.log(bodyres.slug);
 
+              // Configuration variables
+              const DIRECTUS_URL = process.env.DIRECTUS_URL 
+              const DIRECTUS_AUTH_TOKEN = process.env.DIRECTUS_AUTH_TOKEN 
         
         const openai = new OpenAI({
                 apiKey: process.env.OPENAI_API_KEY,
@@ -34,7 +37,7 @@ export default async (req, context) => {
                 // Create form-data instance
                 const form = new FormData();
                 form.append('file', buffer, {
-                  filename: bodyres.slug+'.mp3', // The filename
+                  filename: bodyres.collection+'_'+bodyres.id+'.mp3', // The filename
                   contentType: 'audio/mpeg', // The MIME type of the audio
                   knownLength: buffer.length // Optional, necessary for some setups to calculate Content-Length
                 });
@@ -66,7 +69,72 @@ export default async (req, context) => {
                 return directusResponse;
               }
               
+
+
+              
+              // Function to make requests to Directus API
+              async function directusFetch(endpoint, method = 'GET', body = null) {
+                const url = `${DIRECTUS_URL}${endpoint}`;
+                const headers = {
+                  'Authorization': `Bearer ${DIRECTUS_AUTH_TOKEN}`,
+                  'Content-Type': 'application/json',
+                };
+              
+                const options = {
+                  method,
+                  headers,
+                };
+              
+                if (body) {
+                  options.body = JSON.stringify(body);
+                }
+              
+                const response = await fetch(url, options);
+              
+                if (!response.ok) {
+                  const errorDetails = await response.text();
+                  throw new Error(`Directus API request failed: ${response.status} - ${errorDetails}`);
+                }
+              
+                return response.json();
+              }
+              
+              // Function to read an item from a collection by ID
+              async function readDirectusItem(collection, itemId) {
+                const endpoint = `/items/${collection}/${itemId}`;
+                return directusFetch(endpoint);
+              }
+              
+              // Function to upload speech (placeholder, replace with your actual implementation)
+              async function generateAndUploadSpeech(text) {
+                console.log('Uploading speech with text:', text);
+                // Your generateAndUploadSpeech implementation here...
+              }
+              
+              // Main function to run the process
+              async function runProcess() {
+                try {
+                  // Read an item from the 'articles' collection with an ID of 5
+                  const article = await readDirectusItem(bodyres.collection, bodyres.id);
+                  console.log('Retrieved article:', article);
+                  
+                  // Extract the content field from the article
+                  const content = article.data.text_to_speech; // Adjust 'content' to the field you want
+              
+                  // Call the next function with the article content
+                  await generateAndUploadSpeech(content);
+                } catch (error) {
+                  console.error('Error in process:', error);
+                }
+              }
+              
+              // Start the process
+              runProcess();
+
               // Call the function with your desired text
-              generateAndUploadSpeech(bodyres.content).catch(console.error);
+              // generateAndUploadSpeech(bodyres.content).catch(console.error);
+
+              /////////////
+              
 
 };
