@@ -14,26 +14,39 @@ const openai = new OpenAI({
 
 // Helper function to split text into chunks by paragraphs or sentences
 function splitText(text, maxLength) {
-  const sentenceEndings = /[.!?]\s/; // Define sentence ending characters
+  const sentenceEndings = ['.', '!', '?']; // Sentence ending characters
   let chunks = [];
   let startIndex = 0;
 
   while (startIndex < text.length) {
-    let endIndex = startIndex + maxLength;
-    if (endIndex < text.length) {
-      // Find the last sentence ending before the maxLength
-      let lastSentenceEnd = text.lastIndexOf(sentenceEndings, endIndex) + 1;
-      // If there's no sentence ending, find the next one
-      if (lastSentenceEnd <= startIndex) {
-        lastSentenceEnd = text.indexOf(sentenceEndings, endIndex) + 1 || text.length;
+    let endIndex = Math.min(startIndex + maxLength, text.length);
+    let lastBreakIndex = startIndex; // Store the last index of a sentence or paragraph break
+
+    // Look for the closest sentence or paragraph break within the current chunk
+    for (let i = startIndex; i < endIndex; i++) {
+      if (text[i] === '\n' || (sentenceEndings.includes(text[i]) && text[i + 1] && text[i + 1] === ' ')) {
+        lastBreakIndex = i + 1;
       }
-      // Add the chunk and increment the startIndex
-      chunks.push(text.substring(startIndex, lastSentenceEnd));
-      startIndex = lastSentenceEnd;
+    }
+    
+    // If a sentence or paragraph ending was found, use it as the split point
+    if (lastBreakIndex > startIndex) {
+      chunks.push(text.substring(startIndex, lastBreakIndex));
+      startIndex = lastBreakIndex;
     } else {
-      // Add the rest of the text as the last chunk
-      chunks.push(text.substring(startIndex));
-      break;
+      // If no suitable break was found within the maxLength, look for the next possible break
+      let nextBreakIndex = text.indexOf('\n', endIndex) || text.length;
+      for (const ending of sentenceEndings) {
+        let nextSentenceIndex = text.indexOf(ending + ' ', endIndex);
+        if (nextSentenceIndex !== -1 && (nextSentenceIndex < nextBreakIndex || nextBreakIndex === -1)) {
+          nextBreakIndex = nextSentenceIndex + 1;
+        }
+      }
+
+      // Split at nextBreakIndex or at the end of text if no break is found
+      nextBreakIndex = nextBreakIndex !== -1 ? nextBreakIndex : text.length;
+      chunks.push(text.substring(startIndex, nextBreakIndex));
+      startIndex = nextBreakIndex;
     }
   }
 
