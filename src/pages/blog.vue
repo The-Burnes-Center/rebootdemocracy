@@ -103,7 +103,7 @@ export default {
   <img class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id">
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
-    <p class="excerpt">{{postData[0].excerpt}}</p>
+    <p class="excerpt" v-html="postData[0].excerpt"></p>
     <div v-for="(author,i) in postData[0].authors">
       <div class="hero-author-sm">
         <div class="author-item">
