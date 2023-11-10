@@ -42,7 +42,7 @@ async function directusFetch(endpoint, method = 'GET', body = null) {
 
 // Function to read an item from a collection by ID
 async function readDirectusItem(collection, itemId) {
-  const endpoint = `/items/${collection}/${itemId}`;
+  const endpoint = `/items/${collection}/${itemId}?fields=*.*,authors.team_id.*`;
   return directusFetch(endpoint);
 }
 
@@ -55,9 +55,9 @@ async function runProcess(bodyres) {
     console.log('Retrieved article:', article);
 
     // Extract the content and date updated from the article
-    const { content, slug, title   } = article.data;
+    const { content, slug, title , authors   } = article.data;
     
-    let textContent = title+' \n '+extractTextFromHTML(content);
+    let textContent = title+' \nby '+authors[0].First_Name+' '+authors[0].Last_Name+' \n '+extractTextFromHTML(content);
     
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
