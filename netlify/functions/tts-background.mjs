@@ -55,10 +55,10 @@ async function runProcess(bodyres) {
     console.log('Retrieved article:', article);
 
     // Extract the content and date updated from the article
-    const { text_to_speech, date_updated } = article.data;
+    const { content, slug, title   } = article.data;
     
-    let textContent = extractTextFromHTML(text_to_speech);
-
+    let textContent = title+' \n '+extractTextFromHTML(content);
+    
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
     
@@ -86,7 +86,7 @@ async function runProcess(bodyres) {
      const combinedBuffer = Buffer.concat(allSpeechBuffers);
 
       // Upload combined buffer
-    const uploadResult = await uploadBuffer(combinedBuffer, bodyres, date_updated);
+    const uploadResult = await uploadBuffer(combinedBuffer, slug);
     return uploadResult;
 
   } catch (error) {
@@ -114,11 +114,11 @@ async function generateSpeech(text) {
   return Buffer.concat(chunks); // Return the single speech buffer for one chunk
 }
 
-async function uploadBuffer(buffer, bodyres, date_updated) {
+async function uploadBuffer(buffer, slug) {
   // Create form-data instance
   const form = new FormData();
   form.append('file', buffer, {
-    filename: bodyres.collection + '_' + bodyres.id + '_' + date_updated + '.mp3',
+    filename: slug + '.mp3',
     contentType: 'audio/mpeg',
     knownLength: buffer.length
   });
