@@ -56,8 +56,8 @@ async function runProcess(bodyres) {
 
     // Extract the content and date updated from the article
     const { content, slug, title , authors   } = article.data;
-    
-    let textContent = title+' \nby '+authors[0].First_Name+' '+authors[0].Last_Name+' \n '+extractTextFromHTML(content);
+    console.log(authors[0].team_id.First_Name, authors[0].team_id.Last_Name)
+    let textContent = title+' \nby '+authors[0].team_id.First_Name+' '+authors[0].team_id.Last_Name+' \n '+extractTextFromHTML(content);
     
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
