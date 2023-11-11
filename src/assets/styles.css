@@ -381,6 +381,49 @@ p.excerpt{
   align-items: center;
 
 }
+.blog-body p:has(span.image-caption) {
+  margin-top: -25px;
+}
+.blog-body span.image-caption > * {
+  color: var(--black, #000);
+
+/* body-s/Desktop */
+font-family: Red Hat Text;
+font-size: 16px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+}
+
+.blog-body blockquote {
+  display: flex;
+  max-width: 750px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+  padding: 40px 0;
+}
+.blog-body img{
+  height: 534.5px;
+  max-width: 900px;
+  align-self: stretch;
+  object-fit: cover;
+}
+.blog-body blockquote p{
+  color: var(--teal-text, #04787F);
+font-family: Space Grotesk;
+font-size: 27px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+letter-spacing: -1.08px;
+padding: 0px 24px 0px 50px;
+}
+.blog-body blockquote p:nth-of-type(1){
+  border-left: 2px solid var(--black, #000);
+}
 .blog-content {
   display:flex;
   flex-direction: column;
