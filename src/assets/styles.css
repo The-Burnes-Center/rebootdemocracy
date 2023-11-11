@@ -327,7 +327,14 @@ a.btn:hover{
 
 }
 
-
+.blog-page-hero{
+  height: 30vh;
+  background-color: var(--teal-light);
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 .blog-hero {
   
   width: 100%; /* This will make sure the header extends full width */
@@ -346,10 +353,14 @@ a.btn:hover{
   }
 .blog-img
 {
-
   height: 500px;
   max-width: 1100px;
   width:1100px;
+  object-fit: cover;
+}
+img.blog-list-img{
+  height: 200px;
+  width:100%;
   object-fit: cover;
 }
 .blog-details {
@@ -476,6 +487,17 @@ font-weight: 700;
 line-height: normal;
 letter-spacing: -1.6px;
 }
+.rdblog-section h3{
+  color: var(--black, #000);
+
+  /* H-m/Desktop */
+  font-family: Space Grotesk;
+  font-size: 25px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: -1.6px;
+}
 .hero-author-sm{
   flex-direction: row;
   display: flex;
@@ -484,7 +506,6 @@ letter-spacing: -1.6px;
   align-items:center;
   justify-content: space-between;
   gap: 40px;
-
 }
 .sm-tray{
   display: flex;
@@ -501,6 +522,27 @@ letter-spacing: -1.6px;
 }
 .sm-tray a{
   text-decoration: none;
+}
+.author-list{
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+.author-list p.author-name{
+  font-family: 'Space Grotesk', sans-serif;
+font-size: 16px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+}
+.author-list img.author-headshot{
+  height:30px;
+  width:30px;
+}
+.author-list .author-item{
+  gap: 8px;
 }
 .author-item{
   display:flex;
@@ -539,6 +581,7 @@ img.author-headshot{
   font-size: 22.5px;
   
 }
+
 .rdblog-section{
   padding: 5em;
   display:flex;
@@ -674,8 +717,27 @@ h5.eyebrow.peach{
   height:fit-content !important;
   min-height: 500px;;
 }
-
+@media (max-width: 1200px) {
+  .hero-author-sm{
+    flex-direction: row;
+    display: flex;
+    width: 800px;
+    padding-bottom: 0px;
+    align-items:center;
+    justify-content: space-between;
+    gap: 40px;
+  }
+}
 @media (max-width: 768px) {
+  .hero-author-sm{
+    flex-direction: column;
+    display: flex;
+    width: 100%;
+    padding-bottom: 0px;
+    align-items:center;
+    justify-content: space-between;
+    gap: 40px;
+  }
   .blog-body img{
     height: 534.5px;
     max-width: unset;
