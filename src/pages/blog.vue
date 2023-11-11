@@ -104,15 +104,16 @@ export default {
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
     <p class="excerpt"> {{postData[0].excerpt}}</p>
-    <div v-for="(author,i) in postData[0].authors">
-      <div class="hero-author-sm">
-        <div class="author-item">
-          <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
-          <div class="author-details">
-            <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-            <a class="author-bio" :href="author.team_id.Link_to_bio">Read Bio</a>
-          </div>
 
+      <div class="hero-author-sm">
+      <div v-for="(author,i) in postData[0].authors">
+          <div class="author-item">
+            <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+            <div class="author-details">
+              <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+              <a class="author-bio" :href="author.team_id.Link_to_bio">Read Bio</a>
+            </div>
+          </div>
         </div>
         <div class="sm-tray">
           <a target="_blank" :href="'http://twitter.com/share?url=https://rebootdemocracy.ai/blog/' + postData[0].slug"><i class="fa-brands fa-square-x-twitter"></i></a>
@@ -120,7 +121,7 @@ export default {
           <a target="_blank" :href="'https://linkedin.com/shareArticle?url=https://rebootdemocracy.ai/blog/' + postData[0].slug + '&title=' + postData[0].title"><i class="fa-brands fa-linkedin"></i></a>
           <!-- <a><i class="fa-solid fa-link"></i></a> -->
         </div>
-      </div>
+
     </div>
   </div>
 </div>
