@@ -364,7 +364,7 @@ export default {
 <div class="hero">
   <div class="hero-content">
     <h1 class="eyebrow blue">{{indexData.title}}</h1>
-    <div class="title" v-html="indexData.subtitle"></div>
+    <h1 class="title" v-html="indexData.subtitle"></h1>
   </div>
   <div class="featured-section">
     <v-carousel  hide-delimiters v-model="model">
@@ -376,7 +376,7 @@ export default {
           <img v-if="!item.thumbnail"  src="..//assets/media-image.png">
         </div>
           <h4>{{item.title}}</h4>
-           <p v-if="item.authors == '' && item.type != 'Event'">{{item.description}}</p>
+           <p v-if="item.authors == '' && item.type != 'Event'" class="featured-event-description">{{item.description}}</p>
           <p v-if="item.type == 'Event'">{{formatDateTime(new Date(item.date))}}</p>
           <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
           <div class="speakers-list" v-show="item.speakers" v-html="item.speakers"></div>
