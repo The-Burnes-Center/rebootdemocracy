@@ -406,10 +406,8 @@ line-height: normal;
   padding: 40px 0;
 }
 .blog-body img{
-  height: 534.5px;
   max-width: 900px;
-  align-self: stretch;
-  object-fit: cover;
+  object-fit: contain;
 }
 .blog-body blockquote p{
   color: var(--teal-text, #04787F);
@@ -432,7 +430,6 @@ padding: 0px 24px 0px 50px;
 .blog-content > *{
   max-width: 850px;
   flex: 1 0 0;
-  
 }
 .blog-content > p{
   color: var(--black, #000);
@@ -442,6 +439,16 @@ padding: 0px 24px 0px 50px;
   font-style: normal;
   font-weight: 500;
   line-height: 38px;
+}
+.blog-content > ul{
+  color: var(--black, #000);
+  /* Body-Blog/Desktop */
+  font-family: Red Hat Text;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 38px;
+  margin-left: 50px;
 }
 .blog-content > p > a {
   color: var(--black, #000);
@@ -453,6 +460,10 @@ font-style: normal;
 font-weight: 500;
 line-height: 160%;
 text-decoration-line: underline;
+}
+.blog-content > p > em > a {
+  color: var(--black, #000);
+
 }
 .blog-content > h3 {
   color: var(--black, #000);
@@ -665,7 +676,12 @@ h5.eyebrow.peach{
 }
 
 @media (max-width: 768px) {
-
+  .blog-body img{
+    height: 534.5px;
+    max-width: unset;
+    width: 100%;
+    object-fit: cover;
+  }
   .hero{
     height: 100%;
     flex-direction: column;
