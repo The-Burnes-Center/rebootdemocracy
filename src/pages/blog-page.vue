@@ -173,7 +173,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
          limit: 10,
          fields: [
           '*.*',
-          'authors.team_id.*'
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*'
        ],
        sort:["-date"]
        
@@ -189,11 +190,11 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 }
 </script>
 
-<template >
-  <div class="workshop-hero blog-page-hero">
+<template>
     <!-- Header Component -->
     <header-comp></header-comp>
-    <h1>RebootDemocracy.AI blog</h1>
+  <div class="blog-page-hero">
+    <h1>Reboot Democracy Blog</h1>
   </div>
 
 
@@ -216,11 +217,20 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         "
         class="col-3"
         v-for="blog_item in blogData.slice().reverse()"
-      >        <div class="blog-item">
-          <div v-if="blog_item.image" class="blog-img" :style="{ backgroundImage: 'url(' + this.directus._url+'assets/'+blog_item.image.id+ ')' }"></div>
-          <h4>{{blog_item.title}}</h4>
-          
-          <p><span v-for="(author,i) in blog_item.authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="i<blog_item.authors.length-1">,</span></span></p>
+      >   
+      <div class="blog-item">
+          <div v-if="blog_item.image">  <img class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id"></div>
+          <h3>{{blog_item.title}}</h3>
+          <div class="author-list">
+            <div v-for="(author,i) in blog_item.authors">
+              <div class="author-item">
+                <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+                <div class="author-details">
+                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                </div>
+              </div>
+            </div>
+            </div>
         </div>
       </a> 
 
