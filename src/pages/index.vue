@@ -134,7 +134,7 @@ export default {
             ]
           },
          meta: 'total_count',
-         limit: 3,
+         limit: 2,
          sort:["date"],
          fields: [
           '*.*','thumbnail.*','event_series.general_events_series_id.*'
@@ -411,36 +411,25 @@ export default {
     <div class="upcoming-events-text">
         <h3>Reboot Democracy Lecture Series</h3>
         <div class="our-work-description"><p>Upcoming events in the Reboot Democracy Lecture Series</p></div>
-         <a class="btn btn-primary btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
+         <a class="btn btn-ghost btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
          <div class="col-50-home">
         <!-- <p>Join our mailing list</p> -->
          <!-- <input type="text" placeholder="" name="entry.250007595" aria-hidden=”true”> -->
-        <a href="/signup" class="btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+        <!-- <a href="/signup" class="btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a> -->
       </div>
     </div>
     <div class="upcoming-events-content">
       <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
 
               <img v-if="!resource_item.instructor && resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
-              <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
-              <div v-html="resource_item.speakers"></div>
-              <p>{{formatDateTime(new Date(resource_item.date))}}</p>
+              <div style="display:flex;flex-direction: column"><p><b>Speakers:&nbsp</b></p><div  v-html="resource_item.speakers"></div></div>
+              <p>{{formatDateOnly(new Date(resource_item.date))}}</p>
               <a class="btn btn-small btn-primary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Our Work Separator-->
-
-<div class="our-work-separator">
-  <div class="our-work-separator-text">
-    <h2 class="eyebrow white">{{indexData.our_work_title}}</h2>
-    <p>{{indexData.our_work_subtitle}}</p>
-  </div>
-</div>
-
 
 <!-- Equitable Engagement Lab Section-->
 
@@ -487,6 +476,32 @@ export default {
       </div>
     </div>
 </div>
+<!-- Our Experience Section -->
+
+<div id="about" class="mission-section">
+  <div class="mission-text">
+      <h2 class="eyebrow peach">{{indexData.experience_title}}</h2>
+      <h2>{{indexData.experience_heading}}</h2>
+      <div class="mission-description" v-html="indexData.experience_description"></div>
+        <!-- <a class="btn btn-medium btn-secondary">About Us</a> -->
+  </div>
+  <div class="mission-image">
+
+  </div>
+
+</div>
+
+
+<!-- Our Work Separator-->
+
+<div class="our-work-separator">
+  <div class="our-work-separator-text">
+    <h2 class="eyebrow white">{{indexData.our_work_title}}</h2>
+    <p>{{indexData.our_work_subtitle}}</p>
+  </div>
+</div>
+
+
 
 <!-- Our Past Engagements Section-->
 <div class="our-work-section">

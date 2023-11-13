@@ -54,12 +54,21 @@ h1{
   line-height: normal;
   letter-spacing: -2.5px;
 }
-/* h2.eyebrow.peach{
-  color: var(--peach-text);
+h2.eyebrow.peach{
+  color: var(--peach-text, #D63512);
+
+  /* Eyebrow/Desktop */
+  font-family: Space Mono;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
 }
 h5.eyebrow.peach-light{
   background-color: var(--peach-light);
-} */
+}
 h2.eyebrow{
   font-size: 14px;
 }
@@ -257,7 +266,7 @@ a.btn:hover{
   padding: 0 !important;
   gap:10px;
   justify-content: flex-start !important;
-  align-items: ce !important;
+  align-items: center !important;
 }
 
 .btn-peach-light{
@@ -856,6 +865,31 @@ background-repeat: no-repeat;
   align-items: flex-start;
   gap: 10px;
 }
+.mission-text h2{
+  color: var(--black, #000);
+
+  /* H-m/Desktop */
+  font-family: Space Grotesk;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: -1.6px;
+}
+.mission-description p,ol{
+  color: var(--black, #000);
+
+/* Body/Desktop */
+font-family: Red Hat Text;
+font-size: 20px;
+font-style: normal;
+font-weight: 500;
+line-height: 160%; /* 28px */
+}
+.mission-description ol{
+  margin-left: 40px;
+  padding: 1rem 0;
+}
 .mission-image{
   background-image: url("../assets/mission-image.png");
   width:30%;
@@ -941,33 +975,25 @@ background-repeat: no-repeat;
   gap: 1rem;
 }
 .upcoming-events-item {
-  width: 30%;
-  background-color: #ffffff;
-  padding: 1rem;
-  height: 400px;
-  border: 1px solid #000000;
-  display:flex;
+  display: flex;
+  width: 400px;
+  height: 440px;
+  padding: 32px;
   flex-direction: column;
-  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-shrink: 0;
+  background-color: white;
+  border: 1px solid black;
 }
 .upcoming-events-item img{
  max-height:140px;
- object-fit: contain;
+ object-fit: cover;
+ object-position: 5px 25%;
   width: 100%;
 }
-.upcoming-events-item h4{
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 5; /* number of lines to show */
-          line-clamp: 5; 
-  -webkit-box-orient: vertical;
-}
-.upcoming-events-item p{
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1; /* number of lines to show */
-          line-clamp: 3; 
-  -webkit-box-orient: vertical;
+.upcoming-events-box h4{
+  font-size: 16px;
 }
 
 @media (max-width: 768px) {
