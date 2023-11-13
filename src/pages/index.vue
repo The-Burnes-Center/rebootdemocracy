@@ -145,22 +145,47 @@ export default {
       self.eventsData =  item.data;
       });
     },
+    // fetchFeatured: function fetchFeatured() {
+    //   self = this;
+
+    //   this.directus
+    //   .items('reboot_democracy_resources')
+    //   .readByQuery({
+    //       filter: {
+    //         featured: {
+    //           _eq: 'true',
+    //         },
+    //       },
+    //      meta: 'total_count',
+    //      limit: 3,
+    //      sort:["-date"],
+    //      fields: [
+    //       '*.*','thumbnail.*', 'authors.team_id.*'
+    //    ],
+       
+    //   })
+    //   .then((item) => {
+    //   self.featuredData =  item.data;
+    //   });
+    // },
     fetchFeatured: function fetchFeatured() {
       self = this;
 
       this.directus
-      .items('reboot_democracy_resources')
+      .items('reboot_democracy_blog')
       .readByQuery({
-          filter: {
-            featured: {
-              _eq: 'true',
-            },
-          },
+          // filter: {
+          //   featured: {
+          //     _eq: 'true',
+          //   },
+          // },
          meta: 'total_count',
          limit: 3,
          sort:["-date"],
          fields: [
-          '*.*','thumbnail.*', 'authors.team_id.*'
+          '*.*',          
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*'
        ],
        
       })
@@ -372,13 +397,13 @@ export default {
     <div class="featured-content">
         <!-- <h1 class="eyebrow blue">Featured {{item.type}}</h1> -->
         <div class="featured-image">
-          <img v-if="item.thumbnail" :src="this.directus._url+'assets/'+item.thumbnail.id">
-          <img v-if="!item.thumbnail"  src="..//assets/media-image.png">
+          <img v-if="item.image" :src="this.directus._url+'assets/'+item.image.id">
+          <!-- <img v-if="!item.thumbnail"  src="..//assets/media-image.png"> -->
         </div>
           <h4>{{item.title}}</h4>
            <p v-if="item.authors == '' && item.type != 'Event'" class="featured-event-description">{{item.description}}</p>
           <p v-if="item.type == 'Event'">{{formatDateTime(new Date(item.date))}}</p>
-          <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
+          <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
           <div class="speakers-list" v-show="item.speakers" v-html="item.speakers"></div>
           <a class="btn btn-small btn-blue" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
     </div>
