@@ -703,7 +703,7 @@ export default {
 
 <!-- Other practice section. Consider making repeatable and moving to directus-->
 
-<div class="other-practice">
+<!-- <div class="other-practice">
   <div class="col-50">
       <div class="other-practice-img workplace-img">
        <img src="../assets/workplace-image.png">
@@ -712,15 +712,15 @@ export default {
       <h3><a href="https://poweratwork.us/" target="_blank"> Workplace Democracy <i class="fa-regular fa-arrow-right"></i></a></h3>
     </div>
   </div>
-  <!-- <div class="col-50">
+  <div class="col-50">
     <div class="other-practice-img media-img">
        <img src="../assets/media-image.png">
     </div>
     <div class="other-practice-title">
       <h3>Media and Democracy <i class="fa-regular fa-arrow-right"></i></h3>
     </div>
-  </div> -->
-</div>
+  </div>
+</div> -->
 <mailing-list-comp></mailing-list-comp>
 <footer-comp></footer-comp>
 
