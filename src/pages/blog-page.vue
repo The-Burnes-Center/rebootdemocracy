@@ -194,50 +194,49 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <!-- Header Component -->
     <header-comp></header-comp>
   <div class="blog-page-hero">
-    <h1>Reboot Democracy Blog</h1>
+    <h1 class="eyebrow">Reboot Democracy</h1>
+    <h1>Blog</h1>
   </div>
 
 
-
-<!-- News Section -->
-
-  <div class="rdblog-section">
-
-    <div class="row">
-      <a
-        :href="
-          blog_item.slug
-            ? '/blog/'+ blog_item.slug
-            : blog_item.url
-        "
-        :target="
-          blog_item.slug
-            ? '_self' 
-            :'_blank'
-        "
-        class="col-3"
-        v-for="blog_item in blogData.slice().reverse()"
-      >   
-      <div class="blog-item">
-          <div v-if="blog_item.image">  <img class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id"></div>
-          <h3>{{blog_item.title}}</h3>
-          <div class="author-list">
-            <div v-for="(author,i) in blog_item.authors">
+<!-- Featured Blog Section -->
+<div class="blog-featured">
+  <div class="blog-featured-row">
+    <div class="first-blog-post">
+      <img class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id">
+      <h3>{{blogData.slice().reverse()[0].title}}</h3>
+      <div class="author-list">
+            <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
               <div class="author-item">
-                <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+                <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
                 <div class="author-details">
                   <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                 </div>
               </div>
             </div>
-            </div>
-        </div>
-      </a> 
-
-
+          </div>
     </div>
-    
+    <div class="other-blog-posts">
+      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0"> 
+        <div class="other-post-details">
+              <h3>{{blog_item.title}}</h3>
+              <div class="author-list">
+                    <div v-for="(author,i) in blog_item.authors">
+                      <div class="author-item">
+                        <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
+                        <div class="author-details">
+                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+         <img class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+      </div>
+    </div>
   </div>
+</div>
+
         
       
     
