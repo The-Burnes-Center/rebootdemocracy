@@ -29,7 +29,8 @@ async function directusFetch(endpoint, method = 'GET', body = null) {
   if (body) {
     options.body = JSON.stringify(body);
   }
-
+  console.log(url);
+  console.log(options);
   const response = await fetch(url, options);
 
   if (!response.ok) {
