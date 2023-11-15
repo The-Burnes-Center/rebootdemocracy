@@ -29,7 +29,7 @@ async function directusFetch(endpoint, method = 'GET', body = null) {
   if (body) {
     options.body = JSON.stringify(body);
   }
-  
+
   const response = await fetch(url, options);
 
   if (!response.ok) {
@@ -87,7 +87,10 @@ async function runProcess(bodyres) {
 
       // Upload combined buffer
     const uploadResult = await uploadBuffer(combinedBuffer, slug);
-    return uploadResult;
+    
+      // Update the article with the audio file ID
+      const updateResult = await updateArticleWithAudioId(bodyres.collection, bodyres.id, uploadResult.data.id);
+      return updateResult;
 
   } catch (error) {
     console.error('Error in processing article and generating speech:', error);
@@ -149,6 +152,34 @@ async function uploadBuffer(buffer, slug) {
 
   return directusResponse;
 }
+
+async function updateArticleWithAudioId(collection, itemId, audioFileId) {
+  const directusItemEndpoint = DIRECTUS_URL + '/items/' + collection + '/' + itemId;
+
+  const updateData = {
+    audio_version: audioFileId
+  };
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN
+  };
+
+  const response = await fetch(directusItemEndpoint, {
+    method: 'PATCH',
+    body: JSON.stringify(updateData),
+    headers: headers
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Error updating item: ${errorBody}`);
+  }
+
+  const jsonResponse = await response.json();
+  return jsonResponse;
+}
+
 
 export default async (req, context) => {
   const bodyres = await req.json();
