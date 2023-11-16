@@ -127,7 +127,11 @@ export default {
 </div>
 
 <div class="blog-body">
-  <div class="blog-content" v-html="postData[0].content"></div>
+  <div class="audio_version" v-if="postData[0].audio_version">
+  <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.&nbsp;</em></p>
+    <p><audio controls="controls"><source :src="this.directus._url+'assets/'+postData[0].audio_version" type="audio/mpeg" data-mce-fragment="1"></audio></p>
+  </div>
+    <div class="blog-content" v-html="postData[0].content"></div>
 </div>
 
   <!-- Footer Component -->
