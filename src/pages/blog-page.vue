@@ -208,7 +208,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <div class="author-list">
             <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
               <div class="author-item">
-                <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
+                <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
                 <div class="author-details">
                   <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                 </div>
@@ -231,7 +231,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                     </div>
                   </div>
             </div>
-         <img class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
       </div>
     </div>
   </div>
