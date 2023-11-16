@@ -119,7 +119,7 @@ async function generateSpeech(text) {
 
 async function uploadBuffer(buffer, slug, collection, collectionId) {
   // Check if a file with the given tags exists
-  const existingFile = await checkExistingFile(collection, collectionId);
+  // const existingFile = await checkExistingFile(collection, collectionId);
 
   // Create form-data instance
   const form = new FormData();
@@ -135,15 +135,15 @@ async function uploadBuffer(buffer, slug, collection, collectionId) {
   let directusFileEndpoint;
   let method;
 
-  if (existingFile) {
-    // If file exists, prepare to update it
-    directusFileEndpoint = DIRECTUS_URL + '/files/' + existingFile.id;
-    method = 'PATCH';
-  } else {
+  // if (existingFile) {
+  //   // If file exists, prepare to update it
+  //   directusFileEndpoint = DIRECTUS_URL + '/files/' + existingFile.id;
+  //   method = 'PATCH';
+  // } else {
     // If file does not exist, prepare to upload a new one
     directusFileEndpoint = DIRECTUS_URL + '/files';
     method = 'POST';
-  }
+  // }
 
   // Prepare request headers with the Bearer token
   const headers = {
