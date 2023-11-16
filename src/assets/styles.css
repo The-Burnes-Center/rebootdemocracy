@@ -626,6 +626,8 @@ text-decoration-line: underline;
 .blog-content > h3 {
   color: var(--black, #000);
 
+
+
 /* H-m/Desktop */
 font-family: Space Grotesk;
 font-size: 40px;
@@ -633,6 +635,21 @@ font-style: normal;
 font-weight: 700;
 line-height: normal;
 letter-spacing: -1.6px;
+}
+
+.audio_version {
+  display:flex;
+  flex-direction: column;
+  gap: 24px;
+
+}
+.audio_version p {
+  width:850px
+}
+.audio_version > *{
+  max-width: 850px;
+  flex: 1 0 0;
+  width:100%;
 }
 .rdblog-section h3{
   color: var(--black, #000);
