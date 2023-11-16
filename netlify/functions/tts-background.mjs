@@ -117,10 +117,7 @@ async function generateSpeech(text) {
   return Buffer.concat(chunks); // Return the single speech buffer for one chunk
 }
 
-async function uploadBuffer(buffer, slug, collection, collectionId) {
-  // Check if a file with the given tags exists
-  // const existingFile = await checkExistingFile(collection, collectionId);
-
+async function uploadBuffer(buffer, slug, collection, collection_id) {
   // Create form-data instance
   const form = new FormData();
   form.append('file', buffer, {
@@ -129,43 +126,31 @@ async function uploadBuffer(buffer, slug, collection, collectionId) {
     knownLength: buffer.length
   });
 
-  // Append tags to the form data
-  form.append('tags', JSON.stringify([collection, collectionId.toString()]));
+  const directusFileEndpoint = DIRECTUS_URL + '/files';
 
-  let directusFileEndpoint;
-  let method;
-
-  // if (existingFile) {
-  //   // If file exists, prepare to update it
-  //   directusFileEndpoint = DIRECTUS_URL + '/files/' + existingFile.id;
-  //   method = 'PATCH';
-  // } else {
-    // If file does not exist, prepare to upload a new one
-    directusFileEndpoint = DIRECTUS_URL + '/files';
-    method = 'POST';
-  // }
-
-  // Prepare request headers with the Bearer token
+  // Prepare the request headers with the Bearer token
   const headers = {
-    'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN,
+    'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN, // replace with an actual token
   };
 
   // Merge the headers from form-data with Directus token
   const finalHeaders = { ...form.getHeaders(), ...headers };
 
-  // Make the request to Directus
+  // Make the request to Directus to upload the file
   const fileResponse = await fetch(directusFileEndpoint, {
-    method: method,
+    method: 'POST',
     body: form,
     headers: finalHeaders
   });
 
   if (!fileResponse.ok) {
     const errorBody = await fileResponse.text();
-    throw new Error(`Error in file operation: ${errorBody}`);
+    throw new Error(`Error uploading file: ${errorBody}`);
   }
 
-  return await fileResponse.json();
+  const directusResponse = await fileResponse.json();
+
+  return directusResponse;
 }
 
 async function updateArticleWithAudioId(collection, itemId, audioFileId) {
