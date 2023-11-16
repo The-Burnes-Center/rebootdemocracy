@@ -79,7 +79,7 @@ async function runProcess(bodyres) {
       // }
     } else {
       // await generateAndUploadSpeech(text_to_speech, date_updated, bodyres);
-      const buffer = await generateSpeech(content);
+      const buffer = await generateSpeech(textContent);
       allSpeechBuffers.push(buffer);
     }
      // Concatenate all speech buffers into a single buffer
