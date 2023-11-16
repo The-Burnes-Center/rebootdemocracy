@@ -580,10 +580,38 @@ padding: 0px 24px 0px 50px;
 .blog-body blockquote p:nth-of-type(1){
   border-left: 2px solid var(--black, #000);
 }
+
+.audio-version {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  text-align: left;
+  align-items: flex-start; /* Align items to the start (left) */
+  justify-content: center; /* Center the container */
+  margin-left: auto; /* Center the container horizontally */
+  margin-right: auto; /* Center the container horizontally */
+  max-width: 850px; /* Maximum width of the container */
+    width: 100%;
+}
+
+.audio-version > * {
+  width: 100%; /* Make children take full width of the container */
+}
+
+.audio-version > p {
+  color: var(--black, #000);
+  font-family: "Red Hat Text";
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 38px;
+}
+
 .blog-content {
   display:flex;
   flex-direction: column;
   gap: 24px;
+  text-align: left;
 }
 .blog-content > *{
   max-width: 850px;
@@ -637,7 +665,7 @@ line-height: normal;
 letter-spacing: -1.6px;
 }
 
-.audio_version {
+/* .audio_version {
   display:flex;
   flex-direction: column;
   gap: 24px;
@@ -650,7 +678,7 @@ letter-spacing: -1.6px;
   max-width: 850px;
   flex: 1 0 0;
   width:100%;
-}
+} */
 .rdblog-section h3{
   color: var(--black, #000);
 
