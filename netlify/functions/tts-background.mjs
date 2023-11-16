@@ -86,7 +86,7 @@ async function runProcess(bodyres) {
      const combinedBuffer = Buffer.concat(allSpeechBuffers);
 
       // Upload combined buffer
-    const uploadResult = await uploadBuffer(combinedBuffer, slug);
+    const uploadResult = await uploadBuffer(combinedBuffer, slug, bodyres.collection, bodyres.id);
     
       // Update the article with the audio file ID
       const updateResult = await updateArticleWithAudioId(bodyres.collection, bodyres.id, uploadResult.data.id);
@@ -117,7 +117,10 @@ async function generateSpeech(text) {
   return Buffer.concat(chunks); // Return the single speech buffer for one chunk
 }
 
-async function uploadBuffer(buffer, slug) {
+async function uploadBuffer(buffer, slug, collection, collectionId) {
+  // Check if a file with the given tags exists
+  const existingFile = await checkExistingFile(collection, collectionId);
+
   // Create form-data instance
   const form = new FormData();
   form.append('file', buffer, {
@@ -126,31 +129,43 @@ async function uploadBuffer(buffer, slug) {
     knownLength: buffer.length
   });
 
-  const directusFileEndpoint = DIRECTUS_URL + '/files';
+  // Append tags to the form data
+  form.append('tags', JSON.stringify([collection, collectionId.toString()]));
 
-  // Prepare the request headers with the Bearer token
+  let directusFileEndpoint;
+  let method;
+
+  if (existingFile) {
+    // If file exists, prepare to update it
+    directusFileEndpoint = DIRECTUS_URL + '/files/' + existingFile.id;
+    method = 'PATCH';
+  } else {
+    // If file does not exist, prepare to upload a new one
+    directusFileEndpoint = DIRECTUS_URL + '/files';
+    method = 'POST';
+  }
+
+  // Prepare request headers with the Bearer token
   const headers = {
-    'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN, // replace with an actual token
+    'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN,
   };
 
   // Merge the headers from form-data with Directus token
   const finalHeaders = { ...form.getHeaders(), ...headers };
 
-  // Make the request to Directus to upload the file
+  // Make the request to Directus
   const fileResponse = await fetch(directusFileEndpoint, {
-    method: 'POST',
+    method: method,
     body: form,
     headers: finalHeaders
   });
 
   if (!fileResponse.ok) {
     const errorBody = await fileResponse.text();
-    throw new Error(`Error uploading file: ${errorBody}`);
+    throw new Error(`Error in file operation: ${errorBody}`);
   }
 
-  const directusResponse = await fileResponse.json();
-
-  return directusResponse;
+  return await fileResponse.json();
 }
 
 async function updateArticleWithAudioId(collection, itemId, audioFileId) {
@@ -257,4 +272,26 @@ function splitText(text, maxLength) {
   }
 
   return chunks;
+}
+
+async function checkExistingFile(collection, collectionId) {
+  // Define the endpoint to search for files with the specified tags
+  const query = new URLSearchParams({
+    'filter[tags][_contains]': [collection, collectionId].join(',')
+  });
+  const directusFileSearchEndpoint = DIRECTUS_URL + '/files?' + query.toString();
+
+  const headers = {
+    'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN
+  };
+
+  const response = await fetch(directusFileSearchEndpoint, { headers });
+  
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Error searching for file: ${errorBody}`);
+  }
+
+  const data = await response.json();
+  return data.data && data.data.length > 0 ? data.data[0] : null;
 }
