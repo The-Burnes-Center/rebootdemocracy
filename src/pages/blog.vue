@@ -100,7 +100,7 @@ export default {
 <header-comp></header-comp>
 <div class="blog-hero">
 
-  <img class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id">
+  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id">
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
     <p class="excerpt"> {{postData[0].excerpt}}</p>
@@ -108,7 +108,7 @@ export default {
       <div class="hero-author-sm">
       <div v-for="(author,i) in postData[0].authors">
           <div class="author-item">
-            <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+            <img v-if="author.team_id.Headshot" class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
             <div class="author-details">
               <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
               <a class="author-bio" :href="author.team_id.Link_to_bio">Read Bio</a>

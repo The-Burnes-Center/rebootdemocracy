@@ -203,7 +203,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <div class="blog-featured">
   <div class="blog-featured-row">
     <div class="first-blog-post">
-      <img class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id">
+      <img  v-if="blogData.slice().reverse()[0].image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id">
       <h3>{{blogData.slice().reverse()[0].title}}</h3>
       <div class="author-list">
             <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
