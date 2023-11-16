@@ -56,8 +56,26 @@ async function runProcess(bodyres) {
 
     // Extract the content and date updated from the article
     const { content, slug, title , authors   } = article.data;
-    console.log(authors[0].team_id.First_Name, authors[0].team_id.Last_Name)
-    let textContent = title+' \nby '+authors[0].team_id.First_Name+' '+authors[0].team_id.Last_Name+' \n '+extractTextFromHTML(content);
+
+    // Function to extract the full name from an author object
+      function getFullName(author) {
+        return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
+      }
+
+      // Function to join author names with commas and "and"
+      function joinAuthorNames(authors) {
+        if (authors.length === 1) {
+          // Only one author, so just return the full name
+          return getFullName(authors[0]);
+        } else {
+          // Join multiple authors with commas and replace the last comma with "and"
+          return authors.map(getFullName).join(', ').replace(/, (?=[^,]+$)/, ' and ');
+        }
+      }
+
+
+    let textContent = `${title} \nby ${joinAuthorNames(authors)} \n${extractTextFromHTML(content)}`;
+    console.log(textContent);
     
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
