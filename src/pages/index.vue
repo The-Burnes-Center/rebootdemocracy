@@ -405,7 +405,7 @@ export default {
           <p v-if="item.type == 'Event'">{{formatDateTime(new Date(item.date))}}</p>
           <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
           <div class="speakers-list" v-show="item.speakers" v-html="item.speakers"></div>
-          <a class="btn btn-small btn-blue" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
+          <a class="btn btn-small btn-blue" :href="'blog/'+item.slug">Details <i class="fa-regular fa-arrow-right"></i></a>
     </div>
     </v-carousel-item>
     </v-carousel>
