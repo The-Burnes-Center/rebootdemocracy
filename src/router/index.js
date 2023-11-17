@@ -9,6 +9,10 @@ import Engagement from '../pages/our-engagements.vue';
 import Resources from '../pages/more-resources.vue';
 import Team from '../pages/team.vue';
 import Signup from '../pages/signup.vue';
+import BlogPage from '../pages/blog-page.vue';
+import BlogPost from '../pages/blog.vue';
+
+
 const routes = [
   { path:"/", component: Home },
   { path:"/events", component: Events },
@@ -20,19 +24,9 @@ const routes = [
   { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
   { path:"/team", component:Team },
   { path:"/signup", component:Signup },
+  { path:"/blog/:name", component: BlogPost, props:true },
+  { path:"/blog", component: BlogPage },
 ]
-
-// const routes = [
-//   { path:"/", component: Events },
-//   { path:"/events", component: Events },
-//   { path:"/our-writing", component: Events },
-//   { path:"/our-research", component: Events },
-//   { path:"/our-teaching", component: Events },
-//   { path:"/our-engagements", component: Events },
-//   { path:"/more-resources", component: Events },
-//   { path:"/signup", component: Signup },
-//   { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
-// ]
 
 const router = createRouter({
   history: createWebHistory(),

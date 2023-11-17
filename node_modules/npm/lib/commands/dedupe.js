@@ -1,5 +1,4 @@
 // dedupe duplicated packages, or find them in the tree
-const Arborist = require('@npmcli/arborist')
 const reifyFinish = require('../utils/reify-finish.js')
 
 const ArboristWorkspaceCmd = require('../arborist-cmd.js')
@@ -8,11 +7,13 @@ class Dedupe extends ArboristWorkspaceCmd {
   static description = 'Reduce duplication in the package tree'
   static name = 'dedupe'
   static params = [
-    'global-style',
+    'install-strategy',
     'legacy-bundling',
+    'global-style',
     'strict-peer-deps',
     'package-lock',
     'omit',
+    'include',
     'ignore-scripts',
     'audit',
     'bin-links',
@@ -30,6 +31,7 @@ class Dedupe extends ArboristWorkspaceCmd {
 
     const dryRun = this.npm.config.get('dry-run')
     const where = this.npm.prefix
+    const Arborist = require('@npmcli/arborist')
     const opts = {
       ...this.npm.flatOptions,
       path: where,
