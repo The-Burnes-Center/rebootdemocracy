@@ -109,6 +109,7 @@ export default {
       <div v-for="(author,i) in postData[0].authors">
           <div class="author-item">
             <img v-if="author.team_id.Headshot" class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+            <p  v-if="!author.team_id.Headshot" class="author-no-image">{{author.team_id.First_Name[0] }} {{author.team_id.Last_Name[0]}}</p>
             <div class="author-details">
               <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
               <a class="author-bio" :href="author.team_id.Link_to_bio">Read Bio</a>
