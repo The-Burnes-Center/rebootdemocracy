@@ -27,6 +27,7 @@ export default {
        <i class="fa-solid fa-bars bars" @click="menutoggle =!menutoggle"></i>
       <div :class="[screenWidth=='mobile' ? 'menu-shadow' : '', 'menu']" v-show="screenWidth=='mobile' && !menutoggle ? true : screenWidth=='desktop' || menutype == 'footermenu'? true : false ">
         <a href="#about">About Us</a>
+        <a href="/blog">Blog</a>
          <a href="/events">Events</a>
         <div class="dropdown">
           <button class="dropbtn">Our Work 

@@ -134,7 +134,7 @@ export default {
             ]
           },
          meta: 'total_count',
-         limit: 3,
+         limit: 2,
          sort:["date"],
          fields: [
           '*.*','thumbnail.*','event_series.general_events_series_id.*'
@@ -145,22 +145,47 @@ export default {
       self.eventsData =  item.data;
       });
     },
+    // fetchFeatured: function fetchFeatured() {
+    //   self = this;
+
+    //   this.directus
+    //   .items('reboot_democracy_resources')
+    //   .readByQuery({
+    //       filter: {
+    //         featured: {
+    //           _eq: 'true',
+    //         },
+    //       },
+    //      meta: 'total_count',
+    //      limit: 3,
+    //      sort:["-date"],
+    //      fields: [
+    //       '*.*','thumbnail.*', 'authors.team_id.*'
+    //    ],
+       
+    //   })
+    //   .then((item) => {
+    //   self.featuredData =  item.data;
+    //   });
+    // },
     fetchFeatured: function fetchFeatured() {
       self = this;
 
       this.directus
-      .items('reboot_democracy_resources')
+      .items('reboot_democracy_blog')
       .readByQuery({
-          filter: {
-            featured: {
-              _eq: 'true',
-            },
-          },
+          // filter: {
+          //   featured: {
+          //     _eq: 'true',
+          //   },
+          // },
          meta: 'total_count',
          limit: 3,
          sort:["-date"],
          fields: [
-          '*.*','thumbnail.*', 'authors.team_id.*'
+          '*.*',          
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*'
        ],
        
       })
@@ -364,7 +389,7 @@ export default {
 <div class="hero">
   <div class="hero-content">
     <h1 class="eyebrow blue">{{indexData.title}}</h1>
-    <div class="title" v-html="indexData.subtitle"></div>
+    <h1 class="title" v-html="indexData.subtitle"></h1>
   </div>
   <div class="featured-section">
     <v-carousel  hide-delimiters v-model="model">
@@ -372,13 +397,13 @@ export default {
     <div class="featured-content">
         <!-- <h1 class="eyebrow blue">Featured {{item.type}}</h1> -->
         <div class="featured-image">
-          <img v-if="item.thumbnail" :src="this.directus._url+'assets/'+item.thumbnail.id">
-          <img v-if="!item.thumbnail"  src="..//assets/media-image.png">
+          <img v-if="item.image" :src="this.directus._url+'assets/'+item.image.id">
+          <!-- <img v-if="!item.thumbnail"  src="..//assets/media-image.png"> -->
         </div>
           <h4>{{item.title}}</h4>
-           <p v-if="item.authors == '' && item.type != 'Event'">{{item.description}}</p>
+           <p v-if="item.authors == '' && item.type != 'Event'" class="featured-event-description">{{item.description}}</p>
           <p v-if="item.type == 'Event'">{{formatDateTime(new Date(item.date))}}</p>
-          <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
+          <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
           <div class="speakers-list" v-show="item.speakers" v-html="item.speakers"></div>
           <a class="btn btn-small btn-blue" :href="item.link">Details <i class="fa-regular fa-arrow-right"></i></a>
     </div>
@@ -411,36 +436,25 @@ export default {
     <div class="upcoming-events-text">
         <h3>Reboot Democracy Lecture Series</h3>
         <div class="our-work-description"><p>Upcoming events in the Reboot Democracy Lecture Series</p></div>
-         <a class="btn btn-primary btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
+         <a class="btn btn-ghost btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
          <div class="col-50-home">
         <!-- <p>Join our mailing list</p> -->
          <!-- <input type="text" placeholder="" name="entry.250007595" aria-hidden=”true”> -->
-        <a href="/signup" class="btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+        <!-- <a href="/signup" class="btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a> -->
       </div>
     </div>
     <div class="upcoming-events-content">
       <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
 
               <img v-if="!resource_item.instructor && resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
-              <h5 class="eyebrow">{{resource_item.type}}</h5>
               <h4>{{resource_item.title}}</h4>
-              <div v-html="resource_item.speakers"></div>
-              <p>{{formatDateTime(new Date(resource_item.date))}}</p>
+              <div style="display:flex;flex-direction: column"><p><b>Speakers:&nbsp</b></p><div  v-html="resource_item.speakers"></div></div>
+              <p>{{formatDateOnly(new Date(resource_item.date))}}</p>
               <a class="btn btn-small btn-primary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Our Work Separator-->
-
-<div class="our-work-separator">
-  <div class="our-work-separator-text">
-    <h2 class="eyebrow white">{{indexData.our_work_title}}</h2>
-    <p>{{indexData.our_work_subtitle}}</p>
-  </div>
-</div>
-
 
 <!-- Equitable Engagement Lab Section-->
 
@@ -487,6 +501,32 @@ export default {
       </div>
     </div>
 </div>
+<!-- Our Experience Section -->
+
+<div id="about" class="mission-section">
+  <div class="mission-text">
+      <h2 class="eyebrow peach">{{indexData.experience_title}}</h2>
+      <h2>{{indexData.experience_heading}}</h2>
+      <div class="mission-description" v-html="indexData.experience_description"></div>
+        <!-- <a class="btn btn-medium btn-secondary">About Us</a> -->
+  </div>
+  <div class="mission-image">
+
+  </div>
+
+</div>
+
+
+<!-- Our Work Separator-->
+
+<div class="our-work-separator">
+  <div class="our-work-separator-text">
+    <h2 class="eyebrow white">{{indexData.our_work_title}}</h2>
+    <p>{{indexData.our_work_subtitle}}</p>
+  </div>
+</div>
+
+
 
 <!-- Our Past Engagements Section-->
 <div class="our-work-section">
@@ -663,7 +703,7 @@ export default {
 
 <!-- Other practice section. Consider making repeatable and moving to directus-->
 
-<div class="other-practice">
+<!-- <div class="other-practice">
   <div class="col-50">
       <div class="other-practice-img workplace-img">
        <img src="../assets/workplace-image.png">
@@ -672,15 +712,15 @@ export default {
       <h3><a href="https://poweratwork.us/" target="_blank"> Workplace Democracy <i class="fa-regular fa-arrow-right"></i></a></h3>
     </div>
   </div>
-  <!-- <div class="col-50">
+  <div class="col-50">
     <div class="other-practice-img media-img">
        <img src="../assets/media-image.png">
     </div>
     <div class="other-practice-title">
       <h3>Media and Democracy <i class="fa-regular fa-arrow-right"></i></h3>
     </div>
-  </div> -->
-</div>
+  </div>
+</div> -->
 <mailing-list-comp></mailing-list-comp>
 <footer-comp></footer-comp>
 
