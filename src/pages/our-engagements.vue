@@ -155,13 +155,12 @@ export default {
   </div>
   <div class="resource-scroll-section">
     <div class="resource-scroller">
-      <v-virtual-scroll  :items="articleData">
-        <template v-slot:default="{ item }">
+      <template v-for="item in articleData">
           <div class="featured-items"  v-show="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
               <div class="resource-item-img">
-                 <img v-if="item.thumbnail" :src="this.directus._url + 'assets/' + item.thumbnail.id">
-                   <img v-if="!item.thumbnail" src="../assets/workplace-image.png">
+                 <img v-if="item.thumbnail" :src="this.directus._url + 'assets/' + item.thumbnail.id+'?width=648'">
+                   <img v-if="!item.thumbnail" :src="this.directus._url + 'assets/a23c4d59-eb04-4d2a-ab9b-74136043954c?quality=80'">
               </div>
               <div class="event-tag-row" v-if="item.stage?.length > 0">
             <div class="engagement_dot" ></div>
@@ -174,7 +173,6 @@ export default {
             </div>
           </div>
         </template>
-      </v-virtual-scroll>
     </div>
   </div>
   <div class="resource-image">
