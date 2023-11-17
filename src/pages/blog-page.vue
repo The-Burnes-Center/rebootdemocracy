@@ -205,10 +205,12 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <div class="first-blog-post">
       <img  v-if="blogData.slice().reverse()[0].image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id">
       <h3>{{blogData.slice().reverse()[0].title}}</h3>
+      <p>{{ blogData.slice().reverse()[0].excerpt }}</p>
       <div class="author-list">
             <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
               <div class="author-item">
-                <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+                <p  class="author-name">By</p>
+                <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
                 <div class="author-details">
                   <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                 </div>
@@ -217,13 +219,15 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           </div>
     </div>
     <div class="other-blog-posts">
-      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0"> 
+      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
         <div class="other-post-details">
               <h3>{{blog_item.title}}</h3>
+              <p>{{ blog_item.excerpt }}</p>
               <div class="author-list">
                     <div v-for="(author,i) in blog_item.authors">
                       <div class="author-item">
                         <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
+                        <p  class="author-name">By</p>
                         <div class="author-details">
                           <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                         </div>
