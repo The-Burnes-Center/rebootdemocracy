@@ -101,6 +101,7 @@ export default {
 <div class="blog-hero">
 
   <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id">
+  <p class="blog-img-byline" v-if="postData[0].image.tags && postData[0].image.tags.includes('AI')">AI-generated image</p>
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
     <p class="excerpt"> {{postData[0].excerpt}}</p>
