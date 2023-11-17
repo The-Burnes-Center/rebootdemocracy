@@ -176,7 +176,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           'authors.team_id.*',
           'authors.team_id.Headshot.*'
        ],
-       sort:["-date"]
+       sort:["date"]
        
       })
       .then((item) => {
@@ -203,40 +203,48 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <div class="blog-featured">
   <div class="blog-featured-row">
     <div class="first-blog-post">
+      <a :href="'/blog/' + blogData.slice().reverse()[0].slug">
       <img  v-if="blogData.slice().reverse()[0].image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id">
       <h3>{{blogData.slice().reverse()[0].title}}</h3>
       <p>{{ blogData.slice().reverse()[0].excerpt }}</p>
       <div class="author-list">
+         <p  class="author-name">By</p>
             <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
               <div class="author-item">
-                <p  class="author-name">By</p>
+               
                 <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
                 <div class="author-details">
                   <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                    <p class="author-name" v-if="blogData.slice().reverse()[0].authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
                 </div>
               </div>
             </div>
           </div>
+        </a>  
     </div>
     <div class="other-blog-posts">
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
+       <a :href="'/blog/' + blog_item.slug">
         <div class="other-post-details">
               <h3>{{blog_item.title}}</h3>
               <p>{{ blog_item.excerpt }}</p>
               <div class="author-list">
+                   <p  class="author-name">By</p>
                     <div v-for="(author,i) in blog_item.authors">
                       <div class="author-item">
                         <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
-                        <p  class="author-name">By</p>
                         <div class="author-details">
                           <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length">and</p>
                         </div>
                       </div>
                     </div>
                   </div>
             </div>
          <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+         </a>
       </div>
+
     </div>
   </div>
 </div>
