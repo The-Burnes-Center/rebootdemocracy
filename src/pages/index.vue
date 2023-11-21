@@ -5,10 +5,11 @@ import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
 
-// import { $vfm, VueFinalModal, ModalsContainer } from 'vue-final-modal'
+import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
+import ModalComp from "../components/modal.vue";
 import MailingListComponent from "../components/mailing.vue";
 // import { register } from 'swiper/element/bundle';
 // import {useHead } from '@vueuse/head'
@@ -20,10 +21,10 @@ export default {
     "footer-comp": FooterComponent,
     "mailing-list-comp": MailingListComponent,
   //   "generative-ai-banner-comp":GenerativeAIBannerComponent,
-  //   "ws-banner":WsBanner,
-  //       VueFinalModal,
-  //   ModalsContainer,
-  //   ModalComp,
+    "ws-banner":
+        VueFinalModal,
+    ModalsContainer,
+    ModalComp,
   },
   
   data() {
@@ -37,17 +38,28 @@ export default {
       teachingData:[],
       engagementData: [],
       eelData: [],
+      modalData: [],
+      showmodal: false,
       moreresourceData: [],
       item_counter: 0,
       directus: new Directus('https://content.thegovlab.com/'),
       path:this.$route.fullPath,
     }
   },
-
+  watch :{
+  '$route': {
+    handler: function(r) {
+       this.loadModal(); 
+    },
+    deep: true,
+    immediate: true
+  },
+  },
   created() {
 
     this.indexData = this.directus.items("reboot_democracy");
     this.item_counter = 0;
+      this.loadModal(); 
     this.fetchEvents();
     this.fetchFeatured();
     this.fetchIndex();
@@ -374,14 +386,44 @@ export default {
       .then((item) => {
       self.moreresourceData =  item.data;
       });
-    }
+    },
 
+    loadModal() {
+     self = this;
+      this.directus
+      .items('reboot_democracy_modal')
+      .readByQuery({     
+          meta: 'total_count',
+         limit: -1,
+         fields: [
+          '*.*']
+      }).then((item) => {
+      self.modalData = item.data;
+      
+      console.log(self.modalData);
+
+     let storageItem = localStorage.getItem("Reboot Democracy");
+     self.showmodal = self.modalData.status == 'published' && (self.modalData.visibility == 'always' || (self.modalData.visibility == 'once' && storageItem != 'off'));
+
+        })
+    },
+    closeModal() {
+     this.showmodal=false;
+     localStorage.setItem("Reboot Democracy","off");
+    
+    }
 
   }
 }
 </script>
 
 <template>
+
+
+      <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
+      <ModalComp @close="closeModal" />
+    </vue-final-modal>
+
 <!-- Header Component -->
 <header-comp></header-comp>
 
