@@ -443,6 +443,7 @@ export default {
           <!-- <img v-if="!item.thumbnail"  src="..//assets/media-image.png"> -->
         </div>
           <h4>{{item.title}}</h4>
+          <p>{{ formatDateOnly (new Date (item.date) )}}</p>
            <p v-if="item.authors == '' && item.type != 'Event'" class="featured-event-description">{{item.description}}</p>
           <p v-if="item.type == 'Event'">{{formatDateTime(new Date(item.date))}}</p>
           <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
