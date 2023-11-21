@@ -29,7 +29,7 @@
       <h4>About the GovLab</h4>
        <a href="../">Our Work</a>
        <a href="/team">Our People</a>
-       <a href="../">Careers</a>
+       <!-- <a href="../">Careers</a> -->
        <a href="../">Join the Lab</a>
     </div>
   </div>
