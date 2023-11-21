@@ -105,6 +105,7 @@ export default {
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
     <p class="excerpt"> {{postData[0].excerpt}}</p>
+    <p class="post-date">Published on <b>{{formatDateOnly(new Date(postData[0].date))}}</b></p>
 
       <div class="hero-author-sm">
       <div v-for="(author,i) in postData[0].authors">
@@ -125,6 +126,7 @@ export default {
         </div>
 
     </div>
+   
   </div>
 </div>
 

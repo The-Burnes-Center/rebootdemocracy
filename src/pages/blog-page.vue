@@ -207,8 +207,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <img  v-if="blogData.slice().reverse()[0].image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id">
       <h3>{{blogData.slice().reverse()[0].title}}</h3>
       <p>{{ blogData.slice().reverse()[0].excerpt }}</p>
+       <p>Published on {{ formatDateOnly(new Date( blogData.slice().reverse()[0].date)) }} </p>
       <div class="author-list">
-         <p  class="author-name">By</p>
+          <p  class="author-name">By</p>
             <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
               <div class="author-item">
                
@@ -219,8 +220,11 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                 </div>
               </div>
             </div>
-          </div>
+            
+        </div>
+       
         </a>  
+        
     </div>
     <div class="other-blog-posts">
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
@@ -228,6 +232,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         <div class="other-post-details">
               <h3>{{blog_item.title}}</h3>
               <p>{{ blog_item.excerpt }}</p>
+               <p>Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
               <div class="author-list">
                    <p  class="author-name">By</p>
                     <div v-for="(author,i) in blog_item.authors">
@@ -235,7 +240,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                         <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
                         <div class="author-details">
                           <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length">and</p>
+                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
                         </div>
                       </div>
                     </div>
