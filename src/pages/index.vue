@@ -437,7 +437,7 @@ export default {
     <v-carousel  hide-delimiters v-model="model">
       <v-carousel-item class="index_carousel" v-for="(item, i) in featuredData.slice().reverse()" :key="i">
     <div class="featured-content">
-        <!-- <h1 class="eyebrow blue">Featured {{item.type}}</h1> -->
+        <h1 class="eyebrow">From the Blog</h1>
         <div class="featured-image">
           <img v-if="item.image" :src="this.directus._url+'assets/'+item.image.id">
           <!-- <img v-if="!item.thumbnail"  src="..//assets/media-image.png"> -->
