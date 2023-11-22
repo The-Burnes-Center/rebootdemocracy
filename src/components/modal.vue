@@ -49,7 +49,7 @@ export default {
     <div class="row">
       
         <h3>{{modalData.title}}</h3>
-        <p>{{modalData.content}}</p>
+        <div class="modal-content" v-html = "modalData.content"></div>
          <a @click="btnFunct(modalData.button_url)" :href="modalData.button_url" class="btn btn-primary btn-medium">{{modalData.button_text}}</a>
 
 
