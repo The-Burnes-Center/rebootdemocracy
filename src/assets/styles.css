@@ -2957,6 +2957,8 @@ border-radius: 8px;
   width: 85%;
   padding: 10px;
   flex-direction: column;
+  height: 80vh;
+  z-index: 1000;
   }
   .modal-section .row{
   flex-direction: column;
