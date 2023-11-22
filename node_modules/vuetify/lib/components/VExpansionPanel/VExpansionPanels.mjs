@@ -14,6 +14,7 @@ export const VExpansionPanelSymbol = Symbol.for('vuetify:v-expansion-panel');
 const allowedVariants = ['default', 'accordion', 'inset', 'popout'];
 export const makeVExpansionPanelsProps = propsFactory({
   color: String,
+  static: Boolean,
   variant: {
     type: String,
     default: 'default',
@@ -45,7 +46,8 @@ export const VExpansionPanels = genericComponent()({
         color: toRef(props, 'color')
       },
       VExpansionPanelTitle: {
-        readonly: toRef(props, 'readonly')
+        readonly: toRef(props, 'readonly'),
+        static: toRef(props, 'static')
       }
     });
     useRender(() => _createVNode(props.tag, {

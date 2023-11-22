@@ -8,11 +8,12 @@ import { VBannerText } from "./VBannerText.mjs";
 import { VAvatar } from "../VAvatar/index.mjs";
 import { VDefaultsProvider } from "../VDefaultsProvider/index.mjs"; // Composables
 import { makeBorderProps, useBorder } from "../../composables/border.mjs";
+import { useBackgroundColor } from "../../composables/color.mjs";
 import { makeComponentProps } from "../../composables/component.mjs";
 import { provideDefaults } from "../../composables/defaults.mjs";
 import { makeDensityProps, useDensity } from "../../composables/density.mjs";
 import { makeDimensionProps, useDimension } from "../../composables/dimensions.mjs";
-import { useDisplay } from "../../composables/display.mjs";
+import { makeDisplayProps, useDisplay } from "../../composables/display.mjs";
 import { makeElevationProps, useElevation } from "../../composables/elevation.mjs";
 import { IconValue } from "../../composables/icons.mjs";
 import { makeLocationProps, useLocation } from "../../composables/location.mjs";
@@ -24,6 +25,7 @@ import { toRef } from 'vue';
 import { genericComponent, propsFactory, useRender } from "../../util/index.mjs"; // Types
 export const makeVBannerProps = propsFactory({
   avatar: String,
+  bgColor: String,
   color: String,
   icon: IconValue,
   lines: String,
@@ -34,6 +36,7 @@ export const makeVBannerProps = propsFactory({
   ...makeComponentProps(),
   ...makeDensityProps(),
   ...makeDimensionProps(),
+  ...makeDisplayProps(),
   ...makeElevationProps(),
   ...makeLocationProps(),
   ...makePositionProps(),
@@ -49,14 +52,19 @@ export const VBanner = genericComponent()({
       slots
     } = _ref;
     const {
+      backgroundColorClasses,
+      backgroundColorStyles
+    } = useBackgroundColor(props, 'bgColor');
+    const {
       borderClasses
     } = useBorder(props);
     const {
       densityClasses
     } = useDensity(props);
     const {
+      displayClasses,
       mobile
-    } = useDisplay();
+    } = useDisplay(props);
     const {
       dimensionStyles
     } = useDimension(props);
@@ -92,8 +100,8 @@ export const VBanner = genericComponent()({
           'v-banner--stacked': props.stacked || mobile.value,
           'v-banner--sticky': props.sticky,
           [`v-banner--${props.lines}-line`]: !!props.lines
-        }, borderClasses.value, densityClasses.value, elevationClasses.value, positionClasses.value, roundedClasses.value, themeClasses.value, props.class],
-        "style": [dimensionStyles.value, locationStyles.value, props.style],
+        }, themeClasses.value, backgroundColorClasses.value, borderClasses.value, densityClasses.value, displayClasses.value, elevationClasses.value, positionClasses.value, roundedClasses.value, props.class],
+        "style": [backgroundColorStyles.value, dimensionStyles.value, locationStyles.value, props.style],
         "role": "banner"
       }, {
         default: () => [hasPrepend && _createVNode("div", {

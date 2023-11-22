@@ -42,7 +42,8 @@ const aliases = {
   file: 'attach_file',
   plus: 'add',
   minus: 'remove',
-  calendar: 'event'
+  calendar: 'event',
+  eyeDropper: 'colorize'
 };
 const md = {
   // Not using mergeProps here, functional components merge props by default (?)

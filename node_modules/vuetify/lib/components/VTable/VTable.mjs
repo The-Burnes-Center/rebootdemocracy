@@ -23,7 +23,8 @@ export const VTable = genericComponent()({
   props: makeVTableProps(),
   setup(props, _ref) {
     let {
-      slots
+      slots,
+      emit
     } = _ref;
     const {
       themeClasses

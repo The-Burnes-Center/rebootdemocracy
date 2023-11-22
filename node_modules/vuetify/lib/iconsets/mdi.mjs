@@ -42,7 +42,8 @@ const aliases = {
   file: 'mdi-paperclip',
   plus: 'mdi-plus',
   minus: 'mdi-minus',
-  calendar: 'mdi-calendar'
+  calendar: 'mdi-calendar',
+  eyeDropper: 'mdi-eyedropper'
 };
 const mdi = {
   // Not using mergeProps here, functional components merge props by default (?)

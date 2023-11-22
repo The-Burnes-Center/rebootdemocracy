@@ -48,8 +48,7 @@
 }
 .v-breadcrumbs-item .v-icon {
   font-size: 1rem;
-  margin-inline-start: -4px;
-  margin-inline-end: 2px;
+  margin-inline: -4px 2px;
 }
 
 .v-breadcrumbs-divider {

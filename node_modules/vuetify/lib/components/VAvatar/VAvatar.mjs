@@ -19,6 +19,7 @@ export const makeVAvatarProps = propsFactory({
   end: Boolean,
   icon: IconValue,
   image: String,
+  text: String,
   ...makeComponentProps(),
   ...makeDensityProps(),
   ...makeRoundedProps(),
@@ -69,7 +70,7 @@ export const VAvatar = genericComponent()({
       }, null) : props.icon ? _createVNode(VIcon, {
         "key": "icon",
         "icon": props.icon
-      }, null) : slots.default?.(), genOverlays(false, 'v-avatar')]
+      }, null) : slots.default?.() ?? props.text, genOverlays(false, 'v-avatar')]
     }));
     return {};
   }

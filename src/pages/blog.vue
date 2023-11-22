@@ -75,17 +75,17 @@ export default {
       // convert HTML body of Blog Entry into plain text
       var htmlToText = document.createElement('div');
       htmlToText.innerHTML = this.postData[0].content;
-
+      console.log('here?')
      useHead({
       title: "RebootDemocracy.AI Blog | "+this.postData[0].title,
       meta: [
         { name: 'title', content:"RebootDemocracy.AI  Blog | "+this.postData[0].title },
         { property: 'og:title', content: "RebootDemocracy.AI  Blog | "+this.postData[0].title },
         { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
-        { property: 'og:image', content: this.directus._url+'assets/'+postData[0].image.id},
+        { property: 'og:image', content: this.directus._url+'assets/'+this.postData[0].image.id},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
         { property: 'twitter:description', content: htmlToText.textContent.substring(0,200)+'...'},
-        { property: 'twitter:image', content:  this.directus._url+'assets/'+postData[0].image.id},
+        { property: 'twitter:image', content:  this.directus._url+'assets/'+this.postData[0].image.id},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })

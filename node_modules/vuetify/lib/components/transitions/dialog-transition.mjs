@@ -1,9 +1,10 @@
 import { createVNode as _createVNode, mergeProps as _mergeProps, resolveDirective as _resolveDirective } from "vue";
 // Utilities
 import { Transition } from 'vue';
-import { acceleratedEasing, animate, deceleratedEasing, genericComponent, nullifyTransforms, propsFactory, standardEasing } from "../../util/index.mjs"; // Types
+import { acceleratedEasing, animate, deceleratedEasing, genericComponent, nullifyTransforms, propsFactory, standardEasing } from "../../util/index.mjs";
+import { getTargetBox } from "../../util/box.mjs"; // Types
 export const makeVDialogTransitionProps = propsFactory({
-  target: Object
+  target: [Object, Array]
 }, 'v-dialog-transition');
 export const VDialogTransition = genericComponent()({
   name: 'VDialogTransition',
@@ -105,7 +106,7 @@ function getChildren(el) {
   return els && [...els];
 }
 function getDimensions(target, el) {
-  const targetBox = target.getBoundingClientRect();
+  const targetBox = getTargetBox(target);
   const elBox = nullifyTransforms(el);
   const [originX, originY] = getComputedStyle(el).transformOrigin.split(' ').map(v => parseFloat(v));
   const [anchorSide, anchorOffset] = getComputedStyle(el).getPropertyValue('--v-overlay-anchor-origin').split(' ');

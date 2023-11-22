@@ -17,7 +17,7 @@ import { useSsrBoot } from "../../composables/ssrBoot.mjs";
 import { makeTagProps } from "../../composables/tag.mjs";
 import { makeThemeProps, useTheme } from "../../composables/theme.mjs"; // Utilities
 import { computed, toRef } from 'vue';
-import { convertToUnit, genericComponent, propsFactory, useRender } from "../../util/index.mjs";
+import { convertToUnit, genericComponent, propsFactory, useRender } from "../../util/index.mjs"; // Types
 export const makeVBottomNavigationProps = propsFactory({
   bgColor: String,
   color: String,
