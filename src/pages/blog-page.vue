@@ -254,8 +254,33 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   </div>
 </div>
 
-        
-      
+<div class="blog-section-header">
+  <h2>All Posts</h2>
+</div>
+<!-- Other Blog Section -->
+<div class="allposts-section">
+      <div class="allposts-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"> 
+       <a :href="'/blog/' + blog_item.slug">
+        <div class="allposts-post-details">
+              <h3>{{blog_item.title}}</h3>
+               <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+              <div class="author-list">
+                   <p  class="author-name">By</p>
+                    <div v-for="(author,i) in blog_item.authors">
+                      <div class="author-item">
+                        <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
+                        <div class="author-details">
+                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+         </a>
+      </div>
+</div>
     
 <!-- Footer Component -->
 <footer-comp></footer-comp>
