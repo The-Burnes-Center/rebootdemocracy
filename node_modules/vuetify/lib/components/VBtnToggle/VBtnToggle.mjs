@@ -29,7 +29,7 @@ export const VBtnToggle = genericComponent()({
       selected
     } = useGroup(props, VBtnToggleSymbol);
     useRender(() => {
-      const [btnGroupProps] = VBtnGroup.filterProps(props);
+      const btnGroupProps = VBtnGroup.filterProps(props);
       return _createVNode(VBtnGroup, _mergeProps({
         "class": ['v-btn-toggle', props.class]
       }, btnGroupProps, {

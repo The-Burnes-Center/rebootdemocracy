@@ -5,6 +5,7 @@ import Vue from 'vue';
 export default Vue.extend({
   name: 'mouse',
   methods: {
+    // TODO: this has been partially ported to v3 in util/events
     getDefaultMouseEventHandlers(suffix, getEvent) {
       const listeners = Object.keys(this.$listeners).filter(key => key.endsWith(suffix)).reduce((acc, key) => {
         acc[key] = {

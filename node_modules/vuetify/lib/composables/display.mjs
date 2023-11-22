@@ -1,6 +1,6 @@
 // Utilities
-import { inject, reactive, shallowRef, toRefs, watchEffect } from 'vue';
-import { mergeDeep } from "../util/index.mjs";
+import { computed, inject, reactive, shallowRef, toRefs, watchEffect } from 'vue';
+import { getCurrentInstanceName, mergeDeep, propsFactory } from "../util/index.mjs";
 import { IN_BROWSER, SUPPORTS_TOUCH } from "../util/globals.mjs"; // Types
 export const breakpoints = ['sm', 'md', 'lg', 'xl', 'xxl']; // no xs
 
@@ -120,9 +120,29 @@ export function createDisplay(options, ssr) {
     ssr: !!ssr
   };
 }
+export const makeDisplayProps = propsFactory({
+  mobileBreakpoint: [Number, String]
+}, 'display');
 export function useDisplay() {
+  let props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  let name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : getCurrentInstanceName();
   const display = inject(DisplaySymbol);
   if (!display) throw new Error('Could not find Vuetify display injection');
-  return display;
+  const mobile = computed(() => {
+    if (!props.mobileBreakpoint) return display.mobile.value;
+    const breakpointValue = typeof props.mobileBreakpoint === 'number' ? props.mobileBreakpoint : display.thresholds.value[props.mobileBreakpoint];
+    return display.width.value < breakpointValue;
+  });
+  const displayClasses = computed(() => {
+    if (!name) return {};
+    return {
+      [`${name}--mobile`]: mobile.value
+    };
+  });
+  return {
+    ...display,
+    displayClasses,
+    mobile
+  };
 }
 //# sourceMappingURL=display.mjs.map

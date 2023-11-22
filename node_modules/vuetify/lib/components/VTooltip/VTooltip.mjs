@@ -59,7 +59,7 @@ export const VTooltip = genericComponent()({
       'aria-describedby': id.value
     }, props.activatorProps));
     useRender(() => {
-      const [overlayProps] = VOverlay.filterProps(props);
+      const overlayProps = VOverlay.filterProps(props);
       return _createVNode(VOverlay, _mergeProps({
         "ref": overlay,
         "class": ['v-tooltip', props.class],

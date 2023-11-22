@@ -3,10 +3,12 @@ import { createVNode as _createVNode } from "vue";
 import "./VColorPickerPreview.css";
 
 // Components
+import { VBtn } from "../VBtn/index.mjs";
 import { VSlider } from "../VSlider/index.mjs"; // Composables
 import { makeComponentProps } from "../../composables/component.mjs"; // Utilities
+import { onUnmounted } from 'vue';
 import { nullColor } from "./util/index.mjs";
-import { defineComponent, HSVtoCSS, propsFactory, useRender } from "../../util/index.mjs"; // Types
+import { defineComponent, HexToHSV, HSVtoCSS, propsFactory, SUPPORTS_EYE_DROPPER, useRender } from "../../util/index.mjs"; // Types
 export const makeVColorPickerPreviewProps = propsFactory({
   color: {
     type: Object
@@ -25,12 +27,36 @@ export const VColorPickerPreview = defineComponent({
     let {
       emit
     } = _ref;
+    const abortController = new AbortController();
+    onUnmounted(() => abortController.abort());
+    async function openEyeDropper() {
+      if (!SUPPORTS_EYE_DROPPER) return;
+      const eyeDropper = new window.EyeDropper();
+      try {
+        const result = await eyeDropper.open({
+          signal: abortController.signal
+        });
+        const colorHexValue = HexToHSV(result.sRGBHex);
+        emit('update:color', {
+          ...(props.color ?? nullColor),
+          ...colorHexValue
+        });
+      } catch (e) {}
+    }
     useRender(() => _createVNode("div", {
       "class": ['v-color-picker-preview', {
         'v-color-picker-preview--hide-alpha': props.hideAlpha
       }, props.class],
       "style": props.style
-    }, [_createVNode("div", {
+    }, [SUPPORTS_EYE_DROPPER && _createVNode("div", {
+      "class": "v-color-picker-preview__eye-dropper",
+      "key": "eyeDropper"
+    }, [_createVNode(VBtn, {
+      "onClick": openEyeDropper,
+      "icon": "$eyeDropper",
+      "variant": "plain",
+      "density": "comfortable"
+    }, null)]), _createVNode("div", {
       "class": "v-color-picker-preview__dot"
     }, [_createVNode("div", {
       "style": {
