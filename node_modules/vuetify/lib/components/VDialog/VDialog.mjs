@@ -88,7 +88,7 @@ export const VDialog = genericComponent()({
       'aria-expanded': String(isActive.value)
     }, props.activatorProps));
     useRender(() => {
-      const [overlayProps] = VOverlay.filterProps(props);
+      const overlayProps = VOverlay.filterProps(props);
       return _createVNode(VOverlay, _mergeProps({
         "ref": overlay,
         "class": ['v-dialog', {

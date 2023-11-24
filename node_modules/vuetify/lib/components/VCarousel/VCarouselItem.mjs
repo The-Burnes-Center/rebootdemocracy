@@ -17,8 +17,8 @@ export const VCarouselItem = genericComponent()({
       attrs
     } = _ref;
     useRender(() => {
-      const [imgProps] = VImg.filterProps(props);
-      const [windowItemProps] = VWindowItem.filterProps(props);
+      const imgProps = VImg.filterProps(props);
+      const windowItemProps = VWindowItem.filterProps(props);
       return _createVNode(VWindowItem, _mergeProps({
         "class": "v-carousel-item"
       }, windowItemProps), {

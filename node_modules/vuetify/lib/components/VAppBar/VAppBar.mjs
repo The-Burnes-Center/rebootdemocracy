@@ -108,7 +108,7 @@ export const VAppBar = genericComponent()({
       absolute: toRef(props, 'absolute')
     });
     useRender(() => {
-      const [toolbarProps] = VToolbar.filterProps(props);
+      const toolbarProps = VToolbar.filterProps(props);
       return _createVNode(VToolbar, _mergeProps({
         "ref": vToolbarRef,
         "class": ['v-app-bar', {

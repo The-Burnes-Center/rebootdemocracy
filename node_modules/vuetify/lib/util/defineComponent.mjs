@@ -14,9 +14,9 @@ export function defineComponent(options) {
   }
   if (options._setup) {
     options.props = propsFactory(options.props ?? {}, options.name)();
-    const propKeys = Object.keys(options.props);
+    const propKeys = Object.keys(options.props).filter(key => key !== 'class' && key !== 'style');
     options.filterProps = function filterProps(props) {
-      return pick(props, propKeys, ['class', 'style']);
+      return pick(props, propKeys);
     };
     options.props._as = String;
     options.setup = function setup(props, ctx) {

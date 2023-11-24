@@ -104,12 +104,17 @@ export const VBreadcrumbs = genericComponent()({
             item,
             raw
           } = _ref2;
-          return _createVNode(_Fragment, null, [_createVNode(VBreadcrumbsItem, _mergeProps({
-            "key": item.title,
+          return _createVNode(_Fragment, null, [slots.item?.({
+            item,
+            index
+          }) ?? _createVNode(VBreadcrumbsItem, _mergeProps({
+            "key": index,
             "disabled": index >= array.length - 1
-          }, item), {
+          }, typeof item === 'string' ? {
+            title: item
+          } : item), {
             default: slots.title ? () => slots.title?.({
-              item: raw,
+              item,
               index
             }) : undefined
           }), index < array.length - 1 && _createVNode(VBreadcrumbsDivider, null, {

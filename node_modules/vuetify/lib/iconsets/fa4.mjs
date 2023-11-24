@@ -43,7 +43,8 @@ const aliases = {
   file: 'fa-paperclip',
   plus: 'fa-plus',
   minus: 'fa-minus',
-  calendar: 'fa-calendar'
+  calendar: 'fa-calendar',
+  eyeDropper: 'fa-eye-dropper'
 };
 const fa = {
   // Not using mergeProps here, functional components merge props by default (?)
