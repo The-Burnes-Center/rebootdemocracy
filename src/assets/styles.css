@@ -2798,14 +2798,16 @@ border-radius: 8px;
 }
 
 .team-title{
-  margin-left: 1rem;
+ padding: 2rem;
 }
 
 .teamContainer{
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  width: 350px;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
   gap: 2rem;
+  align-items: center;
+  padding: 2rem;
 }
 
 .imageContainer img{
