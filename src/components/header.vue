@@ -14,7 +14,7 @@ export default {
         <img @click="$router.push('../')" src="../assets/burnes-center-logo.png">
         
       </div>
-      <div class="wordmark">
+      <div @click="$router.push('../')"  class="wordmark">
         Reboot<br>Democracy<br>.AI
       </div>
     </div>
