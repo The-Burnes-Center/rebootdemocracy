@@ -19,6 +19,7 @@ export const makeVExpansionPanelTitleProps = propsFactory({
     default: '$collapse'
   },
   hideActions: Boolean,
+  static: Boolean,
   ripple: {
     type: [Boolean, Object],
     default: false
@@ -51,7 +52,8 @@ export const VExpansionPanelTitle = genericComponent()({
     }));
     useRender(() => _withDirectives(_createVNode("button", {
       "class": ['v-expansion-panel-title', {
-        'v-expansion-panel-title--active': expansionPanel.isSelected.value
+        'v-expansion-panel-title--active': expansionPanel.isSelected.value,
+        'v-expansion-panel-title--static': props.static
       }, backgroundColorClasses.value, props.class],
       "style": [backgroundColorStyles.value, props.style],
       "type": "button",

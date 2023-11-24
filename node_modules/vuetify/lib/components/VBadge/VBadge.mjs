@@ -14,7 +14,7 @@ import { makeTagProps } from "../../composables/tag.mjs";
 import { makeThemeProps, useTheme } from "../../composables/theme.mjs";
 import { makeTransitionProps, MaybeTransition } from "../../composables/transition.mjs"; // Utilities
 import { toRef } from 'vue';
-import { genericComponent, pick, propsFactory, useRender } from "../../util/index.mjs";
+import { genericComponent, pickWithRest, propsFactory, useRender } from "../../util/index.mjs";
 export const makeVBadgeProps = propsFactory({
   bordered: Boolean,
   color: String,
@@ -77,7 +77,7 @@ export const VBadge = genericComponent()({
     useRender(() => {
       const value = Number(props.content);
       const content = !props.max || isNaN(value) ? props.content : value <= +props.max ? value : `${props.max}+`;
-      const [badgeAttrs, attrs] = pick(ctx.attrs, ['aria-atomic', 'aria-label', 'aria-live', 'role', 'title']);
+      const [badgeAttrs, attrs] = pickWithRest(ctx.attrs, ['aria-atomic', 'aria-label', 'aria-live', 'role', 'title']);
       return _createVNode(props.tag, _mergeProps({
         "class": ['v-badge', {
           'v-badge--bordered': props.bordered,

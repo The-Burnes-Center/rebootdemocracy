@@ -7,7 +7,7 @@ import { makeComponentProps } from "../../composables/component.mjs";
 import { makeGroupProps, useGroup } from "../../composables/group.mjs";
 import { makeTagProps } from "../../composables/tag.mjs";
 import { makeThemeProps, provideTheme } from "../../composables/theme.mjs"; // Utilities
-import { genericComponent, propsFactory } from "../../util/index.mjs";
+import { genericComponent, propsFactory } from "../../util/index.mjs"; // Types
 export const VItemGroupSymbol = Symbol.for('vuetify:v-item-group');
 export const makeVItemGroupProps = propsFactory({
   ...makeComponentProps(),

@@ -40,7 +40,8 @@ const aliases = {
   file: 'fas fa-paperclip',
   plus: 'fas fa-plus',
   minus: 'fas fa-minus',
-  calendar: 'fas fa-calendar'
+  calendar: 'fas fa-calendar',
+  eyeDropper: 'fas fa-eye-dropper'
 };
 const fa = {
   component: VClassIcon

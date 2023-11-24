@@ -7,6 +7,7 @@ export * from "./createSimpleFunctional.mjs";
 export * from "./defineComponent.mjs";
 export * from "./dom.mjs";
 export * from "./easing.mjs";
+export * from "./events.mjs";
 export * from "./getCurrentInstance.mjs";
 export * from "./getScrollParent.mjs";
 export * from "./globals.mjs";
