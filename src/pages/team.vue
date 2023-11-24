@@ -1,23 +1,4 @@
-<template>
-  <div>
-    <header-component></header-component>
-    <div class="team-title">
-        <h1>Our Team</h1>
-    </div>
-    <div class="teamContainer">
-    <div v-for="team_item in teamData">
-        <card-component 
-        :fname="team_item.First_Name"
-        :lname="team_item.Last_Name"
-        :bio="team_item.Link_to_bio"
-        :title="team_item.Title"
-        :imgUrl = "this.directus._url + 'assets/' + team_item.Headshot.id"
-         />
-    </div>
-    </div>
-    <footer-component></footer-component>
-  </div>
-</template>
+
 
 <script>
 import HeaderComponent from "../components/header.vue";
@@ -60,6 +41,11 @@ methods: {
      fields: [
       '*.*'
    ],
+          filter: {
+            Headshot: {
+              _neq: null ,
+            },
+          },
    
   })
   .then((item) => {
@@ -69,3 +55,23 @@ methods: {
 }
 };
 </script>
+<template>
+  <div>
+    <header-component></header-component>
+    <div class="team-title">
+        <h1>Our Team</h1>
+    </div>
+    <div class="teamContainer">
+    <div v-for="team_item in teamData">
+        <card-component 
+        :fname="team_item.First_Name"
+        :lname="team_item.Last_Name"
+        :bio="team_item.Link_to_bio"
+        :title="team_item.Title"
+        :imgUrl = "this.directus._url + 'assets/' + team_item.Headshot.id"
+         />
+    </div>
+    </div>
+    <footer-component></footer-component>
+  </div>
+</template>
