@@ -425,10 +425,12 @@ p.author-no-image{
 }
 .other-post-row a{
   text-decoration: none;
-  display:flex;
-  flex-direction: row;
   color: unset;
+  display:flex;
+  flex-direction: row-reverse;
+  gap: 24px;
 }
+
 .blog-details {
   max-width: 1100px; /* Maximum width of the content */
   width: 100%; /* Makes the content fill the container up to the maximum width */
@@ -541,11 +543,7 @@ gap: 24px;
 align-self: stretch;
 border-bottom: 1px solid #E6E4DE;
 }
-.other-post-row a{
-  display:flex;
-  flex-direction: row;
-  gap: 24px;
-}
+
 .other-post-details{
   display:flex;
   flex-direction: column;
@@ -665,11 +663,37 @@ line-height: normal;
     flex-direction: column;
     gap: 68px;
   }
+  .blog-featured .author-list{
+    width: 100%;
+    display: block;
+  }
+  .other-post-details .author-details{
+
+    display: block;
+  }
+  
+  .other-post-details .author-item{
+
+    display: block;
+  }
+  .blog-featured .author-list p.author-name{
+    width: auto;
+    float: left;
+    padding-right: 5px;
+  
+  }
+ 
+  .blog-featured  .author-list > div{
+    width: auto;
+    float: left;
+  
+  }
   .first-blog-post{
     display:flex;
     flex-direction: column;
     justify-content: center;
     width:100%;
+    height:auto;
   }
   .other-blog-posts{
     display:flex;
@@ -678,8 +702,32 @@ line-height: normal;
     width:100%;
   }
   .other-post-row{
-    height: 280px;
+    height: auto;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
   }
+
+  .other-post-row a{
+    display:inline;
+    /* flex-direction: row-reverse;
+    gap: 24px; */
+  }
+  .other-post-row img
+  {
+    float: right;
+  }
+
+.other-post-details{
+  display:inline;
+}
+.other-post-details h3
+{
+  margin-bottom:10px
+}
+.other-post-details p
+{
+  margin-bottom:5px
+}
 }
 @media (max-width: 768px) {
   .allposts-section{
@@ -732,8 +780,10 @@ line-height: normal;
     justify-content: center;
     width:100%;
   }
-  .other-post-row{
-    height: 280px;
+
+
+  .allposts-post-details{
+    max-width: 50%;
   }
 }
 p.excerpt{
