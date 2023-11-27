@@ -229,6 +229,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <div class="other-blog-posts">
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
        <a :href="'/blog/' + blog_item.slug">
+        <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
         <div class="other-post-details">
               <h3>{{blog_item.title}}</h3>
               <p>{{ blog_item.excerpt }}</p>
@@ -246,7 +247,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                     </div>
                   </div>
             </div>
-         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+         
          </a>
       </div>
 
