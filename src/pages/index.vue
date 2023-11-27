@@ -429,6 +429,11 @@ export default {
 
 <!-- Hero Section -->
 <div class="hero">
+    <video autoplay loop muted playsinline>
+        <source src="/src/assets/liquid_ai_animation.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+  <div class="hero-fallback-image"></div>
   <div class="hero-content">
     <h1 class="eyebrow blue">{{indexData.title}}</h1>
     <h1 class="title" v-html="indexData.subtitle"></h1>
