@@ -186,11 +186,11 @@ export default {
       this.directus
       .items('reboot_democracy_blog')
       .readByQuery({
-          // filter: {
-          //   featured: {
-          //     _eq: 'true',
-          //   },
-          // },
+          filter: {
+            status: {
+              _eq: 'published',
+            },
+          },
          meta: 'total_count',
          limit: 10,
          sort:["date"],
@@ -430,7 +430,7 @@ export default {
 <!-- Hero Section -->
 <div class="hero">
     <video autoplay loop muted playsinline>
-        <source src="/src/assets/liquid_ai_animation.mp4" type="video/mp4">
+        <source src="/src/assets/liquid_ai_animation.mp4" type="video/mp4" title="generated with https://runwayml.com/">
         Your browser does not support the video tag.
     </video>
   <div class="hero-fallback-image"></div>
@@ -440,7 +440,7 @@ export default {
   </div>
   <div class="featured-section">
     <v-carousel  hide-delimiters v-model="model">
-      <v-carousel-item class="index_carousel" v-for="(item, i) in featuredData.slice().reverse()" :key="i">
+      <v-carousel-item class="index_carousel" v-for="(item, i) in featuredData.slice().reverse()" :key="i" >
     <div class="featured-content">
         <h1 class="eyebrow">From the Blog</h1>
         <div class="featured-image">
