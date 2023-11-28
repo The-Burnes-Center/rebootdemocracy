@@ -171,6 +171,11 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       .readByQuery({
          meta: 'total_count',
          limit: 10,
+          filter: {
+            status: {
+              _eq: "published",
+            },
+          },
          fields: [
           '*.*',
           'authors.team_id.*',
