@@ -183,6 +183,7 @@ export default {
     fetchFeatured: function fetchFeatured() {
       self = this;
 
+      
       this.directus
       .items('reboot_democracy_blog')
       .readByQuery({
