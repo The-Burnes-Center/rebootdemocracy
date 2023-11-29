@@ -7,7 +7,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@directus/sdk": "^10.1.1",
+    "@directus/sdk": "^10.0.2",
     "@netlify/functions": "^1.6.0",
     "@vueuse/head": "^2.0.0",
     "axios": "^1.6.2",
@@ -16,7 +16,7 @@
     "jsdom": "^22.1.0",
     "node-fetch": "^3.3.2",
     "npm": "^10.2.3",
-    "openai": "^4.17.0",
+    "openai": "^4.20.1",
     "swiper": "^9.0.4",
     "vite-plugin-radar": "^0.5.0",
     "vue": "^3.2.16",
