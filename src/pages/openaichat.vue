@@ -39,7 +39,6 @@ export default {
       messages: [],
       quizQuestions: [],
       isQuizAnswered: false,
-      
       assistantId: process.env.REBOOT_DEMOCRACY_ASSISTANT_ID
     };
   },
