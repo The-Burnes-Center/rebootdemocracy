@@ -11,6 +11,8 @@ import isFuture from "date-fns/isFuture";
 
 // import { $vfm, VueFinalModal, ModalsContainer } from 'vue-final-modal'
 import OpenAI from "openai";
+import { marked } from 'marked';
+
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
@@ -23,6 +25,8 @@ export default {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
     "mailing-list-comp": MailingListComponent,
+    // "vue-markdown":VueMarkdown
+    
 
     //   "generative-ai-banner-comp":GenerativeAIBannerComponent,
     //   "ws-banner":WsBanner,
@@ -36,13 +40,18 @@ export default {
       thread: null,
       currentQuestion: null,
       userAnswer: '',
+      userAnswers:[],
       messages: [],
       quizQuestions: [],
       isQuizAnswered: false,
-      assistantId: process.env.REBOOT_DEMOCRACY_ASSISTANT_ID
+      
+      assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Replace with your assistant ID
     };
   },
   methods: {
+        parsedMarkdown(content) {
+      return marked(content);
+    },
     async displayInfos(title, questions) {
       this.quizQuestions = questions;
       this.nextQuestion();
@@ -62,15 +71,23 @@ export default {
 
     nextQuestion() {
       if (this.quizQuestions.length > 0) {
+        console.log(this.quizQuestions.length)
         this.currentQuestion = this.quizQuestions.shift();
       } else {
         this.isQuizAnswered = true;
+
         this.handleQuizCompletion();
       }
     },
 
     submitAnswer() {
       if (this.userAnswer.trim()) {
+        this.userAnswers.push(this.userAnswer);
+        this.userAnswer = '';
+
+        if (this.quizQuestions.length > 0) {
+        this.nextQuestion();
+      }
        this.messages.push({ id: Date.now(), content: this.userAnswer, type: 'user' });
       // Process the user's answer and call sendToOpenAI or other methods as needed
       this.currentQuestion = null;
@@ -84,11 +101,14 @@ export default {
       this.messages.push({ id: Date.now(), content: "Quiz completed. Thank you for your responses!" });
     },
     async initializeOpenAI() {
-      const secretKey = process.env.OPENAI_API_KEY; // Ensure your API key is stored in an environment variable
+      // const secretKey = process.env.OPENAI_API_KEY; // Ensure your API key is stored in an environment variable
+      const secretKey = "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"; // Ensure your API key is stored in an environment variable
       this.openai = new OpenAI({
         apiKey: secretKey,
+        dangerouslyAllowBrowser: true,
       });
       this.thread = await this.openai.beta.threads.create();
+      this.startQuiz()
     },
     async startQuiz() {
       const initialQuestion =
@@ -186,13 +206,14 @@ export default {
   <!-- Header Component -->
   <header-comp></header-comp>
 
-  <div>
+  <div class="resource-description">
     <h1>Participatory Democracy Assistant</h1>
     <div v-if="!isQuizAnswered">
-      <button @click="startQuiz">Start Quiz</button>
+      <button @click="startQuiz">Starting Quiz...</button>
     </div>
     <div v-else>
-      <div v-if="currentQuestion">
+      <!-- <div v-if="currentQuestion">
+      {{ currentQuestion }}
         <p>{{ currentQuestion.question_text }}</p>
         <div v-if="currentQuestion.question_type === 'MULTIPLE_CHOICE'">
           <div v-for="choice in currentQuestion.choices" :key="choice">
@@ -205,18 +226,18 @@ export default {
           <input v-model="userAnswer" placeholder="Your answer" @keyup.enter="submitAnswer" />
         </div>
         <button @click="submitAnswer">Submit Answer</button>
-      </div>
-      <div v-else>
+      </div> -->
+      <div>
         <div class="chat-window" ref="chatWindow">
-          <div v-for="message in messages" :key="message.id" :class="['message', message.type]">
-            {{ message.content }}
+          <div v-for="message in messages" :key="message.id" :class="['message', message.type]" v-html="parsedMarkdown(message.content)">
+           
           </div>
         </div>
-        <input v-model="userInput" placeholder="Your entry" @keyup.enter="sendUserQuestion" />
+        <textarea v-model="userInput" placeholder="Your entry" @keyup.enter="sendUserQuestion" class="chat-input"/>
         <br>
-        <button @click="sendUserQuestion">Submit</button>
+        <button @click="sendUserQuestion" class="btn btn-small btn-primary">Submit</button>
         <br> <br>
-        <button @click="continueConversation">Continue Conversation</button>
+        <button @click="continueConversation" class="btn btn-small btn-primary">Continue Conversation</button>
       </div>
     </div>
   </div>
@@ -225,11 +246,11 @@ export default {
 </template>
 <style>
 .chat-window {
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
   border: 1px solid #ccc;
   margin-bottom: 10px;
-  padding: 10px;
+  padding: 20px;
       display: flex;
     flex-direction: column;
 }
@@ -254,5 +275,21 @@ export default {
 .message.assistant {
   background-color: #ffcccb; /* Light red background for assistant messages */
   text-align: left;
+}
+.chat-input{
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: -moz-fit-content;
+    width: 100%;
+    height: inherit;
+    padding: 10px 60px;
+    min-height: 55px;
+    font-family: 'Space Mono', monospace;
+    gap: 20px;
+    z-index: 1000;
 }
 </style>
