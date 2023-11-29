@@ -87,7 +87,6 @@ export default {
       const secretKey = process.env.OPENAI_API_KEY; // Ensure your API key is stored in an environment variable
       this.openai = new OpenAI({
         apiKey: secretKey,
-        dangerouslyAllowBrowser: true,
       });
       this.thread = await this.openai.beta.threads.create();
     },
