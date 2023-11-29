@@ -418,7 +418,7 @@ export default {
       this.featuredData.forEach(item => {
         if (item.image) {
           const img = new Image();
-          img.src = this.directus._url + 'assets/' + item.image.id + '??width=438';
+          img.src = this.directus._url + 'assets/' + item.image.id + '?width=438';
           // You can also add event listeners here if you want to handle load or error events
         }
       });
