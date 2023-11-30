@@ -2,7 +2,7 @@
 
 // import { $vfm, VueFinalModal, ModalsContainer } from 'vue-final-modal'
 import { marked } from 'marked';
-
+import axios from 'axios';
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
