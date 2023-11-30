@@ -39,6 +39,13 @@ export default {
       this.nextQuestion();
     },
 
+    updateMessagesAndScroll(newMessage) {
+      this.messages.push(newMessage);
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
+    },
+
     scrollToBottom() {
       const chatWindow = this.$refs.chatWindow;
       chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -103,13 +110,27 @@ export default {
       // other handling
     },
 
+    async sendUserQuestion() {
+      if (this.userInput.trim()) {
+        this.updateMessagesAndScroll({ id: Date.now(), content: this.userInput, type: 'user' });
+        
+        await this.sendOpenAIMessage(this.userInput);
+      }
+    },
+
     async sendOpenAIMessage(messageContent) {
+
+      
+      this.userInput = ""; // Clear the input to prevent repeat
       await axios.post('/.netlify/functions/openai-handler', {
         action: 'sendMessage',
         data: { threadId: this.threadId, message: { role: "user", content: messageContent } }
       });
       await this.processOpenAIResponse();
     },
+
+
+
     async processOpenAIResponse(){
 
       const run = await this.createOpenAIRun( {assistant_id: this.assistantId })
@@ -150,8 +171,10 @@ export default {
     const messagesOAI = await this.listOpenAIMessages();
     const lastMessageForRun = messagesOAI.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
     if (lastMessageForRun) {
-    this.messages.push({ id: lastMessageForRun.id, content: lastMessageForRun.content[0].text.value });
-    }
+    this.updateMessagesAndScroll({ id: lastMessageForRun.id, content: lastMessageForRun.content[0].text.value });
+  
+  }
+
 
     },
 
