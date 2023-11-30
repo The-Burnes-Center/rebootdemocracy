@@ -1,25 +1,43 @@
+
+
+
+
 <script>
+import { ref, watch } from "vue";
+import { Directus } from "@directus/sdk";
+import format from "date-fns/format";
+import isPast from "date-fns/isPast";
+import isFuture from "date-fns/isFuture";
 
 // import { $vfm, VueFinalModal, ModalsContainer } from 'vue-final-modal'
+import OpenAI from "openai";
 import { marked } from 'marked';
 
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import MailingListComponent from "../components/mailing.vue";
-
+// import { register } from 'swiper/element/bundle';
+// import {useHead } from '@vueuse/head'
 
 export default {
   components: {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
     "mailing-list-comp": MailingListComponent,
+    // "vue-markdown":VueMarkdown
+    
+
+    //   "generative-ai-banner-comp":GenerativeAIBannerComponent,
+    //   "ws-banner":WsBanner,
+    //       VueFinalModal,
+    //   ModalsContainer,
+    //   ModalComp,
   },
   data() {
     return {
       openai: null,
       thread: null,
-      threadId: null,
       currentQuestion: null,
       userAnswer: '',
       userAnswers:[],
@@ -31,7 +49,7 @@ export default {
     };
   },
   methods: {
-    parsedMarkdown(content) {
+        parsedMarkdown(content) {
       return marked(content);
     },
     async displayInfos(title, questions) {
@@ -43,6 +61,14 @@ export default {
       const chatWindow = this.$refs.chatWindow;
       chatWindow.scrollTop = chatWindow.scrollHeight;
     },
+
+    updateMessagesAndScroll(newMessage) {
+      this.messages.push(newMessage);
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
+    },
+
     nextQuestion() {
       if (this.quizQuestions.length > 0) {
         console.log(this.quizQuestions.length)
@@ -69,53 +95,50 @@ export default {
       }
       // You might want to store the user's answer and send it to OpenAI
     },
+
     handleQuizCompletion() {
       // Handle the completion of the quiz
       this.messages.push({ id: Date.now(), content: "Quiz completed. Thank you for your responses!" });
     },
-
-        async startQuiz() {
+    async initializeOpenAI() {
+      const secretKey = process.env.OPENAI_API_KEY; // Ensure your API key is stored in an environment variable
+      
+      this.openai = new OpenAI({
+        apiKey: secretKey,
+        dangerouslyAllowBrowser: true,
+      });
+      this.thread = await this.openai.beta.threads.create();
+      this.startQuiz()
+    },
+    async startQuiz() {
       const initialQuestion =
         "Make a quiz with 2 questions: One open-ended, one multiple choice. Then, give me feedback for the responses.";
-      await this.sendOpenAIMessage(initialQuestion);
+      await this.sendToOpenAI(initialQuestion);
     },
-
-    async continueConversation() {
-      const continueAsking = this.userInput.toLowerCase().includes("yes");
-      if (continueAsking) {
-        this.isQuizAnswered = false;
-        this.startQuiz();
-      } else {
-        this.messages.push({
-          id: Date.now(),
-          content: "Alrighty then, I hope you learned something!",
-        });
-        this.userInput = "";
+    async sendUserQuestion() {
+      if (this.userInput.trim()) {
+        this.updateMessagesAndScroll({ id: Date.now(), content: this.userInput, type: 'user' });
+        
+        await this.sendToOpenAI(this.userInput);
+        this.userInput = ""; // Clear the input to prevent repeat
       }
     },
-
-    async createOpenAIThread() {
-      const response = await axios.post('/.netlify/functions/openai-handler', {
-        action: 'createThread'
+    async sendToOpenAI(question) {
+      await this.openai.beta.threads.messages.create(this.thread.id, {
+        role: "user",
+        content: question,
       });
-      this.threadId = response.data.id; // Assuming the thread ID is in the response
-      this.startQuiz()
-      // other handling
+
+      await this.pollForResponse();
     },
+    async pollForResponse() {
+  let run = await this.openai.beta.threads.runs.create(this.thread.id, {
+    assistant_id: this.assistantId,
+  });
 
-    async sendOpenAIMessage(messageContent) {
-      await axios.post('/.netlify/functions/openai-handler', {
-        action: 'sendMessage',
-        data: { threadId: this.threadId, message: { role: "user", content: messageContent } }
-      });
-      await this.processOpenAIResponse();
-    },
-    async processOpenAIResponse(){
+  let actualRun = await this.openai.beta.threads.runs.retrieve(this.thread.id, run.id);
 
-      const run = await createOpenAIRun( {assistant_id: this.assistantId })
-      const actualRun = await retrieveOpenAIRun (run.id)
-
-      while (actualRun.status === "queued" || actualRun.status === "in_progress" || actualRun.status === "requires_action") {
+  while (actualRun.status === "queued" || actualRun.status === "in_progress" || actualRun.status === "requires_action") {
     if (actualRun.status === "requires_action") {
       // Handle the action required by the assistant
       const toolCall = actualRun.required_action?.submit_tool_outputs?.tool_calls[0];
@@ -127,7 +150,7 @@ export default {
       const responses = await this.displayInfos(name || "cool quiz", questions);
       console.log(responses)
       // Submit the tool outputs to continue
-      await this.submitOpenAIToolOutputs(run.id, {
+      await this.openai.beta.threads.runs.submitToolOutputs(this.thread.id, run.id, {
     tool_outputs: [
       {
         tool_call_id: toolCall?.id,
@@ -142,51 +165,33 @@ export default {
 
     // Wait for a while before checking the status again
     await new Promise(resolve => setTimeout(resolve, 2000));
-    actualRun = await this.retrieveOpenAIRun(run.id);
+    actualRun = await this.openai.beta.threads.runs.retrieve(this.thread.id, run.id);
   }
 
-    // Process the final response from OpenAI
-    const messagesOAI = await this.listOpenAIMessages();
-    const lastMessageForRun = messagesOAI.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
-    if (lastMessageForRun) {
+  // Process the final response from OpenAI
+  const messages = await this.openai.beta.threads.messages.list(this.thread.id);
+  const lastMessageForRun = messages.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
+  if (lastMessageForRun) {
     this.messages.push({ id: lastMessageForRun.id, content: lastMessageForRun.content[0].text.value });
-    }
+  }
+},
 
+    async continueConversation() {
+      const continueAsking = this.userInput.toLowerCase().includes("yes");
+      if (continueAsking) {
+        this.isQuizAnswered = false;
+        this.startQuiz();
+      } else {
+        this.messages.push({
+          id: Date.now(),
+          content: "Alrighty then, I hope you learned something!",
+        });
+        this.userInput = "";
+      }
     },
-
-    async createOpenAIRun(runData) {
-      const response = await axios.post('/.netlify/functions/openai-handler', {
-        action: 'createRun',
-        data: { threadId: this.threadId, runData }
-      });
-      // handle the response
-    },
-    async retrieveOpenAIRun(runId) {
-      const response = await axios.post('/.netlify/functions/openai-handler', {
-        action: 'retrieveRun',
-        data: { threadId: this.threadId, runId }
-      });
-      // handle the response
-    },
-    async submitOpenAIToolOutputs(runId, toolOutputs) {
-      const response = await axios.post('/.netlify/functions/openai-handler', {
-        action: 'submitToolOutputs',
-        data: { threadId: this.threadId, runId, toolOutputs }
-      });
-      // handle the response
-    },
-    async listOpenAIMessages() {
-      const response = await axios.post('/.netlify/functions/openai-handler', {
-        action: 'listMessages',
-        data: { threadId: this.threadId }
-      });
-      // handle the response
-    },
-    
   },
   mounted() {
-    this.createOpenAIThread(); // Initialize OpenAI thread on component mount
-
+    this.initializeOpenAI();
   },
 };
 </script>
