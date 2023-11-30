@@ -113,8 +113,8 @@ export default {
     async processOpenAIResponse(){
 
       const run = await this.createOpenAIRun( {assistant_id: this.assistantId })
-      
-      const actualRun = await this.retrieveOpenAIRun (run.id)
+      console.log(run);
+      let actualRun = await this.retrieveOpenAIRun (run.id)
 
       while (actualRun.status === "queued" || actualRun.status === "in_progress" || actualRun.status === "requires_action") {
     if (actualRun.status === "requires_action") {
@@ -161,7 +161,7 @@ export default {
         data: { threadId: this.threadId, runData }
       });
       // handle the response
-      return response
+      return response.data
     },
     async retrieveOpenAIRun(runId) {
       const response = await axios.post('/.netlify/functions/openai-handler', {
@@ -169,7 +169,7 @@ export default {
         data: { threadId: this.threadId, runId }
       });
       // handle the response
-      return response
+      return response.data
     },
     async submitOpenAIToolOutputs(runId, toolOutputs) {
       const response = await axios.post('/.netlify/functions/openai-handler', {
@@ -184,13 +184,11 @@ export default {
         data: { threadId: this.threadId }
       });
       // handle the response
-      return response
+      return response.data
     },
-    
   },
   mounted() {
     this.createOpenAIThread(); // Initialize OpenAI thread on component mount
-
   },
 };
 </script>
