@@ -183,7 +183,7 @@ export default {
     fetchFeatured: function fetchFeatured() {
       self = this;
 
-      
+
       this.directus
       .items('reboot_democracy_blog')
       .readByQuery({
@@ -204,6 +204,7 @@ export default {
       })
       .then((item) => {
       self.featuredData =  item.data;
+      self.preloadImages();
       });
     },
 
@@ -412,9 +413,18 @@ export default {
      this.showmodal=false;
      localStorage.setItem("Reboot Democracy","off");
     
+    },
+    preloadImages() {
+      this.featuredData.forEach(item => {
+        if (item.image) {
+          const img = new Image();
+          img.src = this.directus._url + 'assets/' + item.image.id + '?width=438';
+          // You can also add event listeners here if you want to handle load or error events
+        }
+      });
     }
+  },
 
-  }
 }
 </script>
 
@@ -439,13 +449,15 @@ export default {
     <h1 class="eyebrow blue">{{indexData.title}}</h1>
     <h1 class="title" v-html="indexData.subtitle"></h1>
   </div>
+
+  
   <div class="featured-section">
     <v-carousel  hide-delimiters v-model="model">
-      <v-carousel-item class="index_carousel" v-for="(item, i) in featuredData.slice().reverse()" :key="i" >
+      <v-carousel-item class="index_carousel" v-for="item in featuredData.slice().reverse().slice(0, 6)" :key="i" >
     <div class="featured-content">
         <h1 class="eyebrow">From the Blog</h1>
         <div class="featured-image">
-          <img v-if="item.image" :src="this.directus._url+'assets/'+item.image.id">
+          <img v-if="item.image" :src="this.directus._url+'assets/'+item.image.id+'?width=438'">
           <!-- <img v-if="!item.thumbnail"  src="..//assets/media-image.png"> -->
         </div>
           <h4>{{item.title}}</h4>
@@ -495,7 +507,7 @@ export default {
     <div class="upcoming-events-content">
       <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
 
-              <img v-if="!resource_item.instructor && resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+              <img v-if="!resource_item.instructor && resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id+'?width=334'">
               <h4>{{resource_item.title}}</h4>
               <div style="display:flex;flex-direction: column"><p><b>Speakers:&nbsp</b></p><div  v-html="resource_item.speakers"></div></div>
               <p>{{formatDateOnly(new Date(resource_item.date))}}</p>
@@ -525,7 +537,7 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in eelData" v-show="index < 6">
+          <div class="resource-col"  v-for="resource_item in eelData.slice(0, 6)" >
             <div class="resource-item">
                 <div class="resource-item-img">
                  <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
@@ -590,10 +602,10 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in engagementData.slice().reverse()" v-show="index < 6">
+          <div class="resource-col"  v-for="resource_item in engagementData.slice().reverse().slice(0, 6)" >
             <div class="resource-item">
                 <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id+'?width=566'">
                    <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
               </div>
               <div class="resource-item-text">
@@ -629,11 +641,11 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in researchData" v-show="index < 6">
+          <div class="resource-col"  v-for="resource_item in researchData.slice(0, 6)" >
             <div class="resource-item">
               <div class="resource-item-img">
                 
-                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id+'?width=566'">
                   <!-- <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png"> -->
               </div>
               <div class="resource-item-text">
@@ -663,10 +675,10 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in writingData.slice().reverse()" v-show="index < 6">
+          <div class="resource-col"  v-for="resource_item in writingData.slice().reverse().slice(0, 6)">
             <div class="resource-item">
               <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id+'?width=566'">
                    <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
               </div>
               <div class="resource-item-text">
@@ -696,10 +708,10 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in teachingData" v-show="index < 6">
+          <div class="resource-col"  v-for="resource_item in teachingData.slice(0, 6)">
             <div class="resource-item">
               <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id+'?width=566'">
                    <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
               </div>
               <div class="resource-item-text">
@@ -730,10 +742,10 @@ export default {
       </div>
       <div class="two-col-resources">
         <div class="resource-row">
-          <div class="resource-col"  v-for="(resource_item,index) in moreresourceData" v-show="index < 6">
+          <div class="resource-col"  v-for="resource_item in moreresourceData.slice(0, 6)" >
             <div class="resource-item">
                 <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id">
+                 <img v-if="resource_item.thumbnail" :src="this.directus._url + 'assets/' + resource_item.thumbnail.id+'?width=566'">
                   <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
               </div>
               <div class="resource-item-text">
