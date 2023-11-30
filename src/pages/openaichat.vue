@@ -112,8 +112,8 @@ export default {
     },
     async processOpenAIResponse(){
 
-      const run = await createOpenAIRun( {assistant_id: this.assistantId })
-      const actualRun = await retrieveOpenAIRun (run.id)
+      const run = await this.createOpenAIRun( {assistant_id: this.assistantId })
+      const actualRun = await this.retrieveOpenAIRun (run.id)
 
       while (actualRun.status === "queued" || actualRun.status === "in_progress" || actualRun.status === "requires_action") {
     if (actualRun.status === "requires_action") {
