@@ -9,7 +9,7 @@ export async function handler(event) {
 
   try {
     const { action, data } = JSON.parse(event.body);
-
+    console.log(action)
     let response;
     switch (action) {
       case 'createThread':
