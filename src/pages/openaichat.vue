@@ -23,10 +23,10 @@ export default {
       currentQuestion: null,
       userAnswer: '',
       userAnswers:[],
-      messages: [],
+      messages: [{ id: Date.now(), content: "One second, I am creating a quiz with 2 questions for you: One open-ended, one multiple choice! \n In the meantime, think about what Participatory Democracy means to you."}],
       quizQuestions: [],
       isQuizAnswered: false,
-      isLoading:false,
+      isLoading:true,
       
       assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Replace with your assistant ID
     };
@@ -35,7 +35,7 @@ export default {
     parsedMarkdown(content) {
       return marked(content);
     },
-    async displayInfos(title, questions) {
+    async displayInfo(title, questions) {
       this.quizQuestions = questions;
       this.nextQuestion();
     },
@@ -142,10 +142,13 @@ export default {
     async sendOpenAIMessage(messageContent) {
 
       this.userInput = ""; // Clear the input to prevent repeat
+      console.log('Mssg c:', messageContent);
       await axios.post('/.netlify/functions/openai-handler', {
         action: 'sendMessage',
         data: { threadId: this.threadId, message: { role: "user", content: messageContent } }
       });
+      
+      this.isQuizAnswered = true;
       await this.processOpenAIResponse();
     },
 
@@ -154,7 +157,8 @@ export default {
     async processOpenAIResponse(){
 
       const run = await this.createOpenAIRun( {assistant_id: this.assistantId })
-      let actualRun = await this.retrieveOpenAIRun (run.id)
+      
+      let actualRun = await this.retrieveOpenAIRun (run.id);
 
       while (actualRun.status === "queued" || actualRun.status === "in_progress" || actualRun.status === "requires_action") {
     if (actualRun.status === "requires_action") {
@@ -165,7 +169,7 @@ export default {
       const questions = args.questions;
 
       // Assuming displayInfos is a method that displays the quiz and collects responses
-      const responses = await this.displayInfos(name || "cool quiz", questions);
+      const responses = await this.displayInfo(name || "cool quiz", questions);
     
       // Submit the tool outputs to continue
       await this.submitOpenAIToolOutputs(run.id, {
@@ -263,7 +267,7 @@ export default {
   <div class="assitant-chat">
     <h1>Participatory Democracy Assistant</h1>
     <div v-if="!isQuizAnswered">
-      <button @click="startQuiz">Starting Quiz...</button>
+      <button @click="startQuiz">Loading...</button>
     </div>
     <div v-else>
       <!-- <div v-if="currentQuestion">
