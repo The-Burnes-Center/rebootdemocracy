@@ -291,8 +291,9 @@ export default {
         <br>
         <button @click="sendUserQuestion" class="btn btn-small btn-primary">Submit</button>
         <div v-if="isLoading" class="loader"></div>
-        <br> <br>
-        <button @click="continueConversation" class="btn btn-small btn-primary">Continue Conversation</button>
+        <br> 
+        <!-- <br>
+        <button @click="continueConversation" class="btn btn-small btn-primary">Continue Conversation</button> -->
       </div>
     </div>
   </div>
