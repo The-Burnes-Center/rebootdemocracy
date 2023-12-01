@@ -26,6 +26,7 @@ export default {
       messages: [],
       quizQuestions: [],
       isQuizAnswered: false,
+      isLoading:false,
       
       assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Replace with your assistant ID
     };
@@ -40,9 +41,9 @@ export default {
     },
 
     updateMessagesAndScroll(newMessage) {
+      this.isLoading = false;
       this.isQuizAnswered = true;
       
-
       this.messages.push(newMessage);
 
 
@@ -130,9 +131,10 @@ export default {
     },
 
     async sendUserQuestion() {
+      
       if (this.userInput.trim()) {
         this.updateMessagesAndScroll({ id: Date.now(), content: this.userInput, type: 'user' });
-        
+        this.isLoading = true;
         await this.sendOpenAIMessage(this.userInput);
       }
     },
@@ -288,6 +290,7 @@ export default {
         <textarea v-model="userInput" placeholder="Your entry" @keyup.enter="sendUserQuestion" class="chat-input"/>
         <br>
         <button @click="sendUserQuestion" class="btn btn-small btn-primary">Submit</button>
+        <div v-if="isLoading" class="loader"></div>
         <br> <br>
         <button @click="continueConversation" class="btn btn-small btn-primary">Continue Conversation</button>
       </div>
@@ -344,4 +347,20 @@ export default {
     gap: 20px;
     z-index: 1000;
 }
+.loader {
+  border: 5px solid #f3f3f3; /* Light grey */
+  border-top: 5px solid  #04787f; /* Blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+  float:right;
+
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 </style>
