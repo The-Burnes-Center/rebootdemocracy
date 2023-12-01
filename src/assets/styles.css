@@ -2496,9 +2496,21 @@ border-radius: 8px;
   padding: 4rem 5rem;
   gap: 20px;
 }
+.assitant-chat{
+  display:flex;
+  flex-direction: column;
+  width:70%;
+  padding: 4rem 5rem;
+  gap: 20px;
+}
 @media (max-width: 768px) {
   .resource-description{
   width: 100%;
+
+  }
+  .assitant-chat{
+    width: 100%;
+    padding: 1rem 1rem;
   }
 }
 .resource-scroll-section{
