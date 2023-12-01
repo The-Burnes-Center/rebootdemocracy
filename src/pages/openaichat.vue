@@ -40,19 +40,38 @@ export default {
     },
 
     updateMessagesAndScroll(newMessage) {
+      this.isQuizAnswered = true;
+      
+
       this.messages.push(newMessage);
+
+
       this.$nextTick(() => {
         this.scrollToBottom();
       });
+      this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
+
     },
 
     scrollToBottom() {
-      const chatWindow = this.$refs.chatWindow;
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-    },
+  const chatWindow = this.$refs.chatWindow;
+  if (chatWindow) {
+    // Get the last message element
+    const messages = chatWindow.getElementsByClassName('message');
+    const lastMessage = messages[messages.length - 1];
+
+    if (lastMessage) {
+      // Calculate the position to scroll to
+      // This is the offset top of the last message minus half the height of the chat window
+      const scrollPosition = lastMessage.offsetTop - chatWindow.offsetHeight / 2;
+      chatWindow.scrollTop = scrollPosition > 0 ? scrollPosition : 0;
+    }
+  }
+},
+
     nextQuestion() {
       if (this.quizQuestions.length > 0) {
-        console.log(this.quizQuestions.length)
+        
         this.currentQuestion = this.quizQuestions.shift();
       } else {
         this.isQuizAnswered = true;
@@ -120,7 +139,6 @@ export default {
 
     async sendOpenAIMessage(messageContent) {
 
-      
       this.userInput = ""; // Clear the input to prevent repeat
       await axios.post('/.netlify/functions/openai-handler', {
         action: 'sendMessage',
@@ -134,7 +152,6 @@ export default {
     async processOpenAIResponse(){
 
       const run = await this.createOpenAIRun( {assistant_id: this.assistantId })
-      console.log(run);
       let actualRun = await this.retrieveOpenAIRun (run.id)
 
       while (actualRun.status === "queued" || actualRun.status === "in_progress" || actualRun.status === "requires_action") {
@@ -147,7 +164,7 @@ export default {
 
       // Assuming displayInfos is a method that displays the quiz and collects responses
       const responses = await this.displayInfos(name || "cool quiz", questions);
-      console.log(responses)
+    
       // Submit the tool outputs to continue
       await this.submitOpenAIToolOutputs(run.id, {
     tool_outputs: [
@@ -158,8 +175,7 @@ export default {
     ],
   });
 
-      // Mark the quiz as answered
-      this.isQuizAnswered = true;
+
     }
 
     // Wait for a while before checking the status again
@@ -170,9 +186,10 @@ export default {
     // Process the final response from OpenAI
     const messagesOAI = await this.listOpenAIMessages();
     const lastMessageForRun = messagesOAI.data.filter(message => message.run_id === run.id && message.role === "assistant").pop();
+    
     if (lastMessageForRun) {
-    this.updateMessagesAndScroll({ id: lastMessageForRun.id, content: lastMessageForRun.content[0].text.value });
-  
+    this.updateMessagesAndScroll({ id: lastMessageForRun.id, content: lastMessageForRun.content[0].text.value, type: 'openai'});
+
   }
 
 
@@ -204,11 +221,26 @@ export default {
     async listOpenAIMessages() {
       const response = await axios.post('/.netlify/functions/openai-handler', {
         action: 'listMessages',
-        data: { threadId: this.threadId }
+        data: { threadId: this.threadId}
       });
       // handle the response
       return response.data
     },
+
+    async saveMessageToDatabase(message, threadId, chatPersona) {
+    const openaiId = chatPersona === 'openai' ? message.id : null;
+    try {
+      await axios.post('/.netlify/functions/openai-report-directus', {
+        message: { content: message.content }, // Sending only the content part
+        threadId,
+        chatPersona,
+        openaiId
+      });
+      // Optionally handle the response or errors
+    } catch (error) {
+      console.error('Error saving message to database:', error);
+    }
+  },
   },
   mounted() {
     this.createOpenAIThread(); // Initialize OpenAI thread on component mount
@@ -226,7 +258,7 @@ export default {
   <!-- Header Component -->
   <header-comp></header-comp>
 
-  <div class="resource-description">
+  <div class="assitant-chat">
     <h1>Participatory Democracy Assistant</h1>
     <div v-if="!isQuizAnswered">
       <button @click="startQuiz">Starting Quiz...</button>
