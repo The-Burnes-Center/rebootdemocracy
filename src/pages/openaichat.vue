@@ -27,6 +27,8 @@ export default {
       quizQuestions: [],
       isQuizAnswered: false,
       isLoading:true,
+      initMessage: null,
+      responsePromiseResolve: null,
       
       assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Replace with your assistant ID
     };
@@ -37,7 +39,62 @@ export default {
     },
     async displayInfo(title, questions) {
       this.quizQuestions = questions;
-      this.nextQuestion();
+
+  const responses = [];
+
+  for (const question of questions) {
+    let response = "";
+
+    // if multiple choice, print options
+    if (question["question_type"] === "MULTIPLE_CHOICE") {
+      const choicesString = question["choices"].map(choice => `- ${choice}`).join("\n");
+      const rLineQn = `**Choice question**: ${question["question_text"]} \n\n *Options*:\n${choicesString}\n
+      `;
+      
+      
+      this.initMessage =  { id: Date.now(), content: rLineQn, type: 'openai' };
+      this.updateMessagesAndScroll(this.initMessage);
+      response = await this.waitForUserResponse(); 
+
+    } else if (question["question_type"] === "FREE_RESPONSE") {
+      const rLineQn = `**Free response question**: ${question["question_text"]}\n
+      `;
+      
+      this.initMessage =   ({ id: Date.now(), content: rLineQn, type: 'openai' });
+      this.updateMessagesAndScroll(this.initMessage);
+      response = await this.waitForUserResponse(); 
+
+    }
+
+    responses.push(response);
+    this.initMessage = null;
+  }
+  console.log("Your responses from the quiz:\n", responses);
+  return responses;
+
+    },
+    handleSubmit() {
+      // When the user clicks submit, resolve the promise with the user input
+      
+      if(this.initMessage != null)
+      {
+      this.updateMessagesAndScroll({ id: Date.now(), content: this.userInput, type: 'user' });
+
+      if (this.responsePromiseResolve) {
+        this.responsePromiseResolve(this.userInput);
+        this.userInput = ''; // Clear the input field
+        this.responsePromiseResolve = null; // Reset the resolver
+      }
+      }else
+      {
+        this.sendUserQuestion()
+      }
+    },
+    waitForUserResponse() {
+      // Return a promise that will be resolved when the user clicks submit
+      return new Promise((resolve) => {
+        this.responsePromiseResolve = resolve;
+      });
     },
 
     updateMessagesAndScroll(newMessage) {
@@ -131,6 +188,7 @@ export default {
     },
 
     async sendUserQuestion() {
+
       
       if (this.userInput.trim()) {
         this.updateMessagesAndScroll({ id: Date.now(), content: this.userInput, type: 'user' });
@@ -142,7 +200,7 @@ export default {
     async sendOpenAIMessage(messageContent) {
 
       this.userInput = ""; // Clear the input to prevent repeat
-      console.log('Mssg c:', messageContent);
+
       await axios.post('/.netlify/functions/openai-handler', {
         action: 'sendMessage',
         data: { threadId: this.threadId, message: { role: "user", content: messageContent } }
@@ -159,18 +217,20 @@ export default {
       const run = await this.createOpenAIRun( {assistant_id: this.assistantId })
       
       let actualRun = await this.retrieveOpenAIRun (run.id);
-
+      
       while (actualRun.status === "queued" || actualRun.status === "in_progress" || actualRun.status === "requires_action") {
     if (actualRun.status === "requires_action") {
+      
       // Handle the action required by the assistant
       const toolCall = actualRun.required_action?.submit_tool_outputs?.tool_calls[0];
       const name = toolCall?.function.name;
       const args = JSON.parse(toolCall?.function?.arguments || "{}");
       const questions = args.questions;
-
-      // Assuming displayInfos is a method that displays the quiz and collects responses
+      
+      //  displayInfos is a method that displays the quiz and collects responses at first
       const responses = await this.displayInfo(name || "cool quiz", questions);
-    
+      this.isLoading = true;
+      
       // Submit the tool outputs to continue
       await this.submitOpenAIToolOutputs(run.id, {
     tool_outputs: [
@@ -291,9 +351,9 @@ export default {
            
           </div>
         </div>
-        <textarea v-model="userInput" placeholder="Your entry" @keyup.enter="sendUserQuestion" class="chat-input"/>
+        <textarea v-model="userInput" placeholder="Your entry" @keyup.enter="handleSubmit" class="chat-input"/>
         <br>
-        <button @click="sendUserQuestion" class="btn btn-small btn-primary">Submit</button>
+        <button @click="handleSubmit" class="btn btn-small btn-primary">Submit</button>
         <div v-if="isLoading" class="loader"></div>
         <br> 
         <!-- <br>
