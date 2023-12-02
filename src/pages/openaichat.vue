@@ -52,7 +52,7 @@ export default {
         // if multiple choice, print options
         if (question["question_type"] === "MULTIPLE_CHOICE") {
           const choicesString = question["choices"]
-            .map((choice) => `- ${choice}`)
+            .map((choice, i) => `${i+1}. ${choice}\n `)
             .join("\n");
           const rLineQn = `**Choice question**: ${question["question_text"]} \n\n *Options*:\n${choicesString}\n
       `;
@@ -64,7 +64,7 @@ export default {
           };
           this.updateMessagesAndScroll(this.initMessage);
           response = await this.waitForUserResponse();
-          console.log("MULTIPLE_CHOICE");
+          // console.log("MULTIPLE_CHOICE");
         } else if (question["question_type"] === "FREE_RESPONSE") {
           const rLineQn = `**Free response question**: ${question["question_text"]}\n
       `;
@@ -76,13 +76,13 @@ export default {
           };
           this.updateMessagesAndScroll(this.initMessage);
           response = await this.waitForUserResponse();
-          console.log("FREE_RESPONSE");
+          // console.log("FREE_RESPONSE");
         }
 
         responses.push(response);
         this.initMessage = null;
       }
-      console.log("Your responses from the quiz:\n", responses);
+      // console.log("Your responses from the quiz:\n", responses);
       return responses;
     },
     handleSubmit() {
@@ -252,7 +252,7 @@ export default {
         // Wait for a while before checking the status again
         await new Promise((resolve) => setTimeout(resolve, 2000));
         actualRun = await this.retrieveOpenAIRun(run.id);
-        console.log(actualRun)
+        // console.log(actualRun)
       }
       
 
@@ -280,7 +280,7 @@ export default {
       {
         this.initMessageFeedback = 2;
         const promptSuggestionsContent = 
-        "\nTry one of the following conversation topics to continue the conversation: \n"+lastMessageForRun.content[0].text.value;
+        "\nChoose one of the following conversation topics to continue the conversation: \n"+lastMessageForRun.content[0].text.value;
         
         this.messages.push({id: lastMessageForRun.id, content: promptSuggestionsContent, type: "openai"});
         
@@ -415,9 +415,23 @@ export default {
 .message.user {
   background-color: #a6b2f7;
   text-align: right;
-  width: 60%;
+  width: 65%;
   align-self: flex-end;
 }
+
+@media screen and (max-width: 767px) {
+  .message {
+ 
+ width: 85%;
+
+}
+
+.message.user {
+ width: 85%;
+}
+}
+
+
 
 .message.assistant {
   background-color: #ffcccb; /* Light red background for assistant messages */
