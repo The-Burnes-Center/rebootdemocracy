@@ -357,10 +357,10 @@ export default {
 -->
 
   <!-- Header Component -->
-  <header-comp></header-comp>
+  <!-- <header-comp></header-comp> -->
 
   <div class="assitant-chat">
-    <h1>Participatory Democracy Assistant</h1>
+    <!-- <h1>Participatory Democracy Assistant</h1> -->
     <div v-if="!isQuizAnswered">
       <button @click="startQuiz">Loading...</button>
     </div>
@@ -390,11 +390,12 @@ export default {
     </div>
   </div>
 
-  <footer-comp></footer-comp>
+  <!-- <footer-comp></footer-comp> -->
 </template>
 <style>
 .chat-window {
-  max-height: 400px;
+  max-height: 600px;
+  height: 520px;
   overflow-y: auto;
   border: 1px solid #ccc;
   margin-bottom: 10px;
