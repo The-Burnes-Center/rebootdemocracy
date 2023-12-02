@@ -11,6 +11,7 @@ import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import ModalComp from "../components/modal.vue";
 import MailingListComponent from "../components/mailing.vue";
+import OpenAIChat from "./openaichat.vue";
 // import { register } from 'swiper/element/bundle';
 // import {useHead } from '@vueuse/head'
 
@@ -20,6 +21,7 @@ export default {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
     "mailing-list-comp": MailingListComponent,
+    "openai-chat":OpenAIChat,
   //   "generative-ai-banner-comp":GenerativeAIBannerComponent,
     "ws-banner":
         VueFinalModal,
@@ -483,8 +485,9 @@ export default {
       <div class="mission-description" v-html="indexData.mission_description"></div>
         <!-- <a class="btn btn-medium btn-secondary">About Us</a> -->
   </div>
+  
   <div class="mission-image">
-
+<openai-chat />
   </div>
 
 </div>
