@@ -1404,7 +1404,7 @@ line-height: 160%; /* 28px */
     width: fit-content;
   }
   .mission-image{
-    display:none;
+    width: 100%;
   }
 }
 
@@ -2499,9 +2499,10 @@ border-radius: 8px;
 .assitant-chat{
   display:flex;
   flex-direction: column;
-  width:70%;
-  padding: 4rem 5rem;
+  width:100%;
+  padding: 1rem 1rem;
   gap: 20px;
+  height:700px
 }
 @media (max-width: 768px) {
   .resource-description{
