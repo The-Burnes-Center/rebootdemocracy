@@ -34,14 +34,15 @@ export default {
       initMessageFeedback:0,
       responsePromiseResolve: null,
 
-      assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Replace with your assistant ID
+      // assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Reboot Democracy Tutor ID - Replace with your assistant ID
+      assistantId: "asst_qzM0D7raRhInLxD4i6YSQxAt", // Including Blog API Id Replace with your assistant ID
     };
   },
   methods: {
     parsedMarkdown(content) {
       return marked(content);
     },
-    async displayInfo(title, questions) {
+    async displayQuiz(title, questions) {
       this.quizQuestions = questions;
 
       const responses = [];
@@ -120,7 +121,7 @@ export default {
       this.$nextTick(() => {
         this.scrollToBottom();
       });
-      this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
+      // this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
     },
 
     scrollToBottom() {
@@ -160,18 +161,10 @@ export default {
       await this.sendOpenAIMessage(promptSuggestions);
     },
 
-    async continueConversation() {
-      const continueAsking = this.userInput.toLowerCase().includes("yes");
-      if (continueAsking) {
-        this.isQuizAnswered = false;
-        this.startQuiz();
-      } else {
-        this.messages.push({
-          id: Date.now(),
-          content: "Alrighty then, I hope you learned something!",
-        });
-        this.userInput = "";
-      }
+    async crawlBlogInfos() {
+      const promptSuggestions =
+      "I'm trying to enlist my community's help in identifying a problem, how might I go about it?";
+      await this.sendOpenAIMessage(promptSuggestions);
     },
 
     async createOpenAIThread() {
@@ -179,7 +172,8 @@ export default {
         action: "createThread",
       });
       this.threadId = response.data.id; // Assuming the thread ID is in the response
-      this.startQuiz();
+      // this.startQuiz();
+      this.crawlBlogInfos();
       // other handling
     },
 
@@ -223,19 +217,33 @@ export default {
         actualRun.status === "requires_action"
       ) {
         if (actualRun.status === "requires_action") {
+
           // Handle the action required by the assistant
+          
           const toolCall =
             actualRun.required_action?.submit_tool_outputs?.tool_calls[0];
           const name = toolCall?.function.name;
           const args = JSON.parse(toolCall?.function?.arguments || "{}");
-          const questions = args.questions;
-
-        
-          //  displayInfos is a method that displays the quiz and collects responses at first
-          const responses = await this.displayInfo(
+          
+          console.log(name, args, actualRun)
+          /// handle which function to call based on the reply which tool to use 
+          if(name == "display_quiz")
+          {
+          const questions = args.questions;        
+      
+          //  displayQuizs is a method that displays the quiz and collects responses at first
+          const responses = await this.displayQuiz(
             name || "cool quiz",
             questions
           );
+
+          } else if(name == "crawl_thegovlab_blog")
+          {
+            const responses = await this.displayTheGovlabBlog(
+            // name || "cool quiz",
+            // questions
+          );
+          }
           this.isLoading = true;
 
           // Submit the tool outputs to continue
@@ -284,7 +292,7 @@ export default {
         
         this.messages.push({id: lastMessageForRun.id, content: promptSuggestionsContent, type: "openai"});
         
-        this.saveMessageToDatabase(promptSuggestionsContent, this.threadId, "openai");
+        // this.saveMessageToDatabase(promptSuggestionsContent, this.threadId, "openai");
       }
 
       if(this.initMessageFeedback==0) 
