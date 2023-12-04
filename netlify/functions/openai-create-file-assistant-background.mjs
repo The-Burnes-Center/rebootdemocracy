@@ -57,25 +57,31 @@ async function main(bodyres) {
 
   console.log(article.data);
   const buffer = Buffer.from(JSON.stringify(article.data), 'utf-8');
-  const formData = new FormData();
-
-  formData.append('file', buffer, {
-    contentType: 'application/json',
-    filename: bodyres.collection+'_'+slug+'.json', // Replace with your desired filename
-  });
-  formData.append('purpose', 'assistants');
 
   try {
       // Upload the file
-      const file = await openai.files.create(formData);
-
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      };
+  
+      const formData = new FormData();
+      formData.append('file', buffer, bodyres.collection+'_'+slug + '.json');
+      formData.append('purpose', 'assistants');
+  
+      // Use axios to send the request
+      const response = await axios.post('https://api.openai.com/v1/files', formData, { headers: formData.getHeaders() });
+  
+      // Handle the file upload response
+      const file = response.data;
+  
       // Attach the file to the assistant
-      const assistantId = process.env.REBOOT_DEMOCRACY_ASSISTANT_ID; // Replace with your actual assistant ID
+      const assistantId = process.env.REBOOT_DEMOCRACY_ASSISTANT_ID;
       const myAssistantFile = await openai.beta.assistants.files.create(
-          assistantId,
-          { file_id: file.id }
+        assistantId,
+        { file_id: file.id }
       );
-
+  
       console.log('Assistant file created:', myAssistantFile);
   } catch (error) {
       console.error('Error:', error);
