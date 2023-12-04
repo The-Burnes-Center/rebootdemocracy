@@ -86,6 +86,50 @@ export default {
       // console.log("Your responses from the quiz:\n", responses);
       return responses;
     },
+    async displayTheGovlabBlog(queries) {
+      this.blogQueries = queries;
+
+      const responses = [];
+
+      for (const query of blogQueries) {
+        let response = "";
+
+        // if multiple choice, print options
+        if (question["question_type"] === "MULTIPLE_CHOICE") {
+          const choicesString = question["choices"]
+            .map((choice, i) => `${i+1}. ${choice}\n `)
+            .join("\n");
+          const rLineQn = `**Choice question**: ${question["question_text"]} \n\n *Options*:\n${choicesString}\n
+      `;
+
+          this.initMessage = {
+            id: Date.now(),
+            content: rLineQn,
+            type: "openai",
+          };
+          this.updateMessagesAndScroll(this.initMessage);
+          response = await this.waitForUserResponse();
+          // console.log("MULTIPLE_CHOICE");
+        } else if (question["question_type"] === "FREE_RESPONSE") {
+          const rLineQn = `**Free response question**: ${question["question_text"]}\n
+      `;
+
+          this.initMessage = {
+            id: Date.now(),
+            content: rLineQn,
+            type: "openai",
+          };
+          this.updateMessagesAndScroll(this.initMessage);
+          response = await this.waitForUserResponse();
+          // console.log("FREE_RESPONSE");
+        }
+
+        responses.push(response);
+        this.initMessage = null;
+      }
+      // console.log("Your responses from the quiz:\n", responses);
+      return responses;
+    },
     handleSubmit() {
       // When the user clicks submit, resolve the promise with the user input
 
@@ -172,8 +216,8 @@ export default {
         action: "createThread",
       });
       this.threadId = response.data.id; // Assuming the thread ID is in the response
-      // this.startQuiz();
-      this.crawlBlogInfos();
+      this.startQuiz();
+      // this.crawlBlogInfos();
       // other handling
     },
 
@@ -225,25 +269,27 @@ export default {
           const name = toolCall?.function.name;
           const args = JSON.parse(toolCall?.function?.arguments || "{}");
           
-          console.log(name, args, actualRun)
+          
           /// handle which function to call based on the reply which tool to use 
           if(name == "display_quiz")
           {
-          const questions = args.questions;        
+          const questions = args.questions;    
       
           //  displayQuizs is a method that displays the quiz and collects responses at first
-          const responses = await this.displayQuiz(
+          var responses = await this.displayQuiz(
             name || "cool quiz",
             questions
           );
 
-          } else if(name == "crawl_thegovlab_blog")
-          {
-            const responses = await this.displayTheGovlabBlog(
-            // name || "cool quiz",
-            // questions
-          );
-          }
+          } 
+          // else if(name == "crawl_thegovlab_blog")
+          // {
+          //   const queries = args.blog_items;
+          //   var responses = await this.displayTheGovlabBlog(
+          //   queries
+          // );
+          // }
+          
           this.isLoading = true;
 
           // Submit the tool outputs to continue
