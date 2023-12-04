@@ -3,6 +3,7 @@
 
 import OpenAI from "openai";
 import fs from "fs";
+import { Readable } from 'stream';
 
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL
@@ -56,12 +57,12 @@ async function main(bodyres) {
   if(bodyres.collection == 'reboot_democracy_blog')  article.data['link']= "https://rebootdemocracy.ai/blog/"+slug;
 
   console.log(article.data);
-  fs.writeFileSync(slug+'.json', JSON.stringify(article.data));
+  const jsonStream = Readable.from(JSON.stringify(article.data));
 
   try {
       // Upload the file
       const file = await openai.files.create({
-          file: fs.createReadStream(slug+'.json'),
+          file: jsonStream,
           purpose: "assistants",
       });
 
