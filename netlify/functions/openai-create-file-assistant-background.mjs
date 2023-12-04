@@ -2,8 +2,7 @@
 // Upload a file with an "assistants" purpose
 
 import OpenAI from "openai";
-import fs from "fs";
-import { Readable } from 'stream';
+import FormData from "form-data";
 
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL
@@ -57,14 +56,18 @@ async function main(bodyres) {
   if(bodyres.collection == 'reboot_democracy_blog')  article.data['link']= "https://rebootdemocracy.ai/blog/"+slug;
 
   console.log(article.data);
-  const jsonStream = Readable.from(JSON.stringify(article.data));
+  const buffer = Buffer.from(JSON.stringify(article.data), 'utf-8');
+  const formData = new FormData();
+
+  formData.append('file', buffer, {
+    contentType: 'application/json',
+    filename: bodyres.collection+'_'+slug+'.json', // Replace with your desired filename
+  });
+  formData.append('purpose', 'assistants');
 
   try {
       // Upload the file
-      const file = await openai.files.create({
-          file: jsonStream,
-          purpose: "assistants",
-      });
+      const file = await openai.files.create(formData);
 
       // Attach the file to the assistant
       const assistantId = process.env.REBOOT_DEMOCRACY_ASSISTANT_ID; // Replace with your actual assistant ID
