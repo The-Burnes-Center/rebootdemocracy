@@ -2,7 +2,7 @@
 // Upload a file with an "assistants" purpose
 
 import OpenAI from "openai";
-import FormData from "form-data";
+import axios from "axios";
 
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL
