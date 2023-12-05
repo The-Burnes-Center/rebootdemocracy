@@ -180,7 +180,7 @@ export default {
       this.$nextTick(() => {
         this.scrollToBottom();
       });
-      // this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
+      this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
     },
 
     scrollToBottom() {
@@ -359,7 +359,7 @@ export default {
         
       //   this.messages.push({id: lastMessageForRun.id, content: promptSuggestionsContent, type: "openai"});
         
-      //   // this.saveMessageToDatabase(promptSuggestionsContent, this.threadId, "openai");
+        // this.saveMessageToDatabase(promptSuggestionsContent, this.threadId, "openai");
       // }
 
       if(this.initMessageFeedback==0) 
