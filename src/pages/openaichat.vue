@@ -35,7 +35,6 @@ export default {
       responsePromiseResolve: null,
 
       assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Reboot Democracy Tutor ID - Replace with your assistant ID
-      // assistantId: "asst_qzM0D7raRhInLxD4i6YSQxAt", // Including Blog API Id Replace with your assistant ID
     };
   },
   methods: {
@@ -328,9 +327,9 @@ export default {
         // Wait for a while before checking the status again
         await new Promise((resolve) => setTimeout(resolve, 2000));
         actualRun = await this.retrieveOpenAIRun(run.id);
-        console.log(actualRun.status)
+        console.log(actualRun.status, actualRun)
       }
-      console.log(actualRun.status);
+      console.log(actualRun.status, actualRun);
       
 
       // Process the final response from OpenAI
@@ -365,11 +364,11 @@ export default {
         // this.saveMessageToDatabase(promptSuggestionsContent, this.threadId, "openai");
       // }
 
-      if(this.initMessageFeedback==0) 
-        {
-          this.initMessageFeedback = 1;
-          // await this.makePromptSugesstions();
-        };
+      // if(this.initMessageFeedback==0) 
+      //   {
+      //     this.initMessageFeedback = 1;
+      //     // await this.makePromptSugesstions();
+      //   };
 
 
     },
@@ -402,7 +401,6 @@ export default {
         action: "listMessages",
         data: { threadId: this.threadId },
       });
-      console.log("listOpenAIMessages: ",response);
       // handle the response
       return response.data;
     },
