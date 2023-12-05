@@ -24,7 +24,7 @@ export default {
         {
           id: Date.now(),
           content:
-            "One second, I am creating a quiz with 2 questions for you: One open-ended, one multiple choice! \n In the meantime, think about what Participatory Democracy means to you.",
+            "Hi, ask me anything about how to reboot democracy with AI. As an inspiration, choose one of the sample prompts below!",
         },
       ],
       quizQuestions: [],
@@ -41,6 +41,21 @@ export default {
   methods: {
     parsedMarkdown(content) {
       return marked(content);
+    },
+    submitSamplePrompt(promptKey){
+      // Your function logic here
+      // You can use a switch or an object map to get the actual text from the promptKey
+      const prompts = {
+        enlistHelp: "I'm trying to enlist my community's help in identifying a problem, how might I go about it?",
+        askExperts: "What's the best way to ask industry experts for help with solving a problem?",
+        environmentEngagement: "What are examples of successful engagements relating to the environment?",
+        parliamentEngagement: "How can a parliament create more public engagement in lawmaking?"
+      };
+      const promptText = prompts[promptKey];
+      this.userInput = promptText;
+      this.sendUserQuestion();
+
+      console.log(promptText); // Replace with actual submission logic
     },
     async displayQuiz(title, questions) {
       this.quizQuestions = questions;
@@ -192,6 +207,10 @@ export default {
         content: "Quiz completed. Thank you for your responses!",
       });
     },
+    async startChat() {
+      this.isQuizAnswered = true;
+      this.isLoading = false;
+    },
 
     async startQuiz() {
       const initialQuestion =
@@ -216,7 +235,8 @@ export default {
         action: "createThread",
       });
       this.threadId = response.data.id; // Assuming the thread ID is in the response
-      this.startQuiz();
+      this.startChat();
+      // this.startQuiz();
       // this.crawlBlogInfos();
       // other handling
     },
@@ -330,21 +350,22 @@ export default {
           content: lastMessageForRun.content[0].text.value,
           type: "openai",
         });
-      } else if (lastMessageForRun && this.initMessageFeedback == 1)
-      {
-        this.initMessageFeedback = 2;
-        const promptSuggestionsContent = 
-        "\nChoose one of the following conversation topics to continue the conversation: \n"+lastMessageForRun.content[0].text.value;
+      } 
+      // else if (lastMessageForRun && this.initMessageFeedback == 1)
+      // {
+      //   this.initMessageFeedback = 2;
+      //   const promptSuggestionsContent = 
+      //   "\nChoose one of the following conversation topics to continue the conversation: \n"+lastMessageForRun.content[0].text.value;
         
-        this.messages.push({id: lastMessageForRun.id, content: promptSuggestionsContent, type: "openai"});
+      //   this.messages.push({id: lastMessageForRun.id, content: promptSuggestionsContent, type: "openai"});
         
-        // this.saveMessageToDatabase(promptSuggestionsContent, this.threadId, "openai");
-      }
+      //   // this.saveMessageToDatabase(promptSuggestionsContent, this.threadId, "openai");
+      // }
 
       if(this.initMessageFeedback==0) 
         {
           this.initMessageFeedback = 1;
-          await this.makePromptSugesstions();
+          // await this.makePromptSugesstions();
         };
 
 
@@ -416,7 +437,7 @@ export default {
   <div class="assitant-chat">
     <!-- <h1>Participatory Democracy Assistant</h1> -->
     <div v-if="!isQuizAnswered">
-      <button @click="startQuiz">Loading...</button>
+      <button>Loading...</button>
     </div>
     <div v-else>
       <div>
@@ -428,6 +449,12 @@ export default {
             v-html="parsedMarkdown(message.content)"
           ></div>
         </div>
+        <div class="button-grid">
+      <button class="prompt-button" @click="submitSamplePrompt('enlistHelp')">I'm trying to enlist my community's help in identifying a problem, how might I go about it?</button>
+      <button class="prompt-button" @click="submitSamplePrompt('askExperts')">What's the best way to ask industry experts for help with solving a problem?</button>
+      <button class="prompt-button" @click="submitSamplePrompt('environmentEngagement')">What are examples of successful engagements relating to the environment?</button>
+      <button class="prompt-button" @click="submitSamplePrompt('parliamentEngagement')">How can a parliament create more public engagement in lawmaking?</button>
+    </div>
         <textarea
           v-model="userInput"
           placeholder="Your entry"
@@ -447,8 +474,29 @@ export default {
   <!-- <footer-comp></footer-comp> -->
 </template>
 <style>
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2x2 grid */
+  grid-gap: 10px;
+  margin-bottom:20px;
+}
+
+.prompt-button {
+  padding: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 0.75rem; /* Smaller font size */
+}
+
+.prompt-button:hover {
+  background-color: #daf7a6;
+}
+
 .chat-window {
-  max-height: 600px;
+  max-height: 900px;
   height: 520px;
   overflow-y: auto;
   border: 1px solid #ccc;
