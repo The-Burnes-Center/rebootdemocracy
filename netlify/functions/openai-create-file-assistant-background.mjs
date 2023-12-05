@@ -42,7 +42,7 @@ async function directusFetch(endpoint, method = 'GET', body = null) {
 
 // Function to read an item from a collection by ID
 async function readDirectusItem(collection, itemId) {
-    const endpoint = `/items/${collection}/${itemId}?fields=*.*,authors.team_id.*`;
+    const endpoint = `/items/${collection}/${itemId}?fields=id,slug,content,excerpt,title,date_created,authors.team_id.*`;
     return directusFetch(endpoint);
   }
 
@@ -51,7 +51,9 @@ async function main(bodyres) {
   // Write JSON to a file
 
   const article = await readDirectusItem(bodyres.collection, bodyres.id);
-  const { slug } = article.data;
+  const { slug  } = article.data;
+
+  
   
   if(bodyres.collection == 'blog') article.data['link']= "https://blog.thegovlab.org/"+slug;
   if(bodyres.collection == 'reboot_democracy_blog')  article.data['link']= "https://rebootdemocracy.ai/blog/"+slug;
