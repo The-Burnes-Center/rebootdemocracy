@@ -104,46 +104,46 @@ export default {
     async displayTheGovlabBlog(queries) {
       this.blogQueries = queries;
 
-      const responses = [];
+      // const responses = [];
 
-      for (const query of blogQueries) {
-        let response = "";
+      // for (const query of blogQueries) {
+      //   let response = "";
 
-        // if multiple choice, print options
-        if (question["question_type"] === "MULTIPLE_CHOICE") {
-          const choicesString = question["choices"]
-            .map((choice, i) => `${i+1}. ${choice}\n `)
-            .join("\n");
-          const rLineQn = `**Choice question**: ${question["question_text"]} \n\n *Options*:\n${choicesString}\n
-      `;
+      //   // if multiple choice, print options
+      //   if (question["question_type"] === "MULTIPLE_CHOICE") {
+      //     const choicesString = question["choices"]
+      //       .map((choice, i) => `${i+1}. ${choice}\n `)
+      //       .join("\n");
+      //     const rLineQn = `**Choice question**: ${question["question_text"]} \n\n *Options*:\n${choicesString}\n
+      // `;
 
-          this.initMessage = {
-            id: Date.now(),
-            content: rLineQn,
-            type: "openai",
-          };
-          this.updateMessagesAndScroll(this.initMessage);
-          response = await this.waitForUserResponse();
-          // console.log("MULTIPLE_CHOICE");
-        } else if (question["question_type"] === "FREE_RESPONSE") {
-          const rLineQn = `**Free response question**: ${question["question_text"]}\n
-      `;
+      //     this.initMessage = {
+      //       id: Date.now(),
+      //       content: rLineQn,
+      //       type: "openai",
+      //     };
+      //     this.updateMessagesAndScroll(this.initMessage);
+      //     response = await this.waitForUserResponse();
+      //     // console.log("MULTIPLE_CHOICE");
+      //   } else if (question["question_type"] === "FREE_RESPONSE") {
+      //     const rLineQn = `**Free response question**: ${question["question_text"]}\n
+      // `;
 
-          this.initMessage = {
-            id: Date.now(),
-            content: rLineQn,
-            type: "openai",
-          };
-          this.updateMessagesAndScroll(this.initMessage);
-          response = await this.waitForUserResponse();
-          // console.log("FREE_RESPONSE");
-        }
+      //     this.initMessage = {
+      //       id: Date.now(),
+      //       content: rLineQn,
+      //       type: "openai",
+      //     };
+      //     this.updateMessagesAndScroll(this.initMessage);
+      //     response = await this.waitForUserResponse();
+      //     // console.log("FREE_RESPONSE");
+      //   }
 
-        responses.push(response);
-        this.initMessage = null;
-      }
-      // console.log("Your responses from the quiz:\n", responses);
-      return responses;
+      //   responses.push(response);
+      //   this.initMessage = null;
+      // }
+      // // console.log("Your responses from the quiz:\n", responses);
+      // return responses;
     },
     handleSubmit() {
       // When the user clicks submit, resolve the promise with the user input
@@ -286,15 +286,15 @@ export default {
           
           const toolCall =
             actualRun.required_action?.submit_tool_outputs?.tool_calls[0];
-          const name = toolCall?.function.name;
+          var name = toolCall?.function.name;
           const args = JSON.parse(toolCall?.function?.arguments || "{}");
-          
+          var questions = args.questions;   
           
           /// handle which function to call based on the reply which tool to use 
           if(name == "display_quiz")
           {
-          const questions = args.questions;    
-      
+           
+          this.initMessageFeedback = 0;
           //  displayQuizs is a method that displays the quiz and collects responses at first
           var responses = await this.displayQuiz(
             name || "cool quiz",
