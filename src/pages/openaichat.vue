@@ -290,7 +290,7 @@ export default {
           var name = toolCall?.function.name;
           const args = JSON.parse(toolCall?.function?.arguments || "{}");
           var questions = args.questions;   
-          
+          console.log(toolCall)
           
         //   /// handle which function to call based on the reply which tool to use 
         //   // if(name == "display_quiz")
@@ -330,6 +330,7 @@ export default {
         actualRun = await this.retrieveOpenAIRun(run.id);
         console.log(actualRun.status)
       }
+      console.log(actualRun.status);
       
 
       // Process the final response from OpenAI
