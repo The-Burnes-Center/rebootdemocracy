@@ -70,7 +70,7 @@ async function main(bodyres) {
         ...formData.getHeaders(),
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       };
-  
+      console.log(formData);
       // Use axios to send the request
       const response = await axios.post('https://api.openai.com/v1/files', formData, { headers });
   
