@@ -1351,7 +1351,7 @@ background-repeat: no-repeat;
 }
 .mission-text{
   padding: 5rem;
-  width: 70%;
+  width: 60%;
   display:flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -1385,7 +1385,7 @@ line-height: 160%; /* 28px */
 }
 .mission-image{
   background-image: url("../assets/mission-image.png");
-  width:30%;
+  width:40%;
   height: 850px;
   background-repeat: no-repeat;
   background-size: cover;
