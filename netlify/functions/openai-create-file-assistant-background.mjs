@@ -61,17 +61,18 @@ async function main(bodyres) {
 
   try {
       // Upload the file
-      const headers = {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      };
-  
       const formData = new FormData();
       formData.append('file', buffer, bodyres.collection+'_'+slug + '.json');
       formData.append('purpose', 'assistants');
+
+      // Merge custom headers with form-data headers
+      const headers = {
+        ...formData.getHeaders(),
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      };
   
       // Use axios to send the request
-      const response = await axios.post('https://api.openai.com/v1/files', formData, { headers: formData.getHeaders() });
+      const response = await axios.post('https://api.openai.com/v1/files', formData, { headers });
   
       // Handle the file upload response
       const file = response.data;
