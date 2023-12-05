@@ -34,8 +34,8 @@ export default {
       initMessageFeedback:0,
       responsePromiseResolve: null,
 
-      // assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Reboot Democracy Tutor ID - Replace with your assistant ID
-      assistantId: "asst_qzM0D7raRhInLxD4i6YSQxAt", // Including Blog API Id Replace with your assistant ID
+      assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Reboot Democracy Tutor ID - Replace with your assistant ID
+      // assistantId: "asst_qzM0D7raRhInLxD4i6YSQxAt", // Including Blog API Id Replace with your assistant ID
     };
   },
   methods: {
