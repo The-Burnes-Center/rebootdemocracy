@@ -1347,7 +1347,7 @@ background-repeat: no-repeat;
   align-items: center;
   width:100%;
   background-color: var(--peach-light);
-  height: 700px;
+  height: 900px;
 }
 .mission-text{
   padding: 5rem;
@@ -1386,7 +1386,7 @@ line-height: 160%; /* 28px */
 .mission-image{
   background-image: url("../assets/mission-image.png");
   width:30%;
-  height: 700px;
+  height: 850px;
   background-repeat: no-repeat;
   background-size: cover;
 }
