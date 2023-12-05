@@ -180,7 +180,7 @@ export default {
       this.$nextTick(() => {
         this.scrollToBottom();
       });
-      this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
+      // this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
     },
 
     scrollToBottom() {
@@ -274,15 +274,16 @@ export default {
       });
 
       let actualRun = await this.retrieveOpenAIRun(run.id);
+      console.log(actualRun.status);
 
       while (
         actualRun.status === "queued" ||
         actualRun.status === "in_progress" ||
-        actualRun.status === "requires_action"
+        actualRun.status === "requires_action" 
       ) {
         if (actualRun.status === "requires_action") {
 
-          // Handle the action required by the assistant
+        //   // Handle the action required by the assistant
           
           const toolCall =
             actualRun.required_action?.submit_tool_outputs?.tool_calls[0];
@@ -290,34 +291,35 @@ export default {
           const args = JSON.parse(toolCall?.function?.arguments || "{}");
           var questions = args.questions;   
           
-          /// handle which function to call based on the reply which tool to use 
-          if(name == "display_quiz")
-          {
-           
-          this.initMessageFeedback = 0;
-          //  displayQuizs is a method that displays the quiz and collects responses at first
-          var responses = await this.displayQuiz(
-            name || "cool quiz",
-            questions
-          );
-
-          } 
-          // else if(name == "crawl_thegovlab_blog")
-          // {
-          //   const queries = args.blog_items;
-          //   var responses = await this.displayTheGovlabBlog(
-          //   queries
-          // );
-          // }
           
-          this.isLoading = true;
+        //   /// handle which function to call based on the reply which tool to use 
+        //   // if(name == "display_quiz")
+        //   // {
+           
+        //   // this.initMessageFeedback = 0;
+        //   // //  displayQuizs is a method that displays the quiz and collects responses at first
+        //   // var responses = await this.displayQuiz(
+        //   //   name || "cool quiz",
+        //   //   questions
+        //   // );
 
-          // Submit the tool outputs to continue
+        //   // } 
+        //   // else if(name == "crawl_thegovlab_blog")
+        //   // {
+        //   //   const queries = args.blog_items;
+        //   //   var responses = await this.displayTheGovlabBlog(
+        //   //   queries
+        //   // );
+        //   // }
+          
+        //   this.isLoading = true;
+
+        //   // Submit the tool outputs to continue
           await this.submitOpenAIToolOutputs(run.id, {
             tool_outputs: [
               {
                 tool_call_id: toolCall?.id,
-                output: JSON.stringify({ responses }), // Make sure this is correctly formatted
+                output: JSON.stringify({ args }), // Make sure this is correctly formatted
               },
             ],
           });
@@ -326,7 +328,7 @@ export default {
         // Wait for a while before checking the status again
         await new Promise((resolve) => setTimeout(resolve, 2000));
         actualRun = await this.retrieveOpenAIRun(run.id);
-        // console.log(actualRun)
+        console.log(actualRun.status)
       }
       
 
@@ -343,14 +345,14 @@ export default {
               // Check if this is the first feedback for retrieving suggesting prompts 
  
 
-      if (lastMessageForRun && (this.initMessageFeedback == 0 || this.initMessageFeedback == 2)) {
+      // if (lastMessageForRun && (this.initMessageFeedback == 0 || this.initMessageFeedback == 2)) {
 
         this.updateMessagesAndScroll({
           id: lastMessageForRun.id,
           content: lastMessageForRun.content[0].text.value,
           type: "openai",
         });
-      } 
+      // } 
       // else if (lastMessageForRun && this.initMessageFeedback == 1)
       // {
       //   this.initMessageFeedback = 2;
@@ -399,6 +401,7 @@ export default {
         action: "listMessages",
         data: { threadId: this.threadId },
       });
+      console.log("listOpenAIMessages: ",response);
       // handle the response
       return response.data;
     },
