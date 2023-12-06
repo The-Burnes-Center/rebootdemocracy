@@ -48,17 +48,15 @@ async function readDirectusItem(collection, itemId) {
 
 
 // Main function to run the process
-// async function runProcess(bodyres) {
-  async function runProcess() {
+async function runProcess(bodyres) {
   try {
     // Read an item from the Directus collection with the specified ID
-    // const article = await readDirectusItem(bodyres.collection, bodyres.id);
-    
-    const article = await readDirectusItem("reboot_democracy_blog", 28180);
+    const article = await readDirectusItem(bodyres.collection, bodyres.id);
+    console.log('Retrieved article:', article);
 
     // Extract the content and date updated from the article
     const { content, slug, title , authors   } = article.data;
-    console.log(article.data);
+
     // Function to extract the full name from an author object
       function getFullName(author) {
         return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
@@ -75,8 +73,8 @@ async function readDirectusItem(collection, itemId) {
         }
       }
 
-    console.log('authors:', joinAuthorNames(authors));
-    let textContent = `${title} \n${joinAuthorNames(authors).length>0?'by':''} ${joinAuthorNames(authors)} \n${extractTextFromHTML(content)}`;
+
+    let textContent = `${title} \nby ${joinAuthorNames(authors)} \n${extractTextFromHTML(content)}`;
     console.log(textContent);
     
     // An array to hold all speech buffers
@@ -106,9 +104,6 @@ async function readDirectusItem(collection, itemId) {
      const combinedBuffer = Buffer.concat(allSpeechBuffers);
 
       // Upload combined buffer
-    console.log(article.data)
-    return
-
     const uploadResult = await uploadBuffer(combinedBuffer, slug, bodyres.collection, bodyres.id);
     
       // Update the article with the audio file ID
@@ -205,9 +200,9 @@ async function updateArticleWithAudioId(collection, itemId, audioFileId) {
 
 
 export default async (req, context) => {
-  // const bodyres = await req.json();
-  // console.log(bodyres);
-  await runProcess(); // Start the process using the body of the request
+  const bodyres = await req.json();
+  console.log(bodyres);
+  await runProcess(bodyres); // Start the process using the body of the request
 };
 
 
