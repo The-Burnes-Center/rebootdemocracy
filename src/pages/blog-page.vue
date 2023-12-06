@@ -170,7 +170,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       .items('reboot_democracy_blog')
       .readByQuery({
          meta: 'total_count',
-         limit: 10,
+         limit: 20,
           filter: {
             status: {
               _eq: "published",
