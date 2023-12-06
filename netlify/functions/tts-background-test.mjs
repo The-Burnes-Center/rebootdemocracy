@@ -53,6 +53,7 @@ async function readDirectusItem(collection, itemId) {
   try {
     // Read an item from the Directus collection with the specified ID
     // const article = await readDirectusItem(bodyres.collection, bodyres.id);
+    console.log('here');
     const article = await readDirectusItem("reboot_democracy_blog", 28180);
 
     // Extract the content and date updated from the article
