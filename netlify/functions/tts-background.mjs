@@ -83,7 +83,7 @@ async function runProcess(bodyres) {
     // Check the content length and split if necessary
     if (textContent.length > 4096) {
       const chunks = splitText(textContent, 4096);
-
+      
    // Process each chunk to generate speech
    for (const chunk of chunks) {
     console.log(chunk.length);
@@ -98,13 +98,14 @@ async function runProcess(bodyres) {
     } else {
       // await generateAndUploadSpeech(text_to_speech, date_updated, bodyres);
       const buffer = await generateSpeech(textContent);
+      console.log('bufferrun');
       allSpeechBuffers.push(buffer);
     }
      // Concatenate all speech buffers into a single buffer
      const combinedBuffer = Buffer.concat(allSpeechBuffers);
 
       // Upload combined buffer
-      
+      console.log("beforeUploadResult",uploadResult);
     const uploadResult = await uploadBuffer(combinedBuffer, slug, bodyres.collection, bodyres.id, audio_version);
     console.log("uploadResult",uploadResult);
       // Update the article with the audio file ID
@@ -148,7 +149,7 @@ async function uploadBuffer(buffer, slug, audio_version) {
   });
 
   const directusFileEndpoint = DIRECTUS_URL + '/files' + (audio_version?'/'+audio_version.id:'') ;
-  
+  console.log(directusFileEndpoint);
   // Prepare the request headers with the Bearer token
   const headers = {
     'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN, // replace with an actual token
