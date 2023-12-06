@@ -76,7 +76,7 @@ async function runProcess(bodyres) {
       }
     
     let textContent = `${title} \n ${joinAuthorNames(authors).length>0?'\nby':''} ${joinAuthorNames(authors)} \n${extractTextFromHTML(content)}`;
-    console.log('textContent',textContent);
+    
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
     
@@ -98,19 +98,19 @@ async function runProcess(bodyres) {
     } else {
       // await generateAndUploadSpeech(text_to_speech, date_updated, bodyres);
       const buffer = await generateSpeech(textContent);
-      console.log('bufferrun');
+      
       allSpeechBuffers.push(buffer);
     }
      // Concatenate all speech buffers into a single buffer
      const combinedBuffer = Buffer.concat(allSpeechBuffers);
 
       // Upload combined buffer
-      console.log("beforeUploadResult");
+      
     const uploadResult = await uploadBuffer(combinedBuffer, slug, audio_version);
-    console.log("uploadResult",uploadResult);
+    
       // Update the article with the audio file ID
       const updateResult = await updateArticleWithAudioId(bodyres.collection, bodyres.id, uploadResult.data.id);
-      console.log("updateResult",updateResult);
+    
       return updateResult;
 
   } catch (error) {
@@ -149,7 +149,7 @@ async function uploadBuffer(buffer, slug, audio_version) {
   });
 
   const directusFileEndpoint = DIRECTUS_URL + '/files' + (audio_version?'/'+audio_version.id:'') ;
-  console.log(directusFileEndpoint);
+  
   // Prepare the request headers with the Bearer token
   const headers = {
     'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN, // replace with an actual token
