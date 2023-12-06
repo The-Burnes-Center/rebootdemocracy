@@ -76,7 +76,7 @@ async function runProcess(bodyres) {
       }
     
     let textContent = `${title} \n ${joinAuthorNames(authors).length>0?'\nby':''} ${joinAuthorNames(authors)} \n${extractTextFromHTML(content)}`;
-    
+    console.log('textContent',textContent);
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
     
@@ -106,9 +106,10 @@ async function runProcess(bodyres) {
       // Upload combined buffer
       
     const uploadResult = await uploadBuffer(combinedBuffer, slug, bodyres.collection, bodyres.id, audio_version);
-    console.log(uploadResult);
+    console.log("uploadResult",uploadResult);
       // Update the article with the audio file ID
       const updateResult = await updateArticleWithAudioId(bodyres.collection, bodyres.id, uploadResult.data.id);
+      console.log("updateResult",updateResult);
       return updateResult;
 
   } catch (error) {
