@@ -1,1 +1,1 @@
-import * as func from './netlify/functions/tts-background.mjs';import * as bootstrap from './___netlify-bootstrap.mjs';const funcModule = typeof func.default === "function" ? func : func.default;global.Netlify = bootstrap.getNetlifyGlobal();export const handler = bootstrap.getLambdaHandler(funcModule)
+import * as bootstrap from './___netlify-bootstrap.mjs';import * as func from './netlify/functions/tts-background.mjs';const funcModule = typeof func.default === "function" ? func : func.default;export const handler = bootstrap.getLambdaHandler(funcModule)
