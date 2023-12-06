@@ -106,7 +106,7 @@ async function runProcess(bodyres) {
       // Upload combined buffer
       
     const uploadResult = await uploadBuffer(combinedBuffer, slug, bodyres.collection, bodyres.id, audio_version);
-    
+    console.log(uploadResult);
       // Update the article with the audio file ID
       const updateResult = await updateArticleWithAudioId(bodyres.collection, bodyres.id, uploadResult.data.id);
       return updateResult;
