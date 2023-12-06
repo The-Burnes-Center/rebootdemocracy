@@ -100,8 +100,8 @@ export default {
 <header-comp></header-comp>
 <div class="blog-hero">
 
-  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id">
-  <p class="blog-img-byline" v-if="postData[0].image.tags && postData[0].image.tags.includes('AI')">AI-generated image</p>
+  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id" />
+  
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
     <p class="excerpt"> {{postData[0].excerpt}}</p>
@@ -136,6 +136,7 @@ export default {
     <p><audio controls="controls"><source :src="this.directus._url+'assets/'+postData[0].audio_version.id" type="audio/mpeg" data-mce-fragment="1"></audio></p>
   </div>
     <div class="blog-content" v-html="postData[0].content"></div>
+    <p v-if="postData[0].ai_content_disclaimer" class="blog-img-byline">This post contains AI generated content.</p>
 </div>
 
   <!-- Footer Component -->
