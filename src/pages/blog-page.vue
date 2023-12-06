@@ -214,7 +214,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <p>{{ blogData.slice().reverse()[0].excerpt }}</p>
        <p>Published on {{ formatDateOnly(new Date( blogData.slice().reverse()[0].date)) }} </p>
       <div class="author-list">
-          <p  class="author-name">By</p>
+          <p  class="author-name">{{blogData.slice().reverse()[0].authors.length>0?'By':''}}</p>
             <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
               <div class="author-item">
                
@@ -240,7 +240,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
               <p>{{ blog_item.excerpt }}</p>
                <p>Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
               <div class="author-list">
-                   <p  class="author-name">By</p>
+                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
                     <div v-for="(author,i) in blog_item.authors">
                       <div class="author-item">
                         <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
@@ -271,7 +271,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
               <h3>{{blog_item.title}}</h3>
                <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
               <div class="author-list">
-                   <p  class="author-name">By</p>
+                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
                     <div v-for="(author,i) in blog_item.authors">
                       <div class="author-item">
                         <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
