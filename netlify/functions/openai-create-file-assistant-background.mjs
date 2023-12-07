@@ -47,9 +47,9 @@ async function readDirectusItem(collection, itemId) {
     return directusFetch(endpoint);
   }
 
-  async function retrieveFiles(assistantFiles,tempname, type) {
+  async function retrieveFiles(openAiFiles,tempname, type) {
 
-    const filePromises = assistantFiles.data.map(async (f) => {
+    const filePromises = openAiFiles.data.map(async (f) => {
       
       const file = await openai.files.retrieve(f.id);
 
@@ -60,7 +60,7 @@ async function readDirectusItem(collection, itemId) {
           {
             const deletedAssistantFile = await openai.beta.assistants.files.del(
               "asst_XBK7BcSwGLtDv4PVvN5nKFaB",
-              file.id
+              f.id
             );
           }else if(type == 'all')
           {
@@ -93,7 +93,11 @@ async function main(bodyres) {
 
   console.log(`purge of ${tempname} done in assistant`)
 
-  // const allFielsPurge = retrieveFiles(allFiles,tempname, 'all');
+  setTimeout(() => {
+    console.log("Inside timeout callback");
+  }, 6000);
+
+  const allFielsPurge = retrieveFiles(allFiles,tempname, 'all');
 
   console.log(`purge of ${tempname} done in all files`)
   
