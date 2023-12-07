@@ -60,7 +60,7 @@ async function readDirectusItem(collection, itemId) {
           {
             const deletedAssistantFile = await openai.beta.assistants.files.del(
               "asst_XBK7BcSwGLtDv4PVvN5nKFaB",
-              f.id
+              file.id
             );
           }else if(type == 'all')
           {
@@ -89,11 +89,11 @@ async function main(bodyres) {
     "asst_XBK7BcSwGLtDv4PVvN5nKFaB"
   );
 
-  // const assistantFielsPurge = await retrieveFiles(assistantFiles,tempname, 'assisstant');
+  const assistantFielsPurge = await retrieveFiles(assistantFiles,tempname, 'assisstant');
 
-  // console.log(`purge of ${tempname} done in assistant`)
+  console.log(`purge of ${tempname} done in assistant`)
 
-  const allFielsPurge = retrieveFiles(allFiles,tempname, 'all');
+  // const allFielsPurge = retrieveFiles(allFiles,tempname, 'all');
 
   console.log(`purge of ${tempname} done in all files`)
   
