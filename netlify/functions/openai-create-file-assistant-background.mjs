@@ -58,13 +58,13 @@ async function readDirectusItem(collection, itemId) {
           console.log(type, f.id, file.filename)
           if(type == 'assistant')
           {
-            const deletedAssistantFile = await openai.beta.assistants.files.del(
+            const deletedAssistantFile = await openai.beta.assistants.files.delete(
               "asst_XBK7BcSwGLtDv4PVvN5nKFaB",
               f.id
             );
           }else if(type == 'all')
           {
-            const file = await openai.files.del(f.id);
+            const file = await openai.files.delete(f.id);
           }
 
         }
