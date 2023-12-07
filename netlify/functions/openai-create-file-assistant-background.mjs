@@ -93,11 +93,7 @@ async function main(bodyres) {
 
   console.log(`purge of ${tempname} done in assistant`)
 
-  setTimeout(() => {
-    console.log("Inside timeout callback");
-  }, 6000);
-
-  const allFielsPurge = retrieveFiles(allFiles,tempname, 'all');
+  const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
 
   console.log(`purge of ${tempname} done in all files`)
   
