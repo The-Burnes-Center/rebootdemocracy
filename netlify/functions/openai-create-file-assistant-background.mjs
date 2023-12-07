@@ -66,6 +66,7 @@ async function readDirectusItem(collection, itemId) {
           }else if(type == 'all')
           {
             const file = await openai.files.del(f.id);
+            console.log(file);
           }
 
         }
@@ -90,13 +91,13 @@ async function main(bodyres) {
     "asst_XBK7BcSwGLtDv4PVvN5nKFaB"
   );
 
-  const assistantFielsPurge = await retrieveFiles(assistantFiles,tempname, 'assisstant');
+  // const assistantFielsPurge = await retrieveFiles(assistantFiles,tempname, 'assisstant');
 
-  console.log(`purge of ${tempname} done in assistant`)
+  // console.log(`purge of ${tempname} done in assistant`)
 
-  // const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
+  const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
 
-  // console.log(`purge of ${tempname} done in all files`)
+  console.log(`purge of ${tempname} done in all files`)
   
 
   const buffer = Buffer.from(JSON.stringify(article.data), 'utf-8');
