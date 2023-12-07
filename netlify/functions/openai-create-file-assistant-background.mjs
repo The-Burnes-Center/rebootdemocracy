@@ -8,6 +8,7 @@ import axios from "axios";
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL
 const DIRECTUS_AUTH_TOKEN = process.env.DIRECTUS_AUTH_TOKEN
+const REBOOT_DEMOCRACY_ASSISTANT_ID = process.env.REBOOT_DEMOCRACY_ASSISTANT_ID
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -46,19 +47,58 @@ async function readDirectusItem(collection, itemId) {
     return directusFetch(endpoint);
   }
 
+  async function retrieveFiles(assistantFiles,tempname, type) {
+
+    const filePromises = assistantFiles.data.map(async (f) => {
+      
+      const file = await openai.files.retrieve(f.id);
+
+        if(file.filename == tempname)
+        {
+          console.log(type, f.id, f.filename)
+          if(type == 'assistant')
+          {
+            const deletedAssistantFile = await openai.beta.assistants.files.del(
+              "asst_XBK7BcSwGLtDv4PVvN5nKFaB",
+              f.id
+            );
+          }else if(type == 'all')
+          {
+            const file = await openai.files.del(f.id);
+          }
+
+        }
+      return file; // This will allow you to use the file data outside, if needed
+    });
+    return Promise.all(filePromises);
+  }
 
 async function main(bodyres) {
   // Write JSON to a file
-
+  // var bodyres = {collection:"reboot_democracy_blog",id:28180}
   const article = await readDirectusItem(bodyres.collection, bodyres.id);
   const { slug  } = article.data;
 
-  
-  
   if(bodyres.collection == 'blog') article.data['link']= "https://blog.thegovlab.org/"+slug;
   if(bodyres.collection == 'reboot_democracy_blog')  article.data['link']= "https://rebootdemocracy.ai/blog/"+slug;
 
-  console.log(article.data);
+  
+  var tempname =  bodyres.collection+'_'+slug + '.json';
+  const allFiles = await openai.files.list();
+  const assistantFiles = await openai.beta.assistants.files.list(
+    "asst_XBK7BcSwGLtDv4PVvN5nKFaB"
+  );
+
+  const assistantFielsPurge = await retrieveFiles(assistantFiles,tempname, 'assisstant');
+
+  console.log(`purge of ${tempname} done in assistant`)
+
+  const allFielsPurge = retrieveFiles(allFiles,tempname, 'all');
+
+  console.log(`purge of ${tempname} done in all files`)
+  
+  
+
   const buffer = Buffer.from(JSON.stringify(article.data), 'utf-8');
 
   try {
@@ -80,7 +120,7 @@ async function main(bodyres) {
       const file = response.data;
   
       // Attach the file to the assistant
-      const assistantId = process.env.REBOOT_DEMOCRACY_ASSISTANT_ID;
+      const assistantId = "asst_XBK7BcSwGLtDv4PVvN5nKFaB";
       const myAssistantFile = await openai.beta.assistants.files.create(
         assistantId,
         { file_id: file.id }
