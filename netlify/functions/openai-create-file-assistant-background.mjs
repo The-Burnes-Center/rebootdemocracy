@@ -55,7 +55,7 @@ async function readDirectusItem(collection, itemId) {
 
         if(file.filename == tempname)
         {
-          console.log(type, f.id, f.filename)
+          console.log(type, f.id, file.filename)
           if(type == 'assistant')
           {
             const deletedAssistantFile = await openai.beta.assistants.files.del(
