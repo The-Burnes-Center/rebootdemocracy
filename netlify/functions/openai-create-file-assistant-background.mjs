@@ -94,7 +94,7 @@ async function main(bodyres) {
 
   console.log(`purge of ${tempname} done in assistant`)
 
-  // const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
+  const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
 
   console.log(`purge of ${tempname} done in all files`)
   
