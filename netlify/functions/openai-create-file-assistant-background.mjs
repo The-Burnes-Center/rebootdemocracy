@@ -47,33 +47,32 @@ async function readDirectusItem(collection, itemId) {
     return directusFetch(endpoint);
   }
 
-  async function retrieveFiles(openAiFiles,tempname, type) {
+  async function retrieveFiles(openAiFiles, tempname, type) {
+    let fileDetails = [];
 
-    const filePromises = openAiFiles.data.map(async (f) => {
-      
-      const file = await openai.files.retrieve(f.id);
+    for (const f of openAiFiles.data) {
+        const file = await openai.files.retrieve(f.id);
 
-        if(file.filename == tempname)
-        {
-          console.log(type, f.id, file.filename)
-          if(type == 'assistant')
-          {
-            const deletedAssistantFile = await openai.beta.assistants.files.del(
-              "asst_XBK7BcSwGLtDv4PVvN5nKFaB",
-              f.id
-            );
-            console.log(deletedAssistantFile);
-          }else if(type == 'all')
-          {
-            const file = await openai.files.del(f.id);
-            console.log(file);
-          }
+        if (file.filename === tempname) {
+            console.log(type, f.id, file.filename);
 
+            if (type === 'assistant') {
+                const deletedAssistantFile = await openai.beta.assistants.files.del(
+                    "asst_XBK7BcSwGLtDv4PVvN5nKFaB",
+                    f.id
+                );
+                console.log(deletedAssistantFile);
+            } else if (type === 'all') {
+                const deletedFile = await openai.files.del(f.id);
+                console.log(deletedFile);
+            }
         }
-      return file; // This will allow you to use the file data outside, if needed
-    });
-    return Promise.all(filePromises);
-  }
+
+        fileDetails.push(file); // This will allow you to use the file data outside, if needed
+    }
+
+    return fileDetails;
+}
 
 async function main(bodyres) {
   // Write JSON to a file
