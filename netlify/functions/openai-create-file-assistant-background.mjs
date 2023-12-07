@@ -62,6 +62,7 @@ async function readDirectusItem(collection, itemId) {
               "asst_XBK7BcSwGLtDv4PVvN5nKFaB",
               f.id
             );
+            console.log(deletedAssistantFile);
           }else if(type == 'all')
           {
             const file = await openai.files.del(f.id);
