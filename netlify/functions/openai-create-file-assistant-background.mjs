@@ -91,9 +91,9 @@ async function main(bodyres) {
     "asst_XBK7BcSwGLtDv4PVvN5nKFaB"
   );
 
-  // const assistantFielsPurge = await retrieveFiles(assistantFiles,tempname, 'assisstant');
+  const assistantFielsPurge = await retrieveFiles(assistantFiles,tempname, 'assistant');
 
-  // console.log(`purge of ${tempname} done in assistant`)
+  console.log(`purge of ${tempname} done in assistant`)
 
   const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
 
