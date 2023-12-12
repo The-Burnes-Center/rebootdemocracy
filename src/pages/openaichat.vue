@@ -437,7 +437,7 @@ export default {
   <!-- <header-comp></header-comp> -->
 
   <div class="assitant-chat">
-    <!-- <h1>Participatory Democracy Assistant</h1> -->
+    <h2>RebootDemocracy.AI - OpenAI Assistant</h2>
     <div v-if="!isQuizAnswered">
       <button>Loading...</button>
     </div>
