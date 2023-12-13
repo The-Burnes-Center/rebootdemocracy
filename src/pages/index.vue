@@ -29,7 +29,7 @@ export default {
   
   data() {
     return {
-      model: 1,                          
+      model: 0,                          
       indexData: [],
       eventsData: [],
       featuredData:[],
@@ -204,6 +204,7 @@ export default {
       })
       .then((item) => {
       self.featuredData =  item.data;
+      console.log(self.featuredData )
       self.preloadImages();
       });
     },
