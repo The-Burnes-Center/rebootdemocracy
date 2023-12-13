@@ -193,8 +193,8 @@ export default {
             },
           },
          meta: 'total_count',
-         limit: 10,
-         sort:["date"],
+         limit: 6,
+         sort:["-date"],
          fields: [
           '*.*',          
           'authors.team_id.*',
@@ -453,7 +453,7 @@ export default {
   
   <div class="featured-section">
     <v-carousel  hide-delimiters v-model="model">
-      <v-carousel-item class="index_carousel" v-for="item in featuredData.slice().reverse().slice(0, 6)" :key="i" >
+      <v-carousel-item class="index_carousel" v-for="(item,i) in featuredData" :key="i" >
     <div class="featured-content">
         <h1 class="eyebrow">From the Blog</h1>
         <div class="featured-image">
