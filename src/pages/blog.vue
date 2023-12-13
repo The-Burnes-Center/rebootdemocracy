@@ -79,8 +79,8 @@ export default {
      useHead({
       title: "RebootDemocracy.AI Blog | "+this.postData[0].title,
       meta: [
-        { name: 'title', content:"RebootDemocracy.AI  Blog | "+this.postData[0].title },
-        { property: 'og:title', content: "RebootDemocracy.AI  Blog | "+this.postData[0].title },
+        { name: 'title', content:"RebootDemocracy.AI Blog | "+this.postData[0].title },
+        { property: 'og:title', content: "RebootDemocracy.AI Blog | "+this.postData[0].title },
         // { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
         { property: 'og:description', content: this.postData[0].excerpt},
         { property: 'og:image', content: this.directus._url+'assets/'+this.postData[0].image.id},
