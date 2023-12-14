@@ -75,17 +75,20 @@ export default {
       var htmlToText = document.createElement('div');
       htmlToText.innerHTML = this.postData[0].content;
       // console.log(this.postData[0].excerpt)
+  
+      
      useHead({
       title: "RebootDemocracy.AI Blog | "+this.postData[0].title,
       meta: [
         { name: 'title', content:"RebootDemocracy.AI Blog | "+this.postData[0].title },
+        { name: 'description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
         { property: 'og:title', content: "RebootDemocracy.AI Blog | "+this.postData[0].title },
         // { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
-        { property: 'og:description', content: this.postData[0].excerpt},
-        { property: 'og:image', content: this.directus._url+'assets/'+this.postData[0].image.id},
+        { property: 'og:description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
+        { property: 'og:image', content: this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.id:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
-        { property: 'twitter:description', content: this.postData[0].excerpt},
-        { property: 'twitter:image', content:  this.directus._url+'assets/'+this.postData[0].image.id},
+        { property: 'twitter:description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
+        { property: 'twitter:image', content:  this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.id:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })
