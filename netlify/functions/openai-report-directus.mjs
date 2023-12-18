@@ -38,6 +38,7 @@ export async function handler(event) {
     }
 
     const responseData = await response.json();
+    console.log(responseData)
     return {
       statusCode: 200,
       body: JSON.stringify({ message: 'Item created in Directus', data: responseData })
