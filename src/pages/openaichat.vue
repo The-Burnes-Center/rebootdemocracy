@@ -340,16 +340,18 @@ export default {
           (message) => message.run_id === run.id && message.role === "assistant"
         )
         .pop();
-
-
               // Check if this is the first feedback for retrieving suggesting prompts 
- 
 
       // if (lastMessageForRun && (this.initMessageFeedback == 0 || this.initMessageFeedback == 2)) {
 
+        // Regular expression to match the pattern for a source string
+      // \【 and \】 escape the brackets, \d+ matches one or more digits, and \† escapes the dagger
+      const pattern = /\【\d+†source】/g;
+      let lastMessageForRunSanitized = lastMessageForRun.content[0].text.value.replace(pattern, '');
+
         this.updateMessagesAndScroll({
           id: lastMessageForRun.id,
-          content: lastMessageForRun.content[0].text.value,
+          content: lastMessageForRunSanitized,
           type: "openai",
         });
       // } 
