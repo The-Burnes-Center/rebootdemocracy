@@ -346,7 +346,7 @@ export default {
 
         // Regular expression to match the pattern for a source string
       // \【 and \】 escape the brackets, \d+ matches one or more digits, and \† escapes the dagger
-      const pattern = /\【\d+†source】/g;
+      const pattern = /\【.*?†source】/g;
       let lastMessageForRunSanitized = lastMessageForRun.content[0].text.value.replace(pattern, '');
 
         this.updateMessagesAndScroll({
