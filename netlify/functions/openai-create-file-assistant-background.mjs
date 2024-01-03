@@ -79,7 +79,7 @@ async function main(bodyres) {
   // Write JSON to a file
   // var bodyres = {collection:"reboot_democracy_blog"}
   const article = await readDirectusItem(bodyres.collection);  
-  
+  console.log(article.data);
   article.data.map((e,i)=>{
     if(bodyres.collection == 'blog') article.data[i]['link']= "https://blog.thegovlab.org/"+e.slug;
     if(bodyres.collection == 'reboot_democracy_blog')  article.data[i]['link']= "https://rebootdemocracy.ai/blog/"+e.slug;
