@@ -32,7 +32,7 @@ async function directusFetch(endpoint, method = 'GET', body = null) {
   }
 
   const response = await fetch(url, options);
-
+  
   if (!response.ok) {
     const errorDetails = await response.text();
     throw new Error(`Directus API request failed: ${response.status} - ${errorDetails}`);
@@ -44,7 +44,7 @@ async function directusFetch(endpoint, method = 'GET', body = null) {
 // Function to read an item from a collection by ID
 async function readDirectusItem(collection) {
     // const endpoint = `/items/${collection}/${itemId}?fields=id,slug,content,excerpt,title,date_created,authors.team_id.*`;
-    const endpoint = `/items/${collection}?limit=-1&fields=id,slug,content,excerpt,title,date_created,authors.team_id.*`;
+    const endpoint = `/items/${collection}?limit=-1&fields=id,slug,content,excerpt,title,date_created,authors.team_id.*&filter={ "status": { "_eq": "published" }}`;
     return directusFetch(endpoint);
   }
 
@@ -77,9 +77,9 @@ async function readDirectusItem(collection) {
 
 async function main(bodyres) {
   // Write JSON to a file
-  // var bodyres = {collection:"reboot_democracy_blog"}
+  var bodyres = {collection:"reboot_democracy_blog"}
   const article = await readDirectusItem(bodyres.collection);  
-  console.log(article.data);
+  
   article.data.map((e,i)=>{
     if(bodyres.collection == 'blog') article.data[i]['link']= "https://blog.thegovlab.org/"+e.slug;
     if(bodyres.collection == 'reboot_democracy_blog')  article.data[i]['link']= "https://rebootdemocracy.ai/blog/"+e.slug;
