@@ -179,7 +179,7 @@ export default {
       this.$nextTick(() => {
         this.scrollToBottom();
       });
-      // this.saveMessageToDatabase(newMessage, this.threadId, newMessage.type);
+      // this.saveMessageToDatabase(newMessage, this.threadId, this.runId, newMessage.type);
     },
 
     scrollToBottom() {
@@ -407,15 +407,20 @@ export default {
       return response.data;
     },
 
-    async saveMessageToDatabase(message, threadId, chatPersona) {
+    async saveMessageToDatabase(message, threadId, runId, chatPersona) {
       const openaiId = chatPersona === "openai" ? message.id : null;
       try {
-        await axios.post("/.netlify/functions/openai-report-directus", {
+        const result = await axios.post("/.netlify/functions/openai-report-directus", {
           message: { content: message.content }, // Sending only the content part
           threadId,
+          runId,
           chatPersona,
-          openaiId,
+          openaiId
         });
+
+        return {
+      body: JSON.stringify({ message: 'Item created in Directus', data: result })
+    };
         // Optionally handle the response or errors
       } catch (error) {
         console.error("Error saving message to database:", error);
