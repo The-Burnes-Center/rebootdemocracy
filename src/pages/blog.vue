@@ -171,7 +171,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <p><audio controls="controls"><source :src="this.directus._url+'assets/'+postData[0].audio_version.id" type="audio/mpeg" data-mce-fragment="1"></audio></p>
   </div>
     <div class="blog-content" v-html="postData[0].content"></div>
-    <!-- <p v-if="postData[0].ai_content_disclaimer" class="blog-img-byline">This post contains AI generated content.</p> -->
+    <p v-if="postData[0].ai_content_disclaimer" class="blog-img-byline">Some images in this post were generated using AI generated.</p>
 </div>
 
   <!-- Footer Component -->
