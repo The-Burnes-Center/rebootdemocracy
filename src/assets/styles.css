@@ -797,6 +797,11 @@ line-height: normal;
   .allposts-post-details{
     max-width: 50%;
   }
+  .blog-hero {
+  
+    padding: 40px 10px 40px 10px;
+  
+  }
 }
 p.excerpt{
   color: var(--black, #000);
@@ -892,8 +897,47 @@ padding: 0px 24px 0px 50px;
 .blog-content > *{
   max-width: 850px;
   flex: 1 0 0;
+  font-family: "Red Hat Text" !important;
 }
 .blog-content > p{
+  color: var(--black, #000);
+  /* Body-Blog/Desktop */
+  font-family: Red Hat Text !important;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 38px;
+}
+.blog-content > p > *{
+  color: var(--black, #000);
+  /* Body-Blog/Desktop */
+  font-family: Red Hat Text !important;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 38px;
+}
+.blog-content > div > div > p > * {
+  color: var(--black, #000);
+  /* Body-Blog/Desktop */
+  font-family: Red Hat Text !important;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+
+}
+
+.blog-content > p > strong > em > span{
+  color: var(--black, #000);
+  /* Body-Blog/Desktop */
+  font-family: Red Hat Text !important;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 700;
+
+}
+
+.blog-content > ul{
   color: var(--black, #000);
   /* Body-Blog/Desktop */
   font-family: Red Hat Text;
@@ -901,8 +945,9 @@ padding: 0px 24px 0px 50px;
   font-style: normal;
   font-weight: 500;
   line-height: 38px;
+  margin-left: 50px;
 }
-.blog-content > ul{
+.blog-content > ol{
   color: var(--black, #000);
   /* Body-Blog/Desktop */
   font-family: Red Hat Text;
@@ -916,12 +961,33 @@ padding: 0px 24px 0px 50px;
   color: var(--black, #000);
 
 /* Body-Blog/Desktop */
-font-family: Red Hat Text;
+font-family: Red Hat Text !important;
 font-size: 22px;
 font-style: normal;
 font-weight: 500;
 line-height: 160%;
 text-decoration-line: underline;
+}
+.blog-content > ol > li > strong > span{
+  color: var(--black, #000);
+
+/* Body-Blog/Desktop */
+font-family: Red Hat Text !important;
+font-size: 22px;
+font-style: normal;
+font-weight: 700;
+
+
+}
+.blog-content > ol > li > span {
+  color: var(--black, #000);
+
+/* Body-Blog/Desktop */
+font-family: Red Hat Text !important;
+font-size: 22px;
+font-style: normal;
+font-weight: 500;
+
 }
 .blog-content > p > em > a {
   color: var(--black, #000);
@@ -1277,10 +1343,10 @@ h5.eyebrow.peach{
   .hero-author-sm{
     flex-direction: row;
     display: flex;
-    width: 800px;
-    padding-bottom: 0px;
-    align-items:center;
-    justify-content: space-between;
+    width: 100%;
+    padding: 1rem 0;
+    align-items: left;
+    justify-content: left;
     gap: 40px;
   }
 }
@@ -1295,10 +1361,10 @@ h5.eyebrow.peach{
     gap: 40px;
   }
   .blog-body img{
-    height: 534.5px;
+    height: unset;
     max-width: unset;
     width: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
   .hero{
     height: 100%;
@@ -1339,15 +1405,19 @@ background-repeat: no-repeat;
     .blog-details{
       width: 100%;
       padding: 1rem 1rem 0rem 1rem;
+      gap: 20px;
     }
     .blog-body{
-      padding: 2rem 2rem;
+      padding: 2rem 1rem;
       line-height: 1.8;
     }
     .lede{
       padding-top: 10px;
       font-size: 16.5px;
       
+    }
+    .blog-content{
+      max-width:100%;
     }
 }
 
