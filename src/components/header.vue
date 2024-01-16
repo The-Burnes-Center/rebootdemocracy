@@ -10,8 +10,8 @@ export default {
   <div class="header-section">
     <div class="logo-section">
       <div class="logo">
-        <img @click="$router.push('../')" src="../assets/the-govlab-logo-white.svg">
-        <img @click="$router.push('../')" src="../assets/burnes-center-logo.png">
+      <a href="http://thegovlab.org" target="_blank"><img src="../assets/the-govlab-logo-white.svg"></a>
+      <a href="http://burnes.northeastern.edu" target="_blank"><img src="../assets/burnes-center-logo.png"></a>
         
       </div>
       <div @click="$router.push('../')"  class="wordmark">
