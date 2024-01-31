@@ -4,7 +4,7 @@ import { Directus } from '@directus/sdk';
 import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
-
+import _ from "lodash";
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
 
 import HeaderComponent from "../components/header.vue";
@@ -20,7 +20,10 @@ export default {
   
   data() {
     return {
-     
+      searchResults: [],
+      searchTerm: "",
+      debounceSearch:'',
+      searchloader:false,
       animateNext: 0,
       currentDate: '',
       prevItem: 0,
@@ -28,6 +31,7 @@ export default {
       nextItem: 2,
       testimonialsLength:0,                               
       blogData: [],
+      blogDataSearch: [],
       modalData: [],
       workshopData: [],
       playpause:true,
@@ -56,6 +60,8 @@ export default {
     this.loadModal(); 
     this.blogData = this.directus.items("reboot_democracy_blog");
     this.fetchBlog();
+    this.resetSearch();
+    // this.debounceSearch = _.debounce(this.searchBlog, 500);
     
   },
  mounted()
@@ -66,6 +72,52 @@ export default {
   },
   
   methods: {
+    searchBlog() {
+      self = this;
+      
+      let searchTArray = this.searchTerm.split(" ");
+      searchTArray = searchTArray.filter(item => item); // filter out empty entries
+      const searchObj = [];
+
+      searchTArray.map((a) => {
+        searchObj.push({ excerpt: { _contains: a }  });
+        searchObj.push({ title: { _contains: a } } );
+        searchObj.push({ content: { _contains: a }  });
+        searchObj.push({ authors: { team_id: { First_Name: { _contains: a } } } });
+        searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
+        searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
+      });
+
+      this.directus
+      .items('reboot_democracy_blog')
+      .readByQuery({
+          limit:-1,
+          filter: {
+            _and: [ { date: { _lte: "$NOW(-5 hours)" }},
+            {
+               status: {
+              _eq: "published",
+            },
+            }
+            ],
+            _or: searchObj,
+          },
+          sort:["date"],
+          fields: [          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*'],
+        })
+        .then((b) => {
+          this.blogDataSearch = b.data;
+          console.log(this.blogDataSearch, 'searchResults');
+          this.searchloader = false;
+        });
+    },
+    resetSearch() {
+      (this.blogDataSearch = []);
+      this.searchactive = false;
+      this.searchBlog();
+    },
     fillMeta()
     {
      useHead({
@@ -209,7 +261,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="blog-featured-row">
     <div class="first-blog-post">
       <a :href="'/blog/' + blogData.slice().reverse()[0].slug">
-      <img  v-if="blogData.slice().reverse()[0].image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id">
+      <img  v-if="blogData.slice().reverse()[0].image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
       <h3>{{blogData.slice().reverse()[0].title}}</h3>
       <p>{{ blogData.slice().reverse()[0].excerpt }}</p>
        <p>Published on {{ formatDateOnly(new Date( blogData.slice().reverse()[0].date)) }} </p>
@@ -260,12 +312,36 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   </div>
 </div>
 
-<div class="blog-section-header">
-  <h2>All Posts</h2>
-</div>
+
+        <div class="search-bar-section">
+          <div class="blog-section-header" >
+          <h2 style="color:#fff">All Posts</h2>
+          </div>
+          <input
+            class="search-bar"
+            v-model="searchTerm"
+            @keyup.enter="resetSearch()"
+            type="text"
+            placeholder="SEARCH"
+          />
+          <span
+            type="submit"
+            class="search-bar-btn material-icons"
+            @click="
+              searchTerm = '';
+              resetSearch();
+            "
+            >x</span
+          >
+        </div>
+
+<!-- <div class="blog-section-header">
+  <h2>All Posts </h2>
+</div> -->
+
 <!-- Other Blog Section -->
 <div class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"> 
+      <div class="allposts-post-row" v-for="(blog_item,index) in blogDataSearch.slice().reverse()"> 
        <a :href="'/blog/' + blog_item.slug">
         <div class="allposts-post-details">
               <h3>{{blog_item.title}}</h3>
