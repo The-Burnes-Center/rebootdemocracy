@@ -24,6 +24,7 @@ export default {
       searchTerm: "",
       debounceSearch:'',
       searchloader:false,
+      loadAPI: false,
       animateNext: 0,
       currentDate: '',
       prevItem: 0,
@@ -74,7 +75,7 @@ export default {
   methods: {
     searchBlog() {
       self = this;
-      
+      this.searchloader = true;
       let searchTArray = this.searchTerm.split(" ");
       searchTArray = searchTArray.filter(item => item); // filter out empty entries
       const searchObj = [];
@@ -340,6 +341,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div> -->
 
 <!-- Other Blog Section -->
+<div v-if="searchloader" class="loader"></div>
 <div class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item,index) in blogDataSearch.slice().reverse()"> 
        <a :href="'/blog/' + blog_item.slug">
