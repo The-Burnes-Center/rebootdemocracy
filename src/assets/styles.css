@@ -189,6 +189,67 @@ h1.title{
   height: 95vh;
 }
 
+.search-bar-section
+{
+  height: 10vh;
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(/src/assets/writing-image.png);
+  background-size: cover;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+
+}
+
+.search-bar{
+  padding: 1rem;
+  padding-right: 2.5rem;
+  background-color: none;
+  color: #010101;
+  border: none;
+  text-align: center;
+  font-weight: 600;
+  width: 40%;
+}
+.search-bar-btn{
+  position: relative;
+  background: none;
+  color: #000!important;
+  margin-left: -1.5em;
+  cursor: pointer;
+  top: 0em;
+  opacity: 0;
+  pointer-events: none;
+  /* text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 */
+}
+.search-bar::placeholder {
+  color: #ffffff72;
+  font-weight: 600;
+}
+
+.search-bar-section input:not(:placeholder-shown) + .search-bar-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+.search-bar-box{
+  width:200px;
+  position:absolute;
+  margin-left:40%;
+  margin-bottom:5%;
+
+}
+p.search-bar{
+  font-weight: 200;
+}
+
+
+
+p.search-desc{
+  color: var(--white8);
+  font-weight: 300;
+}
 
 a.btn {
   font-size: 0.8rem;
