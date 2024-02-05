@@ -20,6 +20,7 @@ export default {
   
   data() {
     return {
+     searchResultsFlag: 0,
       searchResults: [],
       searchTerm: "",
       debounceSearch:'',
@@ -79,8 +80,8 @@ export default {
       let searchTArray = this.searchTerm.split(" ");
       searchTArray = searchTArray.filter(item => item); // filter out empty entries
       const searchObj = [];
-
-      searchTArray.map((a) => {
+        
+        searchTArray.map((a) => {
         searchObj.push({ excerpt: { _contains: a }  });
         searchObj.push({ title: { _contains: a } } );
         searchObj.push({ content: { _contains: a }  });
@@ -88,7 +89,10 @@ export default {
         searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
         searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
       });
-
+      if (this.searchTerm)
+        this.searchResultsFlag = 1;
+      else
+        this.searchResultsFlag = 0;
       this.directus
       .items('reboot_democracy_blog')
       .readByQuery({
@@ -117,6 +121,7 @@ export default {
     resetSearch() {
       (this.blogDataSearch = []);
       this.searchactive = false;
+      this.searchResultsFlag = 0;
       this.searchBlog();
     },
     fillMeta()
@@ -253,12 +258,37 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <header-comp></header-comp>
   <div class="blog-page-hero">
     <h1 class="eyebrow">Reboot Democracy</h1>
-    <h1>Blog</h1>
+    <h1>Blog</h1>   
+    <div class="search-bar-section">      
+     <input
+        class="search-bar"
+        v-model="searchTerm"
+        @keyup.enter="resetSearch()"
+        type="text"
+        placeholder="SEARCH"/>
+           
+           <span type="submit"
+          @click="searchTerm = '';
+           resetSearch();"
+           class="search-bar-cancel-btn material-symbols-outlined">
+              cancel
+          </span>
+
+        <span type="submit"
+          @click="
+           resetSearch()"
+           class="search-bar-btn material-symbols-outlined">
+              search
+          </span>
+          
+
+
+        </div>
   </div>
 
-
+<div v-if="searchloader" class="loader"></div>
 <!-- Featured Blog Section -->
-<div class="blog-featured">
+<div class="blog-featured" v-if="!searchResultsFlag || searchTerm == ''"> 
   <div class="blog-featured-row">
     <div class="first-blog-post">
       <a :href="'/blog/' + blogData.slice().reverse()[0].slug">
@@ -284,7 +314,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         </a>  
         
     </div>
-    <div class="other-blog-posts">
+    <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
        <a :href="'/blog/' + blog_item.slug">
         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
@@ -314,31 +344,11 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 
 
-        <div class="search-bar-section">
-          <div class="blog-section-header" >
-          <h2 style="color:#fff">All Posts</h2>
-          </div>
-          <input
-            class="search-bar"
-            v-model="searchTerm"
-            @keyup.enter="resetSearch()"
-            type="text"
-            placeholder="SEARCH"
-          />
-          <span
-            type="submit"
-            class="search-bar-btn material-icons"
-            @click="
-              searchTerm = '';
-              resetSearch();
-            "
-            >x</span
-          >
-        </div>
 
-<!-- <div class="blog-section-header">
-  <h2>All Posts </h2>
-</div> -->
+<div class="blog-section-header">
+  <h2  v-if="!searchResultsFlag  || searchTerm == ''">All Posts </h2>
+  <h2  v-if="searchResultsFlag   && searchTerm != ''">Searching for <i>{{searchTerm}}</i> </h2>
+</div>
 
 <!-- Other Blog Section -->
 <div v-if="searchloader" class="loader"></div>
