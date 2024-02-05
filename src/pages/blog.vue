@@ -24,6 +24,8 @@ export default {
       slug: this.$route.params.name,
       directus: new Directus("https://content.thegovlab.com/"),
       path: this.$route.fullPath,
+
+          // this.debounceSearch = _.debounce(this.searchBlog, 500);
     };
   },
   created() {
@@ -32,6 +34,8 @@ export default {
   },
 
   methods: {
+  
+    
     formatTimeOnly: function formatTimeOnly(d1) {
       return format(d1, "h:mm aa");
     },
@@ -135,7 +139,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <header-comp></header-comp>
 <div class="blog-hero">
 
-  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id" />
+  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id+'?width=800'" />
   
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
