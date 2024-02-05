@@ -23,6 +23,7 @@ export default {
      searchResultsFlag: 0,
       searchResults: [],
       searchTerm: "",
+      searchTermDisplay:"",
       debounceSearch:'',
       searchloader:false,
       loadAPI: false,
@@ -93,6 +94,7 @@ export default {
         this.searchResultsFlag = 1;
       else
         this.searchResultsFlag = 0;
+
       this.directus
       .items('reboot_democracy_blog')
       .readByQuery({
@@ -113,6 +115,7 @@ export default {
           'authors.team_id.Headshot.*'],
         })
         .then((b) => {
+          
           this.blogDataSearch = b.data;
           console.log(this.blogDataSearch, 'searchResults');
           this.searchloader = false;
@@ -122,6 +125,7 @@ export default {
       (this.blogDataSearch = []);
       this.searchactive = false;
       this.searchResultsFlag = 0;
+      this.searchTermDisplay = this.searchTerm;
       this.searchBlog();
     },
     fillMeta()
@@ -343,15 +347,13 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   </div>
 </div>
 
-
-
 <div class="blog-section-header">
   <h2  v-if="!searchResultsFlag  || searchTerm == ''">All Posts </h2>
-  <h2  v-if="searchResultsFlag   && searchTerm != ''">Searching for <i>{{searchTerm}}</i> </h2>
+  <h2  v-if="searchResultsFlag   && searchTerm != ''">Searching for <i>{{searchTermDisplay}}</i> </h2>
 </div>
 
 <!-- Other Blog Section -->
-<div v-if="searchloader" class="loader"></div>
+<!-- <div v-if="searchloader" class="loader"></div> -->
 <div class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item,index) in blogDataSearch.slice().reverse()"> 
        <a :href="'/blog/' + blog_item.slug">
