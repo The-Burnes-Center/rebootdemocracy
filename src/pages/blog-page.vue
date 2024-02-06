@@ -293,7 +293,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <div v-if="searchloader" class="loader"></div>
 <!-- Featured Blog Section -->
 
-<div class="blog-featured" v-if="!searchResultsFlag || searchTerm == ''"> 
+<div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
   <div class="blog-featured-row">
     <div class="first-blog-post">
       <a :href="'/blog/' + blogData.slice().reverse()[0].slug">
@@ -349,8 +349,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 
 <div class="blog-section-header">
-  <h2  v-if="!searchResultsFlag  || searchTerm == ''">All Posts </h2>
-  <h2  v-if="searchResultsFlag">Searching for <i>{{searchTermDisplay}}</i> </h2>
+  <h2  v-if="!searchResultsFlag  || searchTermDisplay == ''">All Posts </h2>
+  <h2  v-if="searchResultsFlag   && searchTermDisplay != ''">Searching for <i>{{searchTermDisplay}}</i> </h2>
 </div>
 
 <!-- Other Blog Section -->
