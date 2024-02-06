@@ -292,6 +292,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <div v-if="searchloader" class="loader"></div>
 <!-- Featured Blog Section -->
+
 <div class="blog-featured" v-if="!searchResultsFlag || searchTerm == ''"> 
   <div class="blog-featured-row">
     <div class="first-blog-post">
@@ -349,7 +350,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <div class="blog-section-header">
   <h2  v-if="!searchResultsFlag  || searchTerm == ''">All Posts </h2>
-  <h2  v-if="searchResultsFlag   && searchTerm != ''">Searching for <i>{{searchTermDisplay}}</i> </h2>
+  <h2  v-if="searchResultsFlag">Searching for <i>{{searchTermDisplay}}</i> </h2>
 </div>
 
 <!-- Other Blog Section -->
