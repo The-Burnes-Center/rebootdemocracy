@@ -308,7 +308,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
               search
           </span>
         </div>
-        <a href="/signup" class="btn btn-small btn-primary">Sign up</a>
+        <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
   </div>
 
 <div v-if="searchloader" class="loader"></div>
@@ -377,8 +377,10 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <div v-if="!searchResultsFlag  || searchTerm == ''">
 
 <div class="allposts-section">
-  <div v-for="(tag_item) in this.filteredTagData">
-    <div> <h3>{{ tag_item }}</h3></div>
+  <div v-for="(tag_item) in this.filteredTagData" class="all-posts-row">
+    <div class="blog-section-header">
+        <h2>{{ tag_item }}</h2>
+    </div>
     <div class="tag-posts-row-container">
     <div  v-for="(blog_item,index) in blogData.slice().reverse()" class="tag-posts-row">
       <div v-if="this.inclucesString(blog_item?.Tags,tag_item)">
