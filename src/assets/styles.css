@@ -646,7 +646,7 @@ height: 350px;
 flex-shrink: 0;
 }
 .tag-posts-row-container{
-  margin:2rem;
+  margin:2rem 0;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   justify-content: space-between;
@@ -678,7 +678,7 @@ flex-shrink: 0;
   display: flex;
     flex-direction: row;
     align-items: left;
-    border-bottom: 1px solid #E6E4DE;
+    /* border-bottom: 1px solid #E6E4DE; */
 }
 .tag-posts-row a{
   display:flex;
@@ -779,6 +779,9 @@ height: 120px;
 .blog-section-header{
   padding: 2rem 40px 0 40px;
 }
+.allposts-section .blog-section-header{
+  padding:0;
+}
 .blog-section-header h2{
   color: var(--brand-only-black-green, #02291C);
 
@@ -805,6 +808,9 @@ flex-flow: row wrap;
   width:100%;
   padding: 40px;
 }
+.all-posts-row{
+  padding: 1rem 0;
+}
 .allposts-post-row{
   display: flex;
   flex-direction: column;
@@ -814,7 +820,7 @@ flex-flow: row wrap;
   -ms-flex: 0 0 33%;
   flex: 0 0 33%;
   max-width: 33%;
-  border-bottom: 1px solid #E6E4DE;
+ 
 }
 .allposts-post-row a{
   display:flex;
@@ -1253,6 +1259,9 @@ letter-spacing: -1.6px;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
   gap: 5px;
 }
 .author-list p.author-name{
@@ -1261,7 +1270,7 @@ font-size: 16px;
 font-style: normal;
 font-weight: 700;
 line-height: normal;
-
+min-width: fit-content;
 }
 .allposts-post-row .author-list {
   gap: 4px;
