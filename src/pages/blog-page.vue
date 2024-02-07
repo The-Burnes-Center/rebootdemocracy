@@ -35,6 +35,7 @@ export default {
       testimonialsLength:0,                               
       blogData: [],
       blogDataSearch: [],
+      filteredTagData: [],
       modalData: [],
       workshopData: [],
       playpause:true,
@@ -225,7 +226,18 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       FutureDate: function FutureDate(d1) {
         return isFuture(new Date(d1));
       },
-    fetchBlog: function fetchBlog() {
+      inclucesInArray:function (haystack,ele){
+      return haystack.some(subArray =>
+        Array.isArray(subArray) &&
+        ele.length === subArray.length &&
+        ele.every((element, index) => element === subArray[index])
+      );
+      },
+      inclucesString:function (array,string){
+        const lowerCasePartialSentence = string.toLowerCase();
+      return array?.some(s => s.toLowerCase().includes(lowerCasePartialSentence));
+      },
+      fetchBlog: function fetchBlog() {
       self = this;
 
       this.directus
@@ -249,6 +261,17 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       .then((item) => {
       self.blogData =  item.data;
       console.log(self.blogData )
+      item.data.map((tag)=>{
+        tag?.Tags?.map(subTags =>{
+          if(subTags != null && !this.inclucesString(this.filteredTagData,subTags)){
+            this.filteredTagData.push(subTags);
+          }
+        })
+        // if(tag?.Tags !=null && !this.inclucesInArray(this.filteredTagData,tag.Tags)){
+        //   this.filteredTagData.push(tag.Tags);
+        // }
+      })
+      console.log(this.filteredTagData)
       // self.testimonialsLength = self.blogData.testimonials.length;
       });
     },
@@ -284,10 +307,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
            class="search-bar-btn material-symbols-outlined">
               search
           </span>
-          
-
-
         </div>
+        <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
   </div>
 
 <div v-if="searchloader" class="loader"></div>
@@ -348,15 +369,61 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   </div>
 </div>
 
-<div class="blog-section-header">
-  <h2  v-if="!searchResultsFlag  || searchTermDisplay == ''">All Posts </h2>
-  <h2  v-if="searchResultsFlag   && searchTermDisplay != ''">Searching for <i>{{searchTermDisplay}}</i> </h2>
+<div class="read-more-post">
+<a href="/all-blog-posts" class="btn btn-small btn-primary" v-if="!searchResultsFlag  || searchTerm == ''">Read All Posts</a>
 </div>
 
-<!-- Other Blog Section -->
-<!-- <div v-if="searchloader" class="loader"></div> -->
+<!-- Filtered Posts Section -->
+<h2  v-if="searchResultsFlag   && searchTerm != ''">Searching for <i>{{searchTermDisplay}}</i> </h2>
+<div v-if="!searchResultsFlag  || searchTerm == ''">
+
 <div class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item,index) in blogDataSearch.slice().reverse()"> 
+  <div v-for="(tag_item) in this.filteredTagData" class="all-posts-row">
+    <div class="blog-section-header">
+        <h2>{{ tag_item }}</h2>
+    </div>
+    <div class="tag-posts-row-container">
+    <div  v-for="(blog_item,index) in blogData.slice().reverse()" class="tag-posts-row">
+      <div v-if="this.inclucesString(blog_item?.Tags,tag_item)">
+       <a :href="'/blog/' + blog_item.slug">
+        <div class="allposts-post-details">
+              <h3>{{blog_item.title}}</h3>
+               <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+              <div class="author-list">
+                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
+                    <div v-for="(author,i) in blog_item.authors">
+                      <div class="author-item">
+                        <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
+                        <div class="author-details">
+                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+         </a>
+        </div>
+      </div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+<!-- Latest Posts -->
+
+<div class="blog-section-header">
+  <h2  v-if="!searchResultsFlag  || searchTerm == ''">Latest Posts </h2>
+</div>
+
+
+<div v-if="!searchResultsFlag  || searchTerm == ''">
+<div class="allposts-section">
+      <div class="allposts-post-row" v-for="(blog_item) in blogData.slice().reverse()"> 
+          <div v-if="blog_item?.Tags === null">
        <a :href="'/blog/' + blog_item.slug">
         <div class="allposts-post-details">
               <h3>{{blog_item.title}}</h3>
@@ -377,7 +444,75 @@ Emboldened by the advent of generative AI, we are excited about the future possi
          <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
          </a>
       </div>
+      </div>
 </div>
+</div>
+
+    <!-- <div v-if="!searchResultsFlag  || searchTerm == ''">
+    <h3>Other Posts</h3>
+    <div class="allposts-section">
+    <div  v-for="(blog_item) in blogData.slice().reverse()" class="other-posts-container">
+          <div v-if="blog_item?.Tags === null">
+            <div class="other-posts-2">
+            <a :href="'/blog/' + blog_item.slug">
+            <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+            <div class="other-post-details">
+                  <h4>{{blog_item.title}}</h4>
+                  <p>{{ blog_item.excerpt }}</p>
+                  <p>Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+                  <div class="author-list">
+                      <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
+                        <div v-for="(author,i) in blog_item.authors">
+                          <div class="author-item"> -->
+                            <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
+                            <!-- <div class="author-details">
+                              <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                              <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </a>
+            </div>
+          </div>
+      </div>
+      </div>
+    </div> -->
+
+
+<!-- </div> -->
+
+<!-- <div class="blog-section-header">
+  <h2  v-if="!searchResultsFlag  || searchTerm == ''">All Posts </h2>
+  <h2  v-if="searchResultsFlag   && searchTerm != ''">Searching for <i>{{searchTermDisplay}}</i> </h2>
+</div> -->
+
+<!-- Other Blog Section -->
+<!-- <div v-if="searchloader" class="loader"></div> -->
+<!-- <div class="allposts-section">
+      <div class="allposts-post-row" v-for="(blog_item,index) in blogDataSearch.slice().reverse()"> 
+       <a :href="'/blog/' + blog_item.slug">
+        <div class="allposts-post-details">
+              <h3>{{blog_item.title}}</h3>
+               <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+              <div class="author-list">
+                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
+                    <div v-for="(author,i) in blog_item.authors">
+                      <div class="author-item">
+                        <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id">
+                        <div class="author-details">
+                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+         </a>
+      </div>
+</div> -->
     
 <!-- Footer Component -->
 <footer-comp></footer-comp>
