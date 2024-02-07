@@ -11,6 +11,7 @@ import Team from '../pages/team.vue';
 import Signup from '../pages/signup.vue';
 import BlogPage from '../pages/blog-page.vue';
 import BlogPost from '../pages/blog.vue';
+import AllPosts from '../pages/all-blog-posts.vue';
 
 
 const routes = [
@@ -26,6 +27,7 @@ const routes = [
   { path:"/signup", component:Signup },
   { path:"/blog/:name", component: BlogPost, props:true },
   { path:"/blog", component: BlogPage },
+  { path:"/all-blog-posts", component: AllPosts },
 ]
 
 const router = createRouter({
