@@ -382,7 +382,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <div class="blog-section-header">
         <h2 v-if="!searchResultsFlag && searchTermDisplay == ''">{{ tag_item }}</h2>
     </div>
-    <div class="tag-posts-row-container" v-if="!searchResultsFlag && searchTermDisplay">
+    <div class="tag-posts-row-container">
     <div  v-for="(blog_item,index) in blogDataSearch.slice().reverse()" class="tag-posts-row">
       <div v-if="this.inclucesString(blog_item?.Tags,tag_item)">
        <a :href="'/blog/' + blog_item.slug">
