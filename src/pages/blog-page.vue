@@ -383,7 +383,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         <h2>{{ tag_item }}</h2>
     </div>
     <div class="tag-posts-row-container">
-    <div  v-for="(blog_item,index) in blogData.slice().reverse()" class="tag-posts-row">
+    <div  v-for="(blog_item,index) in blogDataSearch.slice().reverse()" class="tag-posts-row">
       <div v-if="this.inclucesString(blog_item?.Tags,tag_item)">
        <a :href="'/blog/' + blog_item.slug">
         <div class="allposts-post-details">
@@ -422,7 +422,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <!-- <div v-if="!searchResultsFlag  || searchTerm == ''"> -->
 <div class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item) in blogData.slice().reverse()"> 
+      <div class="allposts-post-row" v-for="(blog_item) in blogDataSearch.slice().reverse()"> 
           <div v-if="blog_item?.Tags === null">
        <a :href="'/blog/' + blog_item.slug">
         <div class="allposts-post-details">
