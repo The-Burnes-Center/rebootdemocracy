@@ -369,8 +369,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   </div>
 </div>
 
-<div class="read-more-post">
-<a href="/all-blog-posts" class="btn btn-small btn-primary" v-if="!searchResultsFlag  || searchTerm == ''">Read All Posts</a>
+<div class="read-more-post" v-if="!searchResultsFlag && searchTermDisplay == ''">
+<a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
 </div>
 
 <!-- Filtered Posts Section -->
@@ -380,9 +380,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <div class="allposts-section">
   <div v-for="(tag_item) in this.filteredTagData" class="all-posts-row">
     <div class="blog-section-header">
-        <h2>{{ tag_item }}</h2>
+        <h2 v-if="!searchResultsFlag && searchTermDisplay == ''">{{ tag_item }}</h2>
     </div>
-    <div class="tag-posts-row-container">
+    <div class="tag-posts-row-container" v-if="!searchResultsFlag && searchTermDisplay == ''">
     <div  v-for="(blog_item,index) in blogDataSearch.slice().reverse()" class="tag-posts-row">
       <div v-if="this.inclucesString(blog_item?.Tags,tag_item)">
        <a :href="'/blog/' + blog_item.slug">
