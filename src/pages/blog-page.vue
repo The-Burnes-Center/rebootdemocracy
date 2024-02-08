@@ -420,7 +420,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 
 
-<div v-if="!searchResultsFlag  || searchTerm == ''">
+<!-- <div v-if="!searchResultsFlag  || searchTerm == ''"> -->
 <div class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item) in blogData.slice().reverse()"> 
           <div v-if="blog_item?.Tags === null">
@@ -446,7 +446,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       </div>
       </div>
 </div>
-</div>
+<!-- </div> -->
 
     <!-- <div v-if="!searchResultsFlag  || searchTerm == ''">
     <h3>Other Posts</h3>
