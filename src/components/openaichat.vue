@@ -484,7 +484,9 @@ export default {
           >
 
           </div>
-           <div class="loader"></div>
+      
+          
+           <div v-if="isLoading" class="loader"></div>
         </div>
 
         <textarea
