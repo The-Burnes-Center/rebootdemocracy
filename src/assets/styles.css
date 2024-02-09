@@ -2742,7 +2742,7 @@ border-radius: 8px;
 } */
 
 /* HTML: <div class="loader"></div> */
-.loader {
+/* .loader {
   width: 15px;
   aspect-ratio: 1;
   position: relative;
@@ -2750,6 +2750,16 @@ border-radius: 8px;
   -webkit-animation:l9-0 1.5s infinite steps(2);
   margin-left: 20px;
   z-index: 20000;
+} */
+
+.loader {
+  width: 15px;
+  aspect-ratio: 1;
+  position: absolute;
+  animation: l9-0 1.5s infinite steps(2);
+  -webkit-animation: l9-0 1.5s infinite steps(2);
+  margin-left: 20px;
+  top: 450px;
 }
 .loader::before,
 .loader::after {
