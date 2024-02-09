@@ -14,6 +14,7 @@ export default {
   },
   data() {
     return {
+      botOpen: 0,
       openai: null,
       thread: null,
       threadId: null,
@@ -21,11 +22,11 @@ export default {
       userAnswer: "",
       userAnswers: [],
       messages: [
-        {
-          id: Date.now(),
-          content:
-            "Hi, ask me anything about how to reboot democracy with AI. As an inspiration, choose one of the sample prompts below!",
-        },
+        // {
+        //   id: Date.now(),
+        //   content:
+        //     "Hi, ask me anything about how to reboot democracy with AI. As an inspiration, choose one of the sample prompts below!",
+        // },
       ],
       quizQuestions: [],
       isQuizAnswered: false,
@@ -38,6 +39,12 @@ export default {
     };
   },
   methods: {
+    closeFunc(){
+      this.botOpen = 0;
+    },
+    openFunc(){
+      this.botOpen = 1;
+    },
     parsedMarkdown(content) {
       return marked(content);
     },
@@ -442,39 +449,49 @@ export default {
 
   <!-- Header Component -->
   <!-- <header-comp></header-comp> -->
-
-  <div class="assitant-chat">
-    <h2>RebootDemocracy.AI - OpenAI Assistant</h2>
+  <div class="bot-icon"  @click="openFunc"  v-if="!botOpen">
+     <i class="fa-solid fa-message-bot"></i>
+  </div>
+  <div class="assitant-chat" v-if="botOpen">
+    <div class="bot-header">
+      <h4>The Reboot Bot</h4>
+          <i @click="closeFunc" class="fa-regular fa-circle-xmark bot-close"></i>
+    </div>
     <div v-if="!isQuizAnswered">
       <button>Loading...</button>
     </div>
     <div v-else>
       <div>
         <div class="chat-window" ref="chatWindow">
+        <div class="button-grid">
+            <p>Type a question you have about public engagement in the box below. Here are some sample prompts to get you started!</p>
+            <a class="prompt-button" @click="submitSamplePrompt('enlistHelp')">I'm trying to enlist my community's help in identifying a problem, how might I go about it?</a>
+            <a class="prompt-button" @click="submitSamplePrompt('askExperts')">What's the best way to ask industry experts for help with solving a problem?</a>
+            <!-- <button class="prompt-button" @click="submitSamplePrompt('environmentEngagement')">What are examples of successful engagements relating to the environment?</button>
+            <button class="prompt-button" @click="submitSamplePrompt('parliamentEngagement')">How can a parliament create more public engagement in lawmaking?</button> -->
+       </div>
           <div
             v-for="message in messages"
             :key="message.id"
             :class="['message', message.type]"
             v-html="parsedMarkdown(message.content)"
-          ></div>
+          >
+
+          </div>
+           <div v-if="isLoading" class="loader"></div>
         </div>
-        <div class="button-grid">
-      <button class="prompt-button" @click="submitSamplePrompt('enlistHelp')">I'm trying to enlist my community's help in identifying a problem, how might I go about it?</button>
-      <button class="prompt-button" @click="submitSamplePrompt('askExperts')">What's the best way to ask industry experts for help with solving a problem?</button>
-      <button class="prompt-button" @click="submitSamplePrompt('environmentEngagement')">What are examples of successful engagements relating to the environment?</button>
-      <button class="prompt-button" @click="submitSamplePrompt('parliamentEngagement')">How can a parliament create more public engagement in lawmaking?</button>
-    </div>
+
         <textarea
           v-model="userInput"
-          placeholder="Your entry"
+          placeholder="Ask a question here!"
           @keyup.enter="handleSubmit"
           class="chat-input"
         />
         <br />
-        <button @click="handleSubmit" class="btn btn-small btn-primary">
+        <button @click="handleSubmit" class="btn btn-small btn-dark-blue">
           Submit
         </button>
-        <div v-if="isLoading" class="loader"></div>
+ 
         <br />
       </div>
     </div>
@@ -482,105 +499,3 @@ export default {
 
   <!-- <footer-comp></footer-comp> -->
 </template>
-<style>
-.button-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2x2 grid */
-  grid-gap: 10px;
-  margin-bottom:20px;
-}
-
-.prompt-button {
-  padding: 5px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 0.75rem; /* Smaller font size */
-}
-
-.prompt-button:hover {
-  background-color: #daf7a6;
-}
-
-.chat-window {
-  max-height: 900px;
-  height: 520px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  margin-bottom: 10px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.message {
-  margin-bottom: 5px;
-  padding: 5px;
-  border-radius: 4px;
-  background-color: #daf7a6;
-  width: 65%;
-  margin-bottom: 10px;
-}
-
-.message.user {
-  background-color: #a6b2f7;
-  text-align: right;
-  width: 65%;
-  align-self: flex-end;
-}
-
-@media screen and (max-width: 767px) {
-  .message {
- 
- width: 85%;
-
-}
-
-.message.user {
- width: 85%;
-}
-}
-
-
-
-.message.assistant {
-  background-color: #ffcccb; /* Light red background for assistant messages */
-  text-align: left;
-}
-.chat-input {
-  border: 1px solid #ccc;
-  background-color: #ffffff;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  width: -moz-fit-content;
-  width: 100%;
-  height: inherit;
-  padding: 10px 60px;
-  min-height: 55px;
-  font-family: "Space Mono", monospace;
-  gap: 20px;
-  z-index: 1000;
-}
-.loader {
-  border: 5px solid #f3f3f3; /* Light grey */
-  border-top: 5px solid #04787f; /* Blue */
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 2s linear infinite;
-  float: right;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-</style>
