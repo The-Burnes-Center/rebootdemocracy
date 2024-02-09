@@ -55,7 +55,11 @@ export default {
         enlistHelp: "I'm trying to enlist my community's help in identifying a problem, how might I go about it?",
         askExperts: "What's the best way to ask industry experts for help with solving a problem?",
         environmentEngagement: "What are examples of successful engagements relating to the environment?",
-        parliamentEngagement: "How can a parliament create more public engagement in lawmaking?"
+        parliamentEngagement: "How can a parliament create more public engagement in lawmaking?",
+        urbanPlanning: "Can you summarize the latest research on AI and participatory decision-making in urban planning?",
+        aiEngagement: "Can you give me examples of case studies or pilot projects where AI has been successfully integrated into public engagement?",
+        misInformation:"How can AI help in addressing misinformation during election campaigns?"
+
       };
       const promptText = prompts[promptKey];
       this.userInput = promptText;
@@ -454,8 +458,8 @@ export default {
   </div>
   <div class="assitant-chat" v-if="botOpen">
     <div class="bot-header">
-      <h4>The Reboot Bot</h4>
-          <i @click="closeFunc" class="fa-regular fa-circle-xmark bot-close"></i>
+      <h4>The Reboot Bot<br><div style="font-size: 0.9rem; font-weight: 400">Your Personal Participatory Democracy Assistant</div></h4>
+      <i @click="closeFunc" class="fa-regular fa-circle-xmark bot-close"></i>
     </div>
     <div v-if="!isQuizAnswered">
       <button>Loading...</button>
@@ -464,9 +468,11 @@ export default {
       <div>
         <div class="chat-window" ref="chatWindow">
         <div class="button-grid">
-            <p>Type a question you have about public engagement in the box below. Here are some sample prompts to get you started!</p>
-            <a class="prompt-button" @click="submitSamplePrompt('enlistHelp')">I'm trying to enlist my community's help in identifying a problem, how might I go about it?</a>
-            <a class="prompt-button" @click="submitSamplePrompt('askExperts')">What's the best way to ask industry experts for help with solving a problem?</a>
+            <p class="bot-welcome-message">Welcome to the Reboot Democracy Bot. Trained on research and writing from the GovLab and the Reboot Blog, I answer your questions about technology, governance and democracy.</p>
+            <p>Type a question you have about AI, democracy and governance in the box below. Here are some sample prompts to get you started!</p>
+            <a class="prompt-button" @click="submitSamplePrompt('urbanPlanning')">Can you summarize the latest research on AI and participatory decision-making in urban planning?</a>
+            <a class="prompt-button" @click="submitSamplePrompt('aiEngagement')">Can you give me examples of case studies or pilot projects where AI has been successfully integrated into public engagement?</a>
+            <a class="prompt-button" @click="submitSamplePrompt('misInformation')">How can AI help in addressing misinformation during election campaigns?</a>
             <!-- <button class="prompt-button" @click="submitSamplePrompt('environmentEngagement')">What are examples of successful engagements relating to the environment?</button>
             <button class="prompt-button" @click="submitSamplePrompt('parliamentEngagement')">How can a parliament create more public engagement in lawmaking?</button> -->
        </div>
@@ -478,7 +484,7 @@ export default {
           >
 
           </div>
-           <div v-if="isLoading" class="loader"></div>
+           <div class="loader"></div>
         </div>
 
         <textarea
@@ -488,13 +494,17 @@ export default {
           class="chat-input"
         />
         <br />
+      
         <button @click="handleSubmit" class="btn btn-small btn-dark-blue">
           Submit
         </button>
- 
-        <br />
+        
+
       </div>
+        <p class="bot-feedback">Have feedback about this tool? Email us at hello@thegovlab.org</p>
     </div>
+
+  <p class="bot-attribution"><i>powered by ChatGPT</i></p> 
   </div>
 
   <!-- <footer-comp></footer-comp> -->
