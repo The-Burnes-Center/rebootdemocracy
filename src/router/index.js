@@ -11,7 +11,7 @@ import Team from '../pages/team.vue';
 import Signup from '../pages/signup.vue';
 import BlogPage from '../pages/blog-page.vue';
 import BlogPost from '../pages/blog.vue';
-import OpenAIChat from '../pages/openaichat.vue';
+// import OpenAIChat from '../pages/openaichat.vue';
 
 
 
@@ -28,7 +28,7 @@ const routes = [
   { path:"/signup", component:Signup },
   { path:"/blog/:name", component: BlogPost, props:true },
   { path:"/blog", component: BlogPage },
-  { path:"/openaichat", component: OpenAIChat },
+  // { path:"/openaichat", component: OpenAIChat },
 ]
 
 const router = createRouter({
