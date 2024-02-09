@@ -2677,6 +2677,10 @@ border-radius: 8px;
 .message.user {
  width: 85%;
 }
+.chatbot-app{
+  width:90%;
+
+}
 }
 
 
