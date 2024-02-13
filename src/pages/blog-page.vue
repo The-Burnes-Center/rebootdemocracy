@@ -311,7 +311,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
   </div>
 
-<div v-if="searchloader" class="loader"></div>
+<div v-if="searchloader" class="loader-blog"></div>
+
+
 <!-- Featured Blog Section -->
 
 <div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
