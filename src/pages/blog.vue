@@ -24,6 +24,8 @@ export default {
       slug: this.$route.params.name,
       directus: new Directus("https://content.thegovlab.com/"),
       path: this.$route.fullPath,
+
+          // this.debounceSearch = _.debounce(this.searchBlog, 500);
     };
   },
   created() {
@@ -32,6 +34,8 @@ export default {
   },
 
   methods: {
+  
+    
     formatTimeOnly: function formatTimeOnly(d1) {
       return format(d1, "h:mm aa");
     },
@@ -66,8 +70,7 @@ export default {
         })
         .then((item) => {
           self.postData = item.data;
-          console.log( self.postData[0])
-          this.fillMeta();
+          item.data.length>0 ? this.fillMeta() :  this.fillMetaDefault()
         });
     },
     fillMeta()
@@ -75,17 +78,53 @@ export default {
       // convert HTML body of Blog Entry into plain text
       var htmlToText = document.createElement('div');
       htmlToText.innerHTML = this.postData[0].content;
-      console.log('here?')
+      // console.log(this.postData[0].excerpt)
+  
+      
      useHead({
       title: "RebootDemocracy.AI Blog | "+this.postData[0].title,
       meta: [
-        { name: 'title', content:"RebootDemocracy.AI  Blog | "+this.postData[0].title },
-        { property: 'og:title', content: "RebootDemocracy.AI  Blog | "+this.postData[0].title },
-        { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
-        { property: 'og:image', content: this.directus._url+'assets/'+this.postData[0].image.id},
+        { name: 'title', content:"RebootDemocracy.AI Blog | "+this.postData[0].title },
+        { name: 'description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
+        { property: 'og:title', content: "RebootDemocracy.AI Blog | "+this.postData[0].title },
+        // { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
+        { property: 'og:description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
+        { property: 'og:image', content: this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.id:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
-        { property: 'twitter:description', content: htmlToText.textContent.substring(0,200)+'...'},
-        { property: 'twitter:image', content:  this.directus._url+'assets/'+this.postData[0].image.id},
+        { property: 'twitter:description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
+        { property: 'twitter:image', content:  this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.id:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
+        { property: 'twitter:card', content: "summary_large_image" },
+      ],
+    })
+    },
+    async fillMetaDefault()
+    {
+     useHead({
+      title: "RebootDemocracy.AI",
+      meta: [
+        { name: 'title', content:"RebootDemocracy.AI" },
+        { property: 'og:title', content: "RebootDemocracy.AI" },
+        { property: 'og:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to “do democracy” in practice.
+
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
+        { property: 'og:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
+        { property: 'twitter:title', content: "RebootDemocracy.AI"},
+        { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to “do democracy” in practice.
+
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
+        { property: 'twitter:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })
@@ -100,8 +139,8 @@ export default {
 <header-comp></header-comp>
 <div class="blog-hero">
 
-  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id">
-  <p class="blog-img-byline" v-if="postData[0].image.tags && postData[0].image.tags.includes('AI')">AI-generated image</p>
+  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id+'?width=800'" />
+  
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
     <p class="excerpt"> {{postData[0].excerpt}}</p>
@@ -136,6 +175,7 @@ export default {
     <p><audio controls="controls"><source :src="this.directus._url+'assets/'+postData[0].audio_version.id" type="audio/mpeg" data-mce-fragment="1"></audio></p>
   </div>
     <div class="blog-content" v-html="postData[0].content"></div>
+    <p v-if="postData[0].ai_content_disclaimer" class="blog-img-byline">Some images in this post were generated using AI generated.</p>
 </div>
 
   <!-- Footer Component -->

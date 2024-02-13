@@ -49,14 +49,16 @@ async function readDirectusItem(collection, itemId) {
 
 // Main function to run the process
 async function runProcess(bodyres) {
+  // async function runProcess() {
+  //  var  bodyres= {collection:"reboot_democracy_blog", id:"28182"}
   try {
     // Read an item from the Directus collection with the specified ID
     const article = await readDirectusItem(bodyres.collection, bodyres.id);
-    console.log('Retrieved article:', article);
 
     // Extract the content and date updated from the article
-    const { content, slug, title , authors   } = article.data;
-
+    const { content, slug, title , authors, audio_version   } = article.data;
+  
+  
     // Function to extract the full name from an author object
       function getFullName(author) {
         return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
@@ -72,10 +74,8 @@ async function runProcess(bodyres) {
           return authors.map(getFullName).join(', ').replace(/, (?=[^,]+$)/, ' and ');
         }
       }
-
-
-    let textContent = `${title} \nby ${joinAuthorNames(authors)} \n${extractTextFromHTML(content)}`;
-    console.log(textContent);
+    
+    let textContent = `${title} \n ${joinAuthorNames(authors).length>0?'\nby':''} ${joinAuthorNames(authors)} \n${extractTextFromHTML(content)}`;
     
     // An array to hold all speech buffers
     let allSpeechBuffers = [];
@@ -83,7 +83,7 @@ async function runProcess(bodyres) {
     // Check the content length and split if necessary
     if (textContent.length > 4096) {
       const chunks = splitText(textContent, 4096);
-
+      
    // Process each chunk to generate speech
    for (const chunk of chunks) {
     console.log(chunk.length);
@@ -98,16 +98,19 @@ async function runProcess(bodyres) {
     } else {
       // await generateAndUploadSpeech(text_to_speech, date_updated, bodyres);
       const buffer = await generateSpeech(textContent);
+      
       allSpeechBuffers.push(buffer);
     }
      // Concatenate all speech buffers into a single buffer
      const combinedBuffer = Buffer.concat(allSpeechBuffers);
 
       // Upload combined buffer
-    const uploadResult = await uploadBuffer(combinedBuffer, slug, bodyres.collection, bodyres.id);
+      
+    const uploadResult = await uploadBuffer(combinedBuffer, slug, audio_version);
     
       // Update the article with the audio file ID
       const updateResult = await updateArticleWithAudioId(bodyres.collection, bodyres.id, uploadResult.data.id);
+    
       return updateResult;
 
   } catch (error) {
@@ -135,8 +138,9 @@ async function generateSpeech(text) {
   return Buffer.concat(chunks); // Return the single speech buffer for one chunk
 }
 
-async function uploadBuffer(buffer, slug, collection, collection_id) {
+async function uploadBuffer(buffer, slug, audio_version) {
   // Create form-data instance
+ 
   const form = new FormData();
   form.append('file', buffer, {
     filename: slug + '.mp3',
@@ -144,8 +148,8 @@ async function uploadBuffer(buffer, slug, collection, collection_id) {
     knownLength: buffer.length
   });
 
-  const directusFileEndpoint = DIRECTUS_URL + '/files';
-
+  const directusFileEndpoint = DIRECTUS_URL + '/files' + (audio_version?'/'+audio_version.id:'') ;
+  
   // Prepare the request headers with the Bearer token
   const headers = {
     'Authorization': 'Bearer ' + DIRECTUS_AUTH_TOKEN, // replace with an actual token
@@ -156,7 +160,7 @@ async function uploadBuffer(buffer, slug, collection, collection_id) {
 
   // Make the request to Directus to upload the file
   const fileResponse = await fetch(directusFileEndpoint, {
-    method: 'POST',
+    method: audio_version?'PATCH':'POST',
     body: form,
     headers: finalHeaders
   });
