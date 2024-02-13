@@ -75,7 +75,8 @@ async function readDirectusItem(collection) {
     return fileDetails;
 }
 
-async function main(bodyres) {
+async function main() {
+// async function main(bodyres) {
   // Write JSON to a file
   var bodyres = {collection:"reboot_democracy_blog"}
   const article = await readDirectusItem(bodyres.collection);  
@@ -98,6 +99,7 @@ async function main(bodyres) {
   const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
 
   console.log(`purge of ${tempname} done in all files`)
+  console.log(article.data);
   
   const buffer = Buffer.from(JSON.stringify(article.data), 'utf-8');
 
@@ -132,8 +134,9 @@ async function main(bodyres) {
 }
 
 export default async (req, context) => {
-    const bodyres = await req.json();
-    await main(bodyres);
+    // const bodyres = await req.json();
+    // await main(bodyres);
+    await main();
   };
   
 
