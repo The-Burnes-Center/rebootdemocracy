@@ -822,6 +822,10 @@ flex-flow: row wrap;
   max-width: 33%;
  
 }
+
+.search-term{
+  padding: 10px 30px;
+}
 .allposts-post-row a{
   display:flex;
   flex-direction: row;

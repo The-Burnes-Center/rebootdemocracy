@@ -82,7 +82,6 @@ export default {
       let searchTArray = this.searchTerm.split(" ");
       searchTArray = searchTArray.filter(item => item); // filter out empty entries
       const searchObj = [];
-        
         searchTArray.map((a) => {
         searchObj.push({ excerpt: { _contains: a }  });
         searchObj.push({ title: { _contains: a } } );
@@ -91,11 +90,13 @@ export default {
         searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
         searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
       });
-      if (this.searchTerm)
+      if (searchTArray.length > 0)
+      {
         this.searchResultsFlag = 1;
+        // console.log(this.searchResultsFlag);
+      }
       else
         this.searchResultsFlag = 0;
-
       this.directus
       .items('reboot_democracy_blog')
       .readByQuery({
@@ -111,12 +112,11 @@ export default {
             _or: searchObj,
           },
           sort:["date"],
-          fields: [          '*.*',
+          fields: ['*.*',
           'authors.team_id.*',
           'authors.team_id.Headshot.*'],
         })
         .then((b) => {
-          
           this.blogDataSearch = b.data;
           console.log(this.blogDataSearch, 'searchResults');
           this.searchloader = false;
@@ -286,27 +286,27 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="blog-page-hero">
     <h1 class="eyebrow">Reboot Democracy</h1>
     <h1>Blog</h1>   
-    <div class="search-bar-section">      
-     <input
-        class="search-bar"
-        v-model="searchTerm"
-        @keyup.enter="resetSearch()"
-        type="text"
-        placeholder="SEARCH"/>
-           
-           <span type="submit"
-          @click="searchTerm = '';
-           resetSearch();"
-           class="search-bar-cancel-btn material-symbols-outlined">
-              cancel
-          </span>
+      <div class="search-bar-section">      
+      <input
+          class="search-bar"
+          v-model="searchTerm"
+          @keyup.enter="resetSearch()"
+          type="text"
+          placeholder="SEARCH"/>
+            
+            <span type="submit"
+            @click="searchTerm = '';
+            resetSearch();"
+            class="search-bar-cancel-btn material-symbols-outlined">
+                cancel
+            </span>
 
-        <span type="submit"
-          @click="
-           resetSearch()"
-           class="search-bar-btn material-symbols-outlined">
-              search
-          </span>
+          <span type="submit"
+            @click="
+            resetSearch()"
+            class="search-bar-btn material-symbols-outlined">
+                search
+            </span>
         </div>
         <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
   </div>
@@ -374,8 +374,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 
 <!-- Filtered Posts Section -->
-<h2  v-if="searchResultsFlag   && searchTerm != ''">Searching for <i>{{searchTermDisplay}}</i> </h2>
-<div v-if="!searchResultsFlag  || searchTerm == ''">
+<h2  v-if="searchResultsFlag   && searchTermDisplay != ''" class="search-term">Searching for <i>{{searchTermDisplay}}</i> </h2>
+<div v-if="searchResultsFlag  || searchTerm == ''">
 
 <div class="allposts-section">
   <div v-for="(tag_item) in this.filteredTagData" class="all-posts-row">
@@ -420,8 +420,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 
 
-<!-- <div v-if="!searchResultsFlag  || searchTerm == ''"> -->
-<div class="allposts-section">
+<div v-if="!searchResultsFlag && searchTermDisplay == ''">
+      <div class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item) in blogDataSearch.slice().reverse()"> 
           <!-- <div v-if="blog_item?.Tags === null"> -->
        <a :href="'/blog/' + blog_item.slug">
@@ -443,7 +443,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             </div>
          <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
          </a>
-      <!-- </div> -->
+      </div>
       </div>
 </div>
 
