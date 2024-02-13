@@ -7,9 +7,9 @@
       <div class="wordmark">
         Reboot Democracy
       </div>
-      <p>A Project By</p>
-      <img @click="$router.push('../')" src="../assets/the-govlab-logo-white.svg">
-      <img @click="$router.push('../')" src="../assets/burnes-center-logo.png">
+      <p>A Project Of</p>
+      <a href="http://thegovlab.org" target="_blank"><img src="../assets/the-govlab-logo-white.svg"></a>
+      <a href="http://burnes.northeastern.edu" target="_blank"><img src="../assets/burnes-center-logo.png"></a>
     </div>
     <div class="footer-col">
       <h4>Our Work</h4>
@@ -19,18 +19,18 @@
     </div>
     <div class="footer-col">
       <h4>Resources</h4>
-       <a href="our-engagements">Reboot Democracy Lecture Series</a>
-       <a href="our-research">Case Studies</a>
-       <a href="our-research">Research Questions</a>
-       <a href="our-writing">Writing</a>
-       <a href="our-teaching">Teaching</a>
+       <a href="/events">Reboot Democracy Lecture Series</a>
+       <a href="/our-research">Case Studies</a>
+       <a href="/our-research">Research Questions</a>
+       <a href="/our-writing">Writing</a>
+       <a href="/our-teaching">Teaching</a>
     </div>
     <div class="footer-col">
-      <h4>About the GovLab</h4>
+      <h4>About Reboot Democracy</h4>
        <a href="../">Our Work</a>
        <a href="/team">Our People</a>
        <!-- <a href="../">Careers</a> -->
-       <a href="../">Join the Lab</a>
+       <!-- <a href="../">Join the Lab</a> -->
     </div>
   </div>
 </div>

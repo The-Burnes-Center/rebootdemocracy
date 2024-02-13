@@ -1,0 +1,19 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Glendale",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "CA",
+				"name": "California"
+			},
+			"timezone": "America/Los_Angeles",
+			"latitude": 34.137,
+			"longitude": -118.2376
+		},
+		"timestamp": 1701902053283
+	}
+}
