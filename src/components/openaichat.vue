@@ -34,7 +34,7 @@ export default {
       initMessage: null,
       initMessageFeedback:0,
       responsePromiseResolve: null,
-
+      errorMessageOpenAI:"At the moment OpenAI experiences issues to handle your request. Please try again in a while. In the meantime, read the latest from the  <a href='https://rebootdemocracy.ai/blog'>Reboot Democracy Blog</a>",
       assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Reboot Democracy Tutor ID - Replace with your assistant ID
     };
   },
@@ -284,7 +284,7 @@ export default {
       });
 
       let actualRun = await this.retrieveOpenAIRun(run.id);
-      console.log(actualRun.status);
+      console.log("status1",actualRun.status);
 
       while (
         actualRun.status === "queued" ||
@@ -338,11 +338,23 @@ export default {
         // Wait for a while before checking the status again
         await new Promise((resolve) => setTimeout(resolve, 2000));
         actualRun = await this.retrieveOpenAIRun(run.id);
-        console.log(actualRun.status)
+        console.log("status2",actualRun.status)
       }
-      console.log(actualRun.status);
       
+      // actualRun.status = "failed";
+      if( actualRun.status == "failed" || actualRun.status == "cancelled"  || actualRun.status == "expired")
+      {
+        this.updateMessagesAndScroll({
+          // id: lastMessageForRun.id,
+          content: this.errorMessageOpenAI,
+          type: "openai",
+        });
+        return
 
+      }
+      // console.log("status3",actualRun.status);
+      
+      
       // Process the final response from OpenAI
       const messagesOAI = await this.listOpenAIMessages();
 
@@ -351,10 +363,7 @@ export default {
           (message) => message.run_id === run.id && message.role === "assistant"
         )
         .pop();
-              // Check if this is the first feedback for retrieving suggesting prompts 
-
-      // if (lastMessageForRun && (this.initMessageFeedback == 0 || this.initMessageFeedback == 2)) {
-
+   
         // Regular expression to match the pattern for a source string
       // \【 and \】 escape the brackets, \d+ matches one or more digits, and \† escapes the dagger
       const pattern = /\【.*?†source】/g;
