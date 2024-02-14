@@ -284,7 +284,7 @@ export default {
       });
 
       let actualRun = await this.retrieveOpenAIRun(run.id);
-      console.log("status1",actualRun.status);
+      console.log(actualRun.status);
 
       while (
         actualRun.status === "queued" ||
@@ -338,7 +338,7 @@ export default {
         // Wait for a while before checking the status again
         await new Promise((resolve) => setTimeout(resolve, 2000));
         actualRun = await this.retrieveOpenAIRun(run.id);
-        console.log("status2",actualRun.status)
+        console.log(actualRun.status)
       }
       
       // actualRun.status = "failed";
