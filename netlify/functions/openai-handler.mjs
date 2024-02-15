@@ -24,6 +24,9 @@ export async function handler(event) {
       case 'retrieveRun':
         response = await openai.beta.threads.runs.retrieve(data.threadId, data.runId);
         break;
+      case 'retrieveThreadMessages':
+        response = await openai.beta.threads.messages.list(data.threadId);
+        break;        
       case 'submitToolOutputs':
         response = await openai.beta.threads.runs.submitToolOutputs(data.threadId, data.runId, data.toolOutputs);
         break;
