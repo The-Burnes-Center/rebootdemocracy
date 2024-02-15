@@ -427,7 +427,6 @@ export default {
 
     async combineAndSanitizeMessages(messages) {
     // Combine messages with role "assistant" into one long message, excluding already processed messages
-    console.log(messages);
     const combinedMessage = messages
       .filter(message => message.role === "assistant" && !this.processedMessageIds.includes(message.id))
       .reverse() 
@@ -542,9 +541,9 @@ async createOpenAIRun(runData) {
         <div class="button-grid">
             <p class="bot-welcome-message">Welcome to the Reboot Democracy Bot. Trained on research and writing from the GovLab and the Reboot Blog, I answer your questions about technology, governance and democracy.</p>
             <p>Type a question you have about AI, democracy and governance in the box below. Here are some sample prompts to get you started!</p>
-            <a class="prompt-button" @click="submitSamplePrompt('urbanPlanning')">Can you summarize the latest research on AI and participatory decision-making in urban planning?</a>
             <a class="prompt-button" @click="submitSamplePrompt('aiEngagement')">Can you give me examples of case studies or pilot projects where AI has been successfully integrated into public engagement?</a>
             <a class="prompt-button" @click="submitSamplePrompt('misInformation')">How can AI help in addressing misinformation during election campaigns?</a>
+            <a class="prompt-button" @click="submitSamplePrompt('urbanPlanning')">Can you summarize the latest research on AI and participatory decision-making in urban planning?</a>
             <!-- <button class="prompt-button" @click="submitSamplePrompt('environmentEngagement')">What are examples of successful engagements relating to the environment?</button>
             <button class="prompt-button" @click="submitSamplePrompt('parliamentEngagement')">How can a parliament create more public engagement in lawmaking?</button> -->
        </div>
