@@ -86,7 +86,7 @@ async function main() {
     if(bodyres.collection == 'reboot_democracy_blog')  article.data[i]['link']= "https://rebootdemocracy.ai/blog/"+e.slug;
   })
   
-  var tempname =  'reboot_democracy_blog_entries_2024.json';
+  var tempname =  'reboot_democracy_blog_entries_2024.txt';
   const allFiles = await openai.files.list();
   const assistantFiles = await openai.beta.assistants.files.list(
     REBOOT_DEMOCRACY_ASSISTANT_ID
@@ -101,12 +101,19 @@ async function main() {
   console.log(`purge of ${tempname} done in all files`)
   console.log(article.data);
   
-  const buffer = Buffer.from(JSON.stringify(article.data), 'utf-8');
+    // Convert JSON data to plain text format
+    let textContent = article.data.map(e => 
+      `Title: ${e.title}\n` +
+      `Link: https://rebootdemocracy.ai/blog/${e.slug}\n` +
+      `Content: ${e.content}\n` // Assuming each entry has a 'content' field
+    ).join("\n\n");
+  
+    const buffer = Buffer.from(textContent, 'utf-8');
 
   try {
       // Upload the file
       const formData = new FormData();
-      formData.append('file', buffer, 'reboot_democracy_blog_entries_2024.json');
+      formData.append('file', buffer, 'reboot_democracy_blog_entries_2024.txt');
       formData.append('purpose', 'assistants');
 
       // Merge custom headers with form-data headers
