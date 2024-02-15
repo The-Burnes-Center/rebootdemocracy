@@ -34,8 +34,10 @@ export default {
       initMessage: null,
       initMessageFeedback:0,
       responsePromiseResolve: null,
+      processedMessageIds:[],
       errorMessageOpenAI:"At the moment OpenAI experiences issues to handle your request. Please try again in a while. In the meantime, read the latest from the  <a href='https://rebootdemocracy.ai/blog'>Reboot Democracy Blog</a>",
       assistantId: "asst_XBK7BcSwGLtDv4PVvN5nKFaB", // Reboot Democracy Tutor ID - Replace with your assistant ID
+      
     };
   },
   methods: {
@@ -284,6 +286,8 @@ export default {
       });
 
       let actualRun = await this.retrieveOpenAIRun(run.id);
+      let currentThreadMessages = '';
+      let currentThreadMessagesArr = [];
       console.log(actualRun.status);
 
       while (
@@ -323,7 +327,7 @@ export default {
         //   // }
           
         //   this.isLoading = true;
-
+        console.log(actualRun.status);
         //   // Submit the tool outputs to continue
           await this.submitOpenAIToolOutputs(run.id, {
             tool_outputs: [
@@ -336,9 +340,31 @@ export default {
         }
 
         // Wait for a while before checking the status again
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         actualRun = await this.retrieveOpenAIRun(run.id);
-        console.log(actualRun.status)
+  //       currentThreadMessages = await this.retrieveThreadMessages();
+
+  //       console.log(currentThreadMessages.data);
+  //       // Filter messages with role "assistant" and sort them by 'created_at' in descending order to get the latest message first
+  // const assistantMessages = currentThreadMessages.data
+  //   .filter(message => message.role === "assistant")
+  //   .sort((a, b) => b.created_at - a.created_at); // Note the 'b - a' for descending order
+  //   console.log(assistantMessages[0].content.length)
+  // // Check if there are any assistant messages
+  // if (assistantMessages.length > 0 && assistantMessages[0].content.length > 0 && assistantMessages.length > currentThreadMessagesLength) {
+  //   // Get the latest assistant message
+  //   const latestMessage = assistantMessages[0]; // The first message is the latest due to sorting
+  //   currentThreadMessagesLength = assistantMessages.length;
+  //   // Send the latest message to `this.updateMessagesAndScroll`
+  //   this.updateMessagesAndScroll({
+  //     // id: latestMessage.id, // Use the ID if necessary
+  //     content: latestMessage.content[0].text.value,
+  //     type: "openai",
+  //   });
+  // }
+
+        console.log("actualRun status:",actualRun.status);
+        
       }
       
       // actualRun.status = "failed";
@@ -358,22 +384,26 @@ export default {
       // Process the final response from OpenAI
       const messagesOAI = await this.listOpenAIMessages();
 
-      const lastMessageForRun = messagesOAI.data
-        .filter(
-          (message) => message.run_id === run.id && message.role === "assistant"
-        )
-        .pop();
+      const sanitizedCombinedMessage = await this.combineAndSanitizeMessages(messagesOAI.data);
+      console.log(sanitizedCombinedMessage);
+      // const lastMessageForRun = messagesOAI.data
+      //   .filter(
+      //     (message) => message.run_id === run.id && message.role === "assistant"
+      //   )
+      //   .pop();
    
-        // Regular expression to match the pattern for a source string
-      // \【 and \】 escape the brackets, \d+ matches one or more digits, and \† escapes the dagger
-      const pattern = /\【.*?†source】/g;
-      let lastMessageForRunSanitized = lastMessageForRun.content[0].text.value.replace(pattern, '');
+      //   // Regular expression to match the pattern for a source string
+      // // \【 and \】 escape the brackets, \d+ matches one or more digits, and \† escapes the dagger
+      // const pattern = /\【.*?†source】/g;
+      // let lastMessageForRunSanitized = lastMessageForRun.content[0].text.value.replace(pattern, '');
 
         this.updateMessagesAndScroll({
-          id: lastMessageForRun.id,
-          content: lastMessageForRunSanitized,
+          // id: lastMessageForRun.id,
+          content: sanitizedCombinedMessage,
           type: "openai",
         });
+      
+        
       // } 
       // else if (lastMessageForRun && this.initMessageFeedback == 1)
       // {
@@ -395,7 +425,31 @@ export default {
 
     },
 
-    async createOpenAIRun(runData) {
+    async combineAndSanitizeMessages(messages) {
+    // Combine messages with role "assistant" into one long message, excluding already processed messages
+    console.log(messages);
+    const combinedMessage = messages
+      .filter(message => message.role === "assistant" && !this.processedMessageIds.includes(message.id))
+      .reverse() 
+      .map(message => {
+        // Mark message ID as processed
+        
+        this.processedMessageIds.push(message.id);
+        return message.content[0].text.value;
+      })
+      .join("\n\n");
+
+    // Regular expression to match the pattern for a source string
+    // \【 and \】 escape the brackets, \d+ matches one or more digits, and \† escapes the dagger
+    const pattern = /\【.*?†source】/g;
+
+    // Sanitize the combined message by removing the specified pattern
+    const sanitizedMessage = combinedMessage.replace(pattern, '');
+
+    return sanitizedMessage
+  },
+
+async createOpenAIRun(runData) {
       const response = await axios.post("/.netlify/functions/openai-handler", {
         action: "createRun",
         data: { threadId: this.threadId, runData },
@@ -407,6 +461,15 @@ export default {
       const response = await axios.post("/.netlify/functions/openai-handler", {
         action: "retrieveRun",
         data: { threadId: this.threadId, runId },
+      });
+      // handle the response
+      return response.data;
+    },
+
+    async retrieveThreadMessages() {
+      const response = await axios.post("/.netlify/functions/openai-handler", {
+        action: "retrieveThreadMessages",
+        data: { threadId: this.threadId },
       });
       // handle the response
       return response.data;
