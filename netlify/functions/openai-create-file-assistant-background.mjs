@@ -44,7 +44,7 @@ async function directusFetch(endpoint, method = 'GET', body = null) {
 // Function to read an item from a collection by ID
 async function readDirectusItem(collection) {
     // const endpoint = `/items/${collection}/${itemId}?fields=id,slug,content,excerpt,title,date_created,authors.team_id.*`;
-    const endpoint = `/items/${collection}?limit=-1&fields=id,slug,content,excerpt,title,date_created,authors.team_id.*&filter={ "status": { "_eq": "published" }}`;
+    const endpoint = `/items/${collection}?limit=-1&fields=id,slug,content,excerpt,title,date,authors.team_id.*&sort=-date&filter={ "status": { "_eq": "published" }}`;
     return directusFetch(endpoint);
   }
 
@@ -99,15 +99,17 @@ async function main() {
   const allFielsPurge = await retrieveFiles(allFiles,tempname, 'all');
 
   console.log(`purge of ${tempname} done in all files`)
-  console.log(article.data);
+  console.log("article",article.data[0].date,article.data[0].link,);
   
     // Convert JSON data to plain text format
     let textContent = article.data.map(e => 
+      `Date: ${e.date}\n` +
       `Title: ${e.title}\n` +
-      `Link: https://rebootdemocracy.ai/blog/${e.slug}\n` +
+      `Link: ${e.link}\n` +
+      `Link: ${e.slug}\n` +
       `Content: ${e.content}\n` // Assuming each entry has a 'content' field
     ).join("\n\n");
-  
+      
     const buffer = Buffer.from(textContent, 'utf-8');
 
   try {
