@@ -576,8 +576,9 @@ async createOpenAIRun(runData) {
       </div>
         <p class="bot-feedback">Have feedback about this tool? Email us at hello@thegovlab.org</p>
     </div>
-
-  <p class="bot-attribution"><i>powered by ChatGPT</i></p> 
+    
+  <p class="bot-attribution"><i>Powered by ChatGPT.</i><br>The use of this chatbot is governed by <a href="https://openai.com/policies" target="blank">OpenAI's terms of use </a>. <br>Do not enter any personally identifiable information. </p> 
+  
   </div>
 
   <!-- <footer-comp></footer-comp> -->
