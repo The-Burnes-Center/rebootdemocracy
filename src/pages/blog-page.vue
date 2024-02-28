@@ -11,11 +11,13 @@ import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import { register } from 'swiper/element/bundle';
 import {useHead } from '@vueuse/head'
+import OpenAIChat from "../components/openaichat.vue";
 
 export default {
   components: {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
+    "openai-chat":OpenAIChat,
   },
   
   data() {
@@ -281,6 +283,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </script>
 
 <template>
+<div class="chatbot-app">
+  <openai-chat />
+</div>
     <!-- Header Component -->
     <header-comp></header-comp>
   <div class="blog-page-hero">
