@@ -383,6 +383,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <!-- Filtered Posts Section -->
 <h2  v-if="searchResultsFlag   && searchTermDisplay != ''" class="search-term">Searching for <i>{{searchTermDisplay}}</i> </h2>
 <div v-if="searchResultsFlag  || searchTerm == ''">
+  <div v-if="!searchResultsFlag && searchTermDisplay == ''">
 
 <div class="allposts-section">
   <div v-for="(tag_item) in this.filteredTagData" class="all-posts-row">
@@ -417,6 +418,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 </div>
 </div>
+</div>
 
 
 
@@ -427,7 +429,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 
 
-<div v-if="!searchResultsFlag && searchTermDisplay == ''">
+
       <div class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item) in blogDataSearch.slice().reverse()"> 
           <!-- <div v-if="blog_item?.Tags === null"> -->
@@ -452,7 +454,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
          </a>
       </div>
       </div>
-</div>
+
 
     
 <!-- Footer Component -->
