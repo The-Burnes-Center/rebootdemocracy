@@ -527,7 +527,7 @@ async createOpenAIRun(runData) {
   <div class="bot-icon"  @click="openFunc"  v-if="!botOpen">
      <i class="fa-solid fa-message-bot"></i>
   </div>
-  <div class="assitant-chat" v-if="botOpen">
+  <div class="assitant-chat" >
     <div class="bot-header">
       <!-- <h4>The Reboot Bot<br><div style="font-size: 0.9rem; font-weight: 400">Your Personal Participatory Democracy Assistant</div></h4> -->
       <i @click="closeFunc" class="fa-regular fa-circle-xmark bot-close"></i>
