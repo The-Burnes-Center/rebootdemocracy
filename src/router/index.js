@@ -12,6 +12,7 @@ import Signup from '../pages/signup.vue';
 import BlogPage from '../pages/blog-page.vue';
 import BlogPost from '../pages/blog.vue';
 import AllPosts from '../pages/all-blog-posts.vue';
+import NJOPDChat from '../components/legalbrief-opd-nj.vue';
 
 
 const routes = [
@@ -28,6 +29,8 @@ const routes = [
   { path:"/blog/:name", component: BlogPost, props:true },
   { path:"/blog", component: BlogPage },
   { path:"/all-blog-posts", component: AllPosts },
+  { path:"/nj-opd-chat", component: NJOPDChat }
+  
 ]
 
 const router = createRouter({
