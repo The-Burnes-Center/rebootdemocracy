@@ -524,13 +524,13 @@ async createOpenAIRun(runData) {
 
   <!-- Header Component -->
   <!-- <header-comp></header-comp> -->
-  <div class="bot-icon"  @click="openFunc"  v-if="!botOpen">
+  <!-- <div class="bot-icon"  @click="openFunc"  v-if="!botOpen">
      <i class="fa-solid fa-message-bot"></i>
-  </div>
+  </div> -->
   <div class="assitant-chat" >
     <div class="bot-header">
       <!-- <h4>The Reboot Bot<br><div style="font-size: 0.9rem; font-weight: 400">Your Personal Participatory Democracy Assistant</div></h4> -->
-      <i @click="closeFunc" class="fa-regular fa-circle-xmark bot-close"></i>
+      <!-- <i @click="closeFunc" class="fa-regular fa-circle-xmark bot-close"></i> -->
     </div>
     <div v-if="!isQuizAnswered">
       <button>Loading...</button>
