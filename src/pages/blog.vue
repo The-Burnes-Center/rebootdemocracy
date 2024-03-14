@@ -63,7 +63,7 @@ export default {
           'authors.team_id.Headshot.*'
           ],
           filter: {
-            _and: [ { date: { _lte: "$NOW(-5 hours)" }},
+            _and: [
             {
             slug: {
               _eq: this.slug,
