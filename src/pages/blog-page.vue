@@ -262,7 +262,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       })
       .then((item) => {
       self.blogData =  item.data;
-      console.log(self.blogData )
+      
       item.data.map((tag)=>{
         tag?.Tags?.map(subTags =>{
           if(subTags != null && !this.inclucesString(this.filteredTagData,subTags)){
@@ -273,7 +273,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         //   this.filteredTagData.push(tag.Tags);
         // }
       })
-      console.log(this.filteredTagData)
+      this.filteredTagData.unshift(this.filteredTagData.splice(this.filteredTagData.indexOf("News that caught our eye"), 1)[0]);
+
+      
       // self.testimonialsLength = self.blogData.testimonials.length;
       });
     },
