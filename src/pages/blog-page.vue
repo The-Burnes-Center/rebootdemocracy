@@ -260,8 +260,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       })
       .then((item) => {
       self.blogData =  item.data;
-      console.log(self.blogData )
+      
       item.data.map((tag)=>{
+        
         tag?.Tags?.map(subTags =>{
           if(subTags != null && !this.inclucesString(this.filteredTagData,subTags)){
             this.filteredTagData.push(subTags);
@@ -271,6 +272,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         //   this.filteredTagData.push(tag.Tags);
         // }
       })
+      this.filteredTagData.unshift(this.filteredTagData.splice(this.filteredTagData.indexOf("News that caught our eye"), 1)[0]);
+
       console.log(this.filteredTagData)
       // self.testimonialsLength = self.blogData.testimonials.length;
       });
@@ -379,6 +382,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <h2  v-if="searchResultsFlag   && searchTermDisplay != ''" class="search-term">Searching for <i>{{searchTermDisplay}}</i> </h2>
 <div v-if="searchResultsFlag  || searchTerm == ''">
 
+  {{ filteredTagData}}
 <div class="allposts-section">
   <div v-for="(tag_item) in this.filteredTagData" class="all-posts-row">
     <div class="blog-section-header">
