@@ -194,7 +194,7 @@ h1.title{
   width:100%;
   background-size: cover;
   color: white;
-  padding: 20px;
+  padding: 0 0 20px 0;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -468,7 +468,7 @@ a.btn:hover{
   margin: 2rem 0;
 }
 .blog-page-hero{
-  height: 45vh;
+  height: 55vh;
   background-image:
   linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)),
   url('../assets/writing-image.png');
