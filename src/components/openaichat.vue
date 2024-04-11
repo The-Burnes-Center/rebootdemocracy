@@ -48,7 +48,7 @@ export default {
       const newWindow = window.open('https://chat.rebootdemocracy.ai', '_blank');
       setTimeout(() => {
                 newWindow.postMessage({ openerScript: true }, 'https://chat.rebootdemocracy.ai');
-            }, 3000); // Adjust the delay as needed
+            }, 2000); // Adjust the delay as needed
       // this.botOpen = 1;
     },
     parsedMarkdown(content) {
