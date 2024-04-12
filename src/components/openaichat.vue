@@ -45,7 +45,12 @@ export default {
       this.botOpen = 0;
     },
     openFunc(){
-      this.botOpen = 1;
+      // window.open('https://chat.rebootdemocracy.ai/')
+      const newWindow = window.open('https://chat.rebootdemocracy.ai', '_blank');
+      setTimeout(() => {
+                newWindow.postMessage({ openerScript: true }, 'https://chat.rebootdemocracy.ai');
+            }, 2000); // Adjust the delay as needed
+      // this.botOpen = 1;
     },
     parsedMarkdown(content) {
       return marked(content);
@@ -510,7 +515,7 @@ async createOpenAIRun(runData) {
     },
   },
   mounted() {
-    this.createOpenAIThread(); // Initialize OpenAI thread on component mount
+    // this.createOpenAIThread(); // Initialize OpenAI thread on component mount
   },
 };
 </script>
