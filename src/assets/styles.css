@@ -294,6 +294,21 @@ p.search-desc{
   }
 } 
 
+.bot-search-hp{display: flex; flex-direction: row; justify-content: flex-start;
+  margin-bottom: 2vh;
+  margin-top: 2vh;
+  margin-right: 2vh;
+}
+
+.bot-input {
+  min-width: 300px;
+  outline: 1px solid black;
+  margin-right: 2vh;
+  margin-top: 1px;
+  padding-left:1vh;
+}
+
+
 
 a.btn {
   font-size: 0.8rem;

@@ -392,6 +392,13 @@ export default {
       self.moreresourceData =  item.data;
       });
     },
+    submitQuery() {
+      const inputValue = this.inputFieldValue; // get the value from the input field
+      const botUrl = `https://policy-synth-chat-dev.thegovlab.com/?query=${inputValue}`;
+      window.open(botUrl, "_blank");
+    },
+    
+
 
     loadModal() {
      self = this;
@@ -453,6 +460,10 @@ export default {
   <div class="hero-content">
     <h1 class="eyebrow blue">{{indexData.title}}</h1>
     <h1 class="title" v-html="indexData.subtitle"></h1>
+    <div class="bot-search-hp">
+      <input type="text" v-model="inputFieldValue" @keyup.enter="submitQuery" placeholder=" Ask a question!" class="bot-input">
+      <input @click="submitQuery" type="submit" class="btn btn-primary btn-dark btn-medium" name="Submit" id="mc-embedded-subscribe"  value="Submit">
+    </div>
   </div>
 
   
