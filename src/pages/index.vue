@@ -498,7 +498,7 @@ export default {
 
 <!-- Upcoming Events -->
 
-<div class="upcoming-events-section">
+<div class="upcoming-events-section" v-show="!eventsData">
   <div class="upcoming-events-box">
     <div class="upcoming-events-text">
         <h3>Reboot Democracy Lecture Series</h3>
