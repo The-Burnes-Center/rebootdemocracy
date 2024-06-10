@@ -15,7 +15,8 @@ import AllPosts from '../pages/all-blog-posts.vue';
 
 
 const routes = [
-  { path:"/", component: Home },
+  { path:"/", component: BlogPage },
+  { path:"/about", component: Home },
   { path:"/events", component: Events },
   { path:"/our-writing", component: Writing },
   { path:"/our-research", component: Research },
