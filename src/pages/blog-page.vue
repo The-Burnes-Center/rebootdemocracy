@@ -5,6 +5,7 @@ import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
 import _ from "lodash";
+import ModalComp from "../components/modal.vue";
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
 
 import HeaderComponent from "../components/header.vue";
@@ -18,6 +19,11 @@ export default {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
     "openai-chat":OpenAIChat,
+    "ws-banner":
+        VueFinalModal,
+    ModalsContainer,
+    ModalComp,
+  
   },
   
   data() {
@@ -164,29 +170,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     })
     },
 
-    loadModal() {
-     self = this;
-      this.directus
-      .items('innovate_us_modal')
-      .readByQuery({     
-          meta: 'total_count',
-         limit: -1,
-         fields: [
-          '*.*']
-      }).then((item) => {
-      self.modalData = item.data;
-      
-      self.showmodal = localStorage.getItem(self.modalData.campaigns.campaign_name) != "off" && self.modalData.status== 'published'?true:false;
-      })
-    },
-    closeModal() {
-     this.showmodal=false;
-     localStorage.setItem(this.modalData.campaigns.campaign_name,"off");
-     
-     // edgecase if modal opens and the workshop banner is not in
-     this.$refs.banner.slider.scrollLeft == 0 ? this.$refs.banner.sliderPos() : '';
-
-    },
 
     nextTestimonial(){
       if (this.nextItem <= this.testimonialsLength-1){
@@ -239,6 +222,30 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         const lowerCasePartialSentence = string.toLowerCase();
       return array?.some(s => s.toLowerCase().includes(lowerCasePartialSentence));
       },
+        loadModal() {
+     self = this;
+      this.directus
+      .items('reboot_democracy_modal')
+      .readByQuery({     
+          meta: 'total_count',
+         limit: -1,
+         fields: [
+          '*.*']
+      }).then((item) => {
+      self.modalData = item.data;
+      
+      console.log(self.modalData);
+
+     let storageItem = localStorage.getItem("Reboot Democracy");
+     self.showmodal = self.modalData.status == 'published' && (self.modalData.visibility == 'always' || (self.modalData.visibility == 'once' && storageItem != 'off'));
+
+        })
+    },
+    closeModal() {
+     this.showmodal=false;
+     localStorage.setItem("Reboot Democracy","off");
+    
+    },
       fetchBlog: function fetchBlog() {
       self = this;
 
@@ -290,6 +297,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
     <!-- Header Component -->
     <header-comp></header-comp>
+          <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
+      <ModalComp @close="closeModal" />
+    </vue-final-modal>
   <div class="blog-page-hero">
     <h1 class="eyebrow">Reboot Democracy</h1>
     <h1>Blog</h1>
