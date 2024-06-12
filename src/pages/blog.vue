@@ -1,36 +1,56 @@
 
 <script>
-import { ref } from "vue";
+import { ref, watch } from 'vue';
 import { Directus } from "@directus/sdk";
 import format from "date-fns/format";
 import isPast from "date-fns/isPast";
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
+import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
+import ModalComp from "../components/modal.vue";
 import {useHead } from '@vueuse/head'
 
 export default {
   components: {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
-
+        "ws-banner":
+        VueFinalModal,
+    ModalsContainer,
+    ModalComp,
+  
   },
   props: {
     slug: String,
     name: String,
   },
+
   data() {
     return {
+      model: 0,      
       postData: [],
       slug: this.$route.params.name,
+      modalData: [],
+      showmodal: false,
       directus: new Directus("https://content.thegovlab.com/"),
       path: this.$route.fullPath,
 
           // this.debounceSearch = _.debounce(this.searchBlog, 500);
     };
   },
+  watch :{
+  '$route': {
+    handler: function(r) {
+       this.loadModal(); 
+    },
+    deep: true,
+    immediate: true
+  },
+  },
   created() {
-    
+     this.loadModal(); 
     this.fetchBlog();
+   
   },
 
   methods: {
@@ -76,6 +96,30 @@ export default {
           self.postData = item.data;
           item.data.length>0 ? this.fillMeta() :  this.fillMetaDefault()
         });
+    },
+    loadModal() {
+     self = this;
+      this.directus
+      .items('reboot_democracy_modal')
+      .readByQuery({     
+          meta: 'total_count',
+         limit: -1,
+         fields: [
+          '*.*']
+      }).then((item) => {
+      self.modalData = item.data;
+      
+      console.log(self.modalData);
+
+     let storageItem = localStorage.getItem("Reboot Democracy");
+     self.showmodal = self.modalData.status == 'published' && (self.modalData.visibility == 'always' || (self.modalData.visibility == 'once' && storageItem != 'off'));
+
+        })
+    },
+    closeModal() {
+     this.showmodal=false;
+     localStorage.setItem("Reboot Democracy","off");
+    
     },
     fillMeta()
     {
@@ -141,6 +185,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
    
 <!-- Header Component -->
 <header-comp></header-comp>
+
 <div class="blog-hero">
 
   <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id+'?width=800'" />
