@@ -1026,6 +1026,7 @@ p.excerpt{
   font-style: normal;
   font-weight: 500;
   line-height: 40px;
+  width: 100%;
 }
 .blog-body
 {
