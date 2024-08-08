@@ -1012,6 +1012,12 @@ line-height: normal;
     padding: 40px 10px 40px 10px;
   
   }
+
+  .tag-posts-row-container{
+
+    grid-template-columns:none;
+
+  }
 }
 p.excerpt{
   color: var(--black, #000);
