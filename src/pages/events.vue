@@ -249,6 +249,7 @@ export default {
 <!-- <mailing-list-comp></mailing-list-comp> -->
 <div ref="upcoming" class="event-grid-section">
   <div class="event-grid-row">
+  <div v-if="eventsData.some(event => FutureDate(new Date(event.event_element.date)))">
     <div class="event-grid-col"  v-for="event_item in eventsData" v-show="FutureDate(new Date(event_item.event_element.date))">
       <div class="event-grid-item">
         <div class="event-grid-padding">
@@ -256,7 +257,6 @@ export default {
             <div class="dot"></div>
             <p>Innovation Mindset</p>
           </div> -->
-          
           <div class="event-title">
           <h2>{{event_item.event_element.title}}</h2>
           </div>
@@ -288,6 +288,10 @@ export default {
              <a :href="event_item.event_element.link" target="_blank" class="btn btn-spl btn-dark btn-medium">Register</a>
          </div>
         </div>
+    </div>
+  </div>
+      <div v-else>
+      <h3>No upcoming events</h3>
     </div>
   </div>
 </div>
