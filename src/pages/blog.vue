@@ -8,7 +8,7 @@ import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
 import ModalComp from "../components/modal.vue";
-import {useHead } from '@vueuse/head'
+import { useHead } from '@vueuse/head'
 
 export default {
   components: {

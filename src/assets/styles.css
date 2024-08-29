@@ -1092,7 +1092,8 @@ padding: 0px 24px 0px 50px;
   justify-content: center; /* Center the container */
   margin-left: auto; /* Center the container horizontally */
   margin-right: auto; /* Center the container horizontally */
-  max-width: 850px; /* Maximum width of the container */
+  margin-bottom: 2rem;
+  max-width: 810px; /* Maximum width of the container */
     width: 100%;
 }
 
@@ -1103,10 +1104,10 @@ padding: 0px 24px 0px 50px;
 .audio-version > p {
   color: var(--black, #000);
   font-family: "Red Hat Text";
-  font-size: 22px;
+  font-size: 18px;
   font-style: normal;
   font-weight: 500;
-  line-height: 38px;
+  line-height: 30px;
 }
 
 .blog-content {
@@ -1115,20 +1116,23 @@ padding: 0px 24px 0px 50px;
   gap: 24px;
   text-align: left;
 }
+
 .blog-content > *{
-  max-width: 850px;
+  max-width: 750px;
   flex: 1 0 0;
   font-family: "Red Hat Text" !important;
 }
+
 .blog-content > p{
   color: var(--black, #000);
   /* Body-Blog/Desktop */
   font-family: Red Hat Text !important;
-  font-size: 22px;
+  font-size: 18px;
   font-style: normal;
-  font-weight: 500;
-  line-height: 38px;
+  font-weight: 402;
+  line-height: 30px;
 }
+
 .blog-content > p > *{
   color: var(--black, #000);
   /* Body-Blog/Desktop */
@@ -1136,7 +1140,7 @@ padding: 0px 24px 0px 50px;
   font-size: 22px;
   font-style: normal;
   font-weight: 500;
-  line-height: 38px;
+  line-height: 36px;
 }
 .blog-content > div > div > p > * {
   color: var(--black, #000);
@@ -1162,12 +1166,13 @@ padding: 0px 24px 0px 50px;
   color: var(--black, #000);
   /* Body-Blog/Desktop */
   font-family: Red Hat Text;
-  font-size: 22px;
+  font-size: 18px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 402;
   line-height: 38px;
   margin-left: 50px;
 }
+
 .blog-content > ol{
   color: var(--black, #000);
   /* Body-Blog/Desktop */
@@ -1175,7 +1180,7 @@ padding: 0px 24px 0px 50px;
   font-size: 22px;
   font-style: normal;
   font-weight: 500;
-  line-height: 38px;
+  line-height: 36px;
   margin-left: 50px;
 }
 .blog-content > p > a {
@@ -1183,12 +1188,13 @@ padding: 0px 24px 0px 50px;
 
 /* Body-Blog/Desktop */
 font-family: Red Hat Text !important;
-font-size: 22px;
+font-size: 18px;
 font-style: normal;
 font-weight: 500;
 line-height: 160%;
 text-decoration-line: underline;
 }
+
 .blog-content > ol > li > strong > span{
   color: var(--black, #000);
 
@@ -1643,7 +1649,7 @@ background-repeat: no-repeat;
       
     }
     .blog-content{
-      max-width:100%;
+      max-width:80%;
     }
 
 }
