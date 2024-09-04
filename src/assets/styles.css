@@ -3672,3 +3672,30 @@ border-radius: 8px;
     }
 
   }
+
+  /* Add this to your main CSS file or create a new one */
+.bot-message {
+  /* existing styles */
+}
+
+.bot-message p {
+  margin: 0 0 10px 0;
+}
+
+.bot-message ul, .bot-message ol {
+  margin: 0 0 10px 0;
+  padding-left: 20px;
+}
+
+.bot-message pre {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.bot-message code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
