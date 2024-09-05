@@ -31,11 +31,13 @@
           </ul>
         </div>
       </div>
-    </div>
       
     </div>
-    <div v-if="isLoading"  class="loader"></div>
+    
+    </div>
+    
     <div class="input-area">
+      <div   class="loader"></div>
   <textarea
     v-model="userInput"
     placeholder="Ask a question here!"
@@ -286,6 +288,7 @@ export default {
   display: flex;
   position: relative;
   scrollbar-width: none;
+  flex-direction: column;
   /* padding: 10px; */
   /* margin-top: 20px; */
 }
@@ -308,7 +311,7 @@ export default {
   position: absolute;
     right: 5px;
     
-    top: 10px;
+    top: 15px;
     /* transform: translateY(-50%); */
     background-color: rgb(11, 202, 196);
     color: white;
