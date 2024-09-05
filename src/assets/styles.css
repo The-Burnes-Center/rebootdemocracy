@@ -2990,8 +2990,8 @@ border-radius: 8px;
 .chatbot-app{
   
   width: 95%;
-  right: 5px;
-  bottom: 5px;
+  right: 15px;
+  bottom: 15px;
 
 }
 }
@@ -3109,6 +3109,10 @@ border-radius: 8px;
   .assitant-chat{
     width: 100%;
     padding: 1rem 1rem;
+  }
+  .loader {
+    top: 532px;
+
   }
 }
 .resource-scroll-section{
