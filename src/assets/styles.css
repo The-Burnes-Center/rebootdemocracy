@@ -3062,7 +3062,7 @@ border-radius: 8px;
   animation: l9-0 1.5s infinite steps(2);
   -webkit-animation: l9-0 1.5s infinite steps(2);
   margin-left: 20px;
-  top: 510px;
+  top: 450px;
   left: 42%;
 }
 .loader::before,
@@ -3115,7 +3115,7 @@ border-radius: 8px;
     padding: 1rem 1rem;
   }
   .loader {
-    top: 532px;
+    top: 502px;
 
   }
 }
