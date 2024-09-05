@@ -433,7 +433,7 @@ export default {
 
 <template>
 
-<div class="chatbot-app">
+<div >
   <openai-chat />
 </div>
       <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
