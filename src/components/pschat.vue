@@ -34,7 +34,7 @@
     </div>
       
     </div>
-    <div  class="loader"></div>
+    <div v-if="isLoading"  class="loader"></div>
     <div class="input-area">
   <textarea
     v-model="userInput"
