@@ -2988,7 +2988,10 @@ border-radius: 8px;
  width: 85%;
 }
 .chatbot-app{
-  width:90%;
+  
+  width: 95%;
+  right: 5px;
+  bottom: 5px;
 
 }
 }
@@ -2999,7 +3002,7 @@ border-radius: 8px;
   background-color: #ffcccb; /* Light red background for assistant messages */
   text-align: left;
 }
-.chat-input {
+/* .chat-input {
   border: 1px solid #ccc;
   background-color: #ffffff;
   display: flex;
@@ -3017,7 +3020,7 @@ border-radius: 8px;
   z-index: 1000;
   border: 1px solid var(--blue-action);
   border-radius: 8px;
-}
+} */
 /* .loader {
   border: 5px solid #f3f3f3;
   border-top: 5px solid #04787f; 
@@ -3049,13 +3052,14 @@ border-radius: 8px;
 } */
 
 .loader {
-  width: 15px;
+  width: 10px;
   aspect-ratio: 1;
   position: absolute;
   animation: l9-0 1.5s infinite steps(2);
   -webkit-animation: l9-0 1.5s infinite steps(2);
   margin-left: 20px;
-  top: 450px;
+  top: 510px;
+  left: 42%;
 }
 .loader::before,
 .loader::after {
@@ -3063,40 +3067,38 @@ border-radius: 8px;
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: #000000;
-  /* background-color: var(--blue-text); */
+  background: #60cbc5;
 }
 .loader::before {
-  box-shadow: 26px 0;
-  transform: translateX(-26px);
+  box-shadow: 16px 0 #60cbc5;
+  transform: translateX(-16px);
   -webkit-animation: l9-1 .75s infinite linear alternate;
   animation: l9-1 .75s infinite linear alternate;
 }
 .loader::after {
-  transform: translateX(13px) rotate(0deg) translateX(13px);
+  transform: translateX(8px) rotate(0deg) translateX(8px);
   animation: l9-2 .75s infinite linear alternate;
-  -webkit-animation:  l9-2 .75s infinite linear alternate;
+  -webkit-animation: l9-2 .75s infinite linear alternate;
 }
 @keyframes l9-0 {
-    0% ,49.9% {transform: scale(1)}
-    50%,100%  {transform: scale(-1)}
+    0%, 49.9% { transform: scale(1) }
+    50%, 100% { transform: scale(-1) }
 }
 @keyframes l9-1 {
-    100%{box-shadow: 52px 0}
+    100% { box-shadow: 26px 0 #60cbc5 }
 }
 @keyframes l9-2 {
-    100%{transform: translateX(13px) rotate(-180deg) translateX(13px)}
+    100% { transform: translateX(8px) rotate(-180deg) translateX(8px) }
 }
 @-webkit-keyframes l9-0 {
-  0% ,49.9% {transform: scale(1)}
-  50%,100%  {transform: scale(-1)}
+    0%, 49.9% { -webkit-transform: scale(1) }
+    50%, 100% { -webkit-transform: scale(-1) }
 }
 @-webkit-keyframes l9-1 {
-  100%{box-shadow: 52px 0}
+    100% { box-shadow: 26px 0 #60cbc5 }
 }
-@-webkit-keyframes l9-0 {
-  0% ,49.9% {transform: scale(1)}
-  50%,100%  {transform: scale(-1)}
+@-webkit-keyframes l9-2 {
+    100% { -webkit-transform: translateX(8px) rotate(-180deg) translateX(8px) }
 }
 
 @media (max-width: 768px) {
@@ -3673,29 +3675,3 @@ border-radius: 8px;
 
   }
 
-  /* Add this to your main CSS file or create a new one */
-.bot-message {
-  /* existing styles */
-}
-
-.bot-message p {
-  margin: 0 0 10px 0;
-}
-
-.bot-message ul, .bot-message ol {
-  margin: 0 0 10px 0;
-  padding-left: 20px;
-}
-
-.bot-message pre {
-  background-color: #f4f4f4;
-  padding: 10px;
-  border-radius: 5px;
-  overflow-x: auto;
-}
-
-.bot-message code {
-  background-color: #f4f4f4;
-  padding: 2px 4px;
-  border-radius: 3px;
-}

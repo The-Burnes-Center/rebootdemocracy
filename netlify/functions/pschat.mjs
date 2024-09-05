@@ -170,10 +170,18 @@ async function searchChunksWithReferences(query) {
       }
   
       // Send the source documents as the final message
-      const sourceDocuments = limitedResults.length > 0 ? limitedResults.map(result => ({
-        title: result.inDocument && result.inDocument[0] ? result.inDocument[0].title : 'N/A',
-        url: result.inDocument && result.inDocument[0] ? result.inDocument[0].url : 'N/A'
-      })) : [];
+      const sourceDocuments = limitedResults.length > 0 
+      ? Array.from(new Map(limitedResults.map(result => {
+          const doc = result.inDocument && result.inDocument[0];
+          return [
+            doc ? doc.url : 'N/A',
+            {
+              title: doc ? doc.title : 'N/A',
+              url: doc ? doc.url : 'N/A'
+            }
+          ];
+        })).values())
+      : [];
     //   console.log('Source documents:', JSON.stringify(sourceDocuments, null, 2));
       context.res.body += `data: ${JSON.stringify({ sourceDocuments })}\n\n`;
       context.res.body += `data: [DONE]\n\n`;
