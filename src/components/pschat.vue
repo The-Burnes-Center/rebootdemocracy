@@ -37,7 +37,8 @@
     </div>
     
     <div class="input-area">
-      <div   class="loader"></div>
+      
+      <div v-if="isLoading"  class="loader"></div>
   <textarea
     v-model="userInput"
     placeholder="Ask a question here!"
