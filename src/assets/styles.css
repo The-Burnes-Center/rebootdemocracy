@@ -3060,12 +3060,13 @@ border-radius: 8px;
 .loader {
   width: 10px;
   aspect-ratio: 1;
-  position: absolute;
+  position: relative;
   animation: l9-0 1.5s infinite steps(2);
   -webkit-animation: l9-0 1.5s infinite steps(2);
   margin-left: 20px;
-  top: 450px;
+  top: -10px;
   left: 42%;
+  
 }
 .loader::before,
 .loader::after {
@@ -3116,10 +3117,7 @@ border-radius: 8px;
     width: 100%;
     padding: 1rem 1rem;
   }
-  .loader {
-    top: 502px;
 
-  }
 }
 .resource-scroll-section{
   display:flex;
