@@ -119,10 +119,10 @@ export default {
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const jsonStr = line.slice(6);
-              console.log("Raw JSON string:", jsonStr);
+              // console.log("Raw JSON string:", jsonStr);
               try {
                 const data = JSON.parse(jsonStr);
-                console.log("Parsed data:", data);
+                // console.log("Parsed data:", data);
                 if (data.content) {
                   botMessage.content += data.content;
                 } else if (data.sourceDocuments) {
@@ -130,8 +130,8 @@ export default {
                   botMessage.sourceDocuments = data.sourceDocuments;
                 }
               } catch (parseError) {
-                console.error("JSON Parse Error:", parseError);
-                console.error("Problematic JSON string:", jsonStr);
+                // console.error("JSON Parse Error:", parseError);
+                // console.error("Problematic JSON string:", jsonStr);
                 const partialMatch = jsonStr.match(/"content":"(.+?)"/);
                 if (partialMatch) {
                   botMessage.content += partialMatch[1];
