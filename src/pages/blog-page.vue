@@ -12,7 +12,7 @@ import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import { register } from 'swiper/element/bundle';
 import {useHead } from '@vueuse/head'
-import OpenAIChat from "../components/openaichat.vue";
+import OpenAIChat from "../components/pschat.vue";
 
 export default {
   components: {

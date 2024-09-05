@@ -46,11 +46,11 @@ export default {
     },
     openFunc(){
       // window.open('https://chat.rebootdemocracy.ai/')
-      const newWindow = window.open('https://chat.rebootdemocracy.ai', '_blank');
-      setTimeout(() => {
-                newWindow.postMessage({ openerScript: true }, 'https://chat.rebootdemocracy.ai');
-            }, 2000); // Adjust the delay as needed
-      // this.botOpen = 1;
+      // const newWindow = window.open('https://chat.rebootdemocracy.ai', '_blank');
+      // setTimeout(() => {
+      //           newWindow.postMessage({ openerScript: true }, 'https://chat.rebootdemocracy.ai');
+      //       }, 2000); // Adjust the delay as needed
+      this.botOpen = 1;
     },
     parsedMarkdown(content) {
       return marked(content);
