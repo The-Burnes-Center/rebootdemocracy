@@ -2979,6 +2979,9 @@ border-radius: 8px;
 }
 
 @media screen and (max-width: 767px) {
+  .chatbot-app{
+    height: 90%;
+  }
   .message {
  
  width: 85%;
