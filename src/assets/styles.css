@@ -2865,6 +2865,7 @@ border-radius: 8px;
   z-index: 1000;
   justify-content: flex-end;
   align-items: flex-end;
+  height: 85%;
 }
 .assitant-chat{
   display:flex;
