@@ -1,4 +1,5 @@
 <template>
+    <div class="chatbot-app" :style="{ zIndex: botOpen ? 1 : 0 }">
   <div class="bot-icon" @click="openFunc" v-if="!botOpen">
     <i class="fa-solid fa-message-bot"></i>
   </div>
@@ -60,6 +61,7 @@
     <p class="bot-feedback">Have feedback about this tool? Email us at hello@thegovlab.org</p>
 
 </div>
+    </div>
     </div>
 </template>
 

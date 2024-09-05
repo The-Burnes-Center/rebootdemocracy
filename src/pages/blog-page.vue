@@ -292,7 +292,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </script>
 
 <template>
-<div class="chatbot-app">
+<div >
   <openai-chat />
 </div>
     <!-- Header Component -->
