@@ -180,8 +180,6 @@ export default {
         </template>
     </div>
   </div>
-  <div class="resource-image">
-  </div>
 </div>
 <div id="research" class="research-questions">
   <div class="research-questions-description">

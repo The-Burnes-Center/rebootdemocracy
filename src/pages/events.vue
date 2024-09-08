@@ -256,7 +256,7 @@ export default {
             <div class="dot"></div>
             <p>Innovation Mindset</p>
           </div> -->
-          
+    
           <div class="event-title">
           <h2>{{event_item.event_element.title}}</h2>
           </div>
@@ -291,7 +291,6 @@ export default {
     </div>
   </div>
 </div>
-
 <div ref="past-events" class="event-grid-section">
   <h3>Past Events</h3>
   <div class="past-event-grid-row">
@@ -311,9 +310,5 @@ export default {
     </div>
   </div>
 </div>
-
-
-
 <footer-comp></footer-comp>
-
 </template>

@@ -2789,9 +2789,10 @@ border-radius: 8px;
 
 .resource-page{
   display:flex;
-  flex-direction: row;
+  flex-direction: column;
   width:100%;
 }
+
 @media (max-width: 768px) {
 .resource-page{
   flex-wrap: wrap;
@@ -2843,13 +2844,15 @@ border-radius: 8px;
   font-size: 1.8em;
   top: 10px;
 }
+
 .resource-description{
   display:flex;
   flex-direction: column;
-  width:70%;
-  padding: 4rem 5rem;
+  width:100%;
+  padding: 2rem 3rem;
   gap: 20px;
 }
+
 .bot-header{
   display:flex;
   flex-direction: row;
@@ -3119,17 +3122,19 @@ border-radius: 8px;
   }
 
 }
+
 .resource-scroll-section{
   display:flex;
   flex-direction: row;
-  width:60%;
+  width:100%;
   padding: 4rem 0;
-  
+  justify-content: center; /* Centers the child horizontally */
+
 }
 
 
 .resource-scroller{
-  width: 100%;
+  width: 80%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

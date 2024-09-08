@@ -157,7 +157,6 @@ export default {
   </div>
   <div class="resource-scroll-section">
     <div class="resource-scroller" ref="resourceScroller">
-
       <template v-for="item in articleData">
           <div class="featured-items"  v-if="item.type == selectedType || selectedType == 'All' ">
             <div class="featured-item-text">
@@ -186,8 +185,6 @@ export default {
         </template>
       </v-virtual-scroll> -->
     </div>
-  </div>
-  <div class="resource-image">
   </div>
 </div>
 <mailing-list-comp></mailing-list-comp>
