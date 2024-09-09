@@ -175,8 +175,6 @@ export default {
         </template>
     </div>
   </div>
-  <div class="resource-image">
-  </div>
 </div>
 <mailing-list-comp></mailing-list-comp>
 <footer-comp></footer-comp>

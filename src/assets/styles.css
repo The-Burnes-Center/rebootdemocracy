@@ -219,6 +219,7 @@ h1.title{
   top: 0em;
   opacity: 0;
   pointer-events: none;
+  margin-bottom: 20px;
   /* text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 */
 }
 .search-bar-cancel-btn{
@@ -396,6 +397,7 @@ a.btn:hover{
   padding: 0 15px;
   height: 35px;
   min-height: 35px;
+  margin-bottom: 20px;
 }
 .btn-medium{
   width:  fit-content;
@@ -1982,7 +1984,7 @@ line-height: 160%; /* 28px */
   justify-content: flex-start;
   align-items: flex-start;
   gap: 0.5rem;
-  height: 270px;
+  height: 100%;
   padding: 0px 20px 20px 20px;
 }
 .resource-item-img{
@@ -1995,22 +1997,13 @@ line-height: 160%; /* 28px */
 
 }
 
-/* .resource-item-img{
-  width:100%;
-  display:flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-
-} */
-
 .resource-item-img img{
-  height: 130px;
+  height: 230px;
   width:100%;
   object-fit: cover;
   object-position: center;
 }
+
 .join-section{
   display:flex;
   flex-direction: column;
@@ -2789,9 +2782,13 @@ border-radius: 8px;
 
 .resource-page{
   display:flex;
-  flex-direction: row;
+  flex-direction: column;
   width:100%;
+  align-items: center;
+  background-color: var(--blue-light);
+
 }
+
 @media (max-width: 768px) {
 .resource-page{
   flex-wrap: wrap;
@@ -2843,13 +2840,21 @@ border-radius: 8px;
   font-size: 1.8em;
   top: 10px;
 }
-.resource-description{
-  display:flex;
+
+.resource-description {
+  display: flex;
   flex-direction: column;
-  width:70%;
-  padding: 4rem 5rem;
+  width: 100%;
+  padding: 20px 0 0 0;
   gap: 20px;
+  align-items: center;
 }
+
+.resource-description > * {
+  width: 80%;
+  max-width: 1200px;
+}
+
 .bot-header{
   display:flex;
   flex-direction: row;
@@ -3119,17 +3124,19 @@ border-radius: 8px;
   }
 
 }
-.resource-scroll-section{
-  display:flex;
-  flex-direction: row;
-  width:60%;
+
+.resource-scroll-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   padding: 4rem 0;
-  
+  align-items: center;
 }
 
 
 .resource-scroller{
-  width: 100%;
+  width: 60%;
+  max-width: 1200px;  
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -3323,15 +3330,14 @@ border-radius: 8px;
   width:100%;
 }
 .featured-items{
-  min-height: 400px;
   background-color: #ffffff;
   border: 1px solid #000000;
   overflow: clip;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
+
 .featured-item-text{
   margin:20px;
   display:flex;
