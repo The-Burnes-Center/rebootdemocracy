@@ -66,8 +66,9 @@
     </div>
 </template>
 
+
 <script>
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
@@ -78,10 +79,34 @@ export default {
     const userInput = ref('');
     const isLoading = ref(false);
     const sampleQuestions = ref([
-      "Can you give me examples of case studies or pilot projects where AI has been successfully integrated into public engagement?",
+       "Can you give me examples of case studies or pilot projects where AI has been successfully integrated into public engagement?",
       "How can AI help in addressing misinformation during election campaigns?",
       "Can you summarize the latest research on AI and participatory decision-making in urban planning?"
     ]);
+
+    onMounted(() => {
+      if (!sessionStorage.getItem('chatSessionActive')) {
+        // This is a new session, clear localStorage
+        localStorage.removeItem('chatbotState');
+        sessionStorage.setItem('chatSessionActive', 'true');
+      } else {
+        // This is an existing session, load saved state
+        const savedState = localStorage.getItem('chatbotState');
+        if (savedState) {
+          const { botOpen: savedBotOpen, messages: savedMessages } = JSON.parse(savedState);
+          botOpen.value = savedBotOpen;
+          messages.value = savedMessages;
+        }
+      }
+    });
+
+    // Save state when it changes
+    watch([botOpen, messages], () => {
+      localStorage.setItem('chatbotState', JSON.stringify({
+        botOpen: botOpen.value,
+        messages: messages.value
+      }));
+    }, { deep: true });
 
     const openFunc = () => {
       botOpen.value = true;
@@ -95,8 +120,10 @@ export default {
       const rawHtml = marked(text);
       return DOMPurify.sanitize(rawHtml);
     };
-    const sendMessage = async () => {
-    if (userInput.value.trim() === '' || isLoading.value) return;
+
+
+      const sendMessage = async () => {
+      if (userInput.value.trim() === '' || isLoading.value) return;
 
       isLoading.value = true;
       messages.value.push({ type: 'user', content: userInput.value });
@@ -153,6 +180,8 @@ export default {
         userInput.value = '';
         isLoading.value = false;
         scrollToBottom();
+        // Trigger the watcher to save the updated messages
+        messages.value = [...messages.value];
       }
     };
 
