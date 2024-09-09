@@ -216,7 +216,7 @@ export default {
 
 <style scoped>
 .chatbot-app-closed {
-  z-index: 0;
+  z-index: 200;
   height: 65px;
   width: 65px;
 }
