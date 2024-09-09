@@ -433,9 +433,7 @@ export default {
 
 <template>
 
-<div >
-  <openai-chat />
-</div>
+
       <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
       <ModalComp @close="closeModal" />
     </vue-final-modal>
