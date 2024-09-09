@@ -1,16 +1,37 @@
 <script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import { ref } from "vue";
 import { Directus } from "@directus/sdk";
-    
-
+import OpenAIChat from "./components/pschat.vue";
 </script>
 
 <template>
- 
-<router-view></router-view>
+  <div class="app-container">
+    <!-- Main content area -->
+    <div class="main-content">
+      <router-view v-slot="{ Component }">
+        <keep-alive>
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
+    </div>
 
+    <!-- OpenAI Chat component that's always visible -->
+    <keep-alive>
+      <OpenAIChat />
+    </keep-alive>
+  </div>
 </template>
 
+<style scoped>
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
 
+.main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/* Add styles for OpenAIChat component positioning */
+</style>

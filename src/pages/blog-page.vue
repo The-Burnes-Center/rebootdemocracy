@@ -292,9 +292,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </script>
 
 <template>
-<div >
-  <openai-chat />
-</div>
+
     <!-- Header Component -->
     <header-comp></header-comp>
           <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
