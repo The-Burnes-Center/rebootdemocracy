@@ -258,7 +258,7 @@ export default {
           </div> -->
           
           <div class="event-title">
-          <h2>{{event_item.event_element.title}}</h2>
+          <h3>{{event_item.event_element.title}}</h3>
           </div>
           <div class="event-item-row">
               <div class="event-image">
@@ -274,18 +274,18 @@ export default {
                     <div v-html="event_item.event_element.speakers"></div> 
                   </div>
                   <p class="event-description" v-html="event_item.event_element.description"></p>
+                  <p class="event-type" v-if="event_item.event_element.online_event && !event_item.event_element.inperson_event"><i class="fa-solid fa-video"></i> Online</p>
+                  <p class="event-type" v-if="event_item.event_element.inperson_event"><i class="fa-solid fa-building-user"></i> Hybrid</p>
                   <p class="event-date"> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>   
+                  <a :href="event_item.event_element.link" target="_blank" class="btn register-btn btn-dark btn-medium register-btn">Register</a>
               </div>
           </div>
          </div>
-         <div class="event-item-btn-row">
+         <div class="event-item-partnership-row" v-if="event_item.event_element.partner_logo">
               <div class="partner-logo-section">
-                <p class="partnership-label" v-if="event_item.event_element.partner_logo">In Partnership with:</p>
-                <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
+                <p class="partnership-label" >In Partnership with:</p>
+                <img class="partner-logo-img"  :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
              </div>
-             <p class="event-type" v-if="event_item.event_element.online_event && !event_item.event_element.inperson_event"><i class="fa-solid fa-video"></i> Online</p>
-             <p class="event-type" v-if="event_item.event_element.inperson_event"><i class="fa-solid fa-building-user"></i> Hybrid</p>
-             <a :href="event_item.event_element.link" target="_blank" class="btn btn-spl btn-dark btn-medium">Register</a>
          </div>
         </div>
     </div>
