@@ -2555,15 +2555,38 @@ p.event-date{
   display: inline-block;
 }
 
-p.partnership-label{
-  font-size:0.8em;
-  font-weight:600;
+.event-partnership-container{
+  display: flex;
+  align-items: center; 
 }
+
+.partnership-label{
+  font-size:1em;
+  font-weight:600;
+  padding: 10px 0;
+}
+
+.event-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-thumbnail img {
+  width: 75%;
+  height: 75%;
+}
+
+.event-description {
+  padding: 10px 0;
+}
+
 img.partner-logo-img{
 height:100%;
 width:50px;
 object-fit: contain; 
 border-radius: 8px;
+margin: 5px 10px;
 }
 .partner-logo-section{
   display:flex;
@@ -2647,11 +2670,11 @@ border-radius: 8px;
   width: 100%;
 }
 .past-event-col-1{
-  width:40%;
+  width:20%;
   height:fit-content;
 }
 .past-event-col-2{
-  width:60%;
+  width:80%;
   height:fit-content;
 }
 
@@ -3323,7 +3346,6 @@ border-radius: 8px;
   width:100%;
 }
 .featured-items{
-  min-height: 400px;
   background-color: #ffffff;
   border: 1px solid #000000;
   overflow: clip;

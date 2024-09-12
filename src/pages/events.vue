@@ -297,15 +297,19 @@ export default {
   <div class="past-event-grid-row">
     <div class="past-event-grid-item"  v-for="event_item in eventsData.slice().reverse()" v-show="PastDate(new Date(event_item.event_element.date))">
       <div class="past-event-col-1">
-          <h5 class="eyebrow">{{event_item.series_name}}</h5>
-          <h2>{{event_item.event_element.title}}</h2>
-          
-           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
-           <p class="partnership-label" v-if="event_item.event_element.partner_logo">In Partnership with:</p>
-           <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
+        <div class="event-thumbnail">
+           <img v-if="event_item.event_element.thumbnail" :src="this.directus._url + 'assets/' + event_item.event_element.thumbnail.id">
+        </div>
       </div>
       <div class="past-event-col-2">
-         <p v-html="event_item.event_element.description"></p>
+           <h5 class="eyebrow">{{event_item.series_name}}</h5>
+           <h2>{{event_item.event_element.title}}</h2>
+           <p> {{ formatDateTime(new Date(event_item.event_element.date)) }} ET </p>
+           <div class="event-partnership-container">
+           <p class="partnership-label" v-if="event_item.event_element.partner_logo">In Partnership with:</p>
+           <img class="partner-logo-img" v-if="event_item.event_element.partner_logo" :src="this.directus._url + 'assets/' + event_item.event_element.partner_logo.id">
+           </div>
+           <p class="event-description" v-html="event_item.event_element.description"></p>
          <a  :href="event_item.event_element.link" target="_blank"  class="btn btn-secondary btn-dark btn-medium">Watch</a>
       </div>
     </div>
