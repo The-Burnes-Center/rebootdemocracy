@@ -210,6 +210,7 @@ export default {
       self.preloadImages();
       });
     },
+    
 
     fetchResearch: function fetchResearch() {
       self = this;
