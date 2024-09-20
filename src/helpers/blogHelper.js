@@ -15,11 +15,7 @@ export function fetchBlogData(slug) {
               slug: {
                 _eq: slug,
               },
-            },
-            {
-              status: {
-                _eq: "published",
-              },
+            }
             },
           ],
         },
