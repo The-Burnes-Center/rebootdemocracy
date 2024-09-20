@@ -10,6 +10,8 @@ import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
 import ModalComp from "../components/modal.vue";
 import {useHead } from '@vueuse/head'
 
+import { fetchBlogData } from '../helpers/blogHelper.js';
+
 export default {
   components: {
     "header-comp": HeaderComponent,
@@ -69,33 +71,19 @@ export default {
       return isPast(d1);
     },
 
-    fetchBlog: function fetchBlog() {
-      self = this;
-
-      this.directus
-        .items("reboot_democracy_blog")
-        .readByQuery({
-          meta: "total_count",
-          limit: -1,
-          
-          fields: ["*.*",
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*'
-          ],
-          filter: {
-            _and: [
-            {
-            slug: {
-              _eq: this.slug,
-            },
-            }
-            ],
-          },
-        })
-        .then((item) => {
-          self.postData = item.data;
-          item.data.length>0 ? this.fillMeta() :  this.fillMetaDefault()
-        });
+    async fetchBlog() {
+          self =this;
+           try {
+        const response = await fetchBlogData.call(this, this.slug);
+          self.postData = response.data;
+          if (self.postData.length === 0) {
+            window.location.href = "/";
+          }
+          console.log(self.postData);
+          self.postData.length>0 ? this.fillMeta() :  this.fillMetaDefault()
+      } catch (error) {
+        // Handle the error
+      }
     },
     loadModal() {
      self = this;
@@ -188,7 +176,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <div class="blog-hero">
 
-  <img v-if="postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id+'?width=800'" />
+  <img v-if="postData[0] && postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id+'?width=800'" />
   
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
