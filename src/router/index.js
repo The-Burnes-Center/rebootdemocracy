@@ -31,6 +31,7 @@ const routes = [
   { path:"/blog", component: BlogPage },
   { path:"/all-blog-posts", component: AllPosts },
   { path:"/pschat", component: PSChat },
+  { path: '/:catchAll(.*)', redirect: '/' },
 ]
 
 const router = createRouter({
