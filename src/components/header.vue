@@ -6,7 +6,8 @@ export default {
   },
   methods: {
     navigateHome() {
-      this.$router.push('/');
+
+    window.location.href = "https://rebootdemocracy.ai";
     }
   }
 }
