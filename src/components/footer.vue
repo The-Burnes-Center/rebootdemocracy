@@ -1,10 +1,19 @@
 
+<script>
+export default {
+  methods: {
+    navigateHome() {
 
+    window.location.href = "https://rebootdemocracy.ai";
+    }
+  }
+}
+</script>
 <template>
 <div class="footer-section">
   <div class="footer-contents">
     <div class="logo-section footer-col">
-      <div class="wordmark">
+      <div @click="navigateHome" class="wordmark">
         Reboot Democracy
       </div>
       <p>A Project Of</p>
