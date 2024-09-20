@@ -4,6 +4,11 @@ export default {
   components: {
     "menu-comp": MenuComponent
   },
+  methods: {
+    navigateHome() {
+      this.$router.push('/');
+    }
+  }
 }
 </script>
 <template>
@@ -14,9 +19,9 @@ export default {
       <a href="http://burnes.northeastern.edu" target="_blank"><img src="../assets/burnes-center-logo.png"></a>
         
       </div>
-      <div @click="$router.push('../')"  class="wordmark">
-        Reboot<br>Democracy<br>.AI
-      </div>
+      <div @click="navigateHome" class="wordmark">
+      Reboot<br>Democracy<br>.AI
+    </div>
     </div>
       <menu-comp></menu-comp>
   </div>
