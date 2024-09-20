@@ -67,10 +67,21 @@ export default {
       immediate: true
   },
   },
+  computed: {
+  latestBlogPost() {
+    if (Array.isArray(this.blogData) && this.blogData.length > 0) {
+      // Use spread operator to create a copy, then reverse
+      return [...this.blogData].reverse()[0];
+      // Or simply return the last item if data is sorted chronologically
+      // return this.blogData[this.blogData.length - 1];
+    }
+    return null;
+  },
+},
   created() {
   
     this.loadModal(); 
-    this.blogData = this.directus.items("reboot_democracy_blog");
+    // this.blogData = this.directus.items("reboot_democracy_blog");
     this.fetchBlog();
     this.resetSearch();
     // this.debounceSearch = _.debounce(this.searchBlog, 500);
@@ -334,21 +345,21 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
   <div class="blog-featured-row">
-    <div class="first-blog-post">
-      <a :href="'/blog/' + blogData.slice().reverse()[0].slug">
-      <img  v-if="blogData.slice().reverse()[0].image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
-      <h3>{{blogData.slice().reverse()[0].title}}</h3>
-      <p>{{ blogData.slice().reverse()[0].excerpt }}</p>
-       <p>Published on {{ formatDateOnly(new Date( blogData.slice().reverse()[0].date)) }} </p>
+    <div class="first-blog-post" v-if="latestBlogPost">
+      <a :href="'/blog/' + latestBlogPost.slug">
+      <img  v-if="latestBlogPost.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
+      <h3>{{latestBlogPost.title}}</h3>
+      <p>{{ latestBlogPost.excerpt }}</p>
+       <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
       <div class="author-list">
-          <p  class="author-name">{{blogData.slice().reverse()[0].authors.length>0?'By':''}}</p>
-            <div v-for="(author,i) in blogData.slice().reverse()[0].authors">
+          <p  class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
+            <div v-for="(author,i) in latestBlogPost.authors">
               <div class="author-item">
                
                 <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
                 <div class="author-details">
                   <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                    <p class="author-name" v-if="blogData.slice().reverse()[0].authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
+                    <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
                 </div>
               </div>
             </div>
