@@ -14,10 +14,9 @@ export function fetchBlogData(slug) {
             {
               slug: {
                 _eq: slug,
-              },
+              }
             }
-            },
-          ],
-        },
+          ]
+        }
       });
   }
