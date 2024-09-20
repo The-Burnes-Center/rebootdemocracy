@@ -202,7 +202,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             <p  v-if="!author.team_id.Headshot" class="author-no-image">{{author.team_id.First_Name[0] }} {{author.team_id.Last_Name[0]}}</p>
             <div class="author-details">
               <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-              <a class="author-bio" :href="author.team_id.Link_to_bio">Read Bio</a>
+              <a class="author-bio" v-if="author.team_id.Link_to_bio" :href="author.team_id.Link_to_bio">Read Bio</a>
             </div>
           </div>
         </div>
