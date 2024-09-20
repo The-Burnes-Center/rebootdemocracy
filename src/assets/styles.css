@@ -163,6 +163,7 @@ h1.title{
 }
 .wordmark{
   font-size:0.8em;
+  cursor: pointer;
 }
 .menu a{
   margin:0;
