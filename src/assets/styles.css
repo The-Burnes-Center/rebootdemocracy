@@ -147,8 +147,10 @@ h1.title{
   color: #ffffff;
   padding-right:20px;
 }
+
+
 .menu{
-  background-color: #ffffff;
+  background-color: #000000;
   display:flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -161,16 +163,23 @@ h1.title{
   gap: 20px;
   z-index:1000;
 }
+
+
 .wordmark{
-  font-size:0.8em;
+  font-size:1em;
   cursor: pointer;
+  padding-left: 40px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
+
 .menu a{
   margin:0;
-  color: #000000;
+  color: #f3ecec;
   font-weight: 600;
   text-decoration: none;
 }
+
 .dropdown .dropbtn { 
   border: none;
   outline: none;
@@ -184,6 +193,7 @@ h1.title{
   justify-content: center;
   align-items: center;
   gap: 10px;
+  color: #f3ecec;
 }
 
 .index_carousel{

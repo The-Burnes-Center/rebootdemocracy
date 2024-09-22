@@ -26,9 +26,9 @@ export default {
 <template>
        <i class="fa-solid fa-bars bars" @click="menutoggle =!menutoggle"></i>
       <div :class="[screenWidth=='mobile' ? 'menu-shadow' : '', 'menu']" v-show="screenWidth=='mobile' && !menutoggle ? true : screenWidth=='desktop' || menutype == 'footermenu'? true : false ">
-        <a href="/about">About Us</a>
-        <a href="/blog">Blog</a>
-         <a href="/events">Events</a>
+          <a href="/about">About Us</a>
+          <a href="/blog">Blog</a>
+          <a href="/events">Events</a>
         <div class="dropdown">
           <button class="dropbtn">Our Work 
            <i class="fa-regular fa-angle-down"></i>
@@ -42,7 +42,6 @@ export default {
               
             </div>
         </div>
-        <!-- <a href="/team">Our Team</a> -->
         <a href="/signup" class="btn btn-small btn-primary">Sign up</a>
       </div>
 </template>
