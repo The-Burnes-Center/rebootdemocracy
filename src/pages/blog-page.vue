@@ -307,8 +307,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <!-- Header Component -->
     <header-comp></header-comp>
           <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
-      <ModalComp @close="closeModal" />
-    </vue-final-modal>
+<ModalComp :modalData="modalData" @close="closeModal" />    </vue-final-modal>
   <div class="blog-page-hero">
     <h1 class="eyebrow">Reboot Democracy</h1>
     <h1>Blog</h1>

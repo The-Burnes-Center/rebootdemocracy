@@ -436,7 +436,7 @@ export default {
 
 
       <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
-      <ModalComp @close="closeModal" />
+      <ModalComp :modalData="modalData" @close="closeModal" />
     </vue-final-modal>
 
 <!-- Header Component -->
