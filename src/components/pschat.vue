@@ -122,68 +122,65 @@ export default {
     };
 
 
-      const sendMessage = async () => {
-      if (userInput.value.trim() === '' || isLoading.value) return;
+    const sendMessage = async () => {
+  if (userInput.value.trim() === '' || isLoading.value) return;
 
-      isLoading.value = true;
-      messages.value.push({ type: 'user', content: userInput.value });
-      const botMessage = { type: 'bot', content: '', sourceDocuments: [] };
-      messages.value.push(botMessage);
+  isLoading.value = true;
+  messages.value.push({ type: 'user', content: userInput.value });
+  const botMessage = { type: 'bot', content: '', sourceDocuments: [] };
+  messages.value.push(botMessage);
 
-      try {
-        const response = await fetch('/.netlify/functions/pschat', {
-          method: 'POST',
-          body: JSON.stringify({ message: userInput.value }),
-          headers: { 'Content-Type': 'application/json' }
-        });
+  try {
+    // Include the conversation history in the request
+    const response = await fetch('/.netlify/functions/pschat', {
+      method: 'POST',
+      body: JSON.stringify({ message: userInput.value, conversation: messages.value }),
+      headers: { 'Content-Type': 'application/json' }
+    });
 
-        if (!response.ok) throw new Error('Network response was not ok');
+    if (!response.ok) throw new Error('Network response was not ok');
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
 
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n\n');
-          
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const jsonStr = line.slice(6);
-              // console.log("Raw JSON string:", jsonStr);
-              try {
-                const data = JSON.parse(jsonStr);
-                // console.log("Parsed data:", data);
-                if (data.content) {
-                  botMessage.content += data.content;
-                } else if (data.sourceDocuments) {
-                  console.log("Source documents:", data.sourceDocuments);
-                  botMessage.sourceDocuments = data.sourceDocuments;
-                }
-              } catch (parseError) {
-                // console.error("JSON Parse Error:", parseError);
-                // console.error("Problematic JSON string:", jsonStr);
-                const partialMatch = jsonStr.match(/"content":"(.+?)"/);
-                if (partialMatch) {
-                  botMessage.content += partialMatch[1];
-                }
-              }
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n\n');
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const jsonStr = line.slice(6);
+          try {
+            const data = JSON.parse(jsonStr);
+            if (data.content) {
+              botMessage.content += data.content;
+            } else if (data.sourceDocuments) {
+              console.log("Source documents:", data.sourceDocuments);
+              botMessage.sourceDocuments = data.sourceDocuments;
+            }
+          } catch (parseError) {
+            const partialMatch = jsonStr.match(/"content":"(.+?)"/);
+            if (partialMatch) {
+              botMessage.content += partialMatch[1];
             }
           }
         }
-      } catch (error) {
-        console.error('Error:', error);
-        botMessage.content = 'Sorry, an error occurred.';
-      } finally {
-        userInput.value = '';
-        isLoading.value = false;
-        scrollToBottom();
-        // Trigger the watcher to save the updated messages
-        messages.value = [...messages.value];
       }
-    };
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    botMessage.content = 'Sorry, an error occurred.';
+  } finally {
+    userInput.value = '';
+    isLoading.value = false;
+    scrollToBottom();
+    // Trigger the watcher to save the updated messages
+    messages.value = [...messages.value];
+  }
+};
 
 
     const submitSamplePrompt = (question) => {
