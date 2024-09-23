@@ -120,57 +120,101 @@ async function searchChunksWithReferences(query) {
   }
   
   // Updated handler function
-  export async function handler(event, context) {
-    if (event.httpMethod !== 'POST') {
-      return { statusCode: 405, body: 'Method Not Allowed' };
-    }
-  
-    const { message } = JSON.parse(event.body);
-  
-    try {
-      console.log('Received message:', message);
-  
-      const searchResults = await searchChunksWithReferences(message);
-    //   console.log('Search results:', JSON.stringify(searchResults, null, 2));
-  
-      const limitedResults = limitMostRelevantSiblingChunks(searchResults);
-    //   console.log('Limited results:', JSON.stringify(limitedResults, null, 2));
-  
-      const formattedResults = formatSearchResults(limitedResults);
-      //console.log('Formatted results:', formattedResults);
-  
-      const messages = [
-        { role: "system", content: "You are the Rebooting Democracy chatbot, a friendly AI that helps users find information from a large database of documents. Use the following information to answer the user's question. Be concise and accurate. If no specific information is found, provide a general answer based on your knowledge." },
-        { role: "user", content: `Question: ${message}\n\nContext:\n${formattedResults}\n\nYour thoughtful answer:` }
-      ];
-  
-      const stream = await openaiClient.chat.completions.create({
-        model: "gpt-4o",
-        messages,
-        max_tokens: 2048,
-        temperature: 0.0,
-        stream: true,
-      });
-  
-      // Set up streaming response
-      context.res = {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        },
-        body: ''
-      };
-  
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || '';
-        context.res.body += `data: ${JSON.stringify({ content })}\n\n`;
-        await new Promise(resolve => context.awsRequestId ? resolve() : context.awsLambda.context.succeed(context.res));
+// Inside your Netlify function
+
+export async function handler(event, context) {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
+
+  const { message, conversation } = JSON.parse(event.body);
+
+  try {
+    console.log('Received message:', message);
+
+    const searchResults = await searchChunksWithReferences(message);
+
+    const limitedResults = limitMostRelevantSiblingChunks(searchResults);
+
+    const formattedResults = formatSearchResults(limitedResults);
+
+    // Construct the OpenAI messages array
+    const messages = [];
+
+    // Add the updated system message
+    const systemMessage = `You are the Rebooting Democracy chatbot, a friendly AI that helps users find information from a large database of documents.
+
+Instructions:
+- The user will ask a question, we will search a large database in a vector store and bring information connected to the user question into your <CONTEXT_TO_ANSWER_USERS_QUESTION_FROM> to provide a thoughtful answer from.
+- If not enough information is available, you can ask the user for more information.
+- Never provide information that is not backed by your context or is common knowledge.
+- Look carefully at all in your context before you present the information to the user.
+- Be optimistic and cheerful but keep a professional nordic style of voice.
+- For longer outputs use bullet points and markdown to make the information easy to read.
+- Do not reference your contexts and the different document sources just provide the information based on those sources.
+- For all document sources we will provide the user with those you do not need to link or reference them.
+- If there are inline links in the actual document chunks, you can provide those to the user in a markdown link format.
+- Use markdown to format your answers, always use formatting so the response comes alive to the user.
+- Keep your answers short and to the point except when the user asks for detail.
+`;
+
+    messages.push({ role: "system", content: systemMessage });
+
+    // Map conversation messages to OpenAI messages
+    // Exclude the last placeholder bot message
+    const mappedConversation = conversation.slice(0, -1).map(msg => {
+      if (msg.type === 'user') {
+        return { role: 'user', content: msg.content };
+      } else if (msg.type === 'bot') {
+        return { role: 'assistant', content: msg.content };
       }
-  
-      // Send the source documents as the final message
-      const sourceDocuments = limitedResults.length > 0 
+      return null;
+    }).filter(msg => msg != null);
+
+    messages.push(...mappedConversation);
+
+    // Add the latest user message with context
+    const userMessageContent = `<LATEST_USER_QUESTION>
+Question: ${message}
+</LATEST_USER_QUESTION>
+
+<CONTEXT_TO_ANSWER_USERS_QUESTION_FROM>
+${formattedResults}
+</CONTEXT_TO_ANSWER_USERS_QUESTION_FROM>
+
+Your thoughtful answer in markdown:
+`;
+
+    messages.push({ role: 'user', content: userMessageContent });
+
+    // Proceed with generating the response
+    const stream = await openaiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages,
+      max_tokens: 2048,
+      temperature: 0.0,
+      stream: true,
+    });
+
+    // Set up streaming response
+    context.res = {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      },
+      body: ''
+    };
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      context.res.body += `data: ${JSON.stringify({ content })}\n\n`;
+      await new Promise(resolve => context.awsRequestId ? resolve() : context.awsLambda.context.succeed(context.res));
+    }
+
+    // Send the source documents as the final message
+    const sourceDocuments = limitedResults.length > 0 
       ? Array.from(new Map(limitedResults.map(result => {
           const doc = result.inDocument && result.inDocument[0];
           return [
@@ -182,17 +226,18 @@ async function searchChunksWithReferences(query) {
           ];
         })).values())
       : [];
-    //   console.log('Source documents:', JSON.stringify(sourceDocuments, null, 2));
-      context.res.body += `data: ${JSON.stringify({ sourceDocuments })}\n\n`;
-      context.res.body += `data: [DONE]\n\n`;
-      
-      console.log('Results:',context.res);
-      return context.res;
-    } catch (error) {
-      console.error('Error processing message:', error);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'An error occurred processing your message' })
-      };
-    }
+
+    context.res.body += `data: ${JSON.stringify({ sourceDocuments })}\n\n`;
+    context.res.body += `data: [DONE]\n\n`;
+    
+    console.log('Results:', context.res);
+    return context.res;
+
+  } catch (error) {
+    console.error('Error processing message:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'An error occurred processing your message' })
+    };
   }
+}
