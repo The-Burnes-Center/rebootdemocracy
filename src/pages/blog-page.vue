@@ -7,7 +7,7 @@ import isFuture from 'date-fns/isFuture';
 import _ from "lodash";
 import ModalComp from "../components/modal.vue";
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
-
+import { lazyLoad } from '../directives/lazyLoad';
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import { register } from 'swiper/element/bundle';
@@ -25,7 +25,9 @@ export default {
     ModalComp,
   
   },
-  
+    directives: {
+    lazyLoad
+  },
   data() {
     return {
      searchResultsFlag: 0,
@@ -354,16 +356,16 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="blog-featured-row">
     <div class="first-blog-post" v-if="latestBlogPost">
       <a :href="'/blog/' + latestBlogPost.slug">
-      <img  v-if="latestBlogPost.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
+      <div v-lazy-load>
+      <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
+      </div>
       <h3>{{latestBlogPost.title}}</h3>
       <p>{{ latestBlogPost.excerpt }}</p>
        <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
       <div class="author-list">
           <p  class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
             <div v-for="(author,i) in latestBlogPost.authors">
-              <div class="author-item">
-               
-                <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
+              <div class="author-item">               
                 <div class="author-details">
                   <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                     <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
@@ -372,14 +374,15 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             </div>
             
         </div>
-       
         </a>  
         
     </div>
     <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
        <a :href="'/blog/' + blog_item.slug">
-        <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+        <div v-lazy-load>
+        <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
+        </div>
         <div class="other-post-details">
               <h3>{{blog_item.title}}</h3>
               <p>{{ blog_item.excerpt }}</p>
@@ -388,7 +391,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                    <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
                     <div v-for="(author,i) in blog_item.authors">
                       <div class="author-item">
-                        <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
                         <div class="author-details">
                           <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                           <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
@@ -397,10 +399,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                     </div>
                   </div>
             </div>
-         
          </a>
       </div>
-
     </div>
   </div>
 </div>
@@ -418,6 +418,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <div v-if="!searchResultsFlag && searchTermDisplay == ''"  class="allposts-section">
   <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" v-show="index >= 4 && index < 16">
     <a :href="'/blog/' + blog_item.slug">
+          <div v-lazy-load>
+        <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url+'assets/'+ blog_item.image.id">
+      </div>
       <div class="allposts-post-details">
         <h3>{{blog_item.title}}</h3>
         <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }}</p>
@@ -433,7 +436,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           </div>
         </div>
       </div>
-      <img v-if="blog_item.image" class="blog-list-img" :src="this.directus._url+'assets/'+ blog_item.image.id">
     </a>
   </div>
   <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
@@ -453,6 +455,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" class="tag-posts-row">
             <div v-if="includesString(blog_item?.Tags, tag_item)">
               <a :href="'/blog/' + blog_item.slug">
+              <div v-lazy-load>
+                <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url + 'assets/' + blog_item.image.id">
+              </div>
                 <div class="allposts-post-details">
                   <h3>{{blog_item.title}}</h3>
                   <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
@@ -468,7 +473,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                     </div>
                   </div>
                 </div>
-                <img v-if="blog_item.image" class="blog-list-img" :src="this.directus._url + 'assets/' + blog_item.image.id">
               </a>
             </div>
           </div>
@@ -483,6 +487,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()"> 
           <!-- <div v-if="blog_item?.Tags === null"> -->
        <a :href="'/blog/' + blog_item.slug">
+                 <div v-lazy-load>
+         <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
+          </div>
         <div class="allposts-post-details">
               <h3>{{blog_item.title}}</h3>
                <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
@@ -490,7 +497,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                    <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
                     <div v-for="(author,i) in blog_item.authors">
                       <div class="author-item">
-                        <!-- <img class="author-headshot" :src="this.directus._url+'assets/'+author.team_id.Headshot.id"> -->
                         <div class="author-details">
                           <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                           <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
@@ -499,7 +505,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                     </div>
                   </div>
             </div>
-         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
          </a>
       </div>
       <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
