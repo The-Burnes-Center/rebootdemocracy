@@ -524,11 +524,17 @@ a.btn:hover{
     width: 100%;
 
 }
+
+
+
 img.blog-list-img{
   height: 200px;
   width:100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
+
 .first-blog-post a{
   text-decoration: none;
   display:flex;
@@ -725,10 +731,12 @@ line-height: normal;
   color: unset;
   text-decoration: none;
 }
+
 .allposts-post-details{
   display:flex;
   flex-direction: column;
   gap: 4px;
+  padding-left: 10px;
 }
 .other-blog-posts{
   display:flex;
@@ -858,10 +866,16 @@ font-style: normal;
 font-weight: 700;
 line-height: normal;
 }
+
 .allposts-post-row img.blog-list-img{
   width: 120px;
   height: 120px;
 }
+
+.loaded .blog-list-img {
+  opacity: 1;
+}
+
 .allposts-post-row a{
   color: unset;
   text-decoration: none;
