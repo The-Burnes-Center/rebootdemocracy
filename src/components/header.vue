@@ -17,8 +17,7 @@ export default {
     <div class="logo-section">
       <div class="logo">
       <a href="http://thegovlab.org" target="_blank"><img src="../assets/the-govlab-logo-white.svg"></a>
-      <a href="http://burnes.northeastern.edu" target="_blank"><img src="../assets/burnes-center-logo.png"></a>
-        
+      <a href="http://burnes.northeastern.edu" target="_blank"><img src="../assets/burnes-center-logo.png"></a>      
       </div>
       <div @click="navigateHome" class="wordmark">
       Reboot<br>Democracy<br>.AI
