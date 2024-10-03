@@ -1245,6 +1245,10 @@ padding: 0px 24px 0px 50px;
 
 }
 
+.blog-content > p > strong, .blog-content > p > b {
+  font-weight: bolder;
+}
+
 .blog-content > p > strong > em > span{
   color: var(--black, #000);
   /* Body-Blog/Desktop */
@@ -3038,6 +3042,8 @@ margin: 5px 10px;
 }
 .bot-welcome-message{
   background-color: var(--blue-light);
+  font-size: 14px;
+  padding: 10px;
 }
 .bot-attribution{
   font-size: 0.8rem;
@@ -3055,6 +3061,7 @@ margin: 5px 10px;
   grid-template-rows: repeat(1, 1fr);
   grid-gap: 10px;
   margin-bottom: 30px;
+  margin-top: 10px;
 }
 .button-grid p{
   font-size: 1rem;
