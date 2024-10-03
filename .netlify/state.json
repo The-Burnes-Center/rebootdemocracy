@@ -1,20 +1,20 @@
 {
 	"geolocation": {
 		"data": {
-			"city": "Los Angeles",
+			"city": "Glendale",
 			"country": {
 				"code": "US",
 				"name": "United States"
 			},
-			"postal_code": "90060",
 			"subdivision": {
 				"code": "CA",
 				"name": "California"
 			},
 			"timezone": "America/Los_Angeles",
-			"latitude": 34.0544,
-			"longitude": -118.2441
+			"latitude": 34.137,
+			"longitude": -118.2376,
+			"postalCode": "91205"
 		},
-		"timestamp": 1727134800398
+		"timestamp": 1727911225616
 	}
 }
