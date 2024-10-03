@@ -2,7 +2,7 @@
     <div class="chat-container">
       <div class="welcome-message">
         <h2>Welcome to the Reboot Democracy Bot</h2>
-        <p>Trained on research and writing from the GovLab and the Reboot Blog, I answer your questions about technology, governance and democracy. Type a question you have about AI, democracy and governance in the box below.</p>
+        <p>Enhanced with research and writing from the GovLab and the Reboot Blog, I answer your questions about technology, governance and democracy.Type a question you have about AI, democracy and governance in the box below.</p>
         <h3>Sample Questions:</h3>
         <ul class="sample-questions">
           <li v-for="(question, index) in sampleQuestions" :key="index">
