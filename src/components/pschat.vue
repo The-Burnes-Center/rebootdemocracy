@@ -11,9 +11,6 @@
           <div style="font-size: 0.9rem; font-weight: 400">
             Your Personal Participatory Democracy Assistant
             <br>
-            <div style="font-size: 0.7rem; font-weight: 600">
-              powered by <a target="_blank" href="https://github.com/CitizensFoundation/policy-synth?tab=readme-ov-file#rag-chatbot">PolicySynth RAG</a>
-            </div>
           </div>
         </h4>
         <br>
@@ -32,7 +29,7 @@
             </a>
           </div>
         </div>
-        <div v-for="(message, index) in messages" :key="index" :class="['message', message.type]">
+    <div v-for="(message, index) in messages" :key="index" :class="['message', message.type]">
     <div v-if="message.type === 'user'" class="user-message">
       {{ message.content }}
     </div>
@@ -59,6 +56,9 @@
     </div>
   </div>
       </div>
+      <div style="font-size: 0.7rem; font-weight: 600; padding: 5px">
+      powered by <a target="_blank" href="https://github.com/CitizensFoundation/policy-synth?tab=readme-ov-file#rag-chatbot">PolicySynth RAG</a>
+      </div>
       <div class="input-area">
         <form @submit.prevent="sendMessage">
           <textarea
@@ -77,15 +77,13 @@
           </button>
         </form>
       </div>
+
       <div style="display: flex; flex-direction: column; align-items: left; justify-content: left;">
         <p class="bot-attribution">
           <i>AI model used: GPT-4o by OpenAI</i>
-          <br>
           The use of this chatbot is governed by <a href="https://openai.com/policies" target="blank">OpenAI's terms of use</a>.
-          <br>
-          Do not enter any personally identifiable information.
+          Do not enter any personally identifiable information. Have feedback about this tool? Email us at hello@thegovlab.org
         </p>
-        <p class="bot-feedback">Have feedback about this tool? Email us at hello@thegovlab.org</p>
       </div>
     </div>
   </div>
@@ -96,6 +94,7 @@ import { ref, watch, onMounted, nextTick } from 'vue';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import debounce from 'lodash/debounce';
+import '../styles/components/pschat.css';
 
 export default {
   setup() {
@@ -248,196 +247,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.chatbot-app-closed {
-  z-index: 200;
-  height: 65px;
-  width: 65px;
-}
-
-.chat-window {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.welcome-message {
-  margin-bottom: 20px;
-}
-
-.button-grid {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.prompt-button {
-  background: none;
-  border: 1px solid rgb(11, 202, 196);
-  color: rgb(4, 120, 127);
-  padding: 10px;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.prompt-button:hover {
-  background-color: rgb(11, 202, 196);
-  color: white;
-}
-
-.message {
-  margin-bottom: 15px;
-}
-
-.user-message {
-  background-color: #e6f2ff;
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 70%;
-  margin-left: auto;
-}
-
-.bot-message {
-  background-color: #f0f0f0;
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 100%;
-}
-
-.bot-message p {
-  margin: 0 0 10px 0;
-}
-
-.bot-message ul,
-.bot-message ol {
-  margin: 0 0 10px 0;
-  padding-left: 20px;
-}
-
-.bot-message pre {
-  background-color: #f4f4f4;
-  padding: 10px;
-  border-radius: 5px;
-  overflow-x: auto;
-}
-
-.bot-message code {
-  background-color: #f4f4f4;
-  padding: 2px 4px;
-  border-radius: 3px;
-}
-
-.btn-dark-blue {
-  background-color: rgb(11, 202, 196);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-dark-blue:disabled {
-  background-color: #cccccc;
-}
-/* New typing indicator styles */
-.typing-indicator {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50px; /* Adjust height as needed */
-}
-
-.typing-dots {
-  display: flex;
-  align-items: center;
-}
-
-.typing-dot {
-  background-color: rgb(11, 202, 196);
-  border-radius: 50%;
-  width: 10px;
-  height: 10px;
-  margin: 0 4px;
-  animation: bounce 1.2s infinite;
-}
-
-.typing-dot:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.typing-dot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-dot:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes bounce {
-  0%, 80%, 100% {
-    transform: scale(0);
-    opacity: 0.2;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-
-.bot-feedback,
-.bot-attribution {
-  font-size: 0.8em;
-  text-align: left;
-}
-
-.input-area {
-  display: flex;
-  position: relative;
-  flex-direction: column;
-}
-
-.chat-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  height: 80px;
-  background-color: white;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.submit-button {
-  position: absolute;
-  right: 5px;
-  top: 15px;
-  background-color: rgb(11, 202, 196);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  z-index: 1;
-}
-
-.submit-button:hover {
-  background-color: rgb(9, 180, 175);
-}
-
-.submit-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.submit-button i {
-  font-size: 14px;
-}
-</style>
