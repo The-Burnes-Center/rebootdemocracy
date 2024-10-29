@@ -142,6 +142,7 @@ export async function handler(event, context) {
     return { statusCode: 400, body: 'Bad Request: Missing "query" parameter' };
   }
 
+  
   try {
     // console.log('Received query:', query);
 
