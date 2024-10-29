@@ -101,51 +101,62 @@ export default {
   
   methods: {
     searchBlog() {
-      self = this;
-      this.searchloader = true;
-      let searchTArray = this.searchTerm.split(" ");
-      searchTArray = searchTArray.filter(item => item); // filter out empty entries
-      const searchObj = [];
-        searchTArray.map((a) => {
-        searchObj.push({ excerpt: { _contains: a }  });
-        searchObj.push({ title: { _contains: a } } );
-        searchObj.push({ content: { _contains: a }  });
-        searchObj.push({ authors: { team_id: { First_Name: { _contains: a } } } });
-        searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
-        searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
-      });
-      if (searchTArray.length > 0)
-      {
-        this.searchResultsFlag = 1;
-        // console.log(this.searchResultsFlag);
-      }
-      else
-        this.searchResultsFlag = 0;
-      this.directus
-      .items('reboot_democracy_blog')
-      .readByQuery({
-          limit:-1,
-          filter: {
-            _and: [ { date: { _lte: "$NOW(-5 hours)" }},
-            {
-               status: {
-              _eq: "published",
+  const self = this;
+  this.searchloader = true;
+
+  if (this.searchTerm.trim().length > 0) {
+    this.searchResultsFlag = 1;
+
+    // Make a request to the Weaviate function
+    fetch('/.netlify/functions/search_weaviate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: this.searchTerm }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        const slugs = data.slugs;
+
+        if (slugs && slugs.length > 0) {
+          // Build a filter for Directus
+          const slugFilters = slugs.map(slug => ({ slug: { _eq: slug } }));
+
+          self.directus.items('reboot_democracy_blog').readByQuery({
+            limit: -1,
+            filter: {
+              _and: [{ date: { _lte: "$NOW(-5 hours)" } }, { status: { _eq: "published" } }],
+              _or: slugFilters,
             },
-            }
-            ],
-            _or: searchObj,
-          },
-          sort:["date"],
-          fields: ['*.*',
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*'],
-        })
-        .then((b) => {
-          this.blogDataSearch = b.data;
-          console.log(this.blogDataSearch, 'searchResults');
-          this.searchloader = false;
-        });
-    },
+            fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*'],
+          }).then((b) => {
+            const blogPostMap = new Map(b.data.map(blogPost => [blogPost.slug, blogPost]));
+            const orderedBlogData = slugs.map(slug => blogPostMap.get(slug)).filter(Boolean);
+            self.blogDataSearch = orderedBlogData;
+            console.log(self.blogDataSearch, 'searchResults');
+            self.searchloader = false;
+          }).catch(error => {
+            console.error('Error fetching blog posts from Directus:', error);
+            self.blogDataSearch = [];
+            self.searchloader = false;
+          });
+        } else {
+          self.blogDataSearch = [];
+          self.searchloader = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching slugs from Weaviate function:', error);
+        self.blogDataSearch = [];
+        self.searchloader = false;
+      });
+
+  } else {
+    this.searchResultsFlag = 0;
+    this.blogDataSearch = this.blogData; // <-- Populate with all blog posts
+    this.searchloader = false;
+    return;
+  }
+},
     includesString(array, string) {
     if (!array) return false;
     const lowerCasePartialSentence = string.toLowerCase();
@@ -484,15 +495,15 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <!-- Search section -->
     <div  v-if="searchResultsFlag   && searchTermDisplay != ''" class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()"> 
+      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch"> 
           <!-- <div v-if="blog_item?.Tags === null"> -->
        <a :href="'/blog/' + blog_item.slug">
                  <div v-lazy-load>
          <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
           </div>
         <div class="allposts-post-details">
-              <h3>{{blog_item.title}}</h3>
-               <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+          <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+          <h3>{{blog_item.title}}</h3>
               <div class="author-list">
                    <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
                     <div v-for="(author,i) in blog_item.authors">
