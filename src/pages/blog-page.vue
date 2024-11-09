@@ -456,6 +456,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <style>
 .pschat-result-container {
   max-height: 400px; /* Adjust the max height as needed */
+  min-height: 400px;
   overflow-y: auto;
   margin: 20px 0; /* Optional: add margin for spacing */
   padding: 15px; /* Optional: add padding inside the container */
