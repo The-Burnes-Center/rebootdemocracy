@@ -148,35 +148,26 @@ Your comprehensive answer in markdown:
 messages.push({ role: 'user', content: userMessageContent });
 
 // Proceed with generating the response
-const stream = await openaiClient.chat.completions.create({
-  model: "gpt-4o",
-  messages,
-  max_tokens: 2048,
-  temperature: 0.0,
-  stream: true,
-});
-
-// Set up streaming response
-context.res = {
-  statusCode: 200,
-  headers: {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  },
-  body: ''
-};
-
-for await (const chunk of stream) {
-  const content = chunk.choices[0]?.delta?.content || '';
-  context.res.body += `data: ${JSON.stringify({ content })}\n\n`;
-  await new Promise(resolve => context.awsRequestId ? resolve() : context.awsLambda.context.succeed(context.res));
-}
-
-context.res.body += `data: [DONE]\n\n`;
-
-console.log('Results:', context.res);
-return context.res;
+const response = await openaiClient.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages,
+    max_tokens: 2048,
+    temperature: 0.0,
+    // Removed 'stream: true'
+  });
+  console.log(response.choices[0])
+  // Extract the assistant's reply
+  const assistantReply = response.choices[0].message.content;
+  
+  // Set up the response
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ reply: assistantReply }),
+  };
+  
 
 } catch (error) {
 console.error('Error processing message:', error);
