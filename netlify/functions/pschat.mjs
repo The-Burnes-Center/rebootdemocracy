@@ -37,7 +37,7 @@ async function searchChunksWithReferences(query) {
         }
       }
     `;
-  
+  console.log('query',query)
     try {
       // First, try a simple nearText search without any where clause
       const nearTextQuery = weaviateClient.graphql
@@ -126,6 +126,10 @@ export async function handler(event, context) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
+
+  console.log('Received event:', event);
+  console.log('Received event body:', event.body);
+
 
   const { message, conversation } = JSON.parse(event.body);
 

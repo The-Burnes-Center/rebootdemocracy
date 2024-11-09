@@ -71,7 +71,7 @@
         messages.value.push({ sender: 'user', text: inputMessage.value });
         const botMessage = { sender: 'bot', text: '' };
         messages.value.push(botMessage);
-  
+        console.log(inputMessage.value)
         try {
           const response = await fetch('/.netlify/functions/pschat', {
             method: 'POST',
