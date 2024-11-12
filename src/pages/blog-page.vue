@@ -356,26 +356,24 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="blog-featured-row">
     <div class="first-blog-post" v-if="latestBlogPost">
       <a :href="'/blog/' + latestBlogPost.slug">
-      <div v-lazy-load>
-      <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
-      </div>
-      <h3>{{latestBlogPost.title}}</h3>
-      <p>{{ latestBlogPost.excerpt }}</p>
-       <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
-      <div class="author-list">
+        <div v-lazy-load>
+          <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
+        </div>
+        <h3>{{latestBlogPost.title}}</h3>
+        <p>{{ latestBlogPost.excerpt }}</p>
+        <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
+        <div class="author-list">
           <p  class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
-            <div v-for="(author,i) in latestBlogPost.authors">
-              <div class="author-item">               
-                <div class="author-details">
-                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                    <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
-                </div>
+          <div v-for="(author,i) in latestBlogPost.authors">
+            <div class="author-item">               
+              <div class="author-details">
+                <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
               </div>
             </div>
-            
+          </div>  
         </div>
-        </a>  
-        
+      </a>  
     </div>
     <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
