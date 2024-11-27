@@ -176,7 +176,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <header-comp></header-comp>
 
 <div class="blog-hero">
-{{postData[0].image}}
+
   <img v-if="postData[0] && postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.filename_disk+'?width=800'" />
   
   <div class="blog-details">
