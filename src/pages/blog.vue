@@ -126,10 +126,10 @@ export default {
         { property: 'og:title', content: "RebootDemocracy.AI Blog | "+this.postData[0].title },
         // { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
         { property: 'og:description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
-        { property: 'og:image', content: this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.id:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
+        { property: 'og:image', content: this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.filename_disk:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
         { property: 'twitter:description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
-        { property: 'twitter:image', content:  this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.id:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
+        { property: 'twitter:image', content:  this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.filename_disk:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })
@@ -176,8 +176,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <header-comp></header-comp>
 
 <div class="blog-hero">
-
-  <img v-if="postData[0] && postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id+'?width=800'" />
+{{postData[0].image}}
+  <img v-if="postData[0] && postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.filename_disk+'?width=800'" />
   
   <div class="blog-details">
     <h1>{{postData[0].title}}</h1>
