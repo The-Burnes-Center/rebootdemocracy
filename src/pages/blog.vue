@@ -98,7 +98,7 @@ function fillMeta() {
       ? post.excerpt
       : (htmlToText.textContent?.substring(0, 200) ?? '') + '...';
 
-  useHead({
+      useHead({
     title: 'RebootDemocracy.AI Blog | ' + post.title,
     meta: [
       { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.title },
@@ -109,7 +109,7 @@ function fillMeta() {
         property: 'og:image',
         content: post.image
           ? directus._url + 'assets/' + post.image.filename_disk
-          : directus._url + 'assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+          : directus._url + 'assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
       },
       { property: 'og:image:width', content: '800' },
       { property: 'og:image:height', content: '800' },
@@ -119,7 +119,7 @@ function fillMeta() {
         property: 'twitter:image',
         content: post.image
           ? directus._url + 'assets/' + post.image.filename_disk
-          : directus._url + 'assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+          : directus._url + 'assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
       },
       { property: 'twitter:card', content: 'summary_large_image' },
     ],
