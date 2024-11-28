@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory } from 'vue-router';
 
 import Home from '../pages/index.vue';
 import Events from '../pages/events.vue';
@@ -14,32 +14,38 @@ import BlogPost from '../pages/blog.vue';
 import AllPosts from '../pages/all-blog-posts.vue';
 import PSChat from '../pages/pschat.vue';
 
-
 const routes = [
-  { path:"/", component: BlogPage },
-  { path:"/about", component: Home },
-  { path:"/events", component: Events },
-  { path:"/our-writing", component: Writing },
-  { path:"/our-research", component: Research },
-  { path:"/our-teaching", component: Teaching },
-  { path:"/our-engagements", component: Engagement },
-  { path:"/more-resources", component: Resources },
-  { path:"/events/reboot-democracy", redirect: '/events?Reboot%20Democracy%20Lecture%20Series' },
-  { path:"/team", component:Team },
-  { path:"/signup", component:Signup },
-  { path:"/blog/:name", component: BlogPost, props:true },
-  { path:"/blog", component: BlogPage },
-  { path:"/all-blog-posts", component: AllPosts },
-  { path:"/pschat", component: PSChat },
+  { path: '/', component: BlogPage },
+  { path: '/about', component: Home },
+  { path: '/events', component: Events },
+  { path: '/our-writing', component: Writing },
+  { path: '/our-research', component: Research },
+  { path: '/our-teaching', component: Teaching },
+  { path: '/our-engagements', component: Engagement },
+  { path: '/more-resources', component: Resources },
+  {
+    path: '/events/reboot-democracy',
+    redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
+  },
+  { path: '/team', component: Team },
+  { path: '/signup', component: Signup },
+  {
+    path: '/blog/:slug',
+    component: BlogPost,
+    props: true,
+    name: 'BlogPost',
+  },
+  { path: '/blog', component: BlogPage },
+  { path: '/all-blog-posts', component: AllPosts },
+  { path: '/pschat', component: PSChat },
   { path: '/:catchAll(.*)', redirect: '/' },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
   base: './',
-  routes
-})
+  routes,
+});
 
-
-
-export default router
+export default router;
+export { routes };

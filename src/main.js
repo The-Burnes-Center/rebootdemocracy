@@ -1,24 +1,43 @@
-import { createApp } from 'vue'
-import './assets/styles.css'
-import App from './App.vue'
-import router from './router'
+// main.js
+import { ViteSSG } from 'vite-ssg';
+import App from './App.vue';
+import router from './router';
+
 // Vuetify
-import 'vuetify/styles'
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
+import 'vuetify/styles';
+import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components';
+import * as directives from 'vuetify/directives';
 
-import { createHead } from "@vueuse/head"
+import { createHead } from '@vueuse/head';
 
-// import Vue from 'vue'
-// import Vuetify from 'vuetify'                                           
+// CSS
+import './assets/styles.css';
 
-// Vue.use(Vuetify)
-const head = createHead();
-
+// Initialize plugins
 const vuetify = createVuetify({
   components,
   directives,
-})
+});
 
-createApp(App).use(router, head).use(vuetify).mount('#app')
+const head = createHead();
+
+// Export the createApp function
+export const createApp = ViteSSG(
+  App,
+  {
+    // Passing the router is optional if you define routes here
+    routes: router.options.routes, // Use this if your router is set up this way
+    // If you have other options, include them here
+  },
+  (ctx) => {
+    const { app, router, isClient } = ctx;
+
+    // Install plugins
+    app.use(router);
+    app.use(vuetify);
+    app.use(head);
+
+    // You can perform other operations here
+  }
+);
