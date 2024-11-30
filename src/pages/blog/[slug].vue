@@ -57,8 +57,8 @@ function setMetaTags(post) {
       {
         property: 'og:image',
         content: post.image
-          ? directus._url + 'assets/' + post.image.filename_disk
-          : directus._url + 'assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
+          ? 'https://content.thegovlab.com/assets/' + post.image.filename_disk
+          : 'https://content.thegovlab.com/assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
       },
       { property: 'og:image:width', content: '800' },
       { property: 'og:image:height', content: '800' },
@@ -67,8 +67,8 @@ function setMetaTags(post) {
       {
         property: 'twitter:image',
         content: post.image
-          ? directus._url + 'assets/' + post.image.filename_disk
-          : directus._url + 'assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
+          ? 'https://content.thegovlab.com/assets/' + post.image.filename_disk
+          : 'https://content.thegovlab.com/assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
       },
       { property: 'twitter:card', content: 'summary_large_image' },
 
