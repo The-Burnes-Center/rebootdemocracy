@@ -1,43 +1,26 @@
-// main.js
+// main.ts
 import { ViteSSG } from 'vite-ssg';
 import App from './App.vue';
-import router from './router';
+import { setupLayouts } from 'virtual:generated-layouts';
+import generatedRoutes from 'virtual:generated-pages';
+import { createHead } from '@unhead/vue';
 
-// Vuetify
-import 'vuetify/styles';
-import { createVuetify } from 'vuetify';
-import * as components from 'vuetify/components';
-import * as directives from 'vuetify/directives';
-
-import { createHead } from '@vueuse/head';
-
-// CSS
-import './assets/styles.css';
-
-// Initialize plugins
-const vuetify = createVuetify({
-  components,
-  directives,
-});
-
-const head = createHead();
-
-// Export the createApp function
 export const createApp = ViteSSG(
   App,
-  {
-    // Passing the router is optional if you define routes here
-    routes: router.options.routes, // Use this if your router is set up this way
-    // If you have other options, include them here
+  { 
+    routes: setupLayouts(generatedRoutes),
+    // You may need to specify history type if issues occur
   },
   (ctx) => {
-    const { app, router, isClient } = ctx;
+    // Create the head instance
+    const head = createHead();
 
-    // Install plugins
-    app.use(router);
-    app.use(vuetify);
-    app.use(head);
+    // Install the head instance to the app
+    ctx.app.use(head);
 
-    // You can perform other operations here
+    // Make head available in the app context
+    ctx.head = head;
+
+    // Any other plugins or setup code
   }
 );

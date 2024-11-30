@@ -1,84 +1,46 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import { VitePluginRadar } from 'vite-plugin-radar';
-import ViteFonts from 'vite-plugin-fonts';
-import { format, isPast } from 'date-fns';
-
 import Pages from 'vite-plugin-pages';
-
-import { Directus } from '@directus/sdk';
-import { resolve } from 'path';
-
-// Import Vite SSG
-import { ViteSSGOptions } from 'vite-ssg';
+import Layouts from 'vite-plugin-vue-layouts';
+import { createDirectus, rest, readItems } from '@directus/sdk';
 
 export default defineConfig({
-  base: '/',
-  assetsInclude: ['**/*.png'],
-  data() {
-    return {
-      format,
-      isPast,
-    };
-  },
   plugins: [
     vue(),
-    VitePluginRadar({
-      // Google Analytics tag inject
-      enableDev: true,
-      analytics: {
-        id: 'G-L78LX2HS2N',
-      },
-    }),
     Pages({
-      dirs: 'src/pages',
-      extensions: ['vue', 'ts'],
+      extensions: ['vue'],
     }),
-    ViteFonts({
-      typekit: {
-        /**
-         * Typekit project id
-         */
-        id: 'tde3xym',
-
-        /**
-         * enable non-blocking renderer
-         *   <link rel="preload" href="xxx" as="style" onload="this.rel='stylesheet'">
-         * default: true
-         */
-        defer: true,
-      },
-    }),
+    Layouts(),
   ],
-  server: {
-    host: '0.0.0.0',
-    // hmr: {
-    //   host: 'localhost', // you could make this an ENV var
-    //   port: '3005',
-    //   path: '/'
-    // }
-  },
-  // Add ssgOptions for Vite SSG
   ssgOptions: {
     script: 'async',
     formatting: 'minify',
+    // Generate dynamic routes from Directus
     includedRoutes: async (paths) => {
-      // Fetch dynamic routes for blog posts
-      const directus = new Directus('https://content.thegovlab.com/');
-      const { data } = await directus.items('reboot_democracy_blog').readByQuery({
-        fields: ['slug'],
-        limit: -1,
-      });
+      const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
-      const blogRoutes = data.map((post) => `/blog/${post.slug}`);
+      try {
+        const response = await directus.request(
+          readItems('reboot_democracy_blog', {
+            fields: ['slug'],
+            filter: { status: 'published' },
+            limit: -1,
+          })
+        );
 
-      // Combine with existing paths
-      return [...paths, ...blogRoutes];
+        const data = response.data ? response.data : response;
+
+        console.log('Data fetched:', data);
+
+        const slugs = data.map((item) => `/blog/${item.slug}`);
+        return [...paths, ...slugs];
+      } catch (error) {
+        console.error('Error fetching slugs from Directus:', error);
+        return paths;
+      }
     },
   },
-  define: {
-    __VUE_OPTIONS_API__: true, // or false if not using Options API
-    __VUE_PROD_DEVTOOLS__: false,
-    __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+  ssr: {
+    noExternal: ['@directus/sdk','@unhead/vue'],
   },
 });

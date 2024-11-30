@@ -1,5 +1,5 @@
 // blogHelper.js
-import { Directus } from '@directus/sdk';
+//import { Directus } from '@directus/sdk';
 
 export function fetchBlogData(directus, slug) {
   return directus
