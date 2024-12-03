@@ -1,15 +1,11 @@
 <!-- src/pages/blog/[slug].vue -->
-<script setup lang="ts">
-import { ref, onServerPrefetch, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+<script lang="ts" setup>
+import { ref } from 'vue';
 import { useHead } from '@unhead/vue';
 import { createDirectus, rest, readItems } from '@directus/sdk';
 
-// Define props
-defineProps<{ slug: string }>();
-
-const route = useRoute();
-const slug = ref(route.params.slug || '');
+// Define props to get the slug from the route
+const props = defineProps<{ slug: string }>();
 
 const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
@@ -46,65 +42,46 @@ async function fetchPost(slugValue) {
   }
 }
 
-function setMetaTags(post) {
+// Fetch the post data using top-level await
+post.value = await fetchPost(props.slug);
+
+if (post.value) {
+  // Set meta tags using useHead
   useHead({
-    title: 'RebootDemocracy.AI Blog | ' + post.title,
+    title: 'RebootDemocracy.AI Blog | ' + post.value.title,
     meta: [
-      { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.title },
-      { name: 'description', content: post.excerpt },
-      { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.title },
-      { property: 'og:description', content: post.excerpt },
+      { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+      { name: 'description', content: post.value.excerpt },
+      { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+      { property: 'og:description', content: post.value.excerpt },
       {
         property: 'og:image',
-        content: post.image
-          ? 'https://content.thegovlab.com/assets/' + post.image.filename_disk
+        content: post.value.image
+          ? 'https://content.thegovlab.com/assets/' + post.value.image.filename_disk
           : 'https://content.thegovlab.com/assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
       },
       { property: 'og:image:width', content: '800' },
       { property: 'og:image:height', content: '800' },
-      { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.title },
-      { property: 'twitter:description', content: post.excerpt },
+      { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+      { property: 'twitter:description', content: post.value.excerpt },
       {
         property: 'twitter:image',
-        content: post.image
-          ? 'https://content.thegovlab.com/assets/' + post.image.filename_disk
+        content: post.value.image
+          ? 'https://content.thegovlab.com/assets/' + post.value.image.filename_disk
           : 'https://content.thegovlab.com/assets/' + '4650f4e2-6cc2-407b-ab01-b74be4838235',
       },
       { property: 'twitter:card', content: 'summary_large_image' },
-
+    ],
+  });
+} else {
+  // Handle the case where the post is not found
+  useHead({
+    title: 'Post Not Found',
+    meta: [
+      { name: 'description', content: 'The requested post could not be found.' },
     ],
   });
 }
-
-async function fetchAndSetPost(slugValue) {
-  post.value = await fetchPost(slugValue);
-  if (post.value) {
-    setMetaTags(post.value);
-  }
-}
-
-// Fetch data during SSR
-onServerPrefetch(() => {
-  return fetchAndSetPost(slug.value);
-});
-
-// Fetch data on client-side navigation
-onMounted(() => {
-  if (!post.value) {
-    fetchAndSetPost(slug.value);
-  }
-});
-
-// Watch for route changes (for client-side navigation)
-watch(
-  () => route.params.slug,
-  (newSlug) => {
-    if (newSlug !== slug.value) {
-      slug.value = newSlug;
-      fetchAndSetPost(slug.value);
-    }
-  }
-);
 </script>
 
 <template>
@@ -114,7 +91,7 @@ watch(
       <div v-html="post.content"></div>
     </div>
     <div v-else>
-      <p>Loading...</p>
+      <p>Post not found.</p>
     </div>
   </div>
 </template>

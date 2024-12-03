@@ -41,6 +41,6 @@ export default defineConfig({
     },
   },
   ssr: {
-    noExternal: ['@directus/sdk','@unhead/vue'],
+    noExternal: ['@directus/sdk', '@unhead/vue'],
   },
 });
