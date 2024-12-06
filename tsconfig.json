@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+      "target": "ESNext",                     // Use the latest ECMAScript target
+      "module": "ESNext",                     // Use ESNext module system to support 'import.meta'
+      "moduleResolution": "Node",             // Use Node.js module resolution
+      "strict": true,                         // Enable all strict type-checking options
+      "jsx": "preserve",                      // Preserve JSX syntax for Vue components
+      "sourceMap": true,                      // Generate source maps
+      "resolveJsonModule": true,              // Allow importing .json files
+      "esModuleInterop": true,                // Enable interop between CommonJS and ES Modules
+      "lib": ["ESNext", "DOM"],               // Include DOM and ESNext library files
+      "skipLibCheck": true                    // Skip type checking of declaration files
+    },
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.d.ts",
+      "src/**/*.tsx",
+      "src/**/*.vue"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist"
+    ]
+  }

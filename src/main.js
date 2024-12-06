@@ -4,6 +4,7 @@ import App from './App.vue';
 import { setupLayouts } from 'virtual:generated-layouts';
 import generatedRoutes from 'virtual:generated-pages';
 import { createHead } from '@unhead/vue';
+import './assets/styles.css'; // Import your global stylesheet here
 
 export const createApp = ViteSSG(
   App,

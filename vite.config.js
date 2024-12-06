@@ -9,6 +9,7 @@ export default defineConfig({
     vue(),
     Pages({
       extensions: ['vue'],
+      
     }),
     Layouts(),
   ],
