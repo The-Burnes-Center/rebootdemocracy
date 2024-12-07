@@ -15,7 +15,7 @@
 
 [dev]
   # Replace '3000' with the port your Vue.js app is running on
-  targetPort = 3000
+  # targetPort = 3000
   # This is the port Netlify Dev will use
-  port = 3001
+  # port = 3001
   # Other configurations...

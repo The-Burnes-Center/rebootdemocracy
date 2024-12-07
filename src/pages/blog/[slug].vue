@@ -3,16 +3,32 @@
 import { ref, onMounted } from 'vue';
 import { useHead } from '@unhead/vue';
 import { createDirectus, rest, readItems } from '@directus/sdk';
-
+import HeaderComponent from "../../components/header.vue";
+import FooterComponent from "../../components/footer.vue";
+import format from "date-fns/format";
+import isPast from "date-fns/isPast";
 // Get props provided by vite-plugin-pages for the dynamic route
 const props = defineProps<{ slug: string }>();
 
 const directus = createDirectus('https://content.thegovlab.com').with(rest());
 const post = ref<any>(null);
 
+ function formatTimeOnly(d1) {
+      return format(d1, "h:mm aa");
+    };
+function formatDateTime(d1) {
+      return format(d1, "MMMM d, yyyy, h:mm aa");
+    };
+function formatDateOnly(d1) {
+      return format(d1, "MMMM d, yyyy");
+    };
+ function PastDate(d1) {
+      return isPast(d1);
+    };
+
 async function fetchPost(slugValue: string) {
   if (!slugValue) return null;
-  console.log('Fetching post:', slugValue);
+  
   const response = await directus.request(
     readItems('reboot_democracy_blog', {
       filter: { slug: slugValue },
@@ -112,14 +128,59 @@ if (import.meta.env.SSR) {
 </script>
 
 <template>
-
-  <!-- Wrap content in a Suspense boundary in a parent component or layout -->
   <div v-if="post">
-    <h1>{{ post.title }}</h1>
-    <div v-html="post.content"></div>
+<!-- Header Component -->
+<HeaderComponent></HeaderComponent>
+
+<div class="blog-hero">
+
+  <img v-if="post && post.image" class="blog-img" :src= "directus.url.href+'assets/'+post.image.id+'?width=800'" />
+  
+  <div class="blog-details">
+    <h1>{{post.title}}</h1>
+    <p class="excerpt"> {{post.excerpt}}</p>
+    <p class="post-date">Published on <b>{{formatDateOnly(new Date(post.date))}}</b></p>
+
+      <div class="hero-author-sm">
+      <div v-for="(author,i) in post.authors">
+          <div class="author-item">
+            <img v-if="author.team_id.Headshot" class="author-headshot" :src="directus.url.href+'assets/'+author.team_id.Headshot">
+            <p  v-if="!author.team_id.Headshot" class="author-no-image">{{author.team_id.First_Name[0] }} {{author.team_id.Last_Name[0]}}</p>
+            <div class="author-details">
+              <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+              <a class="author-bio" v-if="author.team_id.Link_to_bio" :href="author.team_id.Link_to_bio">Read Bio</a>
+            </div>
+          </div>
+        </div>
+        <div class="sm-tray">
+          <a target="_blank" :href="'http://twitter.com/share?url=https://rebootdemocracy.ai/blog/' + post.slug"><i class="fa-brands fa-square-x-twitter"></i></a>
+          <a target="_blank" :href="'https://www.facebook.com/sharer/sharer.php?u=https://rebootdemocracy.ai/blog/' + post.slug"><i class="fa-brands fa-facebook"></i></a>
+          <a target="_blank" :href="'https://linkedin.com/shareArticle?url=https://rebootdemocracy.ai/blog/' + post.slug + '&title=' + post.title"><i class="fa-brands fa-linkedin"></i></a>
+          <!-- <a><i class="fa-solid fa-link"></i></a> -->
+        </div>
+
+    </div>
+   
+  </div>
+</div>
+
+<div class="blog-body">
+  <div class="audio-version" v-if="post.audio_version">
+  <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.&nbsp;</em></p>
+    <p><audio controls="controls"><source :src="directus.url.href+'assets/'+post.audio_version.id" type="audio/mpeg" data-mce-fragment="1"></audio></p>
+  </div>
+    <div class="blog-content" v-html="post.content"></div>
+    <p v-if="post.ai_content_disclaimer" class="blog-img-byline">Some images in this post were generated using AI.</p>
+</div>
+
+  <!-- Footer Component -->
+  <FooterComponent></FooterComponent>
+  <!-- Wrap content in a Suspense boundary in a parent component or layout -->
+  
+
   </div>
   <div v-else>
-    <p>Loading or Post not found...</p>
+    <p>Loading ...</p>
   </div>
 
 </template>

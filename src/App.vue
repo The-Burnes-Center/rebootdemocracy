@@ -1,7 +1,7 @@
 <script setup>
 import { ref, Suspense } from "vue";
 // import { Directus } from "@directus/sdk";
-// import OpenAIChat from "./components/pschat.vue";
+import OpenAIChat from "./components/pschat.vue";
 </script>
 
 <template>
@@ -18,9 +18,9 @@ import { ref, Suspense } from "vue";
     </div>
 
     <!-- OpenAI Chat component that's always visible -->
-    <!-- <keep-alive>
+    <keep-alive>
       <OpenAIChat />
-    </keep-alive> -->
+    </keep-alive>
   </div>
 </template>
 
