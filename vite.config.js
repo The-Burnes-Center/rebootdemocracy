@@ -38,7 +38,7 @@ export default defineConfig({
         return [...paths, `/blog/${slugToBuild}`];
       } else {
         // Existing logic to fetch all slugs
-        const directus = createDirectus('https://content.thegovlab.com').with(rest());
+        const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
         try {
           const response = await directus.request(
