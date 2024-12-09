@@ -20,14 +20,25 @@ export default defineConfig({
     script: 'async',
     formatting: 'minify',
     includedRoutes: async (paths) => {
-      const SLUG_TO_BUILD = process.env.SLUG_TO_BUILD;
-      console.log("SLUG_TO_BUILD",SLUG_TO_BUILD)
-      if (SLUG_TO_BUILD) {
+      let slugToBuild = process.env.SLUG_TO_BUILD;
+
+      // Check if INCOMING_HOOK_BODY is available
+      if (process.env.INCOMING_HOOK_BODY) {
+        try {
+          const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
+          slugToBuild = hookPayload.slug;
+          console.log('Building only for slug:', slugToBuild);
+        } catch (error) {
+          console.error('Error parsing INCOMING_HOOK_BODY:', error);
+        }
+      }
+
+      if (slugToBuild) {
         // Only build the specific slug
-        return [...paths, `/blog/${SLUG_TO_BUILD}`];
+        return [...paths, `/blog/${slugToBuild}`];
       } else {
         // Existing logic to fetch all slugs
-        const directus = createDirectus('https://dev.thegovlab.com').with(rest());
+        const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
         try {
           const response = await directus.request(
