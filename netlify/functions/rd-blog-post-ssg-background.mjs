@@ -3,8 +3,10 @@ import axios from 'axios';
 
 export async function handler(event, context) {
   try {
-    const { slug } = JSON.parse(event.body);
-
+       
+    // const { slug } = JSON.parse(event.body);
+    const slug  = "ai-use-cases-parliament-ipu";
+    console.log(slug)
     const NETLIFY_SITE_ID = process.env.NETLIFY_SITE_ID;
     const NETLIFY_AUTH_TOKEN = process.env.NETLIFY_AUTH_TOKEN;
 

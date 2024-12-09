@@ -20,26 +20,31 @@ export default defineConfig({
     script: 'async',
     formatting: 'minify',
     includedRoutes: async (paths) => {
-      const directus = createDirectus('https://content.thegovlab.com').with(rest());
+      const SLUG_TO_BUILD = process.env.SLUG_TO_BUILD;
+      console.log("SLUG_TO_BUILD",SLUG_TO_BUILD)
+      if (SLUG_TO_BUILD) {
+        // Only build the specific slug
+        return [...paths, `/blog/${SLUG_TO_BUILD}`];
+      } else {
+        // Existing logic to fetch all slugs
+        const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
-      try {
-        const response = await directus.request(
-          readItems('reboot_democracy_blog', {
-            fields: ['slug'],
-            filter: { status: 'published' },
-            limit: -1,
-          })
-        );
+        try {
+          const response = await directus.request(
+            readItems('reboot_democracy_blog', {
+              fields: ['slug'],
+              filter: { status: 'published' },
+              limit: -1,
+            })
+          );
 
-        const data = response.data ? response.data : response;
-
-        console.log('Data fetched:', data);
-
-        const slugs = data.map((item) => `/blog/${item.slug}`);
-        return [...paths, ...slugs];
-      } catch (error) {
-        console.error('Error fetching slugs from Directus:', error);
-        return paths;
+          const data = response.data ? response.data : response;
+          const slugs = data.map((item) => `/blog/${item.slug}`);
+          return [...paths, ...slugs];
+        } catch (error) {
+          console.error('Error fetching slugs from Directus:', error);
+          return paths;
+        }
       }
     },
     onPageRendered(route, html) {
