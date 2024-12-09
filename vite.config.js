@@ -7,10 +7,10 @@ import Layouts from 'vite-plugin-vue-layouts';
 import { createDirectus, rest, readItems } from '@directus/sdk';
 
 export default defineConfig({
-  base: "", 
+  base: "",
   plugins: [
     vue(),
-    vuetify({ autoImport: true }), // Add Vuetify plugin with autoImport option
+    vuetify({ autoImport: true }),
     Pages({
       extensions: ['vue'],
     }),
@@ -25,7 +25,9 @@ export default defineConfig({
       // Check if INCOMING_HOOK_BODY is available
       if (process.env.INCOMING_HOOK_BODY) {
         try {
-          const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
+          // Decode the URL-encoded payload
+          const decodedBody = decodeURIComponent(process.env.INCOMING_HOOK_BODY);
+          const hookPayload = JSON.parse(decodedBody);
           slugToBuild = hookPayload.slug;
           console.log('Building only for slug:', slugToBuild);
         } catch (error) {
@@ -35,7 +37,7 @@ export default defineConfig({
 
       if (slugToBuild) {
         // Only build the specific slug
-        return [...paths, `/blog/${slugToBuild}`];
+        return [...paths, `/blog/${slugToBuild.toLocaleLowerCase()}`];
       } else {
         // Existing logic to fetch all slugs
         const directus = createDirectus('https://dev.thegovlab.com').with(rest());
@@ -50,7 +52,7 @@ export default defineConfig({
           );
 
           const data = response.data ? response.data : response;
-          const slugs = data.map((item) => `/blog/${item.slug}`);
+          const slugs = data.map((item) => `/blog/${item.slug.toLocaleLowerCase()}`);
           return [...paths, ...slugs];
         } catch (error) {
           console.error('Error fetching slugs from Directus:', error);
