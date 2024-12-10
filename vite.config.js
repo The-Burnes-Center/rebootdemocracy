@@ -20,23 +20,24 @@ export default defineConfig({
     script: 'async',
     formatting: 'minify',
     includedRoutes: async (paths) => {
-      let slugToBuild = process.env.SLUG_TO_BUILD;
+      // let slugToBuild = process.env.SLUG_TO_BUILD;
+      // let slugToBuild = "";
 
       // Check if INCOMING_HOOK_BODY is available
-      if (process.env.INCOMING_HOOK_BODY) {
-        try {
-          const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
-          slugToBuild = hookPayload.slug;
-          console.log('Building only for slug:', slugToBuild);
-        } catch (error) {
-          console.error('Error parsing INCOMING_HOOK_BODY:', error);
-        }
-      }
+      // if (process.env.INCOMING_HOOK_BODY) {
+      //   try {
+      //     const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
+      //     slugToBuild = hookPayload.slug;
+      //     console.log('Building only for slug:', slugToBuild);
+      //   } catch (error) {
+      //     console.error('Error parsing INCOMING_HOOK_BODY:', error);
+      //   }
+      // }
 
-      if (slugToBuild) {
+      // if (slugToBuild) {
         // Only build the specific slug, normalized to lowercase
-        return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
-      } else {
+      //   return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
+      // } else {
         // Fetch all slugs and normalize them to lowercase
         const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
@@ -56,7 +57,7 @@ export default defineConfig({
           console.error('Error fetching slugs from Directus:', error);
           return paths;
         }
-      }
+      // }
     },
     onPageRendered(route, html) {
       // Determine the depth of the route to adjust asset paths
