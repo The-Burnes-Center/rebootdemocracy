@@ -252,7 +252,6 @@ function FutureDate(d1: string | Date) {
   return isFuture(new Date(d1));
 }
 
-
 function preloadImages() {
   if (typeof window !== 'undefined') {
   featuredData.value.forEach((item: any) => {
