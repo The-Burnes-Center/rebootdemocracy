@@ -1,37 +1,48 @@
 <!-- src/pages/blog/[slug].vue -->
+<!-- src/pages/blog/[slug].vue -->
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import { useHead } from '@unhead/vue';
+import { useRoute, useRouter } from 'vue-router';
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import HeaderComponent from "../../components/header.vue";
 import FooterComponent from "../../components/footer.vue";
 import format from "date-fns/format";
 import isPast from "date-fns/isPast";
+
 // Get props provided by vite-plugin-pages for the dynamic route
 const props = defineProps<{ slug: string }>();
+
+// Normalize the slug to lowercase
+const normalizedSlug = props.slug.toLowerCase();
 
 const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 const post = ref<any>(null);
 
- function formatTimeOnly(d1) {
-      return format(d1, "h:mm aa");
-    };
+// Date formatting functions...
+function formatTimeOnly(d1) {
+  return format(d1, "h:mm aa");
+}
 function formatDateTime(d1) {
-      return format(d1, "MMMM d, yyyy, h:mm aa");
-    };
+  return format(d1, "MMMM d, yyyy, h:mm aa");
+}
 function formatDateOnly(d1) {
-      return format(d1, "MMMM d, yyyy");
-    };
- function PastDate(d1) {
-      return isPast(d1);
-    };
+  return format(d1, "MMMM d, yyyy");
+}
+function PastDate(d1) {
+  return isPast(d1);
+}
 
 async function fetchPost(slugValue: string) {
   if (!slugValue) return null;
   
+  // Use a case-insensitive filter to fetch the post
   const response = await directus.request(
     readItems('reboot_democracy_blog', {
-      filter: { slug: slugValue },
+      filter: { 
+        status: { _eq: 'published' },
+        slug: { _icontains: slugValue } // Use case-insensitive equality
+      },
       fields: ['*.*.*'],
       limit: 1,
     })
@@ -44,7 +55,9 @@ async function fetchPost(slugValue: string) {
 // If we're in SSG mode, fetch data before rendering
 if (import.meta.env.SSR) {
   // Note: This is top-level await in script setup, allowed in newer environments
-  post.value = await fetchPost(props.slug);
+  post.value = await fetchPost(normalizedSlug);
+
+  
 
   // Set meta right after data is fetched in SSG
   if (post.value) {
@@ -85,8 +98,9 @@ if (import.meta.env.SSR) {
 } else {
   // In dev mode (no SSR), fetch data after mount
   onMounted(async () => {
-    console.log('Dev mode: fetching on mount for slug:', props.slug);
-    post.value = await fetchPost(props.slug);
+    console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
+    post.value = await fetchPost(normalizedSlug);
+    
     
     if (post.value) {
       useHead({
@@ -179,8 +193,8 @@ if (import.meta.env.SSR) {
   
 
   </div>
-  <!-- <div v-else>
+  <div v-else>
     <p>Loading ...</p>
-  </div> -->
+  </div>
 
 </template>

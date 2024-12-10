@@ -1,16 +1,16 @@
 // vite.config.js
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import vuetify from 'vite-plugin-vuetify'; // Import the plugin
+import vuetify from 'vite-plugin-vuetify';
 import Pages from 'vite-plugin-pages';
 import Layouts from 'vite-plugin-vue-layouts';
 import { createDirectus, rest, readItems } from '@directus/sdk';
 
 export default defineConfig({
-  base: "", 
+  base: '', 
   plugins: [
     vue(),
-    vuetify({ autoImport: true }), // Add Vuetify plugin with autoImport option
+    vuetify({ autoImport: true }),
     Pages({
       extensions: ['vue'],
     }),
@@ -34,10 +34,10 @@ export default defineConfig({
       }
 
       if (slugToBuild) {
-        // Only build the specific slug
-        return [...paths, `/blog/${slugToBuild}`];
+        // Only build the specific slug, normalized to lowercase
+        return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
       } else {
-        // Existing logic to fetch all slugs
+        // Fetch all slugs and normalize them to lowercase
         const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
         try {
@@ -50,7 +50,7 @@ export default defineConfig({
           );
 
           const data = response.data ? response.data : response;
-          const slugs = data.map((item) => `/blog/${item.slug}`);
+          const slugs = data.map((item) => `/blog/${item.slug.toLowerCase()}`); // Normalize to lowercase
           return [...paths, ...slugs];
         } catch (error) {
           console.error('Error fetching slugs from Directus:', error);

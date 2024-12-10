@@ -48,7 +48,7 @@ async function fetchIndex() {
       })
     );
     indexData.value = response;
-    console.log(indexData.value)
+    // console.log(indexData.value)
   } catch (error) {
     console.error('Error fetching index data:', error);
   }
@@ -149,7 +149,7 @@ async function fetchTeaching() {
         fields: ['*.*', 'thumbnail.*'],
       })
     );
-    console.log(response)
+    // console.log(response)
     teachingData.value = response;
   } catch (error) {
     console.error('Error fetching teaching data:', error);
@@ -253,12 +253,14 @@ function FutureDate(d1: string | Date) {
 }
 
 function preloadImages() {
+  if (typeof window !== 'undefined') {
   featuredData.value.forEach((item: any) => {
     if (item.image) {
       const img = new Image();
       img.src = directus.url.href + 'assets/' + item.image.id + '?width=438';
     }
   });
+}
 }
 
 // Fetch all data
