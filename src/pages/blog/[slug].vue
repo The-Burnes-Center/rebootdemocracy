@@ -179,8 +179,8 @@ if (import.meta.env.SSR) {
   
 
   </div>
-  <div v-else>
+  <!-- <div v-else>
     <p>Loading ...</p>
-  </div>
+  </div> -->
 
 </template>
