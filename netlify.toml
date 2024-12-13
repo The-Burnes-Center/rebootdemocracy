@@ -23,6 +23,9 @@
 [functions]
   node_bundler = "esbuild"
 
+[[plugins]]
+  package = "./cache-plugin.js"
+
 [functions.environment]
   NETLIFY_SITE_ID = "${NETLIFY_SITE_ID}"
   NETLIFY_AUTH_TOKEN = "${NETLIFY_AUTH_TOKEN}"
