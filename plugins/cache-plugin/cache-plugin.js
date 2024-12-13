@@ -1,7 +1,5 @@
 // cache-plugin.js
 
-const { join } = require('path');
-
 module.exports = {
   onPreBuild: async ({ utils }) => {
     // Restore the cached 'dist' directory if it doesn't exist locally
