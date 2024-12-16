@@ -3,6 +3,9 @@
   functions = "netlify/functions"
   publish = "dist"
 
+[[plugins]]
+  package = "cache-plugin"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -13,18 +16,8 @@
   [headers.values]
   Access-Control-Allow-Origin = "*"
 
-[dev]
-  # Replace '3000' with the port your Vue.js app is running on
-  # targetPort = 3000
-  # This is the port Netlify Dev will use
-  # port = 3001
-  # Other configurations...
-
 [functions]
   node_bundler = "esbuild"
-
-[[plugins]]
-  package = "./plugins/cache-plugin"
 
 [functions.environment]
   NETLIFY_SITE_ID = "${NETLIFY_SITE_ID}"

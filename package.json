@@ -39,7 +39,8 @@
     "vue3-carousel": "^0.2.9",
     "vue3-slick-carousel": "^1.0.6",
     "vuetify": "^3.3.6",
-    "weaviate-ts-client": "^2.2.0"
+    "weaviate-ts-client": "^2.2.0",
+    "cache-plugin": "file:./plugins/cache-plugin"
   },
   "devDependencies": {
     "@netlify/cache-utils": "^5.2.0",
