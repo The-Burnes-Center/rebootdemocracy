@@ -5,7 +5,7 @@ module.exports = {
     // Restore the cached 'dist' directory if it doesn't exist locally
     const didRestore = await utils.cache.restore('./dist');
     if (didRestore) {
-      console.log('Restored cached "dist" directory.');
+      console.log('Restored cached "dist" directory .');
     } else {
       console.log('No cache found for "dist" directory.');
     }
