@@ -5,6 +5,8 @@
 
 [[plugins]]
   package = "cache-plugin"
+  [plugins.inputs]
+    paths = ["dist"]
 
 [[redirects]]
   from = "/*"

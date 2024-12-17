@@ -77,6 +77,7 @@ export default defineConfig({
     },
   },
   build: {
+    emptyOutDir: false,
     rollupOptions: {
       output: {
         // Fixed names for assets
