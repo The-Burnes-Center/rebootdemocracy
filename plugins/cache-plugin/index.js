@@ -1,3 +1,5 @@
+// plugins/custom-cache-plugin/index.js
+
 module.exports = {
   onPreBuild: async ({ utils }) => {
     // Restore the cached 'dist' directory if it doesn't exist locally

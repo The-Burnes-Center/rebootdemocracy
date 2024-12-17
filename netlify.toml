@@ -4,9 +4,7 @@
   publish = "dist"
 
 [[plugins]]
-  package = "cache-plugin"
-  [plugins.inputs]
-    paths = ["dist"]
+  package = "custom-cache-plugin"
 
 [[redirects]]
   from = "/*"

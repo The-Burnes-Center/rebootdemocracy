@@ -1,5 +1,5 @@
 {
-    "name": "cache-plugin",
+    "name": "custom-cache-plugin",
     "version": "1.0.0",
     "main": "index.js"
   }
