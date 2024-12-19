@@ -316,7 +316,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                     </div>
                   </div>
             </div>
-         <img v-if="blog_item.image" class="blog-list-img" :src= "this.directus._url+'assets/'+ blog_item.image.id">
+         <img v-if="blog_item.image" class="blog-list-img" :class="{ 'loaded': imageLoaded }" :src= "this.directus._url+'assets/'+ blog_item.image.id">
          </a>
       </div>
 </div>

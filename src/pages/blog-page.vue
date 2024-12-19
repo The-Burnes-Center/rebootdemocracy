@@ -357,10 +357,10 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <div class="first-blog-post" v-if="latestBlogPost">
       <a :href="'/blog/' + latestBlogPost.slug">
       <div v-lazy-load>
-      <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
+      <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=1000&height=800&quality=75&format=webp'">
       </div>
       <h3>{{latestBlogPost.title}}</h3>
-      <p>{{ latestBlogPost.excerpt }}</p>
+      <p class="latest-blog-post-excerpt">{{ latestBlogPost.excerpt }}</p>
        <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
       <div class="author-list">
           <p  class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
@@ -381,7 +381,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
        <a :href="'/blog/' + blog_item.slug">
         <div v-lazy-load>
-        <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
+        <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id+'?width=1000&height=800&quality=75&format=webp'">
         </div>
         <div class="other-post-details">
               <h3>{{blog_item.title}}</h3>
@@ -419,7 +419,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" v-show="index >= 4 && index < 16">
     <a :href="'/blog/' + blog_item.slug">
           <div v-lazy-load>
-        <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url+'assets/'+ blog_item.image.id">
+        <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url+'assets/'+ blog_item.image.id +'?width=1000&height=800&quality=75&format=webp'">
       </div>
       <div class="allposts-post-details">
         <h3>{{blog_item.title}}</h3>
@@ -456,7 +456,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             <div v-if="includesString(blog_item?.Tags, tag_item)">
               <a :href="'/blog/' + blog_item.slug">
               <div v-lazy-load>
-                <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url + 'assets/' + blog_item.image.id">
+                <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url + 'assets/' + blog_item.image.id +'?width=1000&height=800&quality=75&format=webp'">
               </div>
                 <div class="allposts-post-details">
                   <h3>{{blog_item.title}}</h3>
@@ -488,7 +488,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           <!-- <div v-if="blog_item?.Tags === null"> -->
        <a :href="'/blog/' + blog_item.slug">
                  <div v-lazy-load>
-         <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
+         <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id +'?width=1000&height=800&quality=75&format=webp'">
           </div>
         <div class="allposts-post-details">
               <h3>{{blog_item.title}}</h3>
