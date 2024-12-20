@@ -6,15 +6,19 @@ import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
 import _ from "lodash";
+// In your script section
 
 import { useHead } from '@vueuse/head'
-import { lazyLoad } from '../directives/lazyLoad';
+// import { lazyLoad } from '../directives/lazyLoad';
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import ModalComp from "../components/modal.vue";
-import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
-import OpenAIChat from "../components/pschat.vue";
+import { VueFinalModal } from 'vue-final-modal';
+// In your script section
+import 'vue-final-modal/style.css';
+
+
 import { register } from 'swiper/element/bundle';
 
 const route = useRoute();
@@ -139,7 +143,9 @@ function loadModal() {
       fields: ['*.*']
     })
   ).then((item: any) => {
-    modalData.value = item;
+    // Ensure modalData.value is an object, not an array
+    modalData.value = item || {};
+    console.log('Modal Data:', modalData.value);
     let storageItem = (typeof window !== 'undefined') ? localStorage.getItem("Reboot Democracy") : null;
     showmodal.value = modalData.value.status == 'published' && 
       (modalData.value.visibility == 'always' || (modalData.value.visibility == 'once' && storageItem != 'off'));
@@ -237,25 +243,38 @@ if (import.meta.env.SSR) {
     await fetchBlog();
     resetSearch();
     loadModal();
+
+    showmodal.value = true;
   });
 }
 
 // Register directives locally if needed
 // Note: If the directive is global, remove this registration or adapt accordingly.
-const directives = {
-  lazyLoad
-};
+// const directives = {
+//   lazyLoad
+// };
 
 </script>
 
 <template>
   <div>
     <!-- Header Component -->
-    <header-comp></header-comp>
+    <HeaderComponent></HeaderComponent>
 
-    <vue-final-modal v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
-      <ModalComp :modalData="modalData" @close="closeModal" />
-    </vue-final-modal>
+    <VueFinalModal
+      v-if="showmodal"
+      v-model="showmodal"
+      classes="modal-container"
+      class="modal-container"
+      content-class="modal-comp"
+    >
+      <template v-slot:default="{ close }">
+        <ModalComp
+          :modalData="modalData"
+          :closeFunc="() => { close(); closeModal(); }"
+        />
+      </template>
+    </VueFinalModal>
 
     <div class="blog-page-hero">
       <h1 class="eyebrow">Reboot Democracy</h1>
@@ -291,9 +310,10 @@ const directives = {
       <div class="blog-featured-row">
         <div class="first-blog-post" v-if="latestBlogPost">
           <a :href="'/blog/' + latestBlogPost.slug">
-            <div v-lazy-load>
-              <img v-if="latestBlogPost.image" class="blog-list-img" :data-src="directus.url.href+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
-            </div>
+            <!-- <div v-lazy-load> -->
+              <!-- {{console.log('Image URL:', directus.url.href + 'assets/' + blogData[0].image.id)}} -->
+              <img v-if="latestBlogPost.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blogData[0].image.filename_disk+'?width=800'">
+            <!-- </div> -->
             <h3>{{latestBlogPost.title}}</h3>
             <p>{{ latestBlogPost.excerpt }}</p>
             <p>Published on {{ formatDateOnly(new Date(latestBlogPost.date)) }}</p>
@@ -311,9 +331,10 @@ const directives = {
         <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
           <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  :key="index" v-show="index > 0 && index < 4"> 
             <a :href="'/blog/' + blog_item.slug">
-              <div v-lazy-load>
-                <img v-if="blog_item.image" class="blog-list-img" :data-src="directus.url.href+'assets/'+ blog_item.image.id">
-              </div>
+              <!-- <div v-lazy-load> -->
+                <!-- {{console.log('Image URL:', directus.url.href + 'assets/' + blog_item.image.id)}} -->
+                <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id">
+              <!-- </div> -->
               <div class="other-post-details">
                 <h3>{{blog_item.title}}</h3>
                 <p>{{ blog_item.excerpt }}</p>
@@ -346,9 +367,9 @@ const directives = {
     <div v-if="!searchResultsFlag && searchTermDisplay == ''"  class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" v-show="index >= 4 && index < 16">
         <a :href="'/blog/' + blog_item.slug">
-          <div v-lazy-load>
-            <img v-if="blog_item.image" class="blog-list-img" :data-src="directus.url.href+'assets/'+ blog_item.image.id">
-          </div>
+          
+            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id">
+          
           <div class="allposts-post-details">
             <h3>{{blog_item.title}}</h3>
             <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
@@ -380,9 +401,9 @@ const directives = {
               <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" class="tag-posts-row">
                 <div v-if="includesString(blog_item?.Tags, tag_item)">
                   <a :href="'/blog/' + blog_item.slug">
-                    <div v-lazy-load>
-                      <img v-if="blog_item.image" class="blog-list-img" :data-src="directus.url.href + 'assets/' + blog_item.image.id">
-                    </div>
+                    
+                      <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href + 'assets/' + blog_item.image.id">
+                    
                     <div class="allposts-post-details">
                       <h3>{{blog_item.title}}</h3>
                       <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
@@ -409,9 +430,9 @@ const directives = {
     <div  v-if="searchResultsFlag && searchTermDisplay != ''" class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index"> 
         <a :href="'/blog/' + blog_item.slug">
-          <div v-lazy-load>
-            <img v-if="blog_item.image" class="blog-list-img" :data-src="directus.url.href+'assets/'+ blog_item.image.id">
-          </div>
+          
+            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id">
+          
           <div class="allposts-post-details">
             <h3>{{blog_item.title}}</h3>
             <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }} </p>
@@ -431,7 +452,7 @@ const directives = {
     </div>
 
     <!-- Footer Component -->
-    <footer-comp></footer-comp>
+    <FooterComponent></FooterComponent>
   </div>
 </template>
 

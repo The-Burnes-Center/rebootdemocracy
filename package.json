@@ -14,6 +14,7 @@
     "@unhead/vue": "^1.11.13",
     "@vueuse/head": "^2.0.0",
     "axios": "^1.6.2",
+    "custom-cache-plugin": "file:./plugins/custom-cache-plugin",
     "date-fns": "^4.1.0",
     "dompurify": "^3.1.6",
     "form-data": "^4.0.0",
@@ -31,7 +32,7 @@
     "vite-ssg-sitemap": "^0.8.1",
     "vue": "^3.3.4",
     "vue-axios": "^3.4.0",
-    "vue-final-modal": "^4.4.6",
+    "vue-final-modal": "^4.5.5",
     "vue-meta": "^3.0.0-alpha.10",
     "vue-read-more-smooth": "^0.1.8",
     "vue-router": "^4.0.12",
@@ -39,8 +40,7 @@
     "vue3-carousel": "^0.2.9",
     "vue3-slick-carousel": "^1.0.6",
     "vuetify": "^3.3.6",
-    "weaviate-ts-client": "^2.2.0",
-    "custom-cache-plugin": "file:./plugins/custom-cache-plugin"
+    "weaviate-ts-client": "^2.2.0"
   },
   "devDependencies": {
     "@netlify/cache-utils": "^5.2.0",

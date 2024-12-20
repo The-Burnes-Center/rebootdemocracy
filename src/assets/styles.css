@@ -186,9 +186,9 @@ h1.title{
   gap: 10px;
 }
 
-.index_carousel{
+/* .index_carousel{
   height: 95vh;
-}
+} */
 
 
 .search-bar-section{
@@ -612,7 +612,7 @@ img.blog-list-img{
   height: 200px;
   width:100%;
   object-fit: cover;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.3s;
 }
 
@@ -1649,6 +1649,7 @@ h5.eyebrow.peach{
   height: unset !important;
   left: unset !important;
   gap: 20px !important;
+  z-index: 500;
 
 }
 
@@ -3735,6 +3736,7 @@ margin: 5px 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  
 }
 ::v-deep .modal-comp {
   display: flex;
@@ -3752,9 +3754,9 @@ margin: 5px 10px;
 
  .modal-container
  {
-  background-color: rgb(48 67 92 / 60%)!important;
+  /* background-color: rgb(48 67 92 / 60%)!important; */
   z-index: 5000;
-   
+  
  }
  .modal-bg{
   height:100vh;
@@ -3771,7 +3773,7 @@ margin: 5px 10px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 100;
+  z-index: 300;
 
   }
   .modal-section .row {

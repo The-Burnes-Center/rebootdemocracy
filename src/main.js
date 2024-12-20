@@ -1,26 +1,54 @@
-// main.ts
+// main.js
 import { ViteSSG } from 'vite-ssg';
 import App from './App.vue';
 import { setupLayouts } from 'virtual:generated-layouts';
 import generatedRoutes from 'virtual:generated-pages';
 import { createHead } from '@unhead/vue';
 
+
+// Import your custom page component
+import BlogPage from './pages/blog-page.vue';
+import AboutPage from './pages/index.vue';
+
 // Vuetify
-import { createVuetify } from 'vuetify'; // Import createVuetify
-import '@mdi/font/css/materialdesignicons.css'; // Import Material Design Icons (optional)
-import 'vuetify/styles'; // Import Vuetify styles
-import './assets/styles.css'
-// If using custom themes or additional styles, import them here
-// import './assets/styles.scss'; // If you have a global SCSS file
+import { createVuetify } from 'vuetify';
+import '@mdi/font/css/materialdesignicons.css';
+import 'vuetify/styles';
+import './assets/styles.css';
 
 const vuetify = createVuetify({
   // Add any Vuetify configuration here
 });
 
+// Set up layouts
+let routes = setupLayouts(generatedRoutes);
+
+// Modify the routes array directly
+const rootRouteIndex = routes.findIndex((route) => route.path === '/');
+
+if (rootRouteIndex !== -1) {
+  // Replace the existing route
+  routes[rootRouteIndex] = {
+    path: '/',
+    component: BlogPage,
+  };
+} else {
+  // Add the route if it doesn't exist
+  routes.push({
+    path: '/',
+    component: BlogPage,
+  });
+}
+
+routes.push({
+  path: '/about',
+  component: AboutPage,
+});
+
 export const createApp = ViteSSG(
   App,
   {
-    routes: setupLayouts(generatedRoutes),
+    routes, // Use the modified routes
   },
   (ctx) => {
     // Create the head instance
