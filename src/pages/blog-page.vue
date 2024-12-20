@@ -24,7 +24,7 @@ import { register } from 'swiper/element/bundle';
 const route = useRoute();
 
 // Directus client
-const directus = createDirectus('https://dev.thegovlab.com').with(rest());
+const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
 // State variables (replaces data())
 const searchResultsFlag = ref<number>(0);
@@ -312,7 +312,7 @@ if (import.meta.env.SSR) {
           <a :href="'/blog/' + latestBlogPost.slug">
             <!-- <div v-lazy-load> -->
               <!-- {{console.log('Image URL:', directus.url.href + 'assets/' + blogData[0].image.id)}} -->
-              <img v-if="latestBlogPost.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blogData[0].image.filename_disk+'?width=800'">
+              <img v-if="latestBlogPost.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blogData.slice().reverse()[0].image.filename_disk+'?width=800'">
             <!-- </div> -->
             <h3>{{latestBlogPost.title}}</h3>
             <p>{{ latestBlogPost.excerpt }}</p>
