@@ -1649,7 +1649,7 @@ h5.eyebrow.peach{
   height: unset !important;
   left: unset !important;
   gap: 20px !important;
-  z-index: 500;
+  z-index: 200;
 
 }
 
