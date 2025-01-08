@@ -64,16 +64,17 @@ export default defineConfig({
       const depth = route.split('/').length - 1;
       const assetPrefix = './' + '../'.repeat(depth - 1);
 
-      // Adjust asset paths in the html content
-      html = html.replace(
-        /(<script .*?src=")(.*?)(".*?>)/g,
+      html = html
+      .replace(
+        /(<script[^>]*\s+src=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
         `$1${assetPrefix}$2$3`
-      ).replace(
-        /(<link .*?href=")(.*?)(".*?>)/g,
+      )
+      .replace(
+        /(<link[^>]*\s+href=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
         `$1${assetPrefix}$2$3`
       );
-
-      return html;
+  
+    return html;
     },
   },
   build: {
