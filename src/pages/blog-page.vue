@@ -6,18 +6,16 @@ import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
 import _ from "lodash";
-// In your script section
 
 import { useHead } from '@vueuse/head'
-// import { lazyLoad } from '../directives/lazyLoad';
+import { lazyLoad } from '../directives/lazyLoad';
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import ModalComp from "../components/modal.vue";
 import { VueFinalModal } from 'vue-final-modal';
-// In your script section
-import 'vue-final-modal/style.css';
 
+import 'vue-final-modal/style.css';
 
 import { register } from 'swiper/element/bundle';
 
@@ -205,7 +203,7 @@ function fillMeta() {
 2. Better outcomes
 3. Increased trust in institutions
 4. And in one another
-As researchers we want to understand how best to “do democracy” in practice.
+As researchers we want to understand how best to "do democracy" in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
       { property: 'og:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b" },
@@ -216,7 +214,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 2. Better outcomes
 3. Increased trust in institutions
 4. And in one another
-As researchers we want to understand how best to “do democracy” in practice.
+As researchers we want to understand how best to "do democracy" in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
       { property: 'twitter:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b" },
@@ -248,11 +246,10 @@ if (import.meta.env.SSR) {
   });
 }
 
-// Register directives locally if needed
-// Note: If the directive is global, remove this registration or adapt accordingly.
-// const directives = {
-//   lazyLoad
-// };
+// Register directives locally
+const directives = {
+  lazyLoad
+};
 
 </script>
 
@@ -310,10 +307,9 @@ if (import.meta.env.SSR) {
       <div class="blog-featured-row">
         <div class="first-blog-post" v-if="latestBlogPost">
           <a :href="'/blog/' + latestBlogPost.slug">
-            <!-- <div v-lazy-load> -->
-              <!-- {{console.log('Image URL:', directus.url.href + 'assets/' + blogData[0].image.id)}} -->
+            <div v-lazy-load>
               <img v-if="latestBlogPost.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blogData.slice().reverse()[0].image.filename_disk+'?width=800'">
-            <!-- </div> -->
+            </div>
             <h3>{{latestBlogPost.title}}</h3>
             <p>{{ latestBlogPost.excerpt }}</p>
             <p>Published on {{ formatDateOnly(new Date(latestBlogPost.date)) }}</p>
@@ -331,10 +327,9 @@ if (import.meta.env.SSR) {
         <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
           <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  :key="index" v-show="index > 0 && index < 4"> 
             <a :href="'/blog/' + blog_item.slug">
-              <!-- <div v-lazy-load> -->
-                <!-- {{console.log('Image URL:', directus.url.href + 'assets/' + blog_item.image.id)}} -->
-                <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id">
-              <!-- </div> -->
+              <div v-lazy-load>
+                <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'">
+              </div>
               <div class="other-post-details">
                 <h3>{{blog_item.title}}</h3>
                 <p>{{ blog_item.excerpt }}</p>
@@ -367,9 +362,9 @@ if (import.meta.env.SSR) {
     <div v-if="!searchResultsFlag && searchTermDisplay == ''"  class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" v-show="index >= 4 && index < 16">
         <a :href="'/blog/' + blog_item.slug">
-          
-            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id">
-          
+          <div v-lazy-load>
+            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'">
+          </div>
           <div class="allposts-post-details">
             <h3>{{blog_item.title}}</h3>
             <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
@@ -401,9 +396,9 @@ if (import.meta.env.SSR) {
               <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" class="tag-posts-row">
                 <div v-if="includesString(blog_item?.Tags, tag_item)">
                   <a :href="'/blog/' + blog_item.slug">
-                    
-                      <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href + 'assets/' + blog_item.image.id">
-                    
+                    <div v-lazy-load>
+                      <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href + 'assets/' + blog_item.image.id+'?width=300'">
+                    </div>
                     <div class="allposts-post-details">
                       <h3>{{blog_item.title}}</h3>
                       <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
@@ -427,15 +422,15 @@ if (import.meta.env.SSR) {
     </div>
 
     <!-- Search section -->
-    <div  v-if="searchResultsFlag && searchTermDisplay != ''" class="allposts-section">
+    <div v-if="searchResultsFlag && searchTermDisplay != ''" class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index"> 
         <a :href="'/blog/' + blog_item.slug">
-          
-            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id">
-          
+          <div v-lazy-load>
+            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'">
+          </div>
           <div class="allposts-post-details">
             <h3>{{blog_item.title}}</h3>
-            <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }} </p>
+            <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
             <div class="author-list">
               <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
               <div v-for="(author,i) in blog_item.authors" :key="i" class="author-item">
