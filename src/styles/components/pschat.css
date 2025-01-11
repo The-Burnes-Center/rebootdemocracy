@@ -1,7 +1,7 @@
 .chatbot-app-closed {
     z-index: 200;
-    height: 65px;
-    width: 65px;
+    height: 65px!important;
+    width: 65px!important;
   }
   
   .chat-window {
