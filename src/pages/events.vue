@@ -32,7 +32,7 @@ const directus = createDirectus('https://content.thegovlab.com').with(rest());
 /**
  * Access the current route
  */
-const route = useRoute();
+ const route = typeof window !== 'undefined' ? useRoute() : ref(null);
 
 /**
  * Reactive state (converted from data())
@@ -50,7 +50,8 @@ const eventFullDescription = ref<string>("");
 const seriesData = ref<any[]>([]);
 const pageslug = ref<any>(route.query);
 const alleventsData = ref<any[]>([]);
-const path = ref<string>(route.fullPath);
+const path = ref<string>(typeof window !== 'undefined' ? route.value?.fullPath : '');
+
 
 /**
  * Lifecycle: onMounted
@@ -76,7 +77,7 @@ watch(
 );
 
 watch(
-  () => route.fullPath,
+  () => typeof window !== 'undefined' ? route.value?.fullPath : '',
   () => {
     // If you had something to do on route change, put it here
   },

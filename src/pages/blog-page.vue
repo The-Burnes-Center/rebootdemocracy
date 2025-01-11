@@ -1,30 +1,30 @@
 <script lang="ts" setup>
-import { ref, watch, computed, onMounted, onServerPrefetch, watchEffect } from 'vue';
+import { ref, watch, computed, onMounted, onServerPrefetch } from 'vue';
 import { useRoute } from 'vue-router';
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
 import _ from "lodash";
-
 import { useHead } from '@vueuse/head'
-import { lazyLoad } from '../directives/lazyLoad';
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import ModalComp from "../components/modal.vue";
-import { VueFinalModal } from 'vue-final-modal';
-
-import 'vue-final-modal/style.css';
+import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
 
 import { register } from 'swiper/element/bundle';
+import 'vue-final-modal/style.css';
 
-const route = useRoute();
+// Check if we're on client-side
+const isClient = typeof window !== 'undefined';
+
+const route = isClient ? useRoute() : ref(null);
 
 // Directus client
 const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
-// State variables (replaces data())
+// State variables
 const searchResultsFlag = ref<number>(0);
 const searchResults = ref<any[]>([]);
 const searchTerm = ref<string>("");
@@ -45,7 +45,7 @@ const modalData = ref<any[]>([]);
 const workshopData = ref<any[]>([]);
 const playpause = ref<boolean>(true);
 const showmodal = ref<boolean>(false);
-const path = ref<string>(route.fullPath);
+const path = ref<string>(isClient ? route.value?.fullPath : '');
 const slideautoplay = ref<number>(1);
 const slidetransition = ref<number>(7000);
 const slider = ref<any>('');
@@ -67,7 +67,7 @@ const filteredTagDataWithoutNews = computed(() => {
   return filteredTagData.value.filter(tag => tag !== "News that caught our eye");
 });
 
-// Functions (replaces methods)
+// Functions
 function includesString(array: string[] | null, stringVal: string) {
   if (!array) return false;
   const lowerCasePartialSentence = stringVal.toLowerCase();
@@ -222,11 +222,16 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     ],
   })
 }
-
 // Watchers
-watch(() => route.fullPath, () => {
-  loadModal();
-}, { immediate: true });
+watch(
+  () => isClient ? route.value?.fullPath : '',
+  () => {
+    loadModal();
+  },
+  { immediate: true }
+);
+
+const isSSR = computed(() => import.meta.env.SSR);
 
 
 // Lifecycle hooks
@@ -241,21 +246,13 @@ if (import.meta.env.SSR) {
     await fetchBlog();
     resetSearch();
     loadModal();
-
     showmodal.value = true;
   });
 }
-
-// Register directives locally
-const directives = {
-  lazyLoad
-};
-
 </script>
 
 <template>
   <div>
-    <!-- Header Component -->
     <HeaderComponent></HeaderComponent>
 
     <VueFinalModal
@@ -304,12 +301,17 @@ const directives = {
 
     <!-- Featured Blog Section -->
     <div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
-      <div class="blog-featured-row">
-        <div class="first-blog-post" v-if="latestBlogPost">
-          <a :href="'/blog/' + latestBlogPost.slug">
-            <div v-lazy-load>
-              <img v-if="latestBlogPost.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blogData.slice().reverse()[0].image.filename_disk+'?width=800'">
-            </div>
+    <div class="blog-featured-row">
+      <div class="first-blog-post" v-if="latestBlogPost">
+        <a :href="'/blog/' + latestBlogPost.slug">
+          <!-- Notice the change here -->
+          <div v-if="!isSSR && latestBlogPost.image">
+            <img 
+              class="blog-list-img" 
+              :src="directus.url.href+'assets/'+ blogData.slice().reverse()[0].image.filename_disk+'?width=800'"
+              loading="lazy"
+            >
+          </div>
             <h3>{{latestBlogPost.title}}</h3>
             <p>{{ latestBlogPost.excerpt }}</p>
             <p>Published on {{ formatDateOnly(new Date(latestBlogPost.date)) }}</p>
@@ -324,12 +326,19 @@ const directives = {
             </div>
           </a>  
         </div>
-        <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
-          <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  :key="index" v-show="index > 0 && index < 4"> 
-            <a :href="'/blog/' + blog_item.slug">
-              <div v-lazy-load>
-                <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'">
-              </div>
+        
+        <!-- Other blog posts -->
+        <div class="other-blog-posts" v-if="!searchResultsFlag || searchTerm == ''">
+        <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  :key="index" v-show="index > 0 && index < 4"> 
+          <a :href="'/blog/' + blog_item.slug">
+            <!-- Notice the change here -->
+            <div v-if="!isSSR && blog_item.image">
+              <img 
+                class="blog-list-img" 
+                :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
+                loading="lazy"
+              >
+            </div>
               <div class="other-post-details">
                 <h3>{{blog_item.title}}</h3>
                 <p>{{ blog_item.excerpt }}</p>
@@ -350,20 +359,39 @@ const directives = {
       </div>
     </div>
 
+    <!-- Continue with the rest of your template, replacing v-lazy-load with v-if="!import.meta.env.SSR" -->
+    <!-- For each image section, use the pattern: -->
+    <!--
+    <div v-if="!import.meta.env.SSR && item.image">
+      <img 
+        class="blog-list-img" 
+        :src="directus.url.href+'assets/'+ item.image.id+'?width=300'"
+        loading="lazy"
+      >
+    </div>
+    -->
+
     <div class="read-more-post" v-if="!searchResultsFlag && searchTermDisplay == ''">
       <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
     </div>
 
-    <!-- Latest Posts -->
+
     <div class="blog-section-header" v-if="!searchResultsFlag && searchTermDisplay == ''">
-      <h2>Latest Posts </h2>
+      <h2>Latest Posts</h2>
     </div>
 
-    <div v-if="!searchResultsFlag && searchTermDisplay == ''"  class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" v-show="index >= 4 && index < 16">
+    <div v-if="!searchResultsFlag && searchTermDisplay == ''" class="allposts-section">
+      <div class="allposts-post-row" 
+           v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
+           :key="index" 
+           v-show="index >= 4 && index < 16">
         <a :href="'/blog/' + blog_item.slug">
-          <div v-lazy-load>
-            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'">
+          <div v-if="!isSSR && blog_item.image">
+            <img 
+              class="blog-list-img" 
+              :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
+              loading="lazy"
+            >
           </div>
           <div class="allposts-post-details">
             <h3>{{blog_item.title}}</h3>
@@ -384,7 +412,10 @@ const directives = {
     </div>
 
     <!-- Filtered Posts Section -->
-    <h2 v-if="searchResultsFlag && searchTermDisplay != ''" class="search-term">Searching for <i>{{searchTermDisplay}}</i></h2>
+    <h2 v-if="searchResultsFlag && searchTermDisplay != ''" class="search-term">
+      Searching for <i>{{searchTermDisplay}}</i>
+    </h2>
+    
     <div v-if="searchResultsFlag || searchTerm == ''">
       <div v-if="!searchResultsFlag && searchTermDisplay == ''">
         <div class="allposts-section">
@@ -393,11 +424,17 @@ const directives = {
               <h2>{{ tag_item }}</h2>
             </div>
             <div class="tag-posts-row-container">
-              <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" class="tag-posts-row">
+              <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
+                   :key="index" 
+                   class="tag-posts-row">
                 <div v-if="includesString(blog_item?.Tags, tag_item)">
                   <a :href="'/blog/' + blog_item.slug">
-                    <div v-lazy-load>
-                      <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href + 'assets/' + blog_item.image.id+'?width=300'">
+                    <div v-if="!isSSR && blog_item.image">
+                      <img 
+                        class="blog-list-img" 
+                        :src="directus.url.href + 'assets/' + blog_item.image.id+'?width=300'"
+                        loading="lazy"
+                      >
                     </div>
                     <div class="allposts-post-details">
                       <h3>{{blog_item.title}}</h3>
@@ -421,12 +458,18 @@ const directives = {
       </div>
     </div>
 
-    <!-- Search section -->
+    <!-- Search Results Section -->
     <div v-if="searchResultsFlag && searchTermDisplay != ''" class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index"> 
+      <div class="allposts-post-row" 
+           v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
+           :key="index">
         <a :href="'/blog/' + blog_item.slug">
-          <div v-lazy-load>
-            <img v-if="blog_item.image" class="blog-list-img" :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'">
+          <div v-if="!isSSR && blog_item.image">
+            <img 
+              class="blog-list-img" 
+              :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
+              loading="lazy"
+            >
           </div>
           <div class="allposts-post-details">
             <h3>{{blog_item.title}}</h3>
@@ -446,11 +489,16 @@ const directives = {
       <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
     </div>
 
-    <!-- Footer Component -->
+    <!-- Rest of your template sections... -->
     <FooterComponent></FooterComponent>
   </div>
 </template>
 
 <style scoped>
-/* Your styles here */
+/* Keep your existing styles */
+.image-placeholder {
+  background-color: #f0f0f0;
+  width: 100%;
+  height: 200px;
+}
 </style>

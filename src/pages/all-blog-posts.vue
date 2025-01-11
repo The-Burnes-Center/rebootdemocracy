@@ -33,7 +33,7 @@ const directus = createDirectus('https://content.thegovlab.com').with(rest());
 /**
  * Route
  */
-const route = useRoute();
+ const route = typeof window !== 'undefined' ? useRoute() : ref(null);
 
 /**
  * Reactive state (converted from data() in Options API)
@@ -57,7 +57,7 @@ const modalData = ref<any>([]);
 const workshopData = ref<any[]>([]);
 const playpause = ref<boolean>(true);
 const showmodal = ref<boolean>(false);
-const path = ref<string>(route.fullPath);
+ const path = ref<string>(typeof window !== 'undefined' ? route.value?.fullPath : '');
 const slideautoplay = ref<number>(1);
 const slidetransition = ref<number>(7000);
 const slider = ref<any>('');
@@ -69,7 +69,7 @@ const ini = ref<boolean>(true);
  * (replaces watch: { '$route': { handler() { ... }, deep: true, immediate: true } })
  */
 watch(
-  () => route.fullPath,
+  () => typeof window !== 'undefined' ? route.value?.fullPath : '',
   () => {
     loadModal();
   },

@@ -189,6 +189,7 @@ if (import.meta.env.SSR) {
 
   <!-- Footer Component -->
   <FooterComponent></FooterComponent>
+  
   <!-- Wrap content in a Suspense boundary in a parent component or layout -->
   
 
