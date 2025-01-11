@@ -44,7 +44,7 @@ async function fetchPost(slugValue: string) {
         slug: { _icontains: slugValue } // Use case-insensitive equality
       },
       fields: ['*.*.*'],
-      limit: 1,
+      limit: -1,
     })
   );
   

@@ -39,7 +39,7 @@ export default defineConfig({
         return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
       } else {
         // Fetch all slugs and normalize them to lowercase
-        const directus = createDirectus('https://dev.thegovlab.com').with(rest());
+        const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
         try {
           const response = await directus.request(
