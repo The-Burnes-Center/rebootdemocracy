@@ -213,22 +213,28 @@ async function fetchMoreResources() {
   }
 }
 
-async function loadModal() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_modal', {
-        meta: 'total_count',
-        limit: -1,
-        fields: ['*.*'],
-      })
-    );
-    modalData.value = response?.[0] || {};
-    const storageItem = localStorage.getItem("Reboot Democracy");
-    showmodal.value = modalData.value.status === 'published' &&
-      (modalData.value.visibility === 'always' || (modalData.value.visibility === 'once' && storageItem !== 'off'));
-  } catch (error) {
-    console.error('Error loading modal data:', error);
-  }
+function loadModal(): void {
+  directus.request(
+    readItems('reboot_democracy_modal', {
+      meta: 'total_count',
+      limit: -1,
+      fields: ['*.*']
+    })
+  ).then((item: any) => {
+    modalData.value = item;
+    
+    // Only check localStorage on client-side
+    if (typeof window !== 'undefined') {
+      const campaignName = modalData.value?.campaigns?.campaign_name || "ModalCampaign";
+      const alreadyOff = localStorage.getItem(campaignName) === 'off';
+      showmodal.value = (modalData.value?.status === 'published') && !alreadyOff;
+    } else {
+      // Default state for server-side
+      showmodal.value = modalData.value?.status === 'published';
+    }
+  }).catch((err) => {
+    console.error('Error loading modal:', err);
+  });
 }
 
 function closeModal() {
@@ -278,6 +284,7 @@ async function fetchAllData() {
     loadModal(),
   ]);
 }
+
 
 // Lifecycle hooks
 if (import.meta.env.SSR) {

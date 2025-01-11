@@ -11,6 +11,8 @@ import isFuture from 'date-fns/isFuture';
 import _ from "lodash";
 import { register } from 'swiper/element/bundle';
 import { useHead } from '@vueuse/head';
+import ModalComp from "../components/modal.vue";
+import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
 
 // /**
 //  * Components (imported if needed in this file)
@@ -205,22 +207,22 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 function loadModal(): void {
   directus.request(
     readItems('innovate_us_modal', {
-      meta: 'total_count',
+      meta: 'total_count', 
       limit: -1,
       fields: ['*.*']
     })
   ).then((item: any) => {
-    // 'item.data' will be an array if multiple records exist
-    // Adjust logic as needed if only one record is expected
     modalData.value = Array.isArray(item.data) ? item.data[0] : item.data;
 
-    // If there's a "campaigns" object with "campaign_name" or similar
-    const campaignName = modalData.value?.campaigns?.campaign_name || "ModalCampaign";
-    const alreadyOff = (typeof window !== 'undefined')
-      ? localStorage.getItem(campaignName) === 'off'
-      : false;
-
-    showmodal.value = (modalData.value?.status === 'published') && !alreadyOff;
+    // Only check localStorage on client-side
+    if (typeof window !== 'undefined') {
+      const campaignName = modalData.value?.campaigns?.campaign_name || "ModalCampaign";
+      const alreadyOff = localStorage.getItem(campaignName) === 'off';
+      showmodal.value = (modalData.value?.status === 'published') && !alreadyOff;
+    } else {
+      // Default state for server-side
+      showmodal.value = modalData.value?.status === 'published';
+    }
   }).catch((err: any) => {
     console.error('Error loading modal:', err);
   });
