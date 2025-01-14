@@ -344,7 +344,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                 search
             </span>
         </div>
-        <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
+        <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
   </div>
 
 <div v-if="searchloader" class="loader-blog"></div>
