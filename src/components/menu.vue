@@ -42,7 +42,7 @@
             <a href="/more-resources">More Resources</a>
           </div>
         </div>
-        <a href="/signup" class="btn btn-small btn-primary">Sign up</a>
+        <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
       </div>
     </div>
   </div>
