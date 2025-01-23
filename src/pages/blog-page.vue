@@ -122,21 +122,21 @@ export default {
 
         // Start all searches in parallel
        
-        const psChatPromise = this.performPsChatSearch(searchTermClean);
+        // const psChatPromise = this.performPsChatSearch(searchTermClean);
          const directusPromise = this.performDirectusSearch(searchTermClean);
         const weaviatePromise = this.performWeaviateSearch(searchTermClean);
         
         
 
         // Handle PSChat search result as it comes in
-        psChatPromise
-          .then((content) => {
-            this.pschatContent = content;
-          })
-          .catch((error) => {
-            console.error('Error during PSChat search:', error);
-            this.pschatContent = 'Sorry, an error occurred during PSChat search.';
-          });
+        // psChatPromise
+        //   .then((content) => {
+        //     this.pschatContent = content;
+        //   })
+        //   .catch((error) => {
+        //     console.error('Error during PSChat search:', error);
+        //     this.pschatContent = 'Sorry, an error occurred during PSChat search.';
+        //   });
 
         // Handle Directus and Weaviate search results
         try {
@@ -170,6 +170,7 @@ export default {
         body: JSON.stringify({ message: searchTermClean }),
         headers: { 'Content-Type': 'application/json' },
       });
+
 
       if (!response.ok) throw new Error('Network response was not ok');
       const reader = response.body.getReader();
@@ -548,13 +549,13 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             </span>
         </div>
         <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
-        <div v-if="pschatLoading || pschatContent" class="pschat-result-container">
-      <div v-if="pschatLoading" class="pschat-loader ">
-        <!-- Your loader animation or text -->
+        <!-- <div v-if="pschatLoading || pschatContent" class="pschat-result-container"> -->
+      <!-- <div v-if="pschatLoading" class="pschat-loader ">
+        
         Retrieving context ... 
-      </div>
-      <div v-else v-html="renderMarkdown(pschatContent)"></div>
-    </div>
+      </div> -->
+      <!-- <div v-else v-html="renderMarkdown(pschatContent)"></div> -->
+    <!-- </div> -->
       </div>
 
 <div v-if="searchloader" class="loader-blog"></div>
