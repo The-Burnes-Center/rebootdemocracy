@@ -83,7 +83,7 @@ export default {
           self.postData.length>0 ? this.fillMeta() :  this.fillMetaDefault()
       } catch (error) {
         // Handle the error
-      console.error("An error occurred while fetching the blog data:", error);
+      console.error("An error occurred while fetching the blog data: ", error);
       }
     },
     loadModal() {
