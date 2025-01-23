@@ -91,14 +91,16 @@ export default {
   
     this.loadModal(); 
     // this.blogData = this.directus.items("reboot_democracy_blog");
-    this.fetchBlog();
-    this.resetSearch();
+   
+   
     // this.debounceSearch = _.debounce(this.searchBlog, 500);
     
   },
  mounted()
 
   { 
+    this.fetchBlog();
+    
   this.fillMeta();
    register();
   },
@@ -471,7 +473,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       })
       this.filteredTagData.unshift(this.filteredTagData.splice(this.filteredTagData.indexOf("News that caught our eye"), 1)[0]);
 
-      
+      this.resetSearch();
       // self.testimonialsLength = self.blogData.testimonials.length;
       });
     },
