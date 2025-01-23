@@ -183,7 +183,7 @@ export default {
         if (done) break;
 
         const chunk = decoder.decode(value);
-        console.log("chunk",chunk);
+        console.log(chunk);
         const temp = JSON.parse(chunk);
 
         // Update the content as it streams in
