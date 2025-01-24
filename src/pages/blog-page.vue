@@ -5,6 +5,8 @@ import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
 import _ from "lodash";
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import ModalComp from "../components/modal.vue";
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
 import { lazyLoad } from '../directives/lazyLoad';
@@ -57,6 +59,8 @@ export default {
       slider:'',
       wsloaded:false,
       ini:true,
+      pschatContent: '',
+      pschatLoading: false,
     }
   },
   watch :{
@@ -87,64 +91,229 @@ export default {
   
     this.loadModal(); 
     // this.blogData = this.directus.items("reboot_democracy_blog");
-    this.fetchBlog();
-    this.resetSearch();
+   
+   
     // this.debounceSearch = _.debounce(this.searchBlog, 500);
     
   },
  mounted()
 
   { 
+    this.fetchBlog();
+    
   this.fillMeta();
    register();
   },
   
   methods: {
-    searchBlog() {
-      self = this;
+     renderMarkdown (text) {
+        const rawHtml = marked(text);
+        return DOMPurify.sanitize(rawHtml);
+      },
+      async searchBlog() {
+      const self = this;
       this.searchloader = true;
-      let searchTArray = this.searchTerm.split(" ");
-      searchTArray = searchTArray.filter(item => item); // filter out empty entries
-      const searchObj = [];
-        searchTArray.map((a) => {
-        searchObj.push({ excerpt: { _contains: a }  });
-        searchObj.push({ title: { _contains: a } } );
-        searchObj.push({ content: { _contains: a }  });
-        searchObj.push({ authors: { team_id: { First_Name: { _contains: a } } } });
-        searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
-        searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
-      });
-      if (searchTArray.length > 0)
-      {
+
+      if (this.searchTerm.trim().length > 0) {
         this.searchResultsFlag = 1;
-        // console.log(this.searchResultsFlag);
-      }
-      else
+        const searchTermClean = this.searchTerm.trim();
+
+        // Clear previous search results
+        this.pschatContent = '';
+        this.blogDataSearch = [];
+
+        // Start all searches in parallel
+       
+        // const psChatPromise = this.performPsChatSearch(searchTermClean);
+         const directusPromise = this.performDirectusSearch(searchTermClean);
+        const weaviatePromise = this.performWeaviateSearch(searchTermClean);
+        
+        
+
+        // Handle PSChat search result as it comes in
+        // psChatPromise
+        //   .then((content) => {
+        //     this.pschatContent = content;
+        //   })
+        //   .catch((error) => {
+        //     console.error('Error during PSChat search:', error);
+        //     this.pschatContent = 'Sorry, an error occurred during PSChat search.';
+        //   });
+
+        // Handle Directus and Weaviate search results
+        try {
+          const [directusData, weaviateSlugs] = await Promise.all([
+            directusPromise,
+            weaviatePromise,
+          ]);
+
+          // Process the search results and update blogDataSearch
+          await this.processSearchResults(directusData, weaviateSlugs);
+        } catch (error) {
+          console.error('Error during searches:', error);
+          self.blogDataSearch = [];
+        } finally {
+          self.searchloader = false;
+        }
+      } else {
         this.searchResultsFlag = 0;
-      this.directus
-      .items('reboot_democracy_blog')
-      .readByQuery({
-          limit:-1,
+        this.blogDataSearch = this.blogData; // Populate with all blog posts
+        this.searchloader = false;
+      }
+    },
+
+    // New helper method to handle PSChat search
+    async performPsChatSearch(searchTermClean) {
+    let pschatContent = '';
+    this.pschatLoading = true; // Start loading
+    try {
+      const response = await fetch('/.netlify/functions/blog_content_search', {
+        method: 'POST',
+        body: JSON.stringify({ message: searchTermClean }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+
+      if (!response.ok) throw new Error('Network response was not ok');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        console.log(chunk);
+        const temp = JSON.parse(chunk);
+
+        // Update the content as it streams in
+        pschatContent = temp.reply;
+      }
+
+      return pschatContent;
+    } catch (error) {
+      throw error;
+    } finally {
+      this.pschatLoading = false; // End loading
+    }
+  },
+
+    // New helper method to handle Directus search
+    async performDirectusSearch(searchTermClean) {
+      try {
+        const directusResult = await this.directus.items('reboot_democracy_blog').readByQuery({
+          limit: -1,
           filter: {
-            _and: [ { date: { _lte: "$NOW(-5 hours)" }},
-            {
-               status: {
-              _eq: "published",
-            },
-            }
+            _and: [
+              { date: { _lte: '$NOW(-5 hours)' } },
+              { status: { _eq: 'published' } },
+              {
+                _or: [
+                  { title: { _contains: searchTermClean } },
+                  { excerpt: { _contains: searchTermClean } },
+                  { content: { _contains: searchTermClean } },
+                  {
+                    authors: {
+                      _some: {
+                        team_id: {
+                          First_Name: { _contains: searchTermClean },
+                        },
+                      },
+                    },
+                  },
+                  {
+                    authors: {
+                      _some: {
+                        team_id: {
+                          Last_Name: { _contains: searchTermClean },
+                        },
+                      },
+                    },
+                  },
+                  {
+                    authors: {
+                      _some: {
+                        team_id: {
+                          Title: { _contains: searchTermClean },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
             ],
-            _or: searchObj,
           },
-          sort:["date"],
-          fields: ['*.*',
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*'],
-        })
-        .then((b) => {
-          this.blogDataSearch = b.data;
-          console.log(this.blogDataSearch, 'searchResults');
-          this.searchloader = false;
+          sort: ['date'],
+          fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*'],
         });
+        return directusResult.data || [];
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    // New helper method to handle Weaviate search
+    async performWeaviateSearch(searchTermClean) {
+      try {
+        const weaviateResponse = await fetch('/.netlify/functions/search_weaviate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: searchTermClean }),
+        });
+        if (!weaviateResponse.ok) throw new Error('Weaviate search failed');
+        const weaviateData = await weaviateResponse.json();
+        return weaviateData.slugs || [];
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    // New helper method to process search results
+    async processSearchResults(directusData, weaviateSlugs) {
+      const self = this;
+      const directusSlugMap = new Map(directusData.map((post) => [post.slug, post]));
+      let overlappingPosts = [];
+      let directusOnlyPosts = [];
+
+      // Fetch posts from Directus for slugs in Weaviate that were not in Directus results
+      const weaviateSlugsNotInDirectus = weaviateSlugs.filter((slug) => !directusSlugMap.has(slug));
+      let weaviateOnlyPosts = [];
+
+      if (weaviateSlugsNotInDirectus.length > 0) {
+        const slugFilters = weaviateSlugsNotInDirectus.map((slug) => ({ slug: { _eq: slug } }));
+        const weaviateOnlyResult = await self.directus.items('reboot_democracy_blog').readByQuery({
+          limit: -1,
+          filter: {
+            _and: [{ date: { _lte: '$NOW(-5 hours)' } }, { status: { _eq: 'published' } }],
+            _or: slugFilters,
+          },
+          fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*'],
+        });
+        weaviateOnlyPosts = weaviateOnlyResult.data || [];
+      }
+
+      // Separate overlapping posts and Directus-only posts
+      const overlappingSlugsSet = new Set(
+        weaviateSlugs.filter((slug) => directusSlugMap.has(slug))
+      );
+
+      // Overlapping posts: get from directusSlugMap, order according to Weaviate results
+      overlappingPosts = weaviateSlugs
+        .filter((slug) => overlappingSlugsSet.has(slug))
+        .map((slug) => directusSlugMap.get(slug));
+
+      // Directus-only posts: posts in directusData not in overlappingSlugsSet
+      directusOnlyPosts = directusData.filter((post) => !overlappingSlugsSet.has(post.slug));
+
+      // Weaviate-only posts: order according to Weaviate results
+      const weaviateOnlySlugMap = new Map(weaviateOnlyPosts.map((post) => [post.slug, post]));
+      const weaviateOnlyOrdered = weaviateSlugsNotInDirectus
+        .map((slug) => weaviateOnlySlugMap.get(slug))
+        .filter(Boolean);
+
+      // Construct blogDataSearch
+      // Directus search results first, overlapping posts ordered by Weaviate
+      self.blogDataSearch = [...directusOnlyPosts, ...overlappingPosts, ...weaviateOnlyOrdered];
     },
     includesString(array, string) {
     if (!array) return false;
@@ -156,6 +325,7 @@ export default {
       this.searchactive = false;
       this.searchResultsFlag = 0;
       this.searchTermDisplay = this.searchTerm;
+      this.pschatContent = '';
       this.searchBlog();
     },
     fillMeta()
@@ -303,7 +473,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       })
       this.filteredTagData.unshift(this.filteredTagData.splice(this.filteredTagData.indexOf("News that caught our eye"), 1)[0]);
 
-      
+      this.resetSearch();
       // self.testimonialsLength = self.blogData.testimonials.length;
       });
     },
@@ -311,7 +481,43 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   }
 }
 </script>
+<style>
+.pschat-result-container {
+  max-height: 200px; /* Adjust the max height as needed */
+  min-height: 150px;
+  overflow-y: auto;
+  margin: 20px 0; /* Optional: add margin for spacing */
+  padding: 15px; /* Optional: add padding inside the container */
+  border: 1px solid #ccc; /* Optional: add a border */
+  background-color: #fff;/* Optional: background color */
+  color:#000;
+}
+.pschat-loader {
+  /* Center the loader text or animation */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2em;
+  color: #555;
+}
 
+/* You can add a spinner animation if you prefer */
+.pschat-loader::after {
+  content: '';
+  margin-left: 10px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #1d72b8;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+</style>
 <template>
 
     <!-- Header Component -->
@@ -344,8 +550,16 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                 search
             </span>
         </div>
-        <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
-  </div>
+         <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
+        <!-- <div v-if="pschatLoading || pschatContent" class="pschat-result-container"> -->
+      <!-- <div v-if="pschatLoading" class="pschat-loader ">
+        
+        Retrieving context ... 
+      </div> -->
+      <!-- <div v-else v-html="renderMarkdown(pschatContent)"></div> -->
+    <!-- </div> -->
+      </div>
+
 
 <div v-if="searchloader" class="loader-blog"></div>
 
@@ -484,15 +698,15 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <!-- Search section -->
     <div  v-if="searchResultsFlag   && searchTermDisplay != ''" class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()"> 
+      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch"> 
           <!-- <div v-if="blog_item?.Tags === null"> -->
        <a :href="'/blog/' + blog_item.slug">
                  <div v-lazy-load>
          <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
           </div>
         <div class="allposts-post-details">
-              <h3>{{blog_item.title}}</h3>
-               <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+          <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+          <h3>{{blog_item.title}}</h3>
               <div class="author-list">
                    <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
                     <div v-for="(author,i) in blog_item.authors">
