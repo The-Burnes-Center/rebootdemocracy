@@ -406,6 +406,44 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 }
 </script>
 
+<style>
+.pschat-result-container {
+  max-height: 200px; /* Adjust the max height as needed */
+  min-height: 150px;
+  overflow-y: auto;
+  margin: 20px 0; /* Optional: add margin for spacing */
+  padding: 15px; /* Optional: add padding inside the container */
+  border: 1px solid #ccc; /* Optional: add a border */
+  background-color: #fff;/* Optional: background color */
+  color:#000;
+}
+.pschat-loader {
+  /* Center the loader text or animation */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2em;
+  color: #555;
+}
+
+/* You can add a spinner animation if you prefer */
+.pschat-loader::after {
+  content: '';
+  margin-left: 10px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #1d72b8;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+</style>
+
 <template>
     <!-- Header Component -->
     <header-comp></header-comp>
@@ -442,7 +480,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <a href="/signup" class="btn btn-small btn-primary">Sign up</a>
   </div>
 
-  <div v-if="searchloader" class="loader"></div>
+  <div v-if="searchloader" class="loader-blog"></div>
 
   <div class="blog-section-header">
     <h2 v-if="searchResultsFlag && searchTerm !== ''">
