@@ -550,7 +550,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                 search
             </span>
         </div>
-        <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
+         <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
         <!-- <div v-if="pschatLoading || pschatContent" class="pschat-result-container"> -->
       <!-- <div v-if="pschatLoading" class="pschat-loader ">
         
@@ -559,6 +559,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <!-- <div v-else v-html="renderMarkdown(pschatContent)"></div> -->
     <!-- </div> -->
       </div>
+
 
 <div v-if="searchloader" class="loader-blog"></div>
 
