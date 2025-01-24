@@ -549,29 +549,31 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <div class="search-bar-section"> 
              
         <input
-       class="search-bar"
-       ref="searchInputRef"
-       v-model="searchTerm"
-       @keyup.enter="handleSearch"
-       type="text"
-  role="search"
-  aria-label="Search"
-  placeholder="Search"
-     />
+    class="search-bar"
+    ref="searchInputRef"
+    v-model="searchTerm"
+    @keyup.enter="handleSearch"
+    type="text"
+    role="search"
+    aria-label="Search"
+    placeholder="Search"
+  />
             
-            <span type="submit"
-            @click="searchTerm = '';
-            resetSearch();"
-            class="search-bar-cancel-btn material-symbols-outlined">
-                cancel
-            </span>
+  <span
+    type="button"
+    @click="searchTerm = ''; resetSearch();"
+    class="search-bar-cancel-btn material-symbols-outlined"
+  >
+    cancel
+  </span>
 
-          <span type="submit"
-            @click="
-            resetSearch()"
-            class="search-bar-btn material-symbols-outlined">
-                search
-            </span>
+  <span
+    type="button"
+    @click="resetSearch()"
+    class="search-bar-btn material-symbols-outlined"
+  >
+    search
+  </span>
         </div>
          <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
         <!-- <div v-if="pschatLoading || pschatContent" class="pschat-result-container"> -->
