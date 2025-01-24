@@ -110,6 +110,24 @@ export default {
         const rawHtml = marked(text);
         return DOMPurify.sanitize(rawHtml);
       },
+      handleSearch() {
+         // Run your existing resetSearch or blog search logic
+         this.resetSearch();  
+         
+         // Force the keyboard to close by removing focus from the input
+         if (this.$refs.searchInputRef) {
+           this.$refs.searchInputRef.blur();
+         }
+
+         // (Optional) If search results appear off-screen, scroll them into view
+         // 
+         // this.$nextTick(() => {
+         //   const resultsContainer = document.getElementById('search-results');
+         //   if (resultsContainer) {
+         //     resultsContainer.scrollIntoView({ behavior: 'smooth' });
+         //   }
+         // });
+       },
       async searchBlog() {
       const self = this;
       this.searchloader = true;
@@ -528,13 +546,16 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <h1 class="eyebrow">Reboot Democracy</h1>
     <h1>Blog</h1>
     <p style="padding:1rem 0 0 0">The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.</p>   
-      <div class="search-bar-section">      
-      <input
-          class="search-bar"
-          v-model="searchTerm"
-          @keyup.enter="resetSearch()"
-          type="text"
-          placeholder="SEARCH"/>
+      <div class="search-bar-section"> 
+             
+        <input
+       class="search-bar"
+       ref="searchInputRef"
+       v-model="searchTerm"
+       @keyup.enter="handleSearch"
+       type="text"
+       placeholder="SEARCH"
+     />
             
             <span type="submit"
             @click="searchTerm = '';
