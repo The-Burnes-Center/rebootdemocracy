@@ -191,53 +191,35 @@ h1.title{
 }
 
 
-.search-bar-section{
-  width:100%;
-  background-size: cover;
-  color: white;
-  padding: 0 0 20px 0;
+.search-bar-section {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 1rem 0; /* optional top/bottom spacing */
 }
-.search-bar{
-
-  padding: 1rem;
-  padding-right: 2.5rem;
-  background-color:transparent;
-  color: #010101;
-  border: none;
-  text-align: center;
-  font-weight: 600;
+.search-bar {
   width: 40%;
-  margin: 2rem 0;
-  margin-right: 0.5rem; 
-  -webkit-appearance: none;  /* Disable iOS’s search appearance */
-  appearance: none;
-  box-shadow: none;          /* Remove default box shadow */
-  outline: none;
-  border: 1px solid #ccc;    /* Your custom border */
-  border-radius: 0;          /* Remove any rounding */
+  max-width: 600px;
   padding: 0.5rem 1rem;
-                /* Make it full-width (adjust as needed) */
-}
-.search-bar::-webkit-search-decoration,
-.search-bar::-webkit-search-cancel-button,
-.search-bar::-webkit-search-results-button,
-.search-bar::-webkit-search-results-decoration {
+  border: 1px solid #ccc;
+  border-radius: 0;
+  font-weight: 600;
+  color: #010101;
+  background-color: #fff;
+
+  /* Kill any iOS  default “search” look or shadow: */
   -webkit-appearance: none;
-}
-.material-symbols-outlined {
-  text-shadow: none;
+  appearance: none;
+  box-shadow: none;
+  outline: none;
 }
 
 @media (max-width: 768px) {
-  .search-bar
-  {
-    flex: 1; 
+  .search-bar {
+    width: 90%;
   }
-  
 }
 
 
@@ -253,38 +235,46 @@ h1.title{
   pointer-events: none;
   /* text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 */
 }
-.search-bar-cancel-btn{
+.search-bar-cancel-btn,
+.search-bar-btn {
   position: relative;
-  color: #000!important;
-  margin-left: -1.5em;
   cursor: pointer;
-  top: 0em;
+  top: 0;
   opacity: 0;
   pointer-events: none;
-  /* text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 */
+  color: #000 !important;
 }
-
- input:not(:placeholder-shown) + .search-bar-cancel-btn {
-  opacity: 1 !important;
-  pointer-events: auto;
-  z-index: 100;
-}
-input:not(:placeholder-shown) + .search-bar-btn {
-  opacity: 0;
-}
-
-input:placeholder-shown + .search-bar-cancel-btn {
-  opacity: 0;
-}
-input:placeholder-shown + .search-bar-btn {
-  opacity: 1;
-  pointer-events: auto;
-  color: #000000;
-}
-.search-bar::placeholder {
-  color: var(--dark-grey);
-  opacity: 1; /* Firefox */
-}
+/* Show the “cancel” icon if user typed something 
+   (NOT a placeholder) => input:not(:placeholder-shown) */
+   .search-bar:not(:placeholder-shown) + .search-bar-cancel-btn {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 100;
+  }
+  
+  /* Hide the search icon if user typed something */
+  .search-bar:not(:placeholder-shown) + .search-bar-cancel-btn + .search-bar-btn {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  /* If empty (placeholder shown), hide “cancel” + show “search” */
+  .search-bar:placeholder-shown + .search-bar-cancel-btn {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .search-bar:placeholder-shown + .search-bar-cancel-btn + .search-bar-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  /* Also remove iOS built‐in “X” if using type="search" */
+  .search-bar::-webkit-search-decoration,
+  .search-bar::-webkit-search-cancel-button,
+  .search-bar::-webkit-search-results-button,
+  .search-bar::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
 
 .search-bar-box{
   width:200px;
