@@ -554,7 +554,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
        v-model="searchTerm"
        @keyup.enter="handleSearch"
        type="text"
-       placeholder="SEARCH"
+  role="search"
+  aria-label="Search"
+  placeholder="Search"
      />
             
             <span type="submit"
