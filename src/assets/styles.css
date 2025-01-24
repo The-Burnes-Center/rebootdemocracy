@@ -202,15 +202,46 @@ h1.title{
   align-items: center;
 }
 .search-bar{
+
   padding: 1rem;
   padding-right: 2.5rem;
-  background-color: none;
+  background-color:transparent;
   color: #010101;
   border: none;
   text-align: center;
   font-weight: 600;
   width: 40%;
+  margin: 2rem 0;
+  margin-right: 0.5rem; 
+  -webkit-appearance: none;  /* Disable iOS’s search appearance */
+  appearance: none;
+  box-shadow: none;          /* Remove default box shadow */
+  outline: none;
+  border: 1px solid #ccc;    /* Your custom border */
+  border-radius: 0;          /* Remove any rounding */
+  padding: 0.5rem 1rem;
+                /* Make it full-width (adjust as needed) */
 }
+.search-bar::-webkit-search-decoration,
+.search-bar::-webkit-search-cancel-button,
+.search-bar::-webkit-search-results-button,
+.search-bar::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+.material-symbols-outlined {
+  text-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .search-bar
+  {
+    flex: 1; 
+  }
+  
+}
+
+
+
 .search-bar-btn{
   position: relative;
   background: none;
@@ -547,9 +578,7 @@ a.btn:hover{
   }
 
 }
-.search-bar{
-  margin: 2rem 0;
-}
+
 .blog-page-hero{
   min-height: 55vh;
   background-image:
