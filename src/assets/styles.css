@@ -250,6 +250,7 @@ h1.title{
     opacity: 1;
     pointer-events: auto;
     z-index: 100;
+    left: -2.5rem;
   }
   
   /* Hide the search icon if user typed something */
