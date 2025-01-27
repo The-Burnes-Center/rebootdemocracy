@@ -270,6 +270,8 @@ h1.title{
   .search-bar:placeholder-shown + .search-bar-cancel-btn + .search-bar-btn {
     opacity: 1;
     pointer-events: auto;
+    left: -2.5rem;
+
   }
   
   /* Also remove iOS built‐in “X” if using type="search" */
