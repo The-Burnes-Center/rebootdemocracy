@@ -1,4 +1,3 @@
-<!-- src/pages/index.vue -->
 <script lang="ts" setup>
 import { ref, watch, onMounted, onServerPrefetch } from 'vue';
 import { createDirectus, rest, readItems } from '@directus/sdk';
@@ -12,15 +11,6 @@ import MailingListComponent from "../components/mailing.vue";
 import ModalComp from "../components/modal.vue";
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
 
-// Register components (optional in script setup)
-// {
-//   "openai-chat": OpenAIChat,
-//   "ws-banner": VueFinalModal,
-//   "modals-container": ModalsContainer,
-//   "modal-comp": ModalComp,
-// };
-
-// Reactive variables
 const model = ref(0);
 const indexData = ref<any>({});
 const eventsData = ref<any[]>([]);
@@ -222,14 +212,12 @@ function loadModal(): void {
     })
   ).then((item: any) => {
     modalData.value = item;
-    
-    // Only check localStorage on client-side
+
     if (typeof window !== 'undefined') {
       const campaignName = modalData.value?.campaigns?.campaign_name || "ModalCampaign";
       const alreadyOff = localStorage.getItem(campaignName) === 'off';
       showmodal.value = (modalData.value?.status === 'published') && !alreadyOff;
     } else {
-      // Default state for server-side
       showmodal.value = modalData.value?.status === 'published';
     }
   }).catch((err) => {
@@ -260,16 +248,15 @@ function FutureDate(d1: string | Date) {
 
 function preloadImages() {
   if (typeof window !== 'undefined') {
-  featuredData.value.forEach((item: any) => {
-    if (item.image) {
-      const img = new Image();
-      img.src = directus.url.href + 'assets/' + item.image.id + '?width=438';
-    }
-  });
-}
+    featuredData.value.forEach((item: any) => {
+      if (item.image) {
+        const img = new Image();
+        img.src = directus.url.href + 'assets/' + item.image.id + '?width=438';
+      }
+    });
+  }
 }
 
-// Fetch all data
 async function fetchAllData() {
   await Promise.all([
     fetchIndex(),
@@ -285,8 +272,6 @@ async function fetchAllData() {
   ]);
 }
 
-
-// Lifecycle hooks
 if (import.meta.env.SSR) {
   onServerPrefetch(async () => {
     await fetchAllData();
@@ -296,7 +281,6 @@ if (import.meta.env.SSR) {
     await fetchAllData();
   });
 }
-
 </script>
 
 <template>
@@ -305,11 +289,14 @@ if (import.meta.env.SSR) {
     <vue-final-modal
       v-if="showmodal"
       v-model="showmodal"
-      @before-close="closeModal"
       classes="modal-container"
       content-class="modal-comp"
+      @before-close="closeModal"
     >
-      <ModalComp :modalData="modalData" @close="closeModal" />
+      <template v-slot:default="{ close }">
+        <!-- Pass closeFunc to ModalComp -->
+        <ModalComp :modalData="modalData" :closeFunc="() => { close(); closeModal(); }" />
+      </template>
     </vue-final-modal>
 
     <!-- Header Component -->
