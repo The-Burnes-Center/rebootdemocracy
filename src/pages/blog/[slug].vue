@@ -10,6 +10,7 @@ import FooterComponent from "../../components/footer.vue";
 import format from "date-fns/format";
 import isPast from "date-fns/isPast";
 
+
 // Get props provided by vite-plugin-pages for the dynamic route
 const props = defineProps<{ slug: string }>();
 

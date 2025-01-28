@@ -166,7 +166,6 @@ async function fetchDirectusImagesInHtml(htmlContent) {
   }
 }
 
-
 function checkAssetUrl(url, set) {
   const match = url.match(/https:\/\/content\.thegovlab\.com\/assets\/([^?#]+)/);
   if (match) set.add(match[1]);
@@ -198,7 +197,7 @@ async function fetchAndDownloadDirectusFile(fileIdOrFilename) {
     try {
       const metadata = await fetch(`${CONTENT_DIRECTUS_URL}/files/${fileIdOrFilename}`);
       if (!metadata.ok) {
-        console.error(`Failed to get metadata for ${fileIdOrFilename}, status: ${metadata.status}`);
+        console.error(`Failed to get metadata for ${fileIdOrFilename} , status: ${metadata.status}`);
         return;
       }
       const { data } = await metadata.json();
