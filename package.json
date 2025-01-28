@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prefetch": "node scripts/fetch-directus-assets.mjs",
     "build": "vite-ssg build --base=./",
     "serve": "vite preview"
   },

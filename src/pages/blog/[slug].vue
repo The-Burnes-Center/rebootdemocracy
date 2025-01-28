@@ -16,7 +16,7 @@ const props = defineProps<{ slug: string }>();
 // Normalize the slug to lowercase
 const normalizedSlug = props.slug.toLowerCase();
 
-const directus = createDirectus('https://content.thegovlab.com').with(rest());
+const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 const post = ref<any>(null);
 
 // Date formatting functions...
@@ -43,7 +43,7 @@ async function fetchPost(slugValue: string) {
         status: { _eq: 'published' },
         slug: { _icontains: slugValue } // Use case-insensitive equality
       },
-      fields: ['*.*.*'],
+      fields: ['*.*.*.*'],
       limit: -1,
     })
   );
@@ -71,8 +71,8 @@ if (import.meta.env.SSR) {
         {
           property: 'og:image',
           content: post.value.image
-            ? 'https://content.thegovlab.com/assets/' + post.value.image.filename_disk
-            : 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+            ? '/assets/' + post.value.image.filename_disk
+            : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
         },
         { property: 'og:image:width', content: '800' },
         { property: 'og:image:height', content: '800' },
@@ -81,8 +81,8 @@ if (import.meta.env.SSR) {
         {
           property: 'twitter:image',
           content: post.value.image
-            ? 'https://content.thegovlab.com/assets/' + post.value.image.filename_disk
-            : 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+            ? '/assets/' + post.value.image.filename_disk
+            : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
         },
         { property: 'twitter:card', content: 'summary_large_image' },
       ],
@@ -113,8 +113,8 @@ if (import.meta.env.SSR) {
           {
             property: 'og:image',
             content: post.value.image
-              ? 'https://content.thegovlab.com/assets/' + post.value.image.filename_disk
-              : 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+              ? '/assets/' + post.value.image.filename_disk
+              : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
           },
           { property: 'og:image:width', content: '800' },
           { property: 'og:image:height', content: '800' },
@@ -123,8 +123,8 @@ if (import.meta.env.SSR) {
           {
             property: 'twitter:image',
             content: post.value.image
-              ? 'https://content.thegovlab.com/assets/' + post.value.image.filename_disk
-              : 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+              ? '/assets/' + post.value.image.filename_disk
+              : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
           },
           { property: 'twitter:card', content: 'summary_large_image' },
         ],
@@ -148,7 +148,7 @@ if (import.meta.env.SSR) {
 
 <div class="blog-hero">
 
-  <img v-if="post && post.image" class="blog-img" :src= "directus.url.href+'assets/'+post.image.id+'?width=800'" />
+  <img v-if="post && post.image" class="blog-img" :src= "'/assets/'+post.image.filename_disk+'?width=800'" />
   
   <div class="blog-details">
     <h1>{{post.title}}</h1>
@@ -158,7 +158,7 @@ if (import.meta.env.SSR) {
       <div class="hero-author-sm">
       <div v-for="(author,i) in post.authors">
           <div class="author-item">
-            <img v-if="author.team_id.Headshot" class="author-headshot" :src="directus.url.href+'assets/'+author.team_id.Headshot">
+            <img v-if="author.team_id.Headshot" class="author-headshot" :src="'/assets/'+author.team_id.Headshot">
             <p  v-if="!author.team_id.Headshot" class="author-no-image">{{author.team_id.First_Name[0] }} {{author.team_id.Last_Name[0]}}</p>
             <div class="author-details">
               <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
@@ -181,7 +181,7 @@ if (import.meta.env.SSR) {
 <div class="blog-body">
   <div class="audio-version" v-if="post.audio_version">
   <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.&nbsp;</em></p>
-    <p><audio controls="controls"><source :src="directus.url.href+'assets/'+post.audio_version.id" type="audio/mpeg" data-mce-fragment="1"></audio></p>
+    <p><audio controls="controls"><source :src="'/assets/'+post.audio_version.filename_disk" type="audio/mpeg" data-mce-fragment="1"></audio></p>
   </div>
     <div class="blog-content" v-html="post.content"></div>
     <p v-if="post.ai_content_disclaimer" class="blog-img-byline">Some images in this post were generated using AI.</p>
