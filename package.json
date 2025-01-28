@@ -15,6 +15,7 @@
     "@unhead/vue": "^1.11.13",
     "@vueuse/head": "^2.0.0",
     "axios": "^1.6.2",
+    "cheerio": "^1.0.0",
     "custom-cache-plugin": "file:./plugins/custom-cache-plugin",
     "date-fns": "^4.1.0",
     "dompurify": "^3.1.6",

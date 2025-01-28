@@ -16,7 +16,7 @@ const props = defineProps<{ slug: string }>();
 // Normalize the slug to lowercase
 const normalizedSlug = props.slug.toLowerCase();
 
-const directus = createDirectus('https://dev.thegovlab.com').with(rest());
+const directus = createDirectus('https://content.thegovlab.com').with(rest());
 const post = ref<any>(null);
 
 // Date formatting functions...
@@ -72,7 +72,7 @@ if (import.meta.env.SSR) {
           property: 'og:image',
           content: post.value.image
             ? '/assets/' + post.value.image.filename_disk
-            : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+            : '/meta-fallback-image.png',
         },
         { property: 'og:image:width', content: '800' },
         { property: 'og:image:height', content: '800' },
@@ -82,7 +82,7 @@ if (import.meta.env.SSR) {
           property: 'twitter:image',
           content: post.value.image
             ? '/assets/' + post.value.image.filename_disk
-            : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+            : '/meta-fallback-image.png',
         },
         { property: 'twitter:card', content: 'summary_large_image' },
       ],
@@ -114,7 +114,7 @@ if (import.meta.env.SSR) {
             property: 'og:image',
             content: post.value.image
               ? '/assets/' + post.value.image.filename_disk
-              : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+              : '/meta-fallback-image.png',
           },
           { property: 'og:image:width', content: '800' },
           { property: 'og:image:height', content: '800' },
@@ -124,7 +124,7 @@ if (import.meta.env.SSR) {
             property: 'twitter:image',
             content: post.value.image
               ? '/assets/' + post.value.image.filename_disk
-              : '/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+              : '/meta-fallback-image.png',
           },
           { property: 'twitter:card', content: 'summary_large_image' },
         ],
@@ -158,7 +158,7 @@ if (import.meta.env.SSR) {
       <div class="hero-author-sm">
       <div v-for="(author,i) in post.authors">
           <div class="author-item">
-            <img v-if="author.team_id.Headshot" class="author-headshot" :src="'/assets/'+author.team_id.Headshot">
+            <img v-if="author.team_id.Headshot" class="author-headshot" :src="'/assets/'+author.team_id.Headshot.filename_disk">
             <p  v-if="!author.team_id.Headshot" class="author-no-image">{{author.team_id.First_Name[0] }} {{author.team_id.Last_Name[0]}}</p>
             <div class="author-details">
               <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>

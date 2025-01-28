@@ -4,16 +4,17 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import fetch from 'node-fetch';
 import { createDirectus, rest, readItems } from '@directus/sdk';
+import { load } from 'cheerio'; // ← Updated import
 
 ////////////////////////////////////////////////////////////////////////////////
 // Configuration
 ////////////////////////////////////////////////////////////////////////////////
 
 // Replace these URLs as needed:
-const DIRECTUS_BASE_URL = 'https://dev.thegovlab.com';
-const CONTENT_DIRECTUS_URL = 'https://dev.thegovlab.com'; 
+const DIRECTUS_BASE_URL = 'https://content.thegovlab.com';
+const CONTENT_DIRECTUS_URL = 'https://content.thegovlab.com'; 
 // Regex to detect images from your content directus domain:
-const IMG_REGEX = /<img[^>]+src="https:\/\/content\.thegovlab\.com\/assets\/([^"?]+)(?:\?[^"]*)?"[^>]*>/gi;
+const ASSET_URL_REGEX = /https:\/\/content\.thegovlab\.com\/assets\/([^"?#]+)/gi;
 
 // Create the Directus client for your main data
 const directus = createDirectus(DIRECTUS_BASE_URL).with(rest());
@@ -142,18 +143,44 @@ async function fetchAssetsForSlug(slug) {
  * extract the ID or filename, call /files if needed, then download the assets.
  */
 async function fetchDirectusImagesInHtml(htmlContent) {
-  if (!htmlContent) return;
+  const $ = load(htmlContent); // ← Updated usage
+  const assets = new Set();
 
-  const matchedUrls = [];
-  let match;
-  while ((match = IMG_REGEX.exec(htmlContent)) !== null) {
-    matchedUrls.push(match[1]);
-  }
-  const uniqueIds = [...new Set(matchedUrls)];
+  // Check all relevant attributes
+  $('img[src], [style], [srcset]').each((_, element) => {
+    // Check src attributes
+    const src = $(element).attr('src');
+    if (src) checkAssetUrl(src, assets);
 
-  for (const idOrFilename of uniqueIds) {
+    // Check inline styles
+    const style = $(element).attr('style');
+    if (style) checkCssUrls(style, assets);
+
+    // Check srcset
+    const srcset = $(element).attr('srcset');
+    if (srcset) checkSrcset(srcset, assets);
+  });
+
+  for (const idOrFilename of assets) {
     await fetchAndDownloadDirectusFile(idOrFilename);
   }
+}
+
+
+function checkAssetUrl(url, set) {
+  const match = url.match(/https:\/\/content\.thegovlab\.com\/assets\/([^?#]+)/);
+  if (match) set.add(match[1]);
+}
+
+function checkCssUrls(css, set) {
+  const matches = css.matchAll(/url\(["']?(https:\/\/content\.thegovlab\.com\/assets\/[^"')?#]+)/gi);
+  for (const match of matches) checkAssetUrl(match[1], set);
+}
+
+function checkSrcset(srcset, set) {
+  srcset.split(',')
+    .map(entry => entry.trim().split(/\s+/)[0])
+    .forEach(url => checkAssetUrl(url, set));
 }
 
 /**
