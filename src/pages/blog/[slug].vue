@@ -17,7 +17,7 @@ const props = defineProps<{ slug: string }>();
 // Normalize the slug to lowercase
 const normalizedSlug = props.slug.toLowerCase();
 
-const directus = createDirectus('https://content.thegovlab.com').with(rest());
+const directus = createDirectus('https://test.thegovlab.com').with(rest());
 const post = ref<any>(null);
 
 // Date formatting functions...
