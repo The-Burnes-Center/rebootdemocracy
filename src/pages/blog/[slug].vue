@@ -100,7 +100,7 @@ if (import.meta.env.SSR) {
   // In dev mode (no SSR), fetch data after mount
   onMounted(async () => {
     console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
-    // post.value = await fetchPost(normalizedSlug);
+    post.value = await fetchPost(normalizedSlug);
     
     
     if (post.value) {
@@ -143,8 +143,7 @@ if (import.meta.env.SSR) {
 </script>
 
 <template>
-  <!-- <div v-if="post"> -->
-    <div>
+  <div v-if="post">
 <!-- Header Component -->
 <HeaderComponent></HeaderComponent>
 
@@ -196,8 +195,8 @@ if (import.meta.env.SSR) {
   
 
   </div>
-  <!-- <div v-else>
+  <div v-else>
     <p>Loading ...</p>
-  </div> -->
+  </div>
 
 </template>
