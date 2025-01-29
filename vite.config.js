@@ -1,4 +1,3 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vuetify from 'vite-plugin-vuetify';
@@ -38,21 +37,29 @@ export default defineConfig({
     script: 'async',
     formatting: 'minify',
     includedRoutes: async (paths) => {
+      const distDir = path.join(process.cwd(), 'dist');
       let slugToBuild = process.env.SLUG_TO_BUILD;
-      
+
+      // If we have INCOMING_HOOK_BODY, parse it to see if there's a "slug" and prioritize that
       if (process.env.INCOMING_HOOK_BODY) {
         try {
           const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
-          slugToBuild = hookPayload.slug;
-          console.log('Building only for slug:', slugToBuild);
+          if (hookPayload.slug) {
+            slugToBuild = hookPayload.slug;
+          }
+          if (slugToBuild) {
+            console.log('Building only for slug:', slugToBuild);
+          }
         } catch (error) {
           console.error('Error parsing INCOMING_HOOK_BODY:', error);
         }
       }
 
+      // If we have a specific slug to build, always build it:
       if (slugToBuild) {
         return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
       } else {
+        // Otherwise, fetch all slugs from Directus, then skip any slug whose HTML file is already in dist
         const directus = createDirectus('https://content.thegovlab.com').with(rest());
         try {
           const response = await directus.request(
@@ -63,8 +70,22 @@ export default defineConfig({
             })
           );
           const data = response.data ? response.data : response;
-          const slugs = data.map((item) => `/blog/${item.slug.toLowerCase()}`);
-          return [...paths, ...slugs];
+          // Each item is { slug: 'something' } - map to /blog/something
+          const routePaths = data.map((item) => `/blog/${item.slug.toLowerCase()}`);
+
+          const finalRoutes = [];
+          for (const route of routePaths) {
+            // For a route "/blog/my-slug", the file we'd expect is dist/my-slug.html (per your Netlify pattern)
+            const slugName = route.replace(/^\/blog\//, ''); // "my-slug"
+            const possibleFile = path.join(distDir, `${slugName}.html`);
+            if (fs.existsSync(possibleFile)) {
+              console.log(`Skipping build for "${slugName}", already exists in dist.`);
+            } else {
+              finalRoutes.push(route);
+            }
+          }
+
+          return [...paths, ...finalRoutes];
         } catch (error) {
           console.error('Error fetching slugs from Directus:', error);
           return paths;

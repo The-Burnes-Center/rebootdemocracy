@@ -12,15 +12,16 @@ import { load } from 'cheerio'; // ← Updated import
 
 // Replace these URLs as needed:
 const DIRECTUS_BASE_URL = 'https://content.thegovlab.com';
-const CONTENT_DIRECTUS_URL = 'https://content.thegovlab.com'; 
+const CONTENT_DIRECTUS_URL = 'https://content.thegovlab.com';
+
 // Regex to detect images from your content directus domain:
 const ASSET_URL_REGEX = /https:\/\/content\.thegovlab\.com\/assets\/([^"?#]+)/gi;
 
 // Create the Directus client for your main data
 const directus = createDirectus(DIRECTUS_BASE_URL).with(rest());
 
-// Where downloaded files will be stored locally
-const ASSETS_DIR = path.join(process.cwd(), 'public', 'assets');
+// Where downloaded files will be stored locally (changed to dist/assets)
+const ASSETS_DIR = path.join(process.cwd(), 'dist', 'assets');
 
 ////////////////////////////////////////////////////////////////////////////////
 // Main functions to fetch directus items
@@ -177,9 +178,10 @@ function checkCssUrls(css, set) {
 }
 
 function checkSrcset(srcset, set) {
-  srcset.split(',')
-    .map(entry => entry.trim().split(/\s+/)[0])
-    .forEach(url => checkAssetUrl(url, set));
+  srcset
+    .split(',')
+    .map((entry) => entry.trim().split(/\s+/)[0])
+    .forEach((url) => checkAssetUrl(url, set));
 }
 
 /**
@@ -189,10 +191,12 @@ function checkSrcset(srcset, set) {
  */
 async function fetchAndDownloadDirectusFile(fileIdOrFilename) {
   if (!fileIdOrFilename) return;
-  // UUID test
+
   const isUuidOnly = /^[0-9a-f-]{36}$/i.test(fileIdOrFilename);
   let diskFilename = fileIdOrFilename;
+  let extension = '';
 
+  // If it's just the UUID, fetch metadata to get the correct extension
   if (isUuidOnly) {
     try {
       const metadata = await fetch(`${CONTENT_DIRECTUS_URL}/files/${fileIdOrFilename}`);
@@ -201,29 +205,48 @@ async function fetchAndDownloadDirectusFile(fileIdOrFilename) {
         return;
       }
       const { data } = await metadata.json();
-      diskFilename = data?.filename_disk;
-      if (!diskFilename) {
+      if (!data?.filename_disk) {
         console.error(`filename_disk not found for ${fileIdOrFilename}`);
         return;
       }
+      // For example, if filename_disk = "my-file.png"
+      diskFilename = data.filename_disk;
     } catch (err) {
       console.error(`Error fetching metadata for ${fileIdOrFilename}:`, err);
       return;
     }
   }
 
-  await downloadDirectusFile(diskFilename);
-}
+  // Attempt to parse extension from diskFilename. E.g. "my-file.png" => "png"
+  const dotIndex = diskFilename.lastIndexOf('.');
+  if (dotIndex !== -1) {
+    extension = diskFilename.slice(dotIndex + 1);
+  }
 
-/**
- * Download a single directus file from content.thegovlab.com/assets/<filename>
- * into our local /public/assets folder.
- */
-async function downloadDirectusFile(filenameDisk) {
-  if (!filenameDisk) return;
-  const remoteUrl = `${CONTENT_DIRECTUS_URL}/assets/${filenameDisk}`;
-  const localFilePath = path.join(ASSETS_DIR, filenameDisk);
+  // If it was a UUID, we store it as "uuid.extension"
+  // Otherwise, we just keep the original name "some-file.png"
+  let localFileName;
+  if (isUuidOnly) {
+    if (!extension) {
+      // fallback extension if none found
+      extension = 'dat';
+    }
+    localFileName = `${fileIdOrFilename}.${extension}`;
+  } else {
+    localFileName = diskFilename; // it already has some extension presumably
+  }
 
+  const localFilePath = path.join(ASSETS_DIR, localFileName);
+  // Skip if this file is already downloaded
+  try {
+    await fs.stat(localFilePath);
+    console.log(`File already exists, skipping: ${localFilePath}`);
+    return;
+  } catch {
+    // proceed if file does not exist
+  }
+
+  const remoteUrl = `${CONTENT_DIRECTUS_URL}/assets/${diskFilename}`;
   console.log(`Downloading file: ${remoteUrl} -> ${localFilePath}`);
   await fs.mkdir(ASSETS_DIR, { recursive: true });
 
@@ -237,7 +260,8 @@ async function downloadDirectusFile(filenameDisk) {
 }
 
 /**
- * Download an array of directus filenames (already known) into /public/assets.
+ * Download an array of directus filenames (already known) into /dist/assets,
+ * skipping if they've already been downloaded.
  */
 async function downloadFiles(filenames) {
   if (!filenames || filenames.length === 0) {
@@ -245,21 +269,10 @@ async function downloadFiles(filenames) {
     return;
   }
 
-  await fs.mkdir(ASSETS_DIR, { recursive: true });
-
   for (const filename of filenames) {
-    const remoteUrl = `${DIRECTUS_BASE_URL}/assets/${filename}`;
-    const localFilePath = path.join(ASSETS_DIR, filename);
-
-    console.log(`Downloading asset: ${remoteUrl} -> ${localFilePath}`);
-    const response = await fetch(remoteUrl);
-
-    if (!response.ok) {
-      console.error(`Failed to download asset: ${remoteUrl}. Status: ${response.status}`);
-      continue;
-    }
-    const buffer = await response.arrayBuffer();
-    await fs.writeFile(localFilePath, Buffer.from(buffer));
+    // If we already have an extension, it's likely from Directus "filename_disk".
+    // We'll just pass it to our fetchAndDownloadDirectusFile to handle skip logic.
+    await fetchAndDownloadDirectusFile(filename);
   }
 }
 
