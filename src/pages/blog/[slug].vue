@@ -17,7 +17,7 @@ const props = defineProps<{ slug: string }>();
 // Normalize the slug to lowercase
 const normalizedSlug = props.slug.toLowerCase();
 
-const directus = createDirectus('https://test.thegovlab.com').with(rest());
+const directus = createDirectus('https://content.thegovlab.com').with(rest());
 const post = ref<any>(null);
 
 // Date formatting functions...
@@ -100,7 +100,7 @@ if (import.meta.env.SSR) {
   // In dev mode (no SSR), fetch data after mount
   onMounted(async () => {
     console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
-    post.value = await fetchPost(normalizedSlug);
+    // post.value = await fetchPost(normalizedSlug);
     
     
     if (post.value) {
