@@ -25,85 +25,77 @@ const route = isClient ? useRoute() : ref(null);
 const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
 // State variables
+const searchResultsFlag = ref<number>(0);
+const searchResults = ref<any[]>([]);
 const searchTerm = ref<string>("");
 const searchTermDisplay = ref<string>("");
-const searchResultsFlag = ref<number>(0);
+const debounceSearch = ref<any>(null);
 const searchloader = ref<boolean>(false);
-
+const loadAPI = ref<boolean>(false);
+const animateNext = ref<number>(0);
+const currentDate = ref<string>('');
+const prevItem = ref<number>(0);
+const currentItem = ref<number>(1);
+const nextItem = ref<number>(2);
+const testimonialsLength = ref<number>(0);
 const blogData = ref<any[]>([]);
 const blogDataSearch = ref<any[]>([]);
 const filteredTagData = ref<string[]>([]);
-
+const modalData = ref<any[]>([]);
+const workshopData = ref<any[]>([]);
+const playpause = ref<boolean>(true);
 const showmodal = ref<boolean>(false);
-const modalData = ref<any>({});
+const path = ref<string>(isClient ? route.value?.fullPath : '');
+const slideautoplay = ref<number>(1);
+const slidetransition = ref<number>(7000);
+const slider = ref<any>('');
+const wsloaded = ref<boolean>(false);
+const ini = ref<boolean>(true);
 
-const debounceSearch = ref<any>(null);
+// Set up debounce for search
 debounceSearch.value = _.debounce(searchBlog, 500);
 
-function formatDateOnly(d1: string | Date) {
-  const dateObj = typeof d1 === 'string' ? new Date(d1) : d1;
-  return format(dateObj, 'MMMM d, yyyy');
-}
+// Computed properties
+const latestBlogPost = computed(() => {
+  if (Array.isArray(blogData.value) && blogData.value.length > 0) {
+    return [...blogData.value].reverse()[0];
+  }
+  return null;
+});
 
+const filteredTagDataWithoutNews = computed(() => {
+  return filteredTagData.value.filter(tag => tag !== "News that caught our eye");
+});
+
+// Functions
 function includesString(array: string[] | null, stringVal: string) {
   if (!array) return false;
-  const lowerCasePartial = stringVal.toLowerCase();
-  return array.some(s => s.toLowerCase().includes(lowerCasePartial));
+  const lowerCasePartialSentence = stringVal.toLowerCase();
+  return array.some(s => s.toLowerCase().includes(lowerCasePartialSentence));
 }
 
-// Fetch blog posts
-async function fetchBlog() {
-  try {
-    const item = await directus.request(
-      readItems('reboot_democracy_blog', {
-        meta: 'total_count',
-        limit: -1,
-        filter: { status: { _eq: "published" } },
-        fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*'],
-        sort: ["date"]
-      })
-    );
-
-    // "item" may be an array
-    blogData.value = Array.isArray(item) ? item : (item.data || []);
-
-    // Collect tags
-    blogData.value.forEach((blogEntry: any) => {
-      if (Array.isArray(blogEntry.Tags)) {
-        blogEntry.Tags.forEach((tg: string) => {
-          if (tg && !includesString(filteredTagData.value, tg)) {
-            filteredTagData.value.push(tg);
-          }
-        });
-      }
-    });
-
-    // Move "News that caught our eye" to front if it exists
-    const newsIndex = filteredTagData.value.indexOf("News that caught our eye");
-    if (newsIndex > -1) {
-      filteredTagData.value.unshift(filteredTagData.value.splice(newsIndex, 1)[0]);
-    }
-  } catch (error) {
-    console.error('fetchBlog error:', error);
-  }
+function resetSearch() {
+  blogDataSearch.value = [];
+  searchResultsFlag.value = 0;
+  searchTermDisplay.value = searchTerm.value;
+  searchBlog();
 }
 
-// Search functionality
 function searchBlog() {
   searchloader.value = true;
-  const searchArray = searchTerm.value.trim().split(/\s+/).filter(Boolean);
+  let searchTArray = searchTerm.value.split(" ").filter(item => item);
   const searchObj: any[] = [];
 
-  searchArray.forEach((word) => {
-    searchObj.push({ excerpt: { _contains: word } });
-    searchObj.push({ title: { _contains: word } });
-    searchObj.push({ content: { _contains: word } });
-    searchObj.push({ authors: { team_id: { First_Name: { _contains: word } } } });
-    searchObj.push({ authors: { team_id: { Last_Name: { _contains: word } } } });
-    searchObj.push({ authors: { team_id: { Title: { _contains: word } } } });
+  searchTArray.map((a) => {
+    searchObj.push({ excerpt: { _contains: a } });
+    searchObj.push({ title: { _contains: a } });
+    searchObj.push({ content: { _contains: a } });
+    searchObj.push({ authors: { team_id: { First_Name: { _contains: a } } } });
+    searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
+    searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
   });
 
-  if (searchArray.length > 0) {
+  if (searchTArray.length > 0) {
     searchResultsFlag.value = 1;
   } else {
     searchResultsFlag.value = 0;
@@ -113,25 +105,34 @@ function searchBlog() {
     readItems('reboot_democracy_blog', {
       limit: -1,
       filter: {
-        _and: [
-          { date: { _lte: "$NOW(-5 hours)" } },
-          { status: { _eq: "published" } }
-        ],
+        _and: [{ date: { _lte: "$NOW(-5 hours)" } }, { status: { _eq: "published" } }],
         _or: searchObj
       },
       sort: ["date"],
       fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*']
     })
-  ).then((res: any) => {
+  ).then((b: any) => {
+    blogDataSearch.value = b;
     searchloader.value = false;
-    blogDataSearch.value = Array.isArray(res) ? res : (res.data || []);
   }).catch((err) => {
-    console.error('searchBlog error:', err);
+    console.error(err);
     searchloader.value = false;
   });
 }
 
-// Modal
+function formatDateTime(d1: Date) {
+  return format(d1, 'MMMM d, yyyy, h:mm aa');
+}
+function formatDateOnly(d1: Date) {
+  return format(d1, 'MMMM d, yyyy');
+}
+function PastDate(d1: Date) {
+  return isPast(d1);
+}
+function FutureDate(d1: Date) {
+  return isFuture(new Date(d1));
+}
+
 function loadModal() {
   directus.request(
     readItems('reboot_democracy_modal', {
@@ -140,30 +141,23 @@ function loadModal() {
       fields: ['*.*']
     })
   ).then((item: any) => {
-    // item might be an array
-    const modalRecord = Array.isArray(item) ? item[0] : item;
-    if (!modalRecord) return;
-
-    modalData.value = modalRecord;
-    if (typeof window !== 'undefined') {
-      const storageItem = localStorage.getItem("Reboot Democracy");
-      showmodal.value = (
-        modalRecord.status === 'published' &&
-        (modalRecord.visibility === 'always' ||
-         (modalRecord.visibility === 'once' && storageItem !== 'off'))
-      );
-    }
+    // Ensure modalData.value is an object, not an array
+    modalData.value = item || {};
+    console.log('Modal Data:', modalData.value);
+    let storageItem = (typeof window !== 'undefined') ? localStorage.getItem("Reboot Democracy") : null;
+    showmodal.value = modalData.value.status == 'published' && 
+      (modalData.value.visibility == 'always' || (modalData.value.visibility == 'once' && storageItem != 'off'));
   }).catch((err) => {
-    console.error('loadModal error:', err);
+    console.error(err);
   });
 }
+
 function closeModal() {
   showmodal.value = false;
   if (typeof window !== 'undefined') {
     localStorage.setItem("Reboot Democracy", "off");
   }
 }
-
 
 async function fetchBlog() {
   try {
