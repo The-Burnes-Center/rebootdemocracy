@@ -13,7 +13,7 @@ const uuidToFileMap = {};
 
 try {
   const files = fs.readdirSync(assetsDir);
-  files.forEach(file => {
+  files.forEach((file) => {
     const [uuid, ...extParts] = file.split('.');
     if (uuid && extParts.length) {
       uuidToFileMap[uuid.toLowerCase()] = file;
@@ -40,7 +40,7 @@ export default defineConfig({
       const distDir = path.join(process.cwd(), 'dist');
       let slugToBuild = process.env.SLUG_TO_BUILD;
 
-      // If we have INCOMING_HOOK_BODY, parse it to see if there's a "slug" and prioritize that
+      // If we have incoming hook data, try to parse a specific slug
       if (process.env.INCOMING_HOOK_BODY) {
         try {
           const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
@@ -55,11 +55,11 @@ export default defineConfig({
         }
       }
 
-      // If we have a specific slug to build, always build it:
+      // If we have a specific slug to build, do only that
       if (slugToBuild) {
         return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
       } else {
-        // Otherwise, fetch all slugs from Directus, then skip any slug whose HTML file is already in dist
+        // Otherwise, fetch all published slugs from Directus, skip ones that already exist in dist
         const directus = createDirectus('https://content.thegovlab.com').with(rest());
         try {
           const response = await directus.request(
@@ -70,16 +70,18 @@ export default defineConfig({
             })
           );
           const data = response.data ? response.data : response;
-          // Each item is { slug: 'something' } - map to /blog/something
+
+          // The route for each item => /blog/<slug>
           const routePaths = data.map((item) => `/blog/${item.slug.toLowerCase()}`);
 
           const finalRoutes = [];
           for (const route of routePaths) {
-            // For a route "/blog/my-slug", the file we'd expect is dist/my-slug.html (per your Netlify pattern)
-            const slugName = route.replace(/^\/blog\//, ''); // "my-slug"
-            const possibleFile = path.join(distDir, `${slugName}.html`);
+            // Our final .html is dist/blog/<slug>.html
+            const slugName = route.replace(/^\/blog\//, '');
+            const possibleFile = path.join(distDir, 'blog', `${slugName}.html`);
+
             if (fs.existsSync(possibleFile)) {
-              console.log(`Skipping build for "${slugName}", already exists in dist.`);
+              console.log(`Skipping build for "${slugName}", already exists in dist/blog.`);
             } else {
               finalRoutes.push(route);
             }
@@ -109,9 +111,9 @@ export default defineConfig({
           /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)/gi,
           (match, uuid) => {
             const filename = uuidToFileMap[uuid.toLowerCase()];
-            return filename 
+            return filename
               ? `${assetPrefix}assets/${filename}`
-              : match; // Fallback to original URL if asset not found
+              : match; // If no local asset, leave original URL
           }
         );
 
