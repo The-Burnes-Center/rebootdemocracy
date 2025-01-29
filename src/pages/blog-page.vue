@@ -25,140 +25,33 @@ const route = isClient ? useRoute() : ref(null);
 const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
 // State variables
-const searchResultsFlag = ref<number>(0);
-const searchResults = ref<any[]>([]);
 const searchTerm = ref<string>("");
 const searchTermDisplay = ref<string>("");
-const debounceSearch = ref<any>(null);
+const searchResultsFlag = ref<number>(0);
 const searchloader = ref<boolean>(false);
-const loadAPI = ref<boolean>(false);
-const animateNext = ref<number>(0);
-const currentDate = ref<string>('');
-const prevItem = ref<number>(0);
-const currentItem = ref<number>(1);
-const nextItem = ref<number>(2);
-const testimonialsLength = ref<number>(0);
+
 const blogData = ref<any[]>([]);
 const blogDataSearch = ref<any[]>([]);
 const filteredTagData = ref<string[]>([]);
-const modalData = ref<any[]>([]);
-const workshopData = ref<any[]>([]);
-const playpause = ref<boolean>(true);
-const showmodal = ref<boolean>(false);
-const path = ref<string>(isClient ? route.value?.fullPath : '');
-const slideautoplay = ref<number>(1);
-const slidetransition = ref<number>(7000);
-const slider = ref<any>('');
-const wsloaded = ref<boolean>(false);
-const ini = ref<boolean>(true);
 
-// Set up debounce for search
+const showmodal = ref<boolean>(false);
+const modalData = ref<any>({});
+
+const debounceSearch = ref<any>(null);
 debounceSearch.value = _.debounce(searchBlog, 500);
 
-// Computed properties
-const latestBlogPost = computed(() => {
-  if (Array.isArray(blogData.value) && blogData.value.length > 0) {
-    return [...blogData.value].reverse()[0];
-  }
-  return null;
-});
+function formatDateOnly(d1: string | Date) {
+  const dateObj = typeof d1 === 'string' ? new Date(d1) : d1;
+  return format(dateObj, 'MMMM d, yyyy');
+}
 
-const filteredTagDataWithoutNews = computed(() => {
-  return filteredTagData.value.filter(tag => tag !== "News that caught our eye");
-});
-
-// Functions
 function includesString(array: string[] | null, stringVal: string) {
   if (!array) return false;
-  const lowerCasePartialSentence = stringVal.toLowerCase();
-  return array.some(s => s.toLowerCase().includes(lowerCasePartialSentence));
+  const lowerCasePartial = stringVal.toLowerCase();
+  return array.some(s => s.toLowerCase().includes(lowerCasePartial));
 }
 
-function resetSearch() {
-  blogDataSearch.value = [];
-  searchResultsFlag.value = 0;
-  searchTermDisplay.value = searchTerm.value;
-  searchBlog();
-}
-
-function searchBlog() {
-  searchloader.value = true;
-  let searchTArray = searchTerm.value.split(" ").filter(item => item);
-  const searchObj: any[] = [];
-
-  searchTArray.map((a) => {
-    searchObj.push({ excerpt: { _contains: a } });
-    searchObj.push({ title: { _contains: a } });
-    searchObj.push({ content: { _contains: a } });
-    searchObj.push({ authors: { team_id: { First_Name: { _contains: a } } } });
-    searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
-    searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
-  });
-
-  if (searchTArray.length > 0) {
-    searchResultsFlag.value = 1;
-  } else {
-    searchResultsFlag.value = 0;
-  }
-
-  directus.request(
-    readItems('reboot_democracy_blog', {
-      limit: -1,
-      filter: {
-        _and: [{ date: { _lte: "$NOW(-5 hours)" } }, { status: { _eq: "published" } }],
-        _or: searchObj
-      },
-      sort: ["date"],
-      fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*']
-    })
-  ).then((b: any) => {
-    blogDataSearch.value = b;
-    searchloader.value = false;
-  }).catch((err) => {
-    console.error(err);
-    searchloader.value = false;
-  });
-}
-
-function formatDateTime(d1: Date) {
-  return format(d1, 'MMMM d, yyyy, h:mm aa');
-}
-function formatDateOnly(d1: Date) {
-  return format(d1, 'MMMM d, yyyy');
-}
-function PastDate(d1: Date) {
-  return isPast(d1);
-}
-function FutureDate(d1: Date) {
-  return isFuture(new Date(d1));
-}
-
-function loadModal() {
-  directus.request(
-    readItems('reboot_democracy_modal', {
-      meta: 'total_count',
-      limit: -1,
-      fields: ['*.*']
-    })
-  ).then((item: any) => {
-    // Ensure modalData.value is an object, not an array
-    modalData.value = item || {};
-    console.log('Modal Data:', modalData.value);
-    let storageItem = (typeof window !== 'undefined') ? localStorage.getItem("Reboot Democracy") : null;
-    showmodal.value = modalData.value.status == 'published' && 
-      (modalData.value.visibility == 'always' || (modalData.value.visibility == 'once' && storageItem != 'off'));
-  }).catch((err) => {
-    console.error(err);
-  });
-}
-
-function closeModal() {
-  showmodal.value = false;
-  if (typeof window !== 'undefined') {
-    localStorage.setItem("Reboot Democracy", "off");
-  }
-}
-
+// Fetch blog posts
 async function fetchBlog() {
   try {
     const item = await directus.request(
@@ -171,184 +64,239 @@ async function fetchBlog() {
       })
     );
 
-    blogData.value = item;
-    item.map((tag: any) => {
-      tag?.Tags?.map((subTags: string) => {
-        if (subTags != null && !includesString(filteredTagData.value, subTags)) {
-          filteredTagData.value.push(subTags);
-        }
-      })
-    })
+    // "item" may be an array
+    blogData.value = Array.isArray(item) ? item : (item.data || []);
 
-    // Move "News that caught our eye" to the front if exists
+    // Collect tags
+    blogData.value.forEach((blogEntry: any) => {
+      if (Array.isArray(blogEntry.Tags)) {
+        blogEntry.Tags.forEach((tg: string) => {
+          if (tg && !includesString(filteredTagData.value, tg)) {
+            filteredTagData.value.push(tg);
+          }
+        });
+      }
+    });
+
+    // Move "News that caught our eye" to front if it exists
     const newsIndex = filteredTagData.value.indexOf("News that caught our eye");
     if (newsIndex > -1) {
       filteredTagData.value.unshift(filteredTagData.value.splice(newsIndex, 1)[0]);
     }
-
   } catch (error) {
-    console.error(error);
+    console.error('fetchBlog error:', error);
   }
 }
 
+// Search functionality
+function searchBlog() {
+  searchloader.value = true;
+  const searchArray = searchTerm.value.trim().split(/\s+/).filter(Boolean);
+  const searchObj: any[] = [];
+
+  searchArray.forEach((word) => {
+    searchObj.push({ excerpt: { _contains: word } });
+    searchObj.push({ title: { _contains: word } });
+    searchObj.push({ content: { _contains: word } });
+    searchObj.push({ authors: { team_id: { First_Name: { _contains: word } } } });
+    searchObj.push({ authors: { team_id: { Last_Name: { _contains: word } } } });
+    searchObj.push({ authors: { team_id: { Title: { _contains: word } } } });
+  });
+
+  if (searchArray.length > 0) {
+    searchResultsFlag.value = 1;
+  } else {
+    searchResultsFlag.value = 0;
+  }
+
+  directus.request(
+    readItems('reboot_democracy_blog', {
+      limit: -1,
+      filter: {
+        _and: [
+          { date: { _lte: "$NOW(-5 hours)" } },
+          { status: { _eq: "published" } }
+        ],
+        _or: searchObj
+      },
+      sort: ["date"],
+      fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*']
+    })
+  ).then((res: any) => {
+    searchloader.value = false;
+    blogDataSearch.value = Array.isArray(res) ? res : (res.data || []);
+  }).catch((err) => {
+    console.error('searchBlog error:', err);
+    searchloader.value = false;
+  });
+}
+
+// Modal
+function loadModal() {
+  directus.request(
+    readItems('reboot_democracy_modal', {
+      meta: 'total_count',
+      limit: -1,
+      fields: ['*.*']
+    })
+  ).then((item: any) => {
+    // item might be an array
+    const modalRecord = Array.isArray(item) ? item[0] : item;
+    if (!modalRecord) return;
+
+    modalData.value = modalRecord;
+    if (typeof window !== 'undefined') {
+      const storageItem = localStorage.getItem("Reboot Democracy");
+      showmodal.value = (
+        modalRecord.status === 'published' &&
+        (modalRecord.visibility === 'always' ||
+         (modalRecord.visibility === 'once' && storageItem !== 'off'))
+      );
+    }
+  }).catch((err) => {
+    console.error('loadModal error:', err);
+  });
+}
+function closeModal() {
+  showmodal.value = false;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem("Reboot Democracy", "off");
+  }
+}
+
+// SSR + meta tags
 function fillMeta() {
   useHead({
     title: "RebootDemocracy.AI",
     meta: [
       { name: 'title', content: "RebootDemocracy.AI" },
       { property: 'og:title', content: "RebootDemocracy.AI" },
-      { property: 'og:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
-
-1. Better governance
-2. Better outcomes
-3. Increased trust in institutions
-4. And in one another
-As researchers we want to understand how best to "do democracy" in practice.
-
-Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
-      { property: 'og:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b" },
-      { property: 'twitter:title', content: "RebootDemocracy.AI" },
-      { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
-
-1. Better governance
-2. Better outcomes
-3. Increased trust in institutions
-4. And in one another
-As researchers we want to understand how best to "do democracy" in practice.
-
-Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
-      { property: 'twitter:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b" },
-      { property: 'twitter:card', content: "summary_large_image" },
-    ],
-  })
-}
-// Watchers
-watch(
-  () => isClient ? route.value?.fullPath : '',
-  () => {
-    loadModal();
-  },
-  { immediate: true }
-);
-
-const isSSR = computed(() => import.meta.env.SSR);
-
-
-// Lifecycle hooks
-if (import.meta.env.SSR) {
-  onServerPrefetch(async () => {
-    await fetchBlog();
-  });
-} else {
-  onMounted(async () => {
-    fillMeta();
-    register();
-    await fetchBlog();
-    resetSearch();
-    loadModal();
-    showmodal.value = true;
+      // add more meta as needed
+    ]
   });
 }
+
+// Lifecycle
+onServerPrefetch(async () => {
+  // For SSR
+  await fetchBlog();
+  loadModal();
+});
+onMounted(async () => {
+  // For client side
+  await fetchBlog();
+  loadModal();
+  fillMeta();
+});
 </script>
 
 <template>
-  <div>
-    <HeaderComponent></HeaderComponent>
-
-    <VueFinalModal
-      v-if="showmodal"
-      v-model="showmodal"
-      classes="modal-container"
-      class="modal-container"
-      content-class="modal-comp"
-    >
-      <template v-slot:default="{ close }">
-        <ModalComp
-          :modalData="modalData"
-          :closeFunc="() => { close(); closeModal(); }"
-        />
-      </template>
-    </VueFinalModal>
-
-    <div class="blog-page-hero">
-      <h1 class="eyebrow">Reboot Democracy</h1>
-      <h1>Blog</h1>
-      <p style="padding:1rem 0 0 0">The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.</p>
-      <div class="search-bar-section">      
+  <div class="container container-main">
+    <HeaderComponent />
+    <ModalComp :showmodal="showmodal" @closeModal="closeModal" :data="modalData" />
+    <div class="blog-section">
+      <!-- SEARCH FORM -->
+      <div class="search-container">
         <input
-          class="search-bar"
-          v-model="searchTerm"
-          @keyup.enter="resetSearch()"
           type="text"
-          placeholder="SEARCH"/>
-            
-        <span type="submit"
-          @click="searchTerm = '';resetSearch();"
-          class="search-bar-cancel-btn material-symbols-outlined">
-            cancel
-        </span>
-
-        <span type="submit"
-          @click="resetSearch()"
-          class="search-bar-btn material-symbols-outlined">
-            search
-        </span>
+          v-model="searchTerm"
+          placeholder="Search blog..."
+          @input="debounceSearch()"
+        />
+        <button class="btn" @click="searchBlog">
+          Search
+        </button>
       </div>
-      <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
-    </div>
 
-    <div v-if="searchloader" class="loader-blog"></div>
+      <!-- LOADING SPINNER -->
+      <div v-if="searchloader" class="search-loader">
+        <p>Searching...</p>
+      </div>
 
-    <!-- Featured Blog Section -->
-    <div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
-    <div class="blog-featured-row">
-      <div class="first-blog-post" v-if="latestBlogPost">
-        <a :href="'/blog/' + latestBlogPost.slug">
-          <!-- Notice the change here -->
-          <div v-if="!isSSR && latestBlogPost.image">
-            <img 
-              class="blog-list-img" 
-              :src="directus.url.href+'assets/'+ blogData.slice().reverse()[0].image.filename_disk+'?width=800'"
-              loading="lazy"
+      <!-- If not searching, show some featured posts -->
+      <div v-if="!searchResultsFlag && searchTerm.trim() === ''">
+        <h2>Featured Post</h2>
+        <!-- Safely check the first/last item. Example: the last item is the newest if sorted by date -->
+        <div v-if="blogData.value && blogData.value.length > 0">
+          <div class="featured-post" :key="blogData.value[blogData.value.length - 1].slug">
+            <a 
+              :href="'/blog/' + blogData.value[blogData.value.length - 1].slug"
+              v-if="blogData.value[blogData.value.length - 1]"
             >
-          </div>
-            <h3>{{latestBlogPost.title}}</h3>
-            <p>{{ latestBlogPost.excerpt }}</p>
-            <p>Published on {{ formatDateOnly(new Date(latestBlogPost.date)) }}</p>
-            <div class="author-list">
-              <p class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
-              <div v-for="(author,i) in latestBlogPost.authors" :key="i" class="author-item">               
-                <div class="author-details">
-                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                  <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
+              <!-- Safe check for .image -->
+              <div v-if="blogData.value[blogData.value.length - 1].image">
+                <img
+                  class="blog-list-img"
+                  :src="directus.url.href + 'assets/' + blogData.value[blogData.value.length - 1].image.filename_disk + '?width=600'"
+                  loading="lazy"
+                >
+              </div>
+              <h3>{{ blogData.value[blogData.value.length - 1].title }}</h3>
+              <p>{{ blogData.value[blogData.value.length - 1].excerpt }}</p>
+              <p>
+                Published on
+                {{ formatDateOnly(blogData.value[blogData.value.length - 1].date) }}
+              </p>
+
+              <div class="author-list" v-if="blogData.value[blogData.value.length - 1].authors && blogData.value[blogData.value.length - 1].authors.length > 0">
+                <p class="author-name">By</p>
+                <div
+                  v-for="(author, i) in blogData.value[blogData.value.length - 1].authors"
+                  :key="author?.team_id?.id || i"
+                  class="author-item"
+                >
+                  <div class="author-details">
+                    <p class="author-name">
+                      {{ author.team_id.First_Name }} {{ author.team_id.Last_Name }}
+                    </p>
+                    <p class="author-name" v-if="blogData.value[blogData.value.length - 1].authors.length > 1 && i < blogData.value[blogData.value.length - 1].authors.length - 1">
+                      and
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </a>  
+            </a>
+          </div>
         </div>
-        
-        <!-- Other blog posts -->
-        <div class="other-blog-posts" v-if="!searchResultsFlag || searchTerm == ''">
-        <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  :key="index" v-show="index > 0 && index < 4"> 
-          <a :href="'/blog/' + blog_item.slug">
-            <!-- Notice the change here -->
-            <div v-if="!isSSR && blog_item.image">
-              <img 
-                class="blog-list-img" 
-                :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
-                loading="lazy"
-              >
-            </div>
+
+        <!-- Show a few more recent posts -->
+        <h2>Other Recent Posts</h2>
+        <div class="other-blog-posts">
+          <div
+            class="other-post-row"
+            v-for="(blog_item, index) in [...blogData.value].reverse()"
+            :key="blog_item.slug"
+            v-if="index < 4"
+          >
+            <a :href="'/blog/' + blog_item.slug">
+              <div v-if="blog_item.image">
+                <img
+                  class="blog-list-img"
+                  :src="directus.url.href + 'assets/' + blog_item.image.filename_disk + '?width=300'"
+                  loading="lazy"
+                >
+              </div>
               <div class="other-post-details">
-                <h3>{{blog_item.title}}</h3>
+                <h3>{{ blog_item.title }}</h3>
                 <p>{{ blog_item.excerpt }}</p>
-                <p>Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
-                <div class="author-list">
-                  <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
-                  <div v-for="(author,i) in blog_item.authors" :key="i" class="author-item">
+                <p>Published on {{ formatDateOnly(blog_item.date) }}</p>
+                <div class="author-list" v-if="blog_item.authors && blog_item.authors.length > 0">
+                  <p class="author-name">By</p>
+                  <div 
+                    v-for="(author,i) in blog_item.authors" 
+                    :key="author?.team_id?.id || i"
+                    class="author-item"
+                  >
                     <div class="author-details">
-                      <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                      <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                      <p class="author-name">
+                        {{author.team_id.First_Name}} {{author.team_id.Last_Name}}
+                      </p>
+                      <p 
+                        class="author-name"
+                        v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1"
+                      >
+                        and
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -357,145 +305,81 @@ if (import.meta.env.SSR) {
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Continue with the rest of your template, replacing v-lazy-load with v-if="!import.meta.env.SSR" -->
-    <!-- For each image section, use the pattern: -->
-    <!--
-    <div v-if="!import.meta.env.SSR && item.image">
-      <img 
-        class="blog-list-img" 
-        :src="directus.url.href+'assets/'+ item.image.id+'?width=300'"
-        loading="lazy"
-      >
-    </div>
-    -->
+      <!-- If search is triggered -->
+      <div v-else-if="searchResultsFlag || searchTerm.trim() !== ''">
+        <h2 v-if="searchTermDisplay" class="search-term">
+          Searching for <i>{{ searchTermDisplay }}</i>
+        </h2>
 
-    <div class="read-more-post" v-if="!searchResultsFlag && searchTermDisplay == ''">
-      <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
-    </div>
-
-
-    <div class="blog-section-header" v-if="!searchResultsFlag && searchTermDisplay == ''">
-      <h2>Latest Posts</h2>
-    </div>
-
-    <div v-if="!searchResultsFlag && searchTermDisplay == ''" class="allposts-section">
-      <div class="allposts-post-row" 
-           v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
-           :key="index" 
-           v-show="index >= 4 && index < 16">
-        <a :href="'/blog/' + blog_item.slug">
-          <div v-if="!isSSR && blog_item.image">
-            <img 
-              class="blog-list-img" 
-              :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
-              loading="lazy"
-            >
-          </div>
-          <div class="allposts-post-details">
-            <h3>{{blog_item.title}}</h3>
-            <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
-            <div class="author-list">
-              <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
-              <div v-for="(author,i) in blog_item.authors" :key="i" class="author-item">
-                <div class="author-details">
-                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                  <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                </div>
+        <!-- Show search results -->
+        <div 
+          class="allposts-section"
+          v-if="blogDataSearch.value && blogDataSearch.value.length > 0"
+        >
+          <div 
+            class="allposts-post-row"
+            v-for="(blog_item, index) in [...blogDataSearch.value].reverse()"
+            :key="blog_item.slug"
+          >
+            <a :href="'/blog/' + blog_item.slug">
+              <div v-if="blog_item.image">
+                <img
+                  class="blog-list-img"
+                  :src="directus.url.href + 'assets/' + blog_item.image.filename_disk + '?width=300'"
+                  loading="lazy"
+                >
               </div>
-            </div>
-          </div>
-        </a>
-      </div>
-      <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
-    </div>
-
-    <!-- Filtered Posts Section -->
-    <h2 v-if="searchResultsFlag && searchTermDisplay != ''" class="search-term">
-      Searching for <i>{{searchTermDisplay}}</i>
-    </h2>
-    
-    <div v-if="searchResultsFlag || searchTerm == ''">
-      <div v-if="!searchResultsFlag && searchTermDisplay == ''">
-        <div class="allposts-section">
-          <div v-for="tag_item in filteredTagDataWithoutNews" :key="tag_item" class="all-posts-row">
-            <div class="blog-section-header">
-              <h2>{{ tag_item }}</h2>
-            </div>
-            <div class="tag-posts-row-container">
-              <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
-                   :key="index" 
-                   class="tag-posts-row">
-                <div v-if="includesString(blog_item?.Tags, tag_item)">
-                  <a :href="'/blog/' + blog_item.slug">
-                    <div v-if="!isSSR && blog_item.image">
-                      <img 
-                        class="blog-list-img" 
-                        :src="directus.url.href + 'assets/' + blog_item.image.id+'?width=300'"
-                        loading="lazy"
+              <div class="allposts-post-details">
+                <h3>{{ blog_item.title }}</h3>
+                <p class="post-date">
+                  Published on {{ formatDateOnly(blog_item.date) }}
+                </p>
+                <div class="author-list" v-if="blog_item.authors && blog_item.authors.length > 0">
+                  <p class="author-name">By</p>
+                  <div 
+                    v-for="(author, i) in blog_item.authors"
+                    :key="author?.team_id?.id || i"
+                    class="author-item"
+                  >
+                    <div class="author-details">
+                      <p class="author-name">
+                        {{ author.team_id.First_Name }} {{ author.team_id.Last_Name }}
+                      </p>
+                      <p
+                        class="author-name"
+                        v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1"
                       >
+                        and
+                      </p>
                     </div>
-                    <div class="allposts-post-details">
-                      <h3>{{blog_item.title}}</h3>
-                      <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
-                      <div class="author-list">
-                        <p class="author-name">{{blog_item.authors.length > 0 ? 'By' : ''}}</p>
-                        <div v-for="(author, i) in blog_item.authors" :key="i" class="author-item">
-                          <div class="author-details">
-                            <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                            <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Search Results Section -->
-    <div v-if="searchResultsFlag && searchTermDisplay != ''" class="allposts-section">
-      <div class="allposts-post-row" 
-           v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
-           :key="index">
-        <a :href="'/blog/' + blog_item.slug">
-          <div v-if="!isSSR && blog_item.image">
-            <img 
-              class="blog-list-img" 
-              :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
-              loading="lazy"
-            >
-          </div>
-          <div class="allposts-post-details">
-            <h3>{{blog_item.title}}</h3>
-            <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
-            <div class="author-list">
-              <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
-              <div v-for="(author,i) in blog_item.authors" :key="i" class="author-item">
-                <div class="author-details">
-                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                  <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- If no results found -->
+        <div v-else>
+          <p>No results found.</p>
+        </div>
+      </div>
+
+      <!-- "Read all" link if not searching -->
+      <div class="read-more-post" v-if="!searchResultsFlag && searchTerm.trim() === ''">
+        <a href="/all-blog-posts" class="btn btn-small btn-primary">
+          Read All Posts
         </a>
       </div>
-      <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
     </div>
 
-    <!-- Rest of your template sections... -->
-    <FooterComponent></FooterComponent>
+    <FooterComponent />
   </div>
 </template>
 
 <style scoped>
-/* Keep your existing styles */
+/* Your existing styles. Example: */
 .image-placeholder {
   background-color: #f0f0f0;
   width: 100%;
