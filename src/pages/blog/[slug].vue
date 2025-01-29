@@ -100,8 +100,10 @@ if (import.meta.env.SSR) {
   // In dev mode (no SSR), fetch data after mount
   onMounted(async () => {
     console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
-    post.value = await fetchPost(normalizedSlug);
-    
+    // post.value = await fetchPost(normalizedSlug);
+    if (!post.value) {
+      post.value = await fetchPost(normalizedSlug);
+    }
     
     if (post.value) {
       useHead({
