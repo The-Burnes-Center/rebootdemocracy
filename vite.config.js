@@ -13,7 +13,7 @@ const assetsDir = path.join(process.cwd(), 'dist', 'assets');
 const uuidToFileMap = {};
 
 if (!fs.existsSync(assetsDir)) {
-  console.warn(`Warning: "dist/assets" does not exist. Skipping asset mapping...`);
+  console.warn(`Warning : "dist/assets" does not exist. Skipping asset mapping...`);
 } else {
   try {
     const files = fs.readdirSync(assetsDir);
