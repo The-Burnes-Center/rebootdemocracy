@@ -143,7 +143,8 @@ if (import.meta.env.SSR) {
 </script>
 
 <template>
-  <div v-if="post">
+  <!-- <div v-if="post"> -->
+    <div>
 <!-- Header Component -->
 <HeaderComponent></HeaderComponent>
 
@@ -195,8 +196,8 @@ if (import.meta.env.SSR) {
   
 
   </div>
-  <div v-else>
+  <!-- <div v-else>
     <p>Loading ...</p>
-  </div>
+  </div> -->
 
 </template>
