@@ -7,20 +7,19 @@ import { createDirectus, rest, readItems } from '@directus/sdk';
 import fs from 'fs';
 import path from 'path';
 
-// Safely read asset directory and create UUID-to-filename mapping
-// Updated to dist/assets
+// UPDATED to use dist/assets, since that's where you said your script writes files
 const assetsDir = path.join(process.cwd(), 'dist', 'assets');
 const uuidToFileMap = {};
 
 if (!fs.existsSync(assetsDir)) {
-  console.warn(`Warning : "dist/assets" does not exist. Skipping asset mapping...`);
+  console.warn(`Warning: "dist/assets" does not exist. Skipping asset mapping...`);
 } else {
   try {
     const files = fs.readdirSync(assetsDir);
     files.forEach((file) => {
+      // Example file: "00db1cad-6bc8-4254-8b11-53a383cf0b82.mp3"
       const [uuid, ...extParts] = file.split('.');
       if (uuid && extParts.length) {
-        // Example: 00db1cad-6bc8-4254-8b11-53a383cf0b82.mp3 → { "00db1cad-6bc8-4254-8b11-53a383cf0b82": "00db1cad-6bc8-4254-8b11-53a383cf0b82.mp3" }
         uuidToFileMap[uuid.toLowerCase()] = file;
       }
     });
@@ -45,6 +44,7 @@ export default defineConfig({
       const distDir = path.join(process.cwd(), 'dist');
       let slugToBuild = process.env.SLUG_TO_BUILD;
 
+      // If we have an incoming hook with a slug
       if (process.env.INCOMING_HOOK_BODY) {
         try {
           const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
@@ -59,44 +59,46 @@ export default defineConfig({
         }
       }
 
+      // Build just one slug
       if (slugToBuild) {
         return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
-      } else {
-        const directus = createDirectus('https://content.thegovlab.com').with(rest());
-        try {
-          const response = await directus.request(
-            readItems('reboot_democracy_blog', {
-              fields: ['slug'],
-              filter: { status: 'published' },
-              limit: -1,
-            })
-          );
-          const data = response.data || response;
+      }
 
-          // Build route => /blog/<slug>
-          const routePaths = data.map((item) => `/blog/${item.slug.toLowerCase()}`);
+      // Otherwise, build all published slugs from Directus
+      const directus = createDirectus('https://content.thegovlab.com').with(rest());
+      try {
+        const response = await directus.request(
+          readItems('reboot_democracy_blog', {
+            fields: ['slug'],
+            filter: { status: 'published' },
+            limit: -1,
+          })
+        );
 
-          // If dist/blog/<slug>.html exists, skip building
-          const finalRoutes = [];
-          for (const route of routePaths) {
-            const slugName = route.replace(/^\/blog\//, '');
-            const possibleFile = path.join(distDir, 'blog', `${slugName}.html`);
-            if (fs.existsSync(possibleFile)) {
-              console.log(`Skipping build for "${slugName}", already exists in dist/blog.`);
-            } else {
-              finalRoutes.push(route);
-            }
+        const data = response.data || response;
+        const routePaths = data.map((item) => `/blog/${item.slug.toLowerCase()}`);
+
+        // Skip routes if dist/blog/<slug>.html already exists
+        const finalRoutes = [];
+        for (const route of routePaths) {
+          const slugName = route.replace(/^\/blog\//, '');
+          const possibleFile = path.join(distDir, 'blog', `${slugName}.html`);
+          if (fs.existsSync(possibleFile)) {
+            console.log(`Skipping build for "${slugName}", already in dist/blog.`);
+          } else {
+            finalRoutes.push(route);
           }
-          return [...paths, ...finalRoutes];
-        } catch (error) {
-          console.error('Error fetching slugs from Directus:', error);
-          return paths;
         }
+
+        return [...paths, ...finalRoutes];
+      } catch (error) {
+        console.error('Error fetching slugs from Directus:', error);
+        return paths;
       }
     },
 
+    // Rewrites "https://content.thegovlab.com/assets/<UUID>[?someQuery]" to "assets/<filename>"
     onPageRendered(route, html) {
-      // Example rewriting of script/link references to be relative
       const depth = route.split('/').length - 1;
       const assetPrefix = './' + '../'.repeat(depth - 1);
 
@@ -111,11 +113,12 @@ export default defineConfig({
           /(<link[^>]*\s+href=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
           `$1${assetPrefix}$2$3`
         )
-        // Rewrite directus asset URLs if local file exists in dist/assets
+        // Updated regex: allow optional query params. Ex: ?width=300
         .replace(
-          /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)/gi,
+          /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)(?:\?[^"]*)?/gi,
           (match, uuid) => {
             const filename = uuidToFileMap[uuid.toLowerCase()];
+            // If we have a local file matching that UUID, rewrite to "assets/filename"
             return filename
               ? `${assetPrefix}assets/${filename}`
               : match;
@@ -136,7 +139,7 @@ export default defineConfig({
       },
     },
   },
-  
+
   ssr: {
     noExternal: [
       'vuetify',
