@@ -99,56 +99,55 @@ if (import.meta.env.SSR) {
 } else {
   // In dev mode (no SSR), fetch data after mount
   onMounted(async () => {
-    console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
+    // console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
     // post.value = await fetchPost(normalizedSlug);
-    if (!post.value) {
-      post.value = await fetchPost(normalizedSlug);
-    }
+
     
-    if (post.value) {
-      useHead({
-        title: 'RebootDemocracy.AI Blog | ' + post.value.title,
-        meta: [
-          { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-          { name: 'description', content: post.value.excerpt },
-          { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-          { property: 'og:description', content: post.value.excerpt },
-          {
-            property: 'og:image',
-            content: post.value.image
-              ? '/assets/' + post.value.image.filename_disk
-              : '/meta-fallback-image.png',
-          },
-          { property: 'og:image:width', content: '800' },
-          { property: 'og:image:height', content: '800' },
-          { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-          { property: 'twitter:description', content: post.value.excerpt },
-          {
-            property: 'twitter:image',
-            content: post.value.image
-              ? '/assets/' + post.value.image.filename_disk
-              : '/meta-fallback-image.png',
-          },
-          { property: 'twitter:card', content: 'summary_large_image' },
-        ],
-      });
-    } else {
-      useHead({
-        title: 'Post Not Found',
-        meta: [
-          { name: 'description', content: 'The requested post could not be found.' },
-        ],
-      });
-    }
+    // if (post.value) {
+    //   useHead({
+    //     title: 'RebootDemocracy.AI Blog | ' + post.value.title,
+    //     meta: [
+    //       { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+    //       { name: 'description', content: post.value.excerpt },
+    //       { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+    //       { property: 'og:description', content: post.value.excerpt },
+    //       {
+    //         property: 'og:image',
+    //         content: post.value.image
+    //           ? '/assets/' + post.value.image.filename_disk
+    //           : '/meta-fallback-image.png',
+    //       },
+    //       { property: 'og:image:width', content: '800' },
+    //       { property: 'og:image:height', content: '800' },
+    //       { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+    //       { property: 'twitter:description', content: post.value.excerpt },
+    //       {
+    //         property: 'twitter:image',
+    //         content: post.value.image
+    //           ? '/assets/' + post.value.image.filename_disk
+    //           : '/meta-fallback-image.png',
+    //       },
+    //       { property: 'twitter:card', content: 'summary_large_image' },
+    //     ],
+    //   });
+    // } else {
+    //   useHead({
+    //     title: 'Post Not Found',
+    //     meta: [
+    //       { name: 'description', content: 'The requested post could not be found.' },
+    //     ],
+    //   });
+    // }
   });
 }
 </script>
 
 <template>
-  <div v-if="post">
+  <!-- <div v-if="post"> -->
+    <div>
 <!-- Header Component -->
-<HeaderComponent></HeaderComponent>
-
+<!-- <HeaderComponent></HeaderComponent> -->
+<!-- 
 <div class="blog-hero">
 
   <img v-if="post && post.image" class="blog-img" :src= "'/assets/'+post.image.filename_disk+'?width=800'" />
@@ -173,32 +172,34 @@ if (import.meta.env.SSR) {
           <a target="_blank" :href="'http://twitter.com/share?url=https://rebootdemocracy.ai/blog/' + post.slug"><i class="fa-brands fa-square-x-twitter"></i></a>
           <a target="_blank" :href="'https://www.facebook.com/sharer/sharer.php?u=https://rebootdemocracy.ai/blog/' + post.slug"><i class="fa-brands fa-facebook"></i></a>
           <a target="_blank" :href="'https://linkedin.com/shareArticle?url=https://rebootdemocracy.ai/blog/' + post.slug + '&title=' + post.title"><i class="fa-brands fa-linkedin"></i></a>
+          
+           -->
           <!-- <a><i class="fa-solid fa-link"></i></a> -->
-        </div>
+        <!-- </div>
 
     </div>
    
   </div>
-</div>
+</div> -->
 
-<div class="blog-body">
+<!-- <div class="blog-body">
   <div class="audio-version" v-if="post.audio_version">
   <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.&nbsp;</em></p>
     <p><audio controls="controls"><source :src="'/assets/'+post.audio_version.filename_disk" type="audio/mpeg" data-mce-fragment="1"></audio></p>
   </div>
     <div class="blog-content" v-html="post.content"></div>
     <p v-if="post.ai_content_disclaimer" class="blog-img-byline">Some images in this post were generated using AI.</p>
-</div>
+</div> -->
 
   <!-- Footer Component -->
-  <FooterComponent></FooterComponent>
+  <!-- <FooterComponent></FooterComponent> -->
   
   <!-- Wrap content in a Suspense boundary in a parent component or layout -->
   
 
   </div>
-  <div v-else>
+  <!-- <div v-else>
     <p>Loading ...</p>
-  </div>
+  </div> -->
 
 </template>
