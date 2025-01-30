@@ -1,7 +1,7 @@
 <!-- src/pages/blog/[slug].vue -->
 <!-- src/pages/blog/[slug].vue -->
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useHead } from '@unhead/vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createDirectus, rest, readItems } from '@directus/sdk';
@@ -17,8 +17,16 @@ const props = defineProps<{ slug: string }>();
 // Normalize the slug to lowercase
 const normalizedSlug = props.slug.toLowerCase();
 
+
 const directus = createDirectus('https://content.thegovlab.com').with(rest());
+
+// Dev check
+const isDev = import.meta.env.DEV;
 const post = ref<any>(null);
+
+const showFallback = computed(() => {
+  return isDev && !post.value;
+});
 
 // Date formatting functions...
 function formatTimeOnly(d1) {
@@ -198,7 +206,7 @@ if (import.meta.env.SSR) {
   
 
   </div>
-  <div v-else>
+  <div v-else-if="showFallback">
     <p>Loading ...</p>
   </div>
 
