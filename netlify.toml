@@ -3,9 +3,6 @@
   functions = "netlify/functions"
   publish = "dist"
 
-[build.environment]
-  NODE_ENV = "production"
-
 [[plugins]]
   package = "custom-cache-plugin"
 
