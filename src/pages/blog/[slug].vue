@@ -98,6 +98,7 @@ console.log("SSR fetch result:", post.value)
   // Client code (runs in the browser after hydration)
   // If you don't want to do any client re-fetch in production, gate it behind import.meta.env.DEV
   // --------------------
+  console.log("Client: import.meta.env.DEV =", import.meta.env.DEV);
   onMounted(async () => {
     // Example: Only do a second fetch in dev mode for local debugging
     if (import.meta.env.DEV) {
