@@ -1,77 +1,64 @@
-<!-- src/pages/blog/[slug].vue -->
-<!-- src/pages/blog/[slug].vue -->
-<script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
-import { useHead } from '@unhead/vue';
-import { useRoute, useRouter } from 'vue-router';
-import { createDirectus, rest, readItems } from '@directus/sdk';
-import HeaderComponent from "../../components/header.vue";
-import FooterComponent from "../../components/footer.vue";
-import format from "date-fns/format";
-import isPast from "date-fns/isPast";
 
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useHead } from '@unhead/vue'
+import { createDirectus, rest, readItems } from '@directus/sdk'
 
-// Get props provided by vite-plugin-pages for the dynamic route
-const props = defineProps<{ slug: string }>();
+// Example: import any shared components
+import HeaderComponent from '../../components/header.vue'
+import FooterComponent from '../../components/footer.vue'
 
-// Normalize the slug to lowercase
-const normalizedSlug = props.slug.toLowerCase();
+// In VitePress-based or Vite-based SSG, we'll receive "slug" as a prop from file-based routing
+const props = defineProps<{ slug: string }>()
 
+/**
+ * This ref holds our loaded post data from Directus.
+ * If it's null, we either haven't fetched yet or there's no post matching the slug.
+ */
+const post = ref<any>(null)
 
-const directus = createDirectus('https://content.thegovlab.com').with(rest());
+/**
+ * Create the Directus REST client. 
+ * Replace "https://content.thegovlab.com" with your own Directus instance if needed.
+ */
+const directus = createDirectus('https://content.thegovlab.com').with(rest())
 
-// Dev check
-const isDev = import.meta.env.DEV;
-const post = ref<any>(null);
-
-const showFallback = computed(() => {
-  return isDev && !post.value;
-});
-
-// Date formatting functions...
-function formatTimeOnly(d1) {
-  return format(d1, "h:mm aa");
-}
-function formatDateTime(d1) {
-  return format(d1, "MMMM d, yyyy, h:mm aa");
-}
-function formatDateOnly(d1) {
-  return format(d1, "MMMM d, yyyy");
-}
-function PastDate(d1) {
-  return isPast(d1);
-}
-
+/**
+ * Utility fetch function to load the blog post associated with slugValue.
+ * (Case-insensitive match for "published" post.)
+ */
 async function fetchPost(slugValue: string) {
-  if (!slugValue) return null;
-  
-  // Use a case-insensitive filter to fetch the post
+  if (!slugValue) return null
+
   const response = await directus.request(
     readItems('reboot_democracy_blog', {
-      filter: { 
+      filter: {
         status: { _eq: 'published' },
-        slug: { _icontains: slugValue } // Use case-insensitive equality
+        slug: { _icontains: slugValue },
       },
-      fields: ['*.*.*.*'],
+      fields: ['*.*.*.*'], // Adjust the fields if you need nested expansions
       limit: -1,
     })
-  );
-  
-  const data = response.data || response;
-  return (Array.isArray(data) && data.length > 0) ? data[0] : null;
+  )
+
+  // Directus returns data in "response.data" or directly in "response"
+  const data = response.data || response
+  return Array.isArray(data) && data.length > 0 ? data[0] : null
 }
 
-// If we're in SSG mode, fetch data before rendering
+// --------------------
+// SSG / SSR fetch block
+// This portion runs at build-time or server-time.
+// It populates "post" so the static HTML includes the correct content.
+// --------------------
 if (import.meta.env.SSR) {
-  // Note: This is top-level await in script setup, allowed in newer environments
-  post.value = await fetchPost(normalizedSlug);
+  // Perform the fetch so the HTML is fully rendered before shipping to the client
+  post.value = await fetchPost(props.slug)
 
-  
-
-  // Set meta right after data is fetched in SSG
   if (post.value) {
+    // Inject meta tags for SEO and social sharing
     useHead({
-      title: 'RebootDemocracy.AI Blog | ' + post.value.title,
+      title: `RebootDemocracy.AI Blog | ${post.value.title}`,
       meta: [
         { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
         { name: 'description', content: post.value.excerpt },
@@ -95,119 +82,135 @@ if (import.meta.env.SSR) {
         },
         { property: 'twitter:card', content: 'summary_large_image' },
       ],
-    });
+    })
   } else {
+    // If there's no matching post, set a "Not found" meta
     useHead({
       title: 'Post Not Found',
       meta: [
-        { name: 'description', content: 'The requested post could not be found.' },
+        { name: 'description', content: 'No post found for this slug.' },
       ],
-    });
+    })
   }
 } else {
-  // In dev mode (no SSR), fetch data after mount
+  // --------------------
+  // Client code (runs in the browser after hydration)
+  // If you don't want to do any client re-fetch in production, gate it behind import.meta.env.DEV
+  // --------------------
   onMounted(async () => {
-    console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
-    // post.value = await fetchPost(normalizedSlug);
+    // Example: Only do a second fetch in dev mode for local debugging
     if (import.meta.env.DEV) {
-      console.log("Running in dev mode -> fetching post again for debugging purposes");
-      post.value = await fetchPost(props.slug);
+      console.log('Dev mode: fetching on mount for slug:', props.slug)
+      post.value = await fetchPost(props.slug)
+
+      // Update meta if we get the post in dev mode
+      if (post.value) {
+        useHead({
+          title: `RebootDemocracy.AI Blog | ${post.value.title}`,
+          meta: [
+        { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+        { name: 'description', content: post.value.excerpt },
+        { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+        { property: 'og:description', content: post.value.excerpt },
+        {
+          property: 'og:image',
+          content: post.value.image
+            ? '/assets/' + post.value.image.filename_disk
+            : '/meta-fallback-image.png',
+        },
+        { property: 'og:image:width', content: '800' },
+        { property: 'og:image:height', content: '800' },
+        { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+        { property: 'twitter:description', content: post.value.excerpt },
+        {
+          property: 'twitter:image',
+          content: post.value.image
+            ? '/assets/' + post.value.image.filename_disk
+            : '/meta-fallback-image.png',
+        },
+        { property: 'twitter:card', content: 'summary_large_image' },
+      ],
+        })
+      } else {
+        useHead({
+          title: 'Post Not Found',
+          meta: [{ name: 'description', content: 'No post found for this slug.' }],
+        })
+      }
     }
-    
-    if (post.value) {
-      useHead({
-        title: 'RebootDemocracy.AI Blog | ' + post.value.title,
-        meta: [
-          { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-          { name: 'description', content: post.value.excerpt },
-          { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-          { property: 'og:description', content: post.value.excerpt },
-          {
-            property: 'og:image',
-            content: post.value.image
-              ? '/assets/' + post.value.image.filename_disk
-              : '/meta-fallback-image.png',
-          },
-          { property: 'og:image:width', content: '800' },
-          { property: 'og:image:height', content: '800' },
-          { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-          { property: 'twitter:description', content: post.value.excerpt },
-          {
-            property: 'twitter:image',
-            content: post.value.image
-              ? '/assets/' + post.value.image.filename_disk
-              : '/meta-fallback-image.png',
-          },
-          { property: 'twitter:card', content: 'summary_large_image' },
-        ],
-      });
-    } else {
-      useHead({
-        title: 'Post Not Found',
-        meta: [
-          { name: 'description', content: 'The requested post could not be found.' },
-        ],
-      });
-    }
-  });
+  })
 }
 </script>
 
 <template>
+  <!-- If we have post data, show it. If not, show a fallback. -->
   <div v-if="post">
-<!-- Header Component -->
-<HeaderComponent></HeaderComponent>
+    <!-- Example: a header component -->
+    <HeaderComponent />
 
-<div class="blog-hero">
+    <!-- Example hero section with a featured image -->
+    <section class="blog-hero">
+      <img
+        v-if="post.image"
+        class="blog-img"
+        :src="`/assets/${post.image.filename_disk}?width=800`"
+        alt="Blog Post Image"
+      />
+      <div class="blog-details">
+        <h1>{{ post.title }}</h1>
+        <p class="excerpt">{{ post.excerpt }}</p>
+      </div>
+    </section>
 
-  <img v-if="post && post.image" class="blog-img" :src= "'/assets/'+post.image.filename_disk+'?width=800'" />
-  
-  <div class="blog-details">
-    <h1>{{post.title}}</h1>
-    <p class="excerpt"> {{post.excerpt}}</p>
-    <p class="post-date">Published on <b>{{formatDateOnly(new Date(post.date))}}</b></p>
+    <!-- Body of the blog post, using v-html to render any HTML content -->
+    <section class="blog-body">
+      <!-- If "post.content" is HTML from Directus, you can render it directly -->
+      <div class="blog-content" v-html="post.content"></div>
+      
+      <!-- Optional disclaimers or notes -->
+      <p v-if="post.ai_content_disclaimer" class="blog-img-byline">
+        Some images in this post were generated using AI.
+      </p>
+    </section>
 
-      <div class="hero-author-sm">
-      <div v-for="(author,i) in post.authors">
-          <div class="author-item">
-            <img v-if="author.team_id.Headshot" class="author-headshot" :src="'/assets/'+author.team_id.Headshot.filename_disk">
-            <p  v-if="!author.team_id.Headshot" class="author-no-image">{{author.team_id.First_Name[0] }} {{author.team_id.Last_Name[0]}}</p>
-            <div class="author-details">
-              <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-              <a class="author-bio" v-if="author.team_id.Link_to_bio" :href="author.team_id.Link_to_bio">Read Bio</a>
-            </div>
-          </div>
-        </div>
-        <div class="sm-tray">
-          <a target="_blank" :href="'http://twitter.com/share?url=https://rebootdemocracy.ai/blog/' + post.slug"><i class="fa-brands fa-square-x-twitter"></i></a>
-          <a target="_blank" :href="'https://www.facebook.com/sharer/sharer.php?u=https://rebootdemocracy.ai/blog/' + post.slug"><i class="fa-brands fa-facebook"></i></a>
-          <a target="_blank" :href="'https://linkedin.com/shareArticle?url=https://rebootdemocracy.ai/blog/' + post.slug + '&title=' + post.title"><i class="fa-brands fa-linkedin"></i></a>
-          <!-- <a><i class="fa-solid fa-link"></i></a> -->
-        </div>
-
-    </div>
-   
-  </div>
-</div>
-
-<div class="blog-body">
-  <div class="audio-version" v-if="post.audio_version">
-  <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.&nbsp;</em></p>
-    <p><audio controls="controls"><source :src="'/assets/'+post.audio_version.filename_disk" type="audio/mpeg" data-mce-fragment="1"></audio></p>
-  </div>
-    <div class="blog-content" v-html="post.content"></div>
-    <p v-if="post.ai_content_disclaimer" class="blog-img-byline">Some images in this post were generated using AI.</p>
-</div>
-
-  <!-- Footer Component -->
-  <FooterComponent></FooterComponent>
-  
-  <!-- Wrap content in a Suspense boundary in a parent component or layout -->
-  
-
-  </div>
-  <div v-else-if="showFallback">
-    <p>Loading ...</p>
+    <!-- Example: a footer component -->
+    <FooterComponent />
   </div>
 
+  <!-- Fallback if "post" is null. 
+       In production, if the SSR/SSG fetch succeeded, this won't be seen. -->
+  <div v-else>
+    <p>Loading...</p>
+  </div>
 </template>
+
+<style scoped>
+.blog-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* add styling as needed */
+}
+.blog-img {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1rem;
+}
+.blog-details {
+  text-align: center;
+}
+.blog-body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.blog-content {
+  margin-top: 1rem;
+}
+.blog-img-byline {
+  font-style: italic;
+  margin-top: 1rem;
+}
+</style>
+
+
