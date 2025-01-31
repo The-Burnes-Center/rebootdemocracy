@@ -93,54 +93,54 @@ console.log("SSR fetch result:", post.value)
       ],
     })
   }
-} else {
-  // --------------------
-  // Client code (runs in the browser after hydration)
-  // If you don't want to do any client re-fetch in production, gate it behind import.meta.env.DEV
-  // --------------------
-  console.log("Client: import.meta.env.DEV =", import.meta.env.DEV);
-  onMounted(async () => {
-    // Example: Only do a second fetch in dev mode for local debugging
-    if (import.meta.env.DEV) {
-      console.log('Dev mode: fetching on mount for slug:', props.slug)
-      post.value = await fetchPost(props.slug)
+// } else {
+//   // --------------------
+//   // Client code (runs in the browser after hydration)
+//   // If you don't want to do any client re-fetch in production, gate it behind import.meta.env.DEV
+//   // --------------------
+//   console.log("Client: import.meta.env.DEV =", import.meta.env.DEV);
+//   onMounted(async () => {
+//     // Example: Only do a second fetch in dev mode for local debugging
+//     if (import.meta.env.DEV) {
+//       console.log('Dev mode: fetching on mount for slug:', props.slug)
+//       post.value = await fetchPost(props.slug)
 
-      // Update meta if we get the post in dev mode
-      if (post.value) {
-        useHead({
-          title: `RebootDemocracy.AI Blog | ${post.value.title}`,
-          meta: [
-        { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-        { name: 'description', content: post.value.excerpt },
-        { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-        { property: 'og:description', content: post.value.excerpt },
-        {
-          property: 'og:image',
-          content: post.value.image
-            ? '/assets/' + post.value.image.filename_disk
-            : '/meta-fallback-image.png',
-        },
-        { property: 'og:image:width', content: '800' },
-        { property: 'og:image:height', content: '800' },
-        { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-        { property: 'twitter:description', content: post.value.excerpt },
-        {
-          property: 'twitter:image',
-          content: post.value.image
-            ? '/assets/' + post.value.image.filename_disk
-            : '/meta-fallback-image.png',
-        },
-        { property: 'twitter:card', content: 'summary_large_image' },
-      ],
-        })
-      } else {
-        useHead({
-          title: 'Post Not Found',
-          meta: [{ name: 'description', content: 'No post found for this slug.' }],
-        })
-      }
-    }
-  })
+//       // Update meta if we get the post in dev mode
+//       if (post.value) {
+//         useHead({
+//           title: `RebootDemocracy.AI Blog | ${post.value.title}`,
+//           meta: [
+//         { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+//         { name: 'description', content: post.value.excerpt },
+//         { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+//         { property: 'og:description', content: post.value.excerpt },
+//         {
+//           property: 'og:image',
+//           content: post.value.image
+//             ? '/assets/' + post.value.image.filename_disk
+//             : '/meta-fallback-image.png',
+//         },
+//         { property: 'og:image:width', content: '800' },
+//         { property: 'og:image:height', content: '800' },
+//         { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+//         { property: 'twitter:description', content: post.value.excerpt },
+//         {
+//           property: 'twitter:image',
+//           content: post.value.image
+//             ? '/assets/' + post.value.image.filename_disk
+//             : '/meta-fallback-image.png',
+//         },
+//         { property: 'twitter:card', content: 'summary_large_image' },
+//       ],
+//         })
+//       } else {
+//         useHead({
+//           title: 'Post Not Found',
+//           meta: [{ name: 'description', content: 'No post found for this slug.' }],
+//         })
+//       }
+  //   }
+  // })
 }
 </script>
 
