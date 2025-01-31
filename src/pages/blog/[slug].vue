@@ -93,98 +93,58 @@ console.log("SSR fetch result:", post.value)
       ],
     })
   }
-// } else {
-//   // --------------------
-//   // Client code (runs in the browser after hydration)
-//   // If you don't want to do any client re-fetch in production, gate it behind import.meta.env.DEV
-//   // --------------------
-//   console.log("Client: import.meta.env.DEV =", import.meta.env.DEV);
-//   onMounted(async () => {
-//     // Example: Only do a second fetch in dev mode for local debugging
-//     if (import.meta.env.DEV) {
-//       console.log('Dev mode: fetching on mount for slug:', props.slug)
-//       post.value = await fetchPost(props.slug)
+} else {
+  // --------------------
+  // Client code (runs in the browser after hydration)
+  // If you don't want to do any client re-fetch in production, gate it behind import.meta.env.DEV
+  // --------------------
+  console.log("Client: import.meta.env.DEV =", import.meta.env.DEV);
+  onMounted(async () => {
+    // Example: Only do a second fetch in dev mode for local debugging
+    if (import.meta.env.DEV) {
+      console.log('Dev mode: fetching on mount for slug:', props.slug)
+      post.value = await fetchPost(props.slug)
 
-//       // Update meta if we get the post in dev mode
-//       if (post.value) {
-//         useHead({
-//           title: `RebootDemocracy.AI Blog | ${post.value.title}`,
-//           meta: [
-//         { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-//         { name: 'description', content: post.value.excerpt },
-//         { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-//         { property: 'og:description', content: post.value.excerpt },
-//         {
-//           property: 'og:image',
-//           content: post.value.image
-//             ? '/assets/' + post.value.image.filename_disk
-//             : '/meta-fallback-image.png',
-//         },
-//         { property: 'og:image:width', content: '800' },
-//         { property: 'og:image:height', content: '800' },
-//         { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
-//         { property: 'twitter:description', content: post.value.excerpt },
-//         {
-//           property: 'twitter:image',
-//           content: post.value.image
-//             ? '/assets/' + post.value.image.filename_disk
-//             : '/meta-fallback-image.png',
-//         },
-//         { property: 'twitter:card', content: 'summary_large_image' },
-//       ],
-//         })
-//       } else {
-//         useHead({
-//           title: 'Post Not Found',
-//           meta: [{ name: 'description', content: 'No post found for this slug.' }],
-//         })
-//       }
-  //   }
-  // })
+      // Update meta if we get the post in dev mode
+      if (post.value) {
+        useHead({
+          title: `RebootDemocracy.AI Blog | ${post.value.title}`,
+          meta: [
+        { name: 'title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+        { name: 'description', content: post.value.excerpt },
+        { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+        { property: 'og:description', content: post.value.excerpt },
+        {
+          property: 'og:image',
+          content: post.value.image
+            ? '/assets/' + post.value.image.filename_disk
+            : '/meta-fallback-image.png',
+        },
+        { property: 'og:image:width', content: '800' },
+        { property: 'og:image:height', content: '800' },
+        { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
+        { property: 'twitter:description', content: post.value.excerpt },
+        {
+          property: 'twitter:image',
+          content: post.value.image
+            ? '/assets/' + post.value.image.filename_disk
+            : '/meta-fallback-image.png',
+        },
+        { property: 'twitter:card', content: 'summary_large_image' },
+      ],
+        })
+      } else {
+        useHead({
+          title: 'Post Not Found',
+          meta: [{ name: 'description', content: 'No post found for this slug.' }],
+        })
+      }
+    }
+  })
 }
 </script>
 
-<template>
-  <!-- If we have post data, show it. If not, show a fallback. -->
-  <div v-if="post && import.meta.env.SSR">
-    <!-- Example: a header component -->
-    <HeaderComponent />
 
-    <!-- Example hero section with a featured image -->
-    <section class="blog-hero">
-      <img
-        v-if="post.image"
-        class="blog-img"
-        :src="`/assets/${post.image.filename_disk}?width=800`"
-        alt="Blog Post Image"
-      />
-      <div class="blog-details">
-        <h1>{{ post.title }}</h1>
-        <p class="excerpt">{{ post.excerpt }}</p>
-      </div>
-    </section>
-
-    <!-- Body of the blog post, using v-html to render any HTML content -->
-    <section class="blog-body">
-      <!-- If "post.content" is HTML from Directus, you can render it directly -->
-      <div class="blog-content" v-html="post.content"></div>
-      
-      <!-- Optional disclaimers or notes -->
-      <p v-if="post.ai_content_disclaimer" class="blog-img-byline">
-        Some images in this post were generated using AI.
-      </p>
-    </section>
-
-    <!-- Example: a footer component -->
-    <FooterComponent />
-  </div>
-
-  <!-- Fallback if "post" is null. 
-       In production, if the SSR/SSG fetch succeeded, this won't be seen. -->
-  <div v-else>
-    <p>Loading...</p>
-  </div>
-</template>
 
 <style scoped>
 .blog-hero {
