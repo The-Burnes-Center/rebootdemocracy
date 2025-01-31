@@ -52,8 +52,9 @@ async function fetchPost(slugValue: string) {
 // It populates "post" so the static HTML includes the correct content.
 // --------------------
 if (import.meta.env.SSR) {
-  // Perform the fetch so the HTML is fully rendered before shipping to the client
-  post.value = await fetchPost(props.slug)
+console.log("SSR fetching post for slug:", props.slug)
+post.value = await fetchPost(props.slug)
+console.log("SSR fetch result:", post.value)
 
   if (post.value) {
     // Inject meta tags for SEO and social sharing
