@@ -146,7 +146,7 @@ console.log("SSR fetch result:", post.value)
 
 <template>
   <!-- If we have post data, show it. If not, show a fallback. -->
-  <div v-if="post">
+  <div v-if="post && import.meta.env.SSR">
     <!-- Example: a header component -->
     <HeaderComponent />
 
