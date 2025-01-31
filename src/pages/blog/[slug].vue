@@ -3,7 +3,9 @@
 
 </script>
 
-
+<template>
+  
+</template>
 
 <style scoped>
 .blog-hero {
