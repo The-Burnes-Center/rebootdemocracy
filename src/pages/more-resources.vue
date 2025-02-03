@@ -4,7 +4,6 @@ import { Directus } from '@directus/sdk';
 import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
-
 // import { $vfm, VueFinalModal, ModalsContainer } from 'vue-final-modal'
 
 import HeaderComponent from "../components/header.vue";
