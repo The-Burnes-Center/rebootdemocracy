@@ -199,6 +199,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           <a target="_blank" :href="'http://twitter.com/share?url=https://rebootdemocracy.ai/blog/' + postData[0].slug"><i class="fa-brands fa-square-x-twitter"></i></a>
           <a target="_blank" :href="'https://www.facebook.com/sharer/sharer.php?u=https://rebootdemocracy.ai/blog/' + postData[0].slug"><i class="fa-brands fa-facebook"></i></a>
           <a target="_blank" :href="'https://linkedin.com/shareArticle?url=https://rebootdemocracy.ai/blog/' + postData[0].slug + '&title=' + postData[0].title"><i class="fa-brands fa-linkedin"></i></a>
+          <a target="_blank" :href="'https://bsky.app/intent/compose?text=https://rebootdemocracy.ai/blog/' + postData[0].slug"><i class="fa-brands fa-square-bluesky"></i></a>
           <!-- <a><i class="fa-solid fa-link"></i></a> -->
         </div>
 
