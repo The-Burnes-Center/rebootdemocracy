@@ -526,7 +526,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         </div>
         <img
           v-if="blog_item.image"
-          class="blog-list-img"
+          class="all-posts-page-list-img"
           :src="directus._url + 'assets/' + blog_item.image.id"
           alt="blog-item-img"
         />
