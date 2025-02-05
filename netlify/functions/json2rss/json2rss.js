@@ -64,7 +64,7 @@ exports.handler = async function (event, context) {
           e.fullURL || ("https://rebootdemocracy.ai/blog/" + e.slug),
         description: (() => {
           const fi = (e.image && e.image.filename_disk) ? e.image.filename_disk : "default.jpg";
-          return '<![CDATA[<img src="https://rebootdemocracy.ai/assets/' + fi +
+          return '<![CDATA[<img src="https://content.thegovlab.com/assets/' + fi +
             '"/> ' + e.content + ']]>';
         })(),
         pubDate: buildRFC822Date(e.date)
