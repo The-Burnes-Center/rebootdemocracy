@@ -21,6 +21,7 @@
           </div>
         </div>
         <a href="/signup" class="btn btn-small btn-primary">Sign up</a>
+        <a href="/.netlify/functions/json2rss" target="_blank" class="fa-solid fa-rss rss"></a>
       </div>
     </div>
 
@@ -43,6 +44,7 @@
           </div>
         </div>
         <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
+        <a href="/.netlify/functions/json2rss" class="fa-solid fa-rss rss"></a>
       </div>
     </div>
   </div>
