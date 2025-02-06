@@ -650,9 +650,6 @@ a.btn:hover{
   height: 200px;
   width: 100%;
   object-fit: cover;
-}
-
-.blog-list-img {
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -669,7 +666,8 @@ a.btn:hover{
   height: 120px;
 }
 
-.loaded .blog-list-img {
+.loaded .blog-list-img,
+.loaded .all-posts-page-list-img {
   opacity: 1;
 }
 

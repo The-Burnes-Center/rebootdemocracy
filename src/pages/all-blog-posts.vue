@@ -10,11 +10,15 @@ import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
 import { register } from 'swiper/element/bundle';
 import { useHead } from '@vueuse/head';
+import { lazyLoad } from '../directives/lazyLoad';
 
 export default {
   components: {
     "header-comp": HeaderComponent,
     "footer-comp": FooterComponent,
+  },
+  directives: {
+    lazyLoad
   },
   data() {
     return {
@@ -44,6 +48,10 @@ export default {
       slider: '',
       wsloaded: false,
       ini: true,
+      currentPage: 1,
+      postsPerPage: 50,
+      hasMorePosts: true,  
+      isLoadingMore: false,
 
       // Replicating from blog-page:
       pschatContent: '',
@@ -257,6 +265,7 @@ export default {
       this.blogDataSearch = [...directusOnlyPosts, ...overlappingPosts, ...weaviateOnlyOrdered];
     },
     resetSearch() {
+      this.currentPage = 1;
       this.blogDataSearch = [];
       this.searchactive = false;
       this.searchResultsFlag = 0;
@@ -375,33 +384,65 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     FutureDate(d1) {
       return isFuture(new Date(d1));
     },
-    fetchBlog() {
-      const self = this;
-      this.directus
-        .items('reboot_democracy_blog')
-        .readByQuery({
-          meta: 'total_count',
-          limit: 50,
-          filter: {
-            status: {
-              _eq: "published",
-            },
+async fetchBlog(loadMore = false) {
+ 
+  if (loadMore) {
+    this.isLoadingMore = true;
+  }
+
+  try {
+    const response = await this.directus
+      .items('reboot_democracy_blog')
+      .readByQuery({
+        meta: 'total_count',  
+        limit: this.postsPerPage,
+        page: this.currentPage,
+        filter: {
+          status: {
+            _eq: "published",
           },
-          fields: [
-            '*.*',
-            'authors.team_id.*',
-            'authors.team_id.Headshot.*'
-          ],
-          sort: ["date"]
-        })
-        .then((item) => {
-          self.blogData = item.data;
-          // If no search term, show all posts after fetch
-          if (!self.searchTerm.trim()) {
-            self.blogDataSearch = self.blogData;
-          }
-        });
+        },
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*'
+        ],
+        sort: ["-date"]
+      });
+
+    const totalPosts = response.meta.total_count;
+    const newPosts = response.data;
+
+    if (loadMore) {
+      this.blogData = [...this.blogData, ...newPosts];
+    } else {
+      this.blogData = newPosts;
     }
+
+    if (!this.searchTerm.trim()) {
+      this.blogDataSearch = this.blogData;
+    }
+
+    this.hasMorePosts = newPosts.length === this.postsPerPage && 
+                       this.blogData.length < totalPosts;
+
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    this.hasMorePosts = false; 
+  } finally {
+    this.isLoadingMore = false;
+  }
+},
+
+  async loadMorePosts() {
+  if (this.hasMorePosts && !this.isLoadingMore) {
+    this.currentPage++;
+    await this.fetchBlog(true);
+  }
+}
+
+
+    
   }
 }
 </script>
@@ -441,6 +482,23 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 @keyframes spinner {
   to { transform: rotate(360deg); }
+}
+
+.load-more-section {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.load-more-section button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.load-more-posts-btn {
+  font-family: Space Mono;
+  color: #000;
+  font-weight: 700;
 }
 </style>
 
@@ -491,7 +549,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="allposts-section">
     <div
       class="allposts-post-row"
-      v-for="(blog_item, index) in blogDataSearch.slice().reverse()"
+      v-for="(blog_item, index) in blogDataSearch"
       :key="index"
     >
       <a :href="'/blog/' + blog_item.slug">
@@ -524,16 +582,27 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             </div>
           </div>
         </div>
+        <div v-lazy-load>
         <img
           v-if="blog_item.image"
           class="all-posts-page-list-img"
-          :src="directus._url + 'assets/' + blog_item.image.id"
+          :data-src="directus._url + 'assets/' + blog_item.image.id + '?width=800'"
           alt="blog-item-img"
         />
+        </div>
       </a>
     </div>
   </div>
-
+<div class="load-more-section" v-if="hasMorePosts">
+  <button 
+    @click="loadMorePosts" 
+    class="btn btn-small btn-primary load-more-posts-btn"
+    :disabled="isLoadingMore"
+  >
+    <span v-if="isLoadingMore">Loading...</span>
+    <span v-else>Load More Posts</span>
+  </button>
+</div>
   <!-- Footer Component -->
   <footer-comp></footer-comp>
 </template>
