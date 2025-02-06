@@ -30,7 +30,7 @@ import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
  * (Replace with your older `new Directus('...')` if needed, 
  * but `createDirectus(...).with(rest())` is recommended for Directus v9+)
  */
-const directus = createDirectus('https://content.thegovlab.com').with(rest());
+const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
 /**
  * Route
@@ -180,7 +180,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       },
       {
         property: 'og:image',
-        content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
+        content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
       },
       { property: 'twitter:title', content: "RebootDemocracy.AI" },
       {
@@ -197,7 +197,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       },
       {
         property: 'twitter:image',
-        content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
+        content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
       },
       { property: 'twitter:card', content: "summary_large_image" },
     ],
@@ -407,7 +407,7 @@ function fetchBlog(): void {
           v-if="blog_item.image"
           class="blog-list-img"
           :src="
-            'https://content.thegovlab.com/assets/' + blog_item.image.id+'?width=300'
+            'https://dev.thegovlab.com/assets/' + blog_item.image.id+'?width=300'
           "
         />
       </a>

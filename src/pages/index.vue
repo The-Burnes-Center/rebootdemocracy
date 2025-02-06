@@ -25,7 +25,7 @@ const showmodal = ref(false);
 const moreresourceData = ref<any[]>([]);
 const item_counter = ref(0);
 
-const directus = createDirectus('https://content.thegovlab.com').with(rest());
+const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
 // Fetch data functions
 async function fetchIndex() {

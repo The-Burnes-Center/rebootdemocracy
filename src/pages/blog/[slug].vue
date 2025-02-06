@@ -19,9 +19,9 @@ const post = ref<any>(null)
 
 /**
  * Create the Directus REST client. 
- * Replace "https://content.thegovlab.com" with your own Directus instance if needed.
+ * Replace "https://dev.thegovlab.com" with your own Directus instance if needed.
  */
-const directus = createDirectus('https://content.thegovlab.com').with(rest())
+const directus = createDirectus('https://dev.thegovlab.com').with(rest())
 
 /**
  * Utility fetch function to load the blog post associated with slugValue.

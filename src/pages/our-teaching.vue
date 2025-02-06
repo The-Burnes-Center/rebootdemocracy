@@ -30,7 +30,7 @@ import MailingListComponent from '../components/mailing.vue';
 /**
  * Create Directus client
  */
-const directus = createDirectus('https://content.thegovlab.com').with(rest());
+const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
 /**
  * Access the current route (if needed for path or similar)

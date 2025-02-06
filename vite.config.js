@@ -69,7 +69,7 @@ export default defineConfig({
       }
 
       // Otherwise, fetch all published blog slugs from Directus
-      const directus = createDirectus('https://content.thegovlab.com').with(rest());
+      const directus = createDirectus('https://dev.thegovlab.com').with(rest());
       try {
         const response = await directus.request(
           readItems('reboot_democracy_blog', {
@@ -103,7 +103,7 @@ export default defineConfig({
 
     // 3) Use cheerio in onPageRendered to do:
     //   - Make <script> and <link> references relative.
-    //   - Rewrite "https://content.thegovlab.com/assets" references to local if matching local files.
+    //   - Rewrite "https://dev.thegovlab.com/assets" references to local if matching local files.
     //   - Do more fine-grained rewrites only in .content-body if desired.
     onPageRendered(route, html) {
       const depth = route.split('/').length - 1;
@@ -129,14 +129,14 @@ export default defineConfig({
       });
 
       // 3b) Rewrite embedded asset references in your main content, e.g. .content-body
-      //     This ensures that <img src="https://content.thegovlab.com/assets/xxx"></img> or
-      //     background-image: url("https://content.thegovlab.com/assets/xxx") is replaced
+      //     This ensures that <img src="https://dev.thegovlab.com/assets/xxx"></img> or
+      //     background-image: url("https://dev.thegovlab.com/assets/xxx") is replaced
       //     only in that container’s HTML.
       const $contentBody = $('.content-body');
       if ($contentBody.length) {
         const bodyHtmlOld = $contentBody.html() || '';
         const bodyHtmlNew = bodyHtmlOld.replace(
-          // Regex for "https://content.thegovlab.com/assets/<UUID> possibly .ext ? optional query"
+          // Regex for "https://dev.thegovlab.com/assets/<UUID> possibly .ext ? optional query"
           /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)(\.[a-z0-9]+)?(?:\?[^"]*)?/gi,
           (fullMatch, uuid, ext) => {
             // If we have a locally downloaded file for that UUID, use it
@@ -149,7 +149,7 @@ export default defineConfig({
             } else {
               // If no local match, still rewrite domain to relative (fallback)
               return fullMatch.replace(
-                'https://content.thegovlab.com/assets/',
+                'https://dev.thegovlab.com/assets/',
                 `${assetPrefix}assets/`
               );
             }

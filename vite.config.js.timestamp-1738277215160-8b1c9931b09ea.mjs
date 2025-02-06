@@ -56,7 +56,7 @@ var vite_config_default = defineConfig({
       if (slugToBuild) {
         return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
       }
-      const directus = createDirectus("https://content.thegovlab.com").with(rest());
+      const directus = createDirectus("https://dev.thegovlab.com").with(rest());
       try {
         const response = await directus.request(
           readItems("reboot_democracy_blog", {
@@ -85,7 +85,7 @@ var vite_config_default = defineConfig({
     },
     // 3) Use cheerio in onPageRendered to do:
     //   - Make <script> and <link> references relative.
-    //   - Rewrite "https://content.thegovlab.com/assets" references to local if matching local files.
+    //   - Rewrite "https://dev.thegovlab.com/assets" references to local if matching local files.
     //   - Do more fine-grained rewrites only in .content-body if desired.
     onPageRendered(route, html) {
       const depth = route.split("/").length - 1;
@@ -107,7 +107,7 @@ var vite_config_default = defineConfig({
       if ($contentBody.length) {
         const bodyHtmlOld = $contentBody.html() || "";
         const bodyHtmlNew = bodyHtmlOld.replace(
-          // Regex for "https://content.thegovlab.com/assets/<UUID> possibly .ext ? optional query"
+          // Regex for "https://dev.thegovlab.com/assets/<UUID> possibly .ext ? optional query"
           /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)(\.[a-z0-9]+)?(?:\?[^"]*)?/gi,
           (fullMatch, uuid, ext) => {
             const filename = uuidToFileMap[uuid.toLowerCase()];
@@ -115,7 +115,7 @@ var vite_config_default = defineConfig({
               return `${assetPrefix}assets/${filename}`;
             } else {
               return fullMatch.replace(
-                "https://content.thegovlab.com/assets/",
+                "https://dev.thegovlab.com/assets/",
                 `${assetPrefix}assets/`
               );
             }

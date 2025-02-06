@@ -7349,7 +7349,7 @@ const _sfc_main$8 = /* @__PURE__ */ defineComponent$1({
     const showmodal = ref(false);
     const moreresourceData = ref([]);
     ref(0);
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     async function fetchIndex() {
       try {
         const response = await directus.request(
@@ -7897,7 +7897,7 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent$1({
     var _a;
     ref(null);
     ref(null);
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const route = typeof window !== "undefined" ? useRoute$1() : ref(null);
     ref(0);
     const showingFullText = ref(true);
@@ -8113,7 +8113,7 @@ const _sfc_main$6 = /* @__PURE__ */ defineComponent$1({
   __name: "our-writing",
   __ssrInlineRender: true,
   setup(__props) {
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const route = useRoute$1();
     const articleData = ref([]);
     const indexData = ref({});
@@ -8205,7 +8205,7 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent$1({
   __name: "our-research",
   __ssrInlineRender: true,
   setup(__props) {
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const route = useRoute$1();
     const articleData = ref([]);
     const indexData = ref({});
@@ -8801,7 +8801,7 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent$1({
   __name: "our-teaching",
   __ssrInlineRender: true,
   setup(__props) {
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const route = useRoute$1();
     const articleData = ref([]);
     const indexData = ref({});
@@ -8913,7 +8913,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent$1({
   __name: "our-engagements",
   __ssrInlineRender: true,
   setup(__props) {
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const route = useRoute$1();
     const articleData = ref([]);
     const indexData = ref({});
@@ -8998,7 +8998,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent$1({
   __name: "more-resources",
   __ssrInlineRender: true,
   setup(__props) {
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const route = useRoute$1();
     const articleData = ref([]);
     const indexData = ref({});
@@ -9107,7 +9107,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent$1({
     var _a;
     const isClient = typeof window !== "undefined";
     const route = isClient ? useRoute$1() : ref(null);
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const searchResultsFlag = ref(0);
     ref([]);
     const searchTerm = ref("");
@@ -9471,7 +9471,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent$1({
   __ssrInlineRender: true,
   setup(__props) {
     var _a;
-    const directus = le("https://content.thegovlab.com").with(Fu());
+    const directus = le("https://dev.thegovlab.com").with(Fu());
     const route = typeof window !== "undefined" ? useRoute$1() : ref(null);
     const searchResultsFlag = ref(0);
     ref([]);
@@ -9585,7 +9585,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           },
           {
             property: "og:image",
-            content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
+            content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
           },
           { property: "twitter:title", content: "RebootDemocracy.AI" },
           {
@@ -9602,7 +9602,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           },
           {
             property: "twitter:image",
-            content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
+            content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
           },
           { property: "twitter:card", content: "summary_large_image" }
         ]
@@ -9687,7 +9687,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           if (blog_item.image) {
             _push(`<img class="blog-list-img"${ssrRenderAttr(
               "src",
-              "https://content.thegovlab.com/assets/" + blog_item.image.id + "?width=300"
+              "https://dev.thegovlab.com/assets/" + blog_item.image.id + "?width=300"
             )} data-v-a78956cc>`);
           } else {
             _push(`<!---->`);

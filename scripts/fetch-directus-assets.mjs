@@ -11,8 +11,8 @@ import { load } from 'cheerio'; // ← Updated import
 ////////////////////////////////////////////////////////////////////////////////
 
 // Replace these URLs as needed:
-const DIRECTUS_BASE_URL = 'https://content.thegovlab.com';
-const CONTENT_DIRECTUS_URL = 'https://content.thegovlab.com';
+const DIRECTUS_BASE_URL = 'https://dev.thegovlab.com';
+const CONTENT_DIRECTUS_URL = 'https://dev.thegovlab.com';
 
 // Regex to detect images from your content directus domain:
 const ASSET_URL_REGEX = /https:\/\/content\.thegovlab\.com\/assets\/([^"?#]+)/gi;
@@ -140,7 +140,7 @@ async function fetchAssetsForSlug(slug) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Check for <img src="https://content.thegovlab.com/assets/..."> references,
+ * Check for <img src="https://dev.thegovlab.com/assets/..."> references,
  * extract the ID or filename, call /files if needed, then download the assets.
  */
 async function fetchDirectusImagesInHtml(htmlContent) {

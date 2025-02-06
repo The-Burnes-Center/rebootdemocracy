@@ -27,7 +27,7 @@ const pastEventsBlockRef = ref<HTMLElement | null>(null);
 /**
  * Create Directus client
  */
-const directus = createDirectus('https://content.thegovlab.com').with(rest());
+const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
 /**
  * Access the current route
