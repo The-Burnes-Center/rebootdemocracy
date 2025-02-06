@@ -10,6 +10,7 @@ import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
 import ModalComp from "../components/modal.vue";
 import {useHead } from '@vueuse/head'
 
+
 import { fetchBlogData } from '../helpers/blogHelper.js';
 
 export default {
