@@ -6,28 +6,25 @@ import Layouts from 'vite-plugin-vue-layouts';
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import fs from 'fs';
 import path from 'path';
-// To do HTML manipulation in onPageRendered, install cheerio:
-//   npm install cheerio
-import { load as cheerioLoad } from 'cheerio';
 
-// 1) Build a map of Directus-file-UUID → local filename from "dist/assets" (since that’s where the script writes)
+// UPDATED to use dist/assets, since that's where your script writes files
 const assetsDir = path.join(process.cwd(), 'dist', 'assets');
 const uuidToFileMap = {};
 
+// Load assets map
 if (!fs.existsSync(assetsDir)) {
-  console.warn(`Warning: "dist/assets" does not exist. Skipping Directus asset mapping...`);
+  console.warn(`Warning: "dist/assets" does not exist. Skipping asset mapping...`);
 } else {
   try {
     const files = fs.readdirSync(assetsDir);
     files.forEach((file) => {
-      // For example: "48a7b8a4-0e65-4052-88f4-84e73085ef79.png"
       const [uuid, ...extParts] = file.split('.');
       if (uuid && extParts.length) {
         uuidToFileMap[uuid.toLowerCase()] = file;
       }
     });
   } catch (error) {
-    console.error('Error reading files in dist/assets:', error);
+    console.error('Error loading assets from dist/assets:', error);
   }
 }
 
@@ -43,12 +40,11 @@ export default defineConfig({
     script: 'async',
     formatting: 'minify',
 
-    // 2) Pre-generate only new blog slugs, skipping existing HTML
     includedRoutes: async (paths) => {
       const distDir = path.join(process.cwd(), 'dist');
       let slugToBuild = process.env.SLUG_TO_BUILD;
 
-      // If Netlify hook contains a single slug
+      // If we have an incoming hook with a slug
       if (process.env.INCOMING_HOOK_BODY) {
         try {
           const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
@@ -59,16 +55,16 @@ export default defineConfig({
             console.log('Building only for slug:', slugToBuild);
           }
         } catch (error) {
-          console.error('Error parsing INCOMING_HOOK_BODY JSON:', error);
+          console.error('Error parsing INCOMING_HOOK_BODY:', error);
         }
       }
 
-      // If we have a single slug to build, return only that route
+      // Build just one slug
       if (slugToBuild) {
         return [...paths, `/blog/${slugToBuild.toLowerCase()}`];
       }
 
-      // Otherwise, fetch all published blog slugs from Directus
+      // Otherwise, build all published slugs from Directus
       const directus = createDirectus('https://dev.thegovlab.com').with(rest());
       try {
         const response = await directus.request(
@@ -78,12 +74,12 @@ export default defineConfig({
             limit: -1,
           })
         );
+
         const data = response.data || response;
-
         const routePaths = data.map((item) => `/blog/${item.slug.toLowerCase()}`);
-        const finalRoutes = [];
 
-        // Check if dist/blog/<slug>.html already exists; if so, skip
+        // Skip routes if dist/blog/<slug>.html already exists
+        const finalRoutes = [];
         for (const route of routePaths) {
           const slugName = route.replace(/^\/blog\//, '');
           const possibleFile = path.join(distDir, 'blog', `${slugName}.html`);
@@ -101,65 +97,39 @@ export default defineConfig({
       }
     },
 
-    // 3) Use cheerio in onPageRendered to do:
-    //   - Make <script> and <link> references relative.
-    //   - Rewrite "https://dev.thegovlab.com/assets" references to local if matching local files.
-    //   - Do more fine-grained rewrites only in .content-body if desired.
+    // Ensure blog pages do not get rehydrated after build
     onPageRendered(route, html) {
       const depth = route.split('/').length - 1;
-      // For nested routes, build a relative prefix (like "../assets/")
-      const assetPrefix = './' + '../'.repeat(Math.max(depth - 1, 0));
+      const assetPrefix = './' + '../'.repeat(depth - 1);
 
-      // Parse the HTML with cheerio
-      const $ = cheerioLoad(html);
-
-      // 3a) Rewrite script[src] and link[href] if they’re local (not absolute or data:)
-      $('script[src]').each((_, el) => {
-        const srcVal = $(el).attr('src');
-        if (srcVal && !/^((https?:)?\/\/|data:)/i.test(srcVal)) {
-          $(el).attr('src', assetPrefix + srcVal);
-        }
-      });
-
-      $('link[href]').each((_, el) => {
-        const hrefVal = $(el).attr('href');
-        if (hrefVal && !/^((https?:)?\/\/|data:)/i.test(hrefVal)) {
-          $(el).attr('href', assetPrefix + hrefVal);
-        }
-      });
-
-      // 3b) Rewrite embedded asset references in your main content, e.g. .content-body
-      //     This ensures that <img src="https://dev.thegovlab.com/assets/xxx"></img> or
-      //     background-image: url("https://dev.thegovlab.com/assets/xxx") is replaced
-      //     only in that container’s HTML.
-      const $contentBody = $('.content-body');
-      if ($contentBody.length) {
-        const bodyHtmlOld = $contentBody.html() || '';
-        const bodyHtmlNew = bodyHtmlOld.replace(
-          // Regex for "https://dev.thegovlab.com/assets/<UUID> possibly .ext ? optional query"
-          /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)(\.[a-z0-9]+)?(?:\?[^"]*)?/gi,
-          (fullMatch, uuid, ext) => {
-            // If we have a locally downloaded file for that UUID, use it
+      html = html
+        // Make <script src="xxx"> references relative
+        .replace(
+          /(<script[^>]*\s+src=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
+          `$1${assetPrefix}$2$3`
+        )
+        // Make <link href="xxx"> references relative
+        .replace(
+          /(<link[^>]*\s+href=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
+          `$1${assetPrefix}$2$3`
+        )
+        // Updated regex: allow optional query params. Ex: ?width=300
+        .replace(
+          /https:\/\/dev\.thegovlab\.com\/assets\/([a-f0-9-]+)(?:\?[^"]*)?/gi,
+          (match, uuid) => {
             const filename = uuidToFileMap[uuid.toLowerCase()];
-            if (filename) {
-              // e.g., "../assets/<filename>?someQuery"
-              // or just ".../assets/filenamewithoutquery"
-              // If the user wants to preserve the extension from the local file, do:
-              return `${assetPrefix}assets/${filename}`;
-            } else {
-              // If no local match, still rewrite domain to relative (fallback)
-              return fullMatch.replace(
-                'https://dev.thegovlab.com/assets/',
-                `${assetPrefix}assets/`
-              );
-            }
+            return filename
+              ? `${assetPrefix}assets/${filename}`
+              : match;
           }
         );
-        $contentBody.html(bodyHtmlNew);
+
+      // Prevent hydration for blog pages
+      if (route.startsWith('/blog/')) {
+        html = html.replace(/<script[^>]*?type="module"[^>]*?>[\s\S]*?<\/script>/gi, '');
       }
 
-      // Return updated HTML
-      return $.html();
+      return html;
     },
   },
 

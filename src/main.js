@@ -1,23 +1,23 @@
-import { ViteSSG } from 'vite-ssg'
-import App from './App.vue'
+import { ViteSSG } from 'vite-ssg';
+import App from './App.vue';
 
-import { createHead } from '@unhead/vue'
+import { createHead } from '@unhead/vue';
 
 // 1) Use vite-plugin-pages and vite-plugin-vue-layouts
-import generatedRoutes from 'virtual:generated-pages'
-import { setupLayouts } from 'virtual:generated-layouts'
+import generatedRoutes from 'virtual:generated-pages';
+import { setupLayouts } from 'virtual:generated-layouts';
 
 // Vuetify (if you still need it)
-import { createVuetify } from 'vuetify'
-import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/styles'
-import './assets/styles.css'
+import { createVuetify } from 'vuetify';
+import '@mdi/font/css/materialdesignicons.css';
+import 'vuetify/styles';
+import './assets/styles.css';
 
 // Create Vuetify
-const vuetify = createVuetify({})
+const vuetify = createVuetify({});
 
 // 2) Generate routes from “src/pages” + layouts
-const routes = setupLayouts(generatedRoutes)
+const routes = setupLayouts(generatedRoutes);
 
 export const createApp = ViteSSG(
   // Root component
@@ -31,14 +31,15 @@ export const createApp = ViteSSG(
 
   // (ctx) => callback
   (ctx) => {
-    // 3) Create the head instance
-    const head = createHead()
-    ctx.app.use(head)
+    const isBlogPage = ctx.router.currentRoute.value.path.startsWith('/blog/');
 
-    // 4) Use Vuetify
-    ctx.app.use(vuetify)
+    // Prevent hydration only for blog pages
+    if (!isBlogPage) {
+      const head = createHead();
+      ctx.app.use(head);
+      ctx.head = head;
+    }
 
-    // Provide head in the application context if needed
-    ctx.head = head
+    ctx.app.use(vuetify);
   }
-)
+);
