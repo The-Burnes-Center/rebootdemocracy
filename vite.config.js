@@ -107,13 +107,13 @@ export default defineConfig({
             /(<link[^>]*\s+href=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
             `$1${assetPrefix}$2$3`
           )
-          .replace(
-            /https:\/\/dev\.thegovlab\.com\/assets\/([a-f0-9-]+)(?:\?[^"]*)?/gi,
-            (match, uuid) => {
-              const filename = uuidToFileMap[uuid.toLowerCase()];
-              return filename ? `${assetPrefix}assets/${filename}` : match;
-            }
-          );
+        //   .replace(
+        //     /https:\/\/dev\.thegovlab\.com\/assets\/([a-f0-9-]+)(?:\?[^"]*)?/gi,
+        //     (match, uuid) => {
+        //       const filename = uuidToFileMap[uuid.toLowerCase()];
+        //       return filename ? `${assetPrefix}assets/${filename}` : match;
+        //     }
+        //   );
       
         // For blog pages, remove unwanted hydration scripts...
         if (route.startsWith('/blog/')) {
