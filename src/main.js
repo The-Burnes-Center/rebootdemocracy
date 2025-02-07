@@ -7,6 +7,7 @@
    import '@mdi/font/css/materialdesignicons.css';
    import 'vuetify/styles';
    import './assets/styles.css';
+  //  import router from './router'
 
    // Create Vuetify
    const vuetify = createVuetify({});
@@ -17,7 +18,7 @@
    export const createApp = ViteSSG(
      App,
      {
-       routes,
+      routes,
        base: './'
      },
      (ctx) => {

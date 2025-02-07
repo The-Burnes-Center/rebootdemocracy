@@ -5,7 +5,7 @@
       <i class="fa-solid fa-bars bars" @click="toggleMenu"></i>
       <div :class="['menu-shadow', 'menu', { 'open': menuOpen }]" v-show="menuOpen">
         <a href="/about">About Us</a>
-        <a href="/blog">Blog</a>
+        <a href="/">Blog</a>
         <a href="/events">Events</a>
         <div class="dropdown">
           <button class="dropbtn" @click.prevent="toggleDropdown">

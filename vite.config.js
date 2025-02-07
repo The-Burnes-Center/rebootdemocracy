@@ -29,11 +29,41 @@ if (!fs.existsSync(assetsDir)) {
   }
 }
 
+function cloneRoute(route) {
+    const { parent, ...rest } = route;
+    return { ...rest };
+  }
+
 export default defineConfig({
   base: '',
   plugins: [
     // Place these virtual module based plugins first
-    Pages({ extensions: ['vue'] }),
+    Pages({ extensions: ['vue'],
+        extendRoute(route) {
+            // Ensure alias is always an array if it’s defined.
+            if (route.alias && !Array.isArray(route.alias)) {
+              route.alias = [route.alias];
+            }
+    
+            // For blog-page (from blog-page.vue), add '/blog' as an alias.
+            if (route.name === 'blog-page') {
+              route.alias = route.alias || [];
+              if (!route.alias.includes('/blog')) {
+                route.alias.push('/blog');
+              }
+            }
+    
+            // For homepage (from index.vue), add '/about' as an alias.
+            if (route.name === 'index') {
+              route.alias = route.alias || [];
+              if (!route.alias.includes('/about')) {
+                route.alias.push('/about');
+              }
+            }
+    
+            return route;
+          },
+     }),
     Layouts(),
 
     // Then the Vue and Vuetify plugins

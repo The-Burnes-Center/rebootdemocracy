@@ -1,209 +1,139 @@
 <script lang="ts" setup>
-import { ref, watch, onMounted, onServerPrefetch } from 'vue';
+import { ref, watch, computed, onMounted, onServerPrefetch } from 'vue';
+import { useRoute } from 'vue-router';
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
+import _ from "lodash";
+import { useHead } from '@vueuse/head'
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
-import MailingListComponent from "../components/mailing.vue";
 import ModalComp from "../components/modal.vue";
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal';
 
-const model = ref(0);
-const indexData = ref<any>({});
-const eventsData = ref<any[]>([]);
-const featuredData = ref<any[]>([]);
-const researchData = ref<any[]>([]);
-const writingData = ref<any[]>([]);
-const teachingData = ref<any[]>([]);
-const engagementData = ref<any[]>([]);
-const eelData = ref<any[]>([]);
-const modalData = ref<any>({});
-const showmodal = ref(false);
-const moreresourceData = ref<any[]>([]);
-const item_counter = ref(0);
+import { register } from 'swiper/element/bundle';
+import 'vue-final-modal/style.css';
 
+// Check if we're on client-side
+const isClient = typeof window !== 'undefined';
+
+const route = isClient ? useRoute() : ref(null);
+
+// Directus client
 const directus = createDirectus('https://dev.thegovlab.com').with(rest());
 
-// Fetch data functions
-async function fetchIndex() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy', {
-        meta: 'total_count',
-        limit: -1,
-        fields: ['*.*'],
-      })
-    );
-    indexData.value = response;
-    // console.log(indexData.value)
-  } catch (error) {
-    console.error('Error fetching index data:', error);
+// State variables
+const searchResultsFlag = ref<number>(0);
+const searchResults = ref<any[]>([]);
+const searchTerm = ref<string>("");
+const searchTermDisplay = ref<string>("");
+const debounceSearch = ref<any>(null);
+const searchloader = ref<boolean>(false);
+const loadAPI = ref<boolean>(false);
+const animateNext = ref<number>(0);
+const currentDate = ref<string>('');
+const prevItem = ref<number>(0);
+const currentItem = ref<number>(1);
+const nextItem = ref<number>(2);
+const testimonialsLength = ref<number>(0);
+const blogData = ref<any[]>([]);
+const blogDataSearch = ref<any[]>([]);
+const filteredTagData = ref<string[]>([]);
+const modalData = ref<any[]>([]);
+const workshopData = ref<any[]>([]);
+const playpause = ref<boolean>(true);
+const showmodal = ref<boolean>(false);
+const path = ref<string>(isClient ? route.value?.fullPath : '');
+const slideautoplay = ref<number>(1);
+const slidetransition = ref<number>(7000);
+const slider = ref<any>('');
+const wsloaded = ref<boolean>(false);
+const ini = ref<boolean>(true);
+
+// Set up debounce for search
+debounceSearch.value = _.debounce(searchBlog, 500);
+
+// Computed properties
+const latestBlogPost = computed(() => {
+  if (Array.isArray(blogData.value) && blogData.value.length > 0) {
+    return [...blogData.value].reverse()[0];
   }
+  return null;
+});
+
+const filteredTagDataWithoutNews = computed(() => {
+  return filteredTagData.value.filter(tag => tag !== "News that caught our eye");
+});
+
+// Functions
+function includesString(array: string[] | null, stringVal: string) {
+  if (!array) return false;
+  const lowerCasePartialSentence = stringVal.toLowerCase();
+  return array.some(s => s.toLowerCase().includes(lowerCasePartialSentence));
 }
 
-async function fetchEvents() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        filter: {
-          _and: [
-            { type: { _eq: "Event" } },
-            { date: { _gte: "$NOW" } },
-          ],
-        },
-        meta: 'total_count',
-        limit: 2,
-        sort: ["date"],
-        fields: ['*.*', 'thumbnail.*', 'event_series.general_events_series_id.*'],
-      })
-    );
-    eventsData.value = response;
-    
-  } catch (error) {
-    console.error('Error fetching events data:', error);
-  }
+function resetSearch() {
+  blogDataSearch.value = [];
+  searchResultsFlag.value = 0;
+  searchTermDisplay.value = searchTerm.value;
+  searchBlog();
 }
 
-async function fetchFeatured() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_blog', {
-        filter: { status: { _eq: 'published' } },
-        meta: 'total_count',
-        limit: 6,
-        sort: ["-date"],
-        fields: [
-          '*.*',
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*',
-        ],
-      })
-    );
-    featuredData.value = response;
-    preloadImages();
-  } catch (error) {
-    console.error('Error fetching featured data:', error);
+function searchBlog() {
+  searchloader.value = true;
+  let searchTArray = searchTerm.value.split(" ").filter(item => item);
+  const searchObj: any[] = [];
+
+  searchTArray.map((a) => {
+    searchObj.push({ excerpt: { _contains: a } });
+    searchObj.push({ title: { _contains: a } });
+    searchObj.push({ content: { _contains: a } });
+    searchObj.push({ authors: { team_id: { First_Name: { _contains: a } } } });
+    searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
+    searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
+  });
+
+  if (searchTArray.length > 0) {
+    searchResultsFlag.value = 1;
+  } else {
+    searchResultsFlag.value = 0;
   }
+
+  directus.request(
+    readItems('reboot_democracy_blog', {
+      limit: -1,
+      filter: {
+        _and: [{ date: { _lte: "$NOW(-5 hours)" } }, { status: { _eq: "published" } }],
+        _or: searchObj
+      },
+      sort: ["date"],
+      fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*']
+    })
+  ).then((b: any) => {
+    blogDataSearch.value = b;
+    searchloader.value = false;
+  }).catch((err) => {
+    console.error(err);
+    searchloader.value = false;
+  });
 }
 
-async function fetchResearch() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        filter: { type: { _eq: "Case Study" } },
-        meta: 'total_count',
-        limit: -1,
-        sort: ["-id"],
-        fields: ['*.*', 'thumbnail.*'],
-      })
-    );
-    researchData.value = response;
-  } catch (error) {
-    console.error('Error fetching research data:', error);
-  }
+function formatDateTime(d1: Date) {
+  return format(d1, 'MMMM d, yyyy, h:mm aa');
+}
+function formatDateOnly(d1: Date) {
+  return format(d1, 'MMMM d, yyyy');
+}
+function PastDate(d1: Date) {
+  return isPast(d1);
+}
+function FutureDate(d1: Date) {
+  return isFuture(new Date(d1));
 }
 
-async function fetchWriting() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        filter: {
-          _or: [
-            { type: { _eq: "Article" } },
-            { type: { _eq: "Book" } },
-          ],
-        },
-        meta: 'total_count',
-        limit: -1,
-        sort: ["-id"],
-        fields: ['*.*', 'thumbnail.*', 'authors.team_id.*'],
-      })
-    );
-    writingData.value = response;
-  } catch (error) {
-    console.error('Error fetching writing data:', error);
-  }
-}
-
-async function fetchTeaching() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        filter: { type: { _eq: "Teaching" } },
-        meta: 'total_count',
-        limit: -1,
-        sort: ["-id"],
-        fields: ['*.*', 'thumbnail.*'],
-      })
-    );
-    // console.log(response)
-    teachingData.value = response;
-  } catch (error) {
-    console.error('Error fetching teaching data:', error);
-  }
-}
-
-async function fetchEEL() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        filter: { type: { _eq: "Equitable Engagement Lab" } },
-        meta: 'total_count',
-        limit: -1,
-        sort: ["-id"],
-        fields: ['*.*', 'thumbnail.*'],
-      })
-    );
-    eelData.value = response;
-  } catch (error) {
-    console.error('Error fetching EEL data:', error);
-  }
-}
-
-async function fetchEngagements() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        filter: { type: { _eq: "Engagement" } },
-        meta: 'total_count',
-        limit: -1,
-        sort: ["-id"],
-        fields: ['*.*', 'thumbnail.*'],
-      })
-    );
-    engagementData.value = response;
-  } catch (error) {
-    console.error('Error fetching engagements data:', error);
-  }
-}
-
-async function fetchMoreResources() {
-  try {
-    const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        filter: {
-          _or: [
-            { type: { _eq: "Video" } },
-            { type: { _eq: "Podcast" } },
-            { type: { _eq: "Resources" } },
-          ],
-        },
-        meta: 'total_count',
-        limit: -1,
-        sort: ["-id"],
-        fields: ['*.*', 'thumbnail.*'],
-      })
-    );
-    moreresourceData.value = response;
-  } catch (error) {
-    console.error('Error fetching more resources data:', error);
-  }
-}
-
-function loadModal(): void {
+function loadModal() {
   directus.request(
     readItems('reboot_democracy_modal', {
       meta: 'total_count',
@@ -211,429 +141,364 @@ function loadModal(): void {
       fields: ['*.*']
     })
   ).then((item: any) => {
-    modalData.value = item;
-
-    if (typeof window !== 'undefined') {
-      const campaignName = modalData.value?.campaigns?.campaign_name || "ModalCampaign";
-      const alreadyOff = localStorage.getItem(campaignName) === 'off';
-      showmodal.value = (modalData.value?.status === 'published') && !alreadyOff;
-    } else {
-      showmodal.value = modalData.value?.status === 'published';
-    }
+    // Ensure modalData.value is an object, not an array
+    modalData.value = item || {};
+    console.log('Modal Data:', modalData.value);
+    let storageItem = (typeof window !== 'undefined') ? localStorage.getItem("Reboot Democracy") : null;
+    showmodal.value = modalData.value.status == 'published' && 
+      (modalData.value.visibility == 'always' || (modalData.value.visibility == 'once' && storageItem != 'off'));
   }).catch((err) => {
-    console.error('Error loading modal:', err);
+    console.error(err);
   });
 }
 
 function closeModal() {
   showmodal.value = false;
-  localStorage.setItem("Reboot Democracy", "off");
-}
-
-function formatDateTime(d1: string | Date) {
-  return format(new Date(d1), 'MMMM d, yyyy, h:mm aa');
-}
-
-function formatDateOnly(d1: string | Date) {
-  return format(new Date(d1), 'MMMM d, yyyy');
-}
-
-function PastDate(d1: string | Date) {
-  return isPast(new Date(d1));
-}
-
-function FutureDate(d1: string | Date) {
-  return isFuture(new Date(d1));
-}
-
-function preloadImages() {
   if (typeof window !== 'undefined') {
-    featuredData.value.forEach((item: any) => {
-      if (item.image) {
-        const img = new Image();
-        img.src = directus.url.href + 'assets/' + item.image.id + '?width=438';
-      }
-    });
+    localStorage.setItem("Reboot Democracy", "off");
   }
 }
 
-async function fetchAllData() {
-  await Promise.all([
-    fetchIndex(),
-    fetchEvents(),
-    fetchFeatured(),
-    fetchResearch(),
-    fetchWriting(),
-    fetchTeaching(),
-    fetchEngagements(),
-    fetchEEL(),
-    fetchMoreResources(),
-    loadModal(),
-  ]);
+async function fetchBlog() {
+  try {
+    const item = await directus.request(
+      readItems('reboot_democracy_blog', {
+        meta: 'total_count',
+        limit: -1,
+        filter: { status: { _eq: "published" } },
+        fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*'],
+        sort: ["date"]
+      })
+    );
+
+    blogData.value = item;
+    item.map((tag: any) => {
+      tag?.Tags?.map((subTags: string) => {
+        if (subTags != null && !includesString(filteredTagData.value, subTags)) {
+          filteredTagData.value.push(subTags);
+        }
+      })
+    })
+
+    // Move "News that caught our eye" to the front if exists
+    const newsIndex = filteredTagData.value.indexOf("News that caught our eye");
+    if (newsIndex > -1) {
+      filteredTagData.value.unshift(filteredTagData.value.splice(newsIndex, 1)[0]);
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
 }
 
+function fillMeta() {
+  useHead({
+    title: "RebootDemocracy.AI",
+    meta: [
+      { name: 'title', content: "RebootDemocracy.AI" },
+      { property: 'og:title', content: "RebootDemocracy.AI" },
+      { property: 'og:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to "do democracy" in practice.
+
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
+      { property: 'og:image', content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b" },
+      { property: 'twitter:title', content: "RebootDemocracy.AI" },
+      { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to "do democracy" in practice.
+
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
+      { property: 'twitter:image', content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b" },
+      { property: 'twitter:card', content: "summary_large_image" },
+    ],
+  })
+}
+// Watchers
+watch(
+  () => isClient ? route.value?.fullPath : '',
+  () => {
+    loadModal();
+  },
+  { immediate: true }
+);
+
+const isSSR = computed(() => import.meta.env.SSR);
+
+
+// Lifecycle hooks
 if (import.meta.env.SSR) {
   onServerPrefetch(async () => {
-    await fetchAllData();
+    await fetchBlog();
   });
 } else {
   onMounted(async () => {
-    await fetchAllData();
+    fillMeta();
+    register();
+    await fetchBlog();
+    resetSearch();
+    loadModal();
+    showmodal.value = true;
   });
 }
 </script>
 
 <template>
   <div>
-    <!-- Modal -->
-    <vue-final-modal
+    <HeaderComponent></HeaderComponent>
+
+    <VueFinalModal
       v-if="showmodal"
       v-model="showmodal"
       classes="modal-container"
+      class="modal-container"
       content-class="modal-comp"
-      @before-close="closeModal"
     >
       <template v-slot:default="{ close }">
-        <!-- Pass closeFunc to ModalComp -->
-        <ModalComp :modalData="modalData" :closeFunc="() => { close(); closeModal(); }" />
+        <ModalComp
+          :modalData="modalData"
+          :closeFunc="() => { close(); closeModal(); }"
+        />
       </template>
-    </vue-final-modal>
+    </VueFinalModal>
 
-    <!-- Header Component -->
-    <HeaderComponent></HeaderComponent>
-<!-- Hero Section -->
-<div class="hero">
-    <video autoplay loop muted playsinline>
-        <source src="/src/assets/liquid_ai_animation.mp4" type="video/mp4" title="generated with https://runwayml.com/">
-        Your browser does not support the video tag.
-    </video>
-  <div class="hero-fallback-image"></div>
-  <div class="hero-content">
-    <h1 class="eyebrow blue">{{indexData.title}}</h1>
-    <h1 class="title" v-html="indexData.subtitle"></h1>
-  </div>
+    <div class="blog-page-hero">
+      <h1 class="eyebrow">Reboot Democracy</h1>
+      <h1>Blog</h1>
+      <p style="padding:1rem 0 0 0">The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.</p>
+      <div class="search-bar-section">      
+        <input
+          class="search-bar"
+          v-model="searchTerm"
+          @keyup.enter="resetSearch()"
+          type="text"
+          placeholder="SEARCH"/>
+            
+        <span type="submit"
+          @click="searchTerm = '';resetSearch();"
+          class="search-bar-cancel-btn material-symbols-outlined">
+            cancel
+        </span>
 
-  
-  <div class="featured-section">
-    <v-carousel  hide-delimiters v-model="model">
-      <v-carousel-item class="index_carousel" v-for="(item,i) in featuredData" :key="i" >
-    <div class="featured-content">
-        <h1 class="eyebrow">From the Blog</h1>
-        <div class="featured-image">
-          <img v-if="item.image" :src="directus.url.href+'assets/'+item.image.id+'?width=438'">
-          <!-- <img v-if="!item.thumbnail"  src="..//assets/media-image.png"> -->
-        </div>
-          <h4>{{item.title}}</h4>
-          <p>{{ formatDateOnly (new Date (item.date) )}}</p>
-           <p v-if="item.authors == '' && item.type != 'Event'" class="featured-event-description">{{item.description}}</p>
-          <p v-if="item.type == 'Event'">{{formatDateTime(new Date(item.date))}}</p>
-          <p v-if="item.authors != ''">By <span v-for="(author,index) in item.authors">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}<span v-if="index < item.authors.length - 1">, </span></span></p>
-          <div class="speakers-list" v-show="item.speakers" v-html="item.speakers"></div>
-          <a class="btn btn-small btn-blue" :href="'blog/'+item.slug">Details <i class="fa-regular fa-arrow-right"></i></a>
-    </div>
-    </v-carousel-item>
-    </v-carousel>
-  </div>
-</div>
-
-
-<!-- Our Mission Section -->
-
-<div id="about" class="mission-section">
-  <div class="mission-text">
-      <h2 class="eyebrow peach">{{indexData.mission_title}}</h2>
-      <div v-html="indexData.mission_heading"></div>
-      <div class="mission-description" v-html="indexData.mission_description"></div>
-        <!-- <a class="btn btn-medium btn-secondary">About Us</a> -->
-  </div>
-  
-  <div class="mission-image">
-
-  </div>
-
-</div>
-
-
-<!-- Upcoming Events -->
-
-<div class="upcoming-events-section" v-show="!eventsData">
-  <div class="upcoming-events-box">
-    <div class="upcoming-events-text">
-        <h3>Reboot Democracy Lecture Series</h3>
-        <div class="our-work-description"><p>Upcoming events in the Reboot Democracy Lecture Series</p></div>
-         <a class="btn btn-ghost btn-dark btn-medium" href="/events/reboot-democracy" target="_blank">View all events</a>
-         <div class="col-50-home">
-        <!-- <p>Join our mailing list</p> -->
-         <!-- <input type="text" placeholder="" name="entry.250007595" aria-hidden=”true”> -->
-        <!-- <a href="/signup" class="btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a> -->
+        <span type="submit"
+          @click="resetSearch()"
+          class="search-bar-btn material-symbols-outlined">
+            search
+        </span>
       </div>
+      <a href="/signup" class="btn btn-small btn-primary">Sign up for our newsletter</a>
     </div>
-    <div class="upcoming-events-content">
-      <div class="upcoming-events-item" v-for="resource_item in eventsData"  v-show="FutureDate(new Date(resource_item.date))">
 
-              <img v-if="!resource_item.instructor && resource_item.thumbnail" :src="directus.url.href + 'assets/' + resource_item.thumbnail.id+'?width=334'">
-              <h4>{{resource_item.title}}</h4>
-              <div style="display:flex;flex-direction: column"><p><b>Speakers:&nbsp</b></p><div  v-html="resource_item.speakers"></div></div>
-              <p>{{formatDateOnly(new Date(resource_item.date))}}</p>
-              <a class="btn btn-small btn-primary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
-      </div>
-    </div>
-  </div>
-</div>
+    <div v-if="searchloader" class="loader-blog"></div>
 
-<!-- Equitable Engagement Lab Section-->
-
-<div class="our-work-section">
-    <div class="our-work-image equitable-engagement-img">
-      <img src="../assets/eel-image.png">
-    </div>
-    <!-- <div class="our-work-separator">
-  <div class="our-work-separator-text">
-    <h2 class="eyebrow white">{{indexData.our_work_title}}</h2>
-    <p>{{indexData.our_work_subtitle}}</p>
-  </div>
-</div> -->
-    <div class="our-work-layout">
-      <div class="our-work-text">
-        <h3>{{indexData.equitable_engagement_lab_title}}</h3>
-        <div class="our-work-description" v-html="indexData.equitable_engagement_lab_description"></div>
-        <!-- <a class="btn btn-small btn-ghost">About the lab <i class="fa-regular fa-arrow-right"></i></a> -->
-      </div>
-      <div class="two-col-resources">
-        <div class="resource-row">
-          <div class="resource-col"  v-for="resource_item in eelData.slice(0, 6)" >
-            <div class="resource-item">
-                <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="directus.url.href + 'assets/' + resource_item.thumbnail.id">
-                 <img v-if="!resource_item.thumbnail" src="../assets/eel-image.png">
+    <!-- Featured Blog Section -->
+    <div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
+    <div class="blog-featured-row">
+      <div class="first-blog-post" v-if="latestBlogPost">
+        <a :href="'/blog/' + latestBlogPost.slug">
+          <!-- Notice the change here -->
+          <div v-if="!isSSR && latestBlogPost.image">
+            <img 
+              class="blog-list-img" 
+              :src="directus.url.href+'assets/'+ blogData.slice().reverse()[0].image.filename_disk+'?width=800'"
+              loading="lazy"
+            >
+          </div>
+            <h3>{{latestBlogPost.title}}</h3>
+            <p>{{ latestBlogPost.excerpt }}</p>
+            <p>Published on {{ formatDateOnly(new Date(latestBlogPost.date)) }}</p>
+            <div class="author-list">
+              <p class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
+              <div v-for="(author,i) in latestBlogPost.authors" :key="i" class="author-item">               
+                <div class="author-details">
+                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                  <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
+                </div>
               </div>
-              <div class="resource-item-text">
-              <h4>{{resource_item.title}}</h4>
-              <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More <i class="fa-regular fa-arrow-right"></i></a>
             </div>
-            </div>
-          </div>
+          </a>  
         </div>
-
-        <div class="join-section">
-          <div class="join-text">
-            <h3>{{indexData.join_the_lab_title}}</h3>
-            <div v-html="indexData.join_the_lab_description"></div>
-            <a class="btn btn-primary btn-dark btn-medium">Join the Lab</a>
-          </div>
-        </div>
-      </div>
-    </div>
-</div>
-<!-- Our Experience Section -->
-
-<div id="about" class="mission-section">
-  <div class="mission-text">
-      <h2 class="eyebrow peach">{{indexData.experience_title}}</h2>
-      <h2>{{indexData.experience_heading}}</h2>
-      <div class="mission-description" v-html="indexData.experience_description"></div>
-        <!-- <a class="btn btn-medium btn-secondary">About Us</a> -->
-  </div>
-  <div class="mission-image">
-
-  </div>
-
-</div>
-
-
-<!-- Our Work Separator-->
-
-<div class="our-work-separator">
-  <div class="our-work-separator-text">
-    <h2 class="eyebrow white">{{indexData.our_work_title}}</h2>
-    <p>{{indexData.our_work_subtitle}}</p>
-  </div>
-</div>
-
-
-
-<!-- Our Past Engagements Section-->
-<div class="our-work-section">
-    <div class="our-work-image research-img">
-       <img src="../assets/media-image.png">
-    </div>
-    <div class="our-work-layout">
-      <div class="our-work-text">
-        <h3>{{indexData.engagement_title}}</h3>
-        <div class="our-work-description" v-html="indexData.engagement_description"></div>
         
-      </div>
-      <div class="two-col-resources">
-        <div class="resource-row">
-          <div class="resource-col"  v-for="resource_item in engagementData.slice().reverse().slice(0, 6)" >
-            <div class="resource-item">
-                <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="directus.url.href + 'assets/' + resource_item.thumbnail.id+'?width=566'">
-                   <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
-              </div>
-              <div class="resource-item-text">
-                
-               <!-- <h5 class="eyebrow">{{resource_item.type}}</h5> -->
-               <div class="event-tag-row" v-if="resource_item.stage?.length > 0">
-            <div class="engagement_dot" ></div>
-            <p>{{resource_item.stage?.length > 0 ? resource_item.stage[0]:""}}</p>
-          </div>
-              <h4>{{resource_item.title}}</h4>
-              <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
+        <!-- Other blog posts -->
+        <div class="other-blog-posts" v-if="!searchResultsFlag || searchTerm == ''">
+        <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  :key="index" v-show="index > 0 && index < 4"> 
+          <a :href="'/blog/' + blog_item.slug">
+            <!-- Notice the change here -->
+            <div v-if="!isSSR && blog_item.image">
+              <img 
+                class="blog-list-img" 
+                :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
+                loading="lazy"
+              >
             </div>
-          </div>
-          </div>
-        </div>
-        <a class="btn btn-small btn-ghost" href="/our-engagements">More Engagements<i class="fa-regular fa-arrow-right"></i></a>
-      </div>
-    </div>
-</div>
-
-
-<!-- Our Research Section-->
-<div class="our-work-section">
-    <div class="our-work-image research-img">
-       <img src="../assets/research-image.png">
-    </div>
-    <div class="our-work-layout">
-      <div class="our-work-text">
-        <h3>{{indexData.research_title}}</h3>
-        <div class="our-work-description" v-html="indexData.research_description"></div>
-        
-      </div>
-      <div class="two-col-resources">
-        <div class="resource-row">
-          <div class="resource-col"  v-for="resource_item in researchData.slice(0, 6)" >
-            <div class="resource-item">
-              <div class="resource-item-img">
-                
-                 <img v-if="resource_item.thumbnail" :src="directus.url.href + 'assets/' + resource_item.thumbnail.id+'?width=566'">
-                  <!-- <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png"> -->
+              <div class="other-post-details">
+                <h3>{{blog_item.title}}</h3>
+                <p>{{ blog_item.excerpt }}</p>
+                <p>Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
+                <div class="author-list">
+                  <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
+                  <div v-for="(author,i) in blog_item.authors" :key="i" class="author-item">
+                    <div class="author-details">
+                      <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                      <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="resource-item-text">
-                <h5 class="eyebrow">{{resource_item.type}}</h5>
-                <h4>{{resource_item.title}}</h4>
-                <p>{{resource_item.description}}</p>
-                <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
-              </div>
-            </div>
+            </a>
           </div>
         </div>
-        <a class="btn btn-small btn-ghost" href="/our-research">More Research<i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
-</div>
 
-<!-- Our Writing Section-->
-<div class="our-work-section">
-    <div class="our-work-image writing-img">
-       <img src="../assets/writing-image.png">
+    <!-- Continue with the rest of your template, replacing v-lazy-load with v-if="!import.meta.env.SSR" -->
+    <!-- For each image section, use the pattern: -->
+    <!--
+    <div v-if="!import.meta.env.SSR && item.image">
+      <img 
+        class="blog-list-img" 
+        :src="directus.url.href+'assets/'+ item.image.id+'?width=300'"
+        loading="lazy"
+      >
     </div>
-    <div class="our-work-layout">
-      <div class="our-work-text">
-        <h3>{{indexData.writing_title}}</h3>
-        <div class="our-work-description" v-html="indexData.writing_description"></div>
-        
-      </div>
-      <div class="two-col-resources">
-        <div class="resource-row">
-          <div class="resource-col"  v-for="resource_item in writingData.slice().reverse().slice(0, 6)">
-            <div class="resource-item">
-              <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="directus.url.href + 'assets/' + resource_item.thumbnail.id+'?width=566'">
-                   <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+    -->
+
+    <div class="read-more-post" v-if="!searchResultsFlag && searchTermDisplay == ''">
+      <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
+    </div>
+
+
+    <div class="blog-section-header" v-if="!searchResultsFlag && searchTermDisplay == ''">
+      <h2>Latest Posts</h2>
+    </div>
+
+    <div v-if="!searchResultsFlag && searchTermDisplay == ''" class="allposts-section">
+      <div class="allposts-post-row" 
+           v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
+           :key="index" 
+           v-show="index >= 4 && index < 16">
+        <a :href="'/blog/' + blog_item.slug">
+          <div v-if="!isSSR && blog_item.image">
+            <img 
+              class="blog-list-img" 
+              :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
+              loading="lazy"
+            >
+          </div>
+          <div class="allposts-post-details">
+            <h3>{{blog_item.title}}</h3>
+            <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
+            <div class="author-list">
+              <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
+              <div v-for="(author,i) in blog_item.authors" :key="i" class="author-item">
+                <div class="author-details">
+                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                  <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                </div>
               </div>
-              <div class="resource-item-text">
-               <h5 class="eyebrow">{{resource_item.type}}</h5>
-              <h4>{{resource_item.title}}</h4>
-              <p>By <span v-for="(author,index) in resource_item.authors">{{author.team_id.name}}<span v-if="index < resource_item.authors.length - 1">, </span></span></p>
-              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
-            </div>
             </div>
           </div>
-        </div>
-        <a class="btn btn-small btn-ghost" href="/our-writing">More Writing<i class="fa-regular fa-arrow-right"></i></a>
+        </a>
       </div>
+      <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
     </div>
-</div>
 
-<!-- Our Teaching Section-->
-<div class="our-work-section">
-    <div class="our-work-image writing-img">
-       <img src="../assets/workplace-image.png">
-    </div>
-    <div class="our-work-layout">
-      <div class="our-work-text">
-        <h3>{{indexData.teaching_title}}</h3>
-        <div class="our-work-description" v-html="indexData.teaching_description"></div>
-        
-      </div>
-      <div class="two-col-resources">
-        <div class="resource-row">
-          <div class="resource-col"  v-for="resource_item in teachingData.slice(0, 6)">
-            <div class="resource-item">
-              <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="directus.url.href + 'assets/' + resource_item.thumbnail.id+'?width=566'">
-                   <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
+    <!-- Filtered Posts Section -->
+    <h2 v-if="searchResultsFlag && searchTermDisplay != ''" class="search-term">
+      Searching for <i>{{searchTermDisplay}}</i>
+    </h2>
+    
+    <div v-if="searchResultsFlag || searchTerm == ''">
+      <div v-if="!searchResultsFlag && searchTermDisplay == ''">
+        <div class="allposts-section">
+          <div v-for="tag_item in filteredTagDataWithoutNews" :key="tag_item" class="all-posts-row">
+            <div class="blog-section-header">
+              <h2>{{ tag_item }}</h2>
+            </div>
+            <div class="tag-posts-row-container">
+              <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
+                   :key="index" 
+                   class="tag-posts-row">
+                <div v-if="includesString(blog_item?.Tags, tag_item)">
+                  <a :href="'/blog/' + blog_item.slug">
+                    <div v-if="!isSSR && blog_item.image">
+                      <img 
+                        class="blog-list-img" 
+                        :src="directus.url.href + 'assets/' + blog_item.image.id+'?width=300'"
+                        loading="lazy"
+                      >
+                    </div>
+                    <div class="allposts-post-details">
+                      <h3>{{blog_item.title}}</h3>
+                      <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
+                      <div class="author-list">
+                        <p class="author-name">{{blog_item.authors.length > 0 ? 'By' : ''}}</p>
+                        <div v-for="(author, i) in blog_item.authors" :key="i" class="author-item">
+                          <div class="author-details">
+                            <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                            <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
               </div>
-              <div class="resource-item-text">
-               <h5 class="eyebrow">{{resource_item.type}}</h5>
-              <h4>{{resource_item.title}}</h4>
-              <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
-            </div>
-            </div>
-          </div>
-        </div>
-        <a class="btn btn-small btn-ghost" href="/our-teaching">More Teaching<i class="fa-regular fa-arrow-right"></i></a>
-      </div>
-    </div>
-</div>
-
-
-<!-- Our Other Resources Section-->
-<div class="our-work-section">
-    <div class="our-work-image writing-img">
-       <img src="../assets/media-image.png">
-    </div>
-    <div class="our-work-layout">
-      <div class="our-work-text">
-        <h3>{{indexData.more_resources_title}}</h3>
-        <div class="our-work-description" v-html="indexData.more_resources_description"></div>
-        
-      </div>
-      <div class="two-col-resources">
-        <div class="resource-row">
-          <div class="resource-col"  v-for="resource_item in moreresourceData.slice(0, 6)" >
-            <div class="resource-item">
-                <div class="resource-item-img">
-                 <img v-if="resource_item.thumbnail" :src="directus.url.href + 'assets/' + resource_item.thumbnail.id+'?width=566'">
-                  <img v-if="!resource_item.thumbnail" src="../assets/workplace-image.png">
-              </div>
-              <div class="resource-item-text">
-              <h5 class="eyebrow">{{resource_item.type}}</h5>
-              <h4>{{resource_item.title}}</h4>
-              <p>{{resource_item.description}}</p>
-              <a class="btn btn-small btn-tertiary" :href="resource_item.link" target="_blank">Read More  <i class="fa-regular fa-arrow-right"></i></a>
-            </div>
             </div>
           </div>
         </div>
-        <a class="btn btn-small btn-ghost" href="/more-resources">More Resources<i class="fa-regular fa-arrow-right"></i></a>
       </div>
     </div>
-</div>
 
-    <!-- Mailing List Component -->
-    <MailingListComponent></MailingListComponent>
+    <!-- Search Results Section -->
+    <div v-if="searchResultsFlag && searchTermDisplay != ''" class="allposts-section">
+      <div class="allposts-post-row" 
+           v-for="(blog_item, index) in blogDataSearch.slice().reverse()" 
+           :key="index">
+        <a :href="'/blog/' + blog_item.slug">
+          <div v-if="!isSSR && blog_item.image">
+            <img 
+              class="blog-list-img" 
+              :src="directus.url.href+'assets/'+ blog_item.image.id+'?width=300'"
+              loading="lazy"
+            >
+          </div>
+          <div class="allposts-post-details">
+            <h3>{{blog_item.title}}</h3>
+            <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
+            <div class="author-list">
+              <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
+              <div v-for="(author,i) in blog_item.authors" :key="i" class="author-item">
+                <div class="author-details">
+                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                  <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
+    </div>
 
-    <!-- Footer Component -->
+    <!-- Rest of your template sections... -->
     <FooterComponent></FooterComponent>
   </div>
 </template>
 
 <style scoped>
-/* Your styles here */
+/* Keep your existing styles */
+.image-placeholder {
+  background-color: #f0f0f0;
+  width: 100%;
+  height: 200px;
+}
 </style>
