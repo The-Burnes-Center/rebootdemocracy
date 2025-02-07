@@ -10,9 +10,15 @@ import FooterComponent from "../../components/footer.vue";
 import format from "date-fns/format";
 import isPast from "date-fns/isPast";
 
+// Base URL for assets. Change this variable if the base path ever changes.
+const ASSET_BASE_URL = import.meta.env.DEV
+  ? 'https://dev.rebootdemocracy.ai/assets/'
+  : 'https://ssg-test.rebootdemocracy.ai/assets/';
+// Fallback image if no image is provided.
+const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235';
+
 // Get props provided by vite-plugin-pages for the dynamic route
 const props = defineProps<{ slug: string }>();
-
 // Normalize the slug to lowercase
 const normalizedSlug = props.slug.toLowerCase();
 
@@ -52,14 +58,13 @@ async function fetchPost(slugValue: string) {
   return (Array.isArray(data) && data.length > 0) ? data[0] : null;
 }
 
-// If we're in SSG mode, fetch data before rendering
+// For SSR, fetch data before rendering.
 if (import.meta.env.SSR) {
-  // Note: This is top-level await in script setup, allowed in newer environments
   post.value = await fetchPost(normalizedSlug);
 
-  
+  console.log('in ssr mode', import.meta.env.SSR);
 
-  // Set meta right after data is fetched in SSG
+  // Set meta right after data is fetched in SSR mode.
   if (post.value) {
     useHead({
       title: 'RebootDemocracy.AI Blog | ' + post.value.title,
@@ -71,8 +76,8 @@ if (import.meta.env.SSR) {
         {
           property: 'og:image',
           content: post.value.image
-            ? 'https://dev.thegovlab.com/assets/' + post.value.image.id
-            : 'https://dev.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+            ? `${ASSET_BASE_URL}${post.value.image.id}`
+            : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
         },
         { property: 'og:image:width', content: '800' },
         { property: 'og:image:height', content: '800' },
@@ -81,8 +86,8 @@ if (import.meta.env.SSR) {
         {
           property: 'twitter:image',
           content: post.value.image
-            ? 'https://dev.thegovlab.com/assets/' + post.value.image.id
-            : 'https://dev.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+            ? `${ASSET_BASE_URL}${post.value.image.id}`
+            : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
         },
         { property: 'twitter:card', content: 'summary_large_image' },
       ],
@@ -96,11 +101,10 @@ if (import.meta.env.SSR) {
     });
   }
 } else {
-  // In dev mode (no SSR), fetch data after mount
+  // In dev (non-SSR) mode, fetch data after mount.
   onMounted(async () => {
     console.log('Dev mode: fetching on mount for slug:', normalizedSlug);
     post.value = await fetchPost(normalizedSlug);
-    
     
     if (post.value) {
       useHead({
@@ -113,8 +117,8 @@ if (import.meta.env.SSR) {
           {
             property: 'og:image',
             content: post.value.image
-              ? 'https://dev.thegovlab.com/assets/' + post.value.image.id
-              : 'https://dev.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+              ? `${ASSET_BASE_URL}${post.value.image.id}`
+              : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
           },
           { property: 'og:image:width', content: '800' },
           { property: 'og:image:height', content: '800' },
@@ -123,8 +127,8 @@ if (import.meta.env.SSR) {
           {
             property: 'twitter:image',
             content: post.value.image
-              ? 'https://dev.thegovlab.com/assets/' + post.value.image.id
-              : 'https://dev.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235',
+              ? `${ASSET_BASE_URL}${post.value.image.id}`
+              : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
           },
           { property: 'twitter:card', content: 'summary_large_image' },
         ],

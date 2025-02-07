@@ -18,11 +18,11 @@ const OpenAIChat = defineAsyncComponent(() => import('./components/pschat.vue'))
     </div>
 
     <!-- OpenAI Chat component that must always remain interactive -->
-    <!-- <client-only>
+    <client-only>
       <keep-alive>
         <OpenAIChat />
       </keep-alive>
-    </client-only> -->
+    </client-only>
   </div>
 </template>
 
