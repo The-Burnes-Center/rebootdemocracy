@@ -17,7 +17,7 @@ function navigateHome() {
           <img src="../assets/the-govlab-logo-white.svg" />
         </a>
         <a href="http://burnes.northeastern.edu" target="_blank">
-          <img src="../assets/burnes-center-logo.png" />
+          <img src="/burnes-center-logo.png" />
         </a>
       </div>
       <!-- Rest of the footer content -->
