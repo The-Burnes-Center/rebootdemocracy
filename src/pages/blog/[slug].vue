@@ -76,7 +76,7 @@ if (import.meta.env.SSR) {
         {
           property: 'og:image',
           content: post.value.image
-            ? `${ASSET_BASE_URL}${post.value.image.id}`
+            ? `${ASSET_BASE_URL}${post.value.image.filename_disk}`
             : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
         },
         { property: 'og:image:width', content: '800' },
@@ -86,7 +86,7 @@ if (import.meta.env.SSR) {
         {
           property: 'twitter:image',
           content: post.value.image
-            ? `${ASSET_BASE_URL}${post.value.image.id}`
+            ? `${ASSET_BASE_URL}${post.value.image.filename_disk}`
             : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
         },
         { property: 'twitter:card', content: 'summary_large_image' },
@@ -117,7 +117,7 @@ if (import.meta.env.SSR) {
           {
             property: 'og:image',
             content: post.value.image
-              ? `${ASSET_BASE_URL}${post.value.image.id}`
+              ? `${ASSET_BASE_URL}${post.value.image.filename_disk}`
               : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
           },
           { property: 'og:image:width', content: '800' },
@@ -127,7 +127,7 @@ if (import.meta.env.SSR) {
           {
             property: 'twitter:image',
             content: post.value.image
-              ? `${ASSET_BASE_URL}${post.value.image.id}`
+              ? `${ASSET_BASE_URL}${post.value.image.filename_disk}`
               : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`,
           },
           { property: 'twitter:card', content: 'summary_large_image' },
@@ -152,7 +152,7 @@ if (import.meta.env.SSR) {
 
 <div class="blog-hero">
 
-  <img v-if="post && post.image" class="blog-img" :src= "directus.url.href+'assets/'+post.image.id+'?width=800'" />
+  <img v-if="post && post.image" class="blog-img" :src= "directus.url.href+'assets/'+post.image.filename_disk+'?width=800'" />
   
   <div class="blog-details">
     <h1>{{post.title}}</h1>
