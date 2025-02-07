@@ -152,7 +152,7 @@ if (import.meta.env.SSR) {
 
 <div class="blog-hero">
 
-  <img v-if="post && post.image" class="blog-img" :src= "directus.url.href+'assets/'+post.image.filename_disk+'?width=800'" />
+  <img v-if="post && post.image" class="blog-img" :src= "ASSET_BASE_URL+post.image.filename_disk+'?width=800'" />
   
   <div class="blog-details">
     <h1>{{post.title}}</h1>

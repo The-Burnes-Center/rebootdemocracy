@@ -28,7 +28,7 @@
     <div v-else>
       <div class="menu">
         <a href="/about">About Us</a>
-        <a href="/blog">Blog</a>
+        <a href="/">Blog</a>
         <a href="/events">Events</a>
         <div class="dropdown">
           <button class="dropbtn">Our Work 
