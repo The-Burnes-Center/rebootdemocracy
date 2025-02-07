@@ -1,7 +1,7 @@
 <script setup>
-import { ref, Suspense } from "vue";
-// import { Directus } from "@directus/sdk";
-import OpenAIChat from "./components/pschat.vue";
+import { defineAsyncComponent } from "vue";
+// Dynamically import the chat component so it’s in its own bundle (island)
+const OpenAIChat = defineAsyncComponent(() => import('./components/pschat.vue'));
 </script>
 
 <template>
@@ -11,16 +11,18 @@ import OpenAIChat from "./components/pschat.vue";
       <router-view v-slot="{ Component }">
         <keep-alive>
           <Suspense>
-          <component :is="Component" />
+            <component :is="Component" />
           </Suspense>
         </keep-alive>
       </router-view>
     </div>
 
-    <!-- OpenAI Chat component that's always visible -->
-    <keep-alive>
-      <OpenAIChat />
-    </keep-alive>
+    <!-- OpenAI Chat component that must always remain interactive -->
+    <!-- <client-only>
+      <keep-alive>
+        <OpenAIChat />
+      </keep-alive>
+    </client-only> -->
   </div>
 </template>
 
@@ -29,11 +31,8 @@ import OpenAIChat from "./components/pschat.vue";
   display: flex;
   min-height: 100vh;
 }
-
 .main-content {
   flex-grow: 1;
   overflow-y: auto;
 }
-
-/* Add styles for OpenAIChat component positioning */
 </style>
