@@ -4,27 +4,47 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import fetch from 'node-fetch';
 import { createDirectus, rest, readItems } from '@directus/sdk';
-import { load } from 'cheerio'; // ← Updated import
+import { load } from 'cheerio'; // For parsing HTML content
 
 ////////////////////////////////////////////////////////////////////////////////
 // Configuration
 ////////////////////////////////////////////////////////////////////////////////
 
-// Replace these URLs as needed:
+// Primary Directus base domain
 const DIRECTUS_BASE_URL = 'https://dev.thegovlab.com';
+
+/**
+ * This is your original content domain for "regular" images
+ * found outside of .blog-content (or for standard use).
+ */
 const CONTENT_DIRECTUS_URL = 'https://dev.thegovlab.com';
 
-// Regex to detect images from your content directus domain:
-const ASSET_URL_REGEX = /https:\/\/content\.thegovlab\.com\/assets\/([^"?#]+)/gi;
+/**
+ * NEW: second domain for ".blog-content" HTML.
+ * Anything discovered within the .blog-content container
+ * will be downloaded from this URL instead.
+ */
+const BLOG_CONTENT_DIRECTUS_URL = 'https://content.thegovlab.com';
 
-// Create the Directus client for your main data
-const directus = createDirectus(DIRECTUS_BASE_URL).with(rest());
+/**
+ * If you always want to fetch a fallback image, specify it here.
+ * If your fallback is a plain UUID (e.g., '4650f4e2-6cc2-407b-ab01-b74be4838235'),
+ * you can omit the .png extension and let metadata supply it. Or, if you know
+ * it's definitely .png, keep it in the filename as shown below.
+ */
+const ALWAYS_DOWNLOAD_FALLBACK_FILE = '4650f4e2-6cc2-407b-ab01-b74be4838235.png';
 
-// Where downloaded files will be stored locally (changed to dist/assets)
+/**
+ * Where downloaded files will be stored. Changed to dist/assets
+ * because you're building your site there.
+ */
 const ASSETS_DIR = path.join(process.cwd(), 'dist', 'assets');
 
+// Create the Directus client for main data
+const directus = createDirectus(DIRECTUS_BASE_URL).with(rest());
+
 ////////////////////////////////////////////////////////////////////////////////
-// Main functions to fetch directus items
+// Main fetch logic
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -51,7 +71,7 @@ async function fetchAllAssets() {
     return;
   }
 
-  // Build up the set of filenames to download from the explicit fields
+  // Build up a set of filenames/IDs to download from the fields
   const allFilenames = new Set();
   for (const post of data) {
     // post image
@@ -70,9 +90,14 @@ async function fetchAllAssets() {
         }
       }
     }
-    // look in post.content for <img> references
+
+    // content might have <img> references outside of .blog-content
     if (post?.content) {
+      // Default parse (content domain)
       await fetchDirectusImagesInHtml(post.content);
+
+      // If you also want to parse for .blog-content and pull from second domain:
+      await fetchBlogContentImagesInHtml(post.content);
     }
   }
 
@@ -126,9 +151,14 @@ async function fetchAssetsForSlug(slug) {
       }
     }
   }
-  // parse HTML content for directus images
+
+  // parse HTML content
   if (post?.content) {
+    // Normal parse
     await fetchDirectusImagesInHtml(post.content);
+
+    // Additional parse for .blog-content from second domain
+    await fetchBlogContentImagesInHtml(post.content);
   }
 
   // Download the explicitly referenced files
@@ -136,47 +166,90 @@ async function fetchAssetsForSlug(slug) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Helpers for parsing <img> from HTML content, requesting metadata, and downloading
+// HTML parsing helpers
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Check for <img src="https://dev.thegovlab.com/assets/..."> references,
- * extract the ID or filename, call /files if needed, then download the assets.
+ * Parse the given HTML for <img>, inline CSS, srcset, etc.
+ * and download from the DEFAULT domain (CONTENT_DIRECTUS_URL).
  */
 async function fetchDirectusImagesInHtml(htmlContent) {
-  const $ = load(htmlContent); // ← Updated usage
+  const $ = load(htmlContent);
   const assets = new Set();
 
-  // Check all relevant attributes
+  // Check all relevant attributes in the entire HTML
   $('img[src], [style], [srcset]').each((_, element) => {
-    // Check src attributes
+    // src
     const src = $(element).attr('src');
     if (src) checkAssetUrl(src, assets);
 
-    // Check inline styles
+    // style
     const style = $(element).attr('style');
     if (style) checkCssUrls(style, assets);
 
-    // Check srcset
+    // srcset
     const srcset = $(element).attr('srcset');
     if (srcset) checkSrcset(srcset, assets);
   });
 
+  // For each discovered asset, fetch from the standard domain
   for (const idOrFilename of assets) {
-    await fetchAndDownloadDirectusFile(idOrFilename);
+    await fetchAndDownloadDirectusFile(idOrFilename, CONTENT_DIRECTUS_URL);
   }
 }
 
+/**
+ * NEW: This function looks ONLY within .blog-content container
+ * and downloads from the second domain: BLOG_CONTENT_DIRECTUS_URL.
+ */
+async function fetchBlogContentImagesInHtml(htmlContent) {
+  const $ = load(htmlContent);
+  const assets = new Set();
+
+  // Only parse inside .blog-content
+  const $blogContainer = $('.blog-content');
+  $blogContainer.find('img[src], [style], [srcset]').each((_, element) => {
+    const src = $(element).attr('src');
+    if (src) checkAssetUrl(src, assets);
+
+    const style = $(element).attr('style');
+    if (style) checkCssUrls(style, assets);
+
+    const srcset = $(element).attr('srcset');
+    if (srcset) checkSrcset(srcset, assets);
+  });
+
+  // For each discovered asset, download it from BLOG_CONTENT_DIRECTUS_URL
+  for (const idOrFilename of assets) {
+    await fetchAndDownloadDirectusFile(idOrFilename, BLOG_CONTENT_DIRECTUS_URL);
+  }
+}
+
+/**
+ * Check a single asset URL for matches, and if found, add the directus file ID
+ * or filename to the set so we can fetch it later.
+ */
 function checkAssetUrl(url, set) {
-  const match = url.match(/https:\/\/content\.thegovlab\.com\/assets\/([^?#]+)/);
+  // Generic pattern or your original domain pattern:
+  // Feel free to adjust if you have a different domain for the default parse
+  const match = url.match(/https?:\/\/[^/]+\/assets\/([^?#]+)/);
   if (match) set.add(match[1]);
 }
 
+/**
+ * Check inline styles for "url( ... )" references and gather them.
+ */
 function checkCssUrls(css, set) {
-  const matches = css.matchAll(/url\(["']?(https:\/\/content\.thegovlab\.com\/assets\/[^"')?#]+)/gi);
-  for (const match of matches) checkAssetUrl(match[1], set);
+  // For example, background-image: url('https://xyz.com/assets/...')
+  const matches = css.matchAll(/url\(["']?(https?:\/\/[^"')?#]+)/gi);
+  for (const match of matches) {
+    checkAssetUrl(match[1], set);
+  }
 }
 
+/**
+ * Parse a srcset string, which could look like "url1 1x, url2 2x", and gather them.
+ */
 function checkSrcset(srcset, set) {
   srcset
     .split(',')
@@ -184,24 +257,32 @@ function checkSrcset(srcset, set) {
     .forEach((url) => checkAssetUrl(url, set));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Downloading files
+////////////////////////////////////////////////////////////////////////////////
+
 /**
- * Given a possible Directus ID or a filename like "123abc.png", 
- * request /files/<id> if it looks like a pure UUID, 
- * get the filename_disk, then download the file.
+ * Universal: given a file ID or directus filename, do:
+ *   1) If it's a plain UUID, fetch metadata to get the actual filename_disk
+ *   2) Download from the specified baseDomain (defaults to CONTENT_DIRECTUS_URL)
  */
-async function fetchAndDownloadDirectusFile(fileIdOrFilename) {
+async function fetchAndDownloadDirectusFile(
+  fileIdOrFilename,
+  baseDomain = CONTENT_DIRECTUS_URL
+) {
   if (!fileIdOrFilename) return;
 
   const isUuidOnly = /^[0-9a-f-]{36}$/i.test(fileIdOrFilename);
   let diskFilename = fileIdOrFilename;
   let extension = '';
 
-  // If it's just the UUID, fetch metadata to get the correct extension
+  // If it’s just a UUID, fetch metadata from the chosen domain
   if (isUuidOnly) {
     try {
-      const metadata = await fetch(`${CONTENT_DIRECTUS_URL}/files/${fileIdOrFilename}`);
+      const metadataUrl = `${baseDomain}/files/${fileIdOrFilename}`;
+      const metadata = await fetch(metadataUrl);
       if (!metadata.ok) {
-        console.error(`Failed to get metadata for ${fileIdOrFilename} , status: ${metadata.status}`);
+        console.error(`Failed to get metadata for ${fileIdOrFilename}, status: ${metadata.status}`);
         return;
       }
       const { data } = await metadata.json();
@@ -209,7 +290,6 @@ async function fetchAndDownloadDirectusFile(fileIdOrFilename) {
         console.error(`filename_disk not found for ${fileIdOrFilename}`);
         return;
       }
-      // For example, if filename_disk = "my-file.png"
       diskFilename = data.filename_disk;
     } catch (err) {
       console.error(`Error fetching metadata for ${fileIdOrFilename}:`, err);
@@ -217,36 +297,36 @@ async function fetchAndDownloadDirectusFile(fileIdOrFilename) {
     }
   }
 
-  // Attempt to parse extension from diskFilename. E.g. "my-file.png" => "png"
+  // Attempt to parse the extension
   const dotIndex = diskFilename.lastIndexOf('.');
   if (dotIndex !== -1) {
-    extension = diskFilename.slice(dotIndex + 1);
+    extension = diskFilename.slice(dotIndex + 1).toLowerCase();
   }
 
-  // If it was a UUID, we store it as "uuid.extension"
-  // Otherwise, we just keep the original name "some-file.png"
+  // If it was a UUID, store it as <uuid>.<extension>, else keep original
   let localFileName;
   if (isUuidOnly) {
-    if (!extension) {
-      // fallback extension if none found
-      extension = 'dat';
-    }
-    localFileName = `${fileIdOrFilename}.${extension}`;
+    localFileName = `${fileIdOrFilename}.${extension || 'dat'}`;
   } else {
-    localFileName = diskFilename; // it already has some extension presumably
+    localFileName = diskFilename;
   }
 
   const localFilePath = path.join(ASSETS_DIR, localFileName);
-  // Skip if this file is already downloaded
+
+  // Skip if we already have it
   try {
     await fs.stat(localFilePath);
     console.log(`File already exists, skipping: ${localFilePath}`);
     return;
   } catch {
-    // proceed if file does not exist
+    // proceed
   }
 
-  const remoteUrl = `${CONTENT_DIRECTUS_URL}/assets/${diskFilename}`;
+  // If you want a forced width=800, you could do:
+  // const remoteUrl = `${baseDomain}/assets/${diskFilename}?width=800`;
+  // For now, we do no transformations:
+  const remoteUrl = `${baseDomain}/assets/${diskFilename}`;
+
   console.log(`Downloading file: ${remoteUrl} -> ${localFilePath}`);
   await fs.mkdir(ASSETS_DIR, { recursive: true });
 
@@ -255,6 +335,7 @@ async function fetchAndDownloadDirectusFile(fileIdOrFilename) {
     console.error(`Failed to download ${remoteUrl}. Status: ${response.status}`);
     return;
   }
+
   const buffer = await response.arrayBuffer();
   await fs.writeFile(localFilePath, Buffer.from(buffer));
 }
@@ -268,10 +349,8 @@ async function downloadFiles(filenames) {
     console.log('No additional assets to download (explicit fields).');
     return;
   }
-
   for (const filename of filenames) {
-    // If we already have an extension, it's likely from Directus "filename_disk".
-    // We'll just pass it to our fetchAndDownloadDirectusFile to handle skip logic.
+    // pass with no second arg to fetch from CONTENT_DIRECTUS_URL
     await fetchAndDownloadDirectusFile(filename);
   }
 }
@@ -290,6 +369,11 @@ async function downloadFiles(filenames) {
       // Incremental fetch for one slug
       await fetchAssetsForSlug(slugToBuild.toLowerCase());
     }
+
+    // Always download your fallback file:
+    await fetchAndDownloadDirectusFile(ALWAYS_DOWNLOAD_FALLBACK_FILE);
+
+    console.log('Asset fetching complete.');
   } catch (err) {
     console.error('Error in fetch-directus-assets:', err);
     process.exit(1);
