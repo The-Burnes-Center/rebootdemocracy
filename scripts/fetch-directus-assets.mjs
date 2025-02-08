@@ -323,9 +323,9 @@ async function fetchAndDownloadDirectusFile(
   }
 
   // If you want a forced width=800, you could do:
-  // const remoteUrl = `${baseDomain}/assets/${diskFilename}?width=800`;
+  const remoteUrl = `${baseDomain}/assets/${diskFilename}?width=800`;
   // For now, we do no transformations:
-  const remoteUrl = `${baseDomain}/assets/${diskFilename}`;
+  // const remoteUrl = `${baseDomain}/assets/${diskFilename}`;
 
   console.log(`Downloading file: ${remoteUrl} -> ${localFilePath}`);
   await fs.mkdir(ASSETS_DIR, { recursive: true });
