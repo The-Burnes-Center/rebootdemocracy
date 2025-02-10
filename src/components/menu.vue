@@ -13,10 +13,11 @@
             <i :class="['fa-regular', dropdownOpen ? 'fa-angle-up' : 'fa-angle-down']"></i>
           </button>
           <div class="dropdown-content" v-show="dropdownOpen">
+            <a href="https://thegovlab.org/beth-simone-noveck.html">About Beth Noveck</a>
             <a href="/our-engagements">Engagements</a>
             <a href="/our-research">Research</a>
-            <a href="/our-writing">Writing</a>
-            <a href="/our-teaching">Teaching</a>
+            <a href="https://innovate-us.org/" target="_blank">Teaching</a>
+            <a href=" https://www.publicentrepreneur.org" target="_blank">University Teaching</a>
             <a href="/more-resources">More Resources</a>
           </div>
         </div>
@@ -35,10 +36,11 @@
             <i class="fa-regular fa-angle-down"></i>
           </button>
           <div class="dropdown-content">
+            <a href="https://thegovlab.org/beth-simone-noveck.html">About Beth Noveck</a>
             <a href="/our-engagements">Engagements</a>
             <a href="/our-research">Research</a>
-            <a href="/our-writing">Writing</a>
-            <a href="/our-teaching">Teaching</a>
+            <a href="https://innovate-us.org/" target="_blank">Teaching</a>
+            <a href=" https://www.publicentrepreneur.org" target="_blank">University Teaching</a>
             <a href="/more-resources">More Resources</a>
           </div>
         </div>
