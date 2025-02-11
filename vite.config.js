@@ -30,46 +30,52 @@ if (!fs.existsSync(assetsDir)) {
 }
 
 function cloneRoute(route) {
-    const { parent, ...rest } = route;
-    return { ...rest };
-  }
+  const { parent, ...rest } = route;
+  return { ...rest };
+}
 
 export default defineConfig({
   base: '',
   plugins: [
     // Place these virtual module based plugins first
-    Pages({ extensions: ['vue'],
-        extendRoute(route) {
-            // Ensure alias is always an array if it’s defined.
-            if (route.alias && !Array.isArray(route.alias)) {
-              route.alias = [route.alias];
-            }
+    Pages({
+      extensions: ['vue'],
+      extendRoute(route) {
+        // Ensure alias is always an array if it’s defined.
+        if (route.alias && !Array.isArray(route.alias)) {
+          route.alias = [route.alias];
+        }
     
-            // For blog-page (from blog-page.vue), add '/blog' as an alias.
-            if (route.name === 'blog-page') {
-              route.alias = route.alias || [];
-              if (!route.alias.includes('/blog')) {
-                route.alias.push('/blog');
-              }
-            }
+        // For blog-page (from blog-page.vue), add '/blog' as an alias.
+        if (route.name === 'blog-page') {
+          route.alias = route.alias || [];
+          if (!route.alias.includes('/blog')) {
+            route.alias.push('/blog');
+          }
+        }
     
-            // For homepage (from index.vue), add '/about' as an alias.
-            if (route.name === 'index') {
-              route.alias = route.alias || [];
-              if (!route.alias.includes('/about')) {
-                route.alias.push('/about');
-              }
-            }
+        // For homepage (from index.vue), add '/about' as an alias.
+        if (route.name === 'index') {
+          route.alias = route.alias || [];
+          if (!route.alias.includes('/about')) {
+            route.alias.push('/about');
+          }
+        }
     
-            return route;
-          },
-     }),
+        return route;
+      },
+    }),
     Layouts(),
 
     // Then the Vue and Vuetify plugins
     vue(),
     vuetify({ autoImport: true }),
   ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
   // Exclude virtual modules from dependency optimization
   optimizeDeps: {
     exclude: ['virtual:generated-pages', 'virtual:generated-layouts'],
@@ -123,61 +129,56 @@ export default defineConfig({
       }
     },
 
-    // Ensure blog pages do not get rehydrated after build, but keep OpenAIChat working
+    // Remove unwanted hydration scripts on blog pages and inject the SSG-components script.
     onPageRendered(route, html) {
-        const depth = route.split('/').length - 1;
-        const assetPrefix = './' + '../'.repeat(depth - 1);
+      const depth = route.split('/').length - 1;
+      const assetPrefix = './' + '../'.repeat(depth - 1);
       
-        html = html
-          .replace(
-            /(<script[^>]*\s+src=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
-            `$1${assetPrefix}$2$3`
-          )
-          .replace(
-            /(<link[^>]*\s+href=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
-            `$1${assetPrefix}$2$3`
-          )
-          .replace(
-            /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)(?:\?[^"]*)?/gi,
-            (match, uuid) => {
-              const filename = uuidToFileMap[uuid.toLowerCase()];
-              return filename ? `${assetPrefix}assets/${filename}` : match;
-            }
-          );
+      html = html
+        .replace(
+          /(<script[^>]*\s+src=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
+          `$1${assetPrefix}$2$3`
+        )
+        .replace(
+          /(<link[^>]*\s+href=")(?!https?:\/\/|\/\/|data:)([^"]+)(")/g,
+          `$1${assetPrefix}$2$3`
+        )
+        .replace(
+          /https:\/\/content\.thegovlab\.com\/assets\/([a-f0-9-]+)(?:\?[^"]*)?/gi,
+          (match, uuid) => {
+            const filename = uuidToFileMap[uuid.toLowerCase()];
+            return filename ? `${assetPrefix}assets/${filename}` : match;
+          }
+        );
       
-        // For blog pages, remove unwanted hydration scripts...
-        if (route.startsWith('/blog/')) {
-          html = html.replace(/(<script[^>]*?>)([\s\S]*?<\/script>)/gi, () => '');
-          
-          // ...and then inject the chat island container and chat client script.
-          // (Ensure that chat-client.js is placed in your public folder so that it’s served as-is.)
-          html = html.replace(
-            /<\/body>/i,
-            `<div id="chat"></div>
-            <script type="module" src="${assetPrefix}assets/chat-client.js"></script>
-            <script type="module" src="${assetPrefix}assets/chat-prod.js"></script>
-            </body>`
-          );          
-        }
-        return html;
-      },
+      // For blog pages, remove all hydration scripts and add container divs with our SSG-components script.
+      if (route.startsWith('/blog/')) {
+        html = html.replace(/(<script[^>]*?>)([\s\S]*?<\/script>)/gi, '');
+        html = html.replace(
+          /<\/body>/i,
+          `<div id="chat"></div>
+<script type="module" src="${assetPrefix}assets/ssg-components.js"></script>
+</body>`
+        );
+      }
+      return html;
+    },
   },
 
   build: {
     emptyOutDir: false,
     rollupOptions: {
-        input: {
-            // Default entry (usually index.html in your project)
-            main: resolve(__dirname, 'index.html'),
-            // Extra entry for your chat client bundle.
-            'chat-client': resolve(__dirname, 'src/chat-client.js')
-          },
+      input: {
+        // Default entry (usually index.html in your project)
+        main: resolve(__dirname, 'index.html'),
+        // Extra entry for your SSG components bundle.
+        'ssg-components': resolve(__dirname, 'src/ssg-components.js'),
+      },
       output: {
-        
-         entryFileNames: 'assets/[name].js',
+        entryFileNames: 'assets/[name].js',
         chunkFileNames: 'assets/[name]-prod.js',
         assetFileNames: 'assets/pp-prod.css',
-        // Extract the chat component into its own chunk based on its path
+        // Optionally extract the chat component into its own chunk:
         manualChunks(id) {
           if (id.includes('pschat.vue')) {
             return 'chat';

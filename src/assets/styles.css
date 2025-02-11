@@ -3849,3 +3849,55 @@ margin: 5px 10px;
     }
 
   }
+
+
+.mobile-menu {
+  display: none;
+}
+.desktop-menu {
+  display: block;
+}
+
+/* 
+  For screens up to 786px wide, show the mobile menu and 
+  hide the desktop menu. Adjust 786px to whatever breakpoint you prefer.
+*/
+@media (max-width: 786px) {
+  .mobile-menu {
+    display: block;
+  }
+  .desktop-menu {
+    display: none;
+  }
+}
+
+/* Example styles for your “menu-shadow” or “menu open” states:
+
+   This is up to you to style. The main point is the pure-CSS 
+   approach for switching mobile/desktop via media queries.
+*/
+
+.menu-component {
+  /* your container styling... */
+}
+.menu {
+  /* shared menu styling... */
+}
+.menu.open {
+  /* open state styling for the mobile menu, if you want transitions, etc. */
+}
+.menu-shadow {
+  /* maybe a dark background overlay or something similar for mobile? */
+}
+
+/* .dropdown, .dropbtn, .dropdown-content, etc... */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropbtn {
+  /* your styling for the button */
+}
+.dropdown-content {
+  /* typically position: absolute; etc. */
+}

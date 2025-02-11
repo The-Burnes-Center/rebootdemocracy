@@ -1,5 +1,6 @@
 <template>
-  <div class="menu-component">
+  <div id="menuIsland" class="menu-component">
+
     <!--
       MOBILE MENU
       Displayed ONLY at screens <= 786px (handled via media query)
