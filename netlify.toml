@@ -2,17 +2,18 @@
   command = "vite build"
   functions = "netlify/functions"
   publish = "dist"
+  
+[[redirects]]
+  from = "/feed/rss"
+  to = "/.netlify/functions/json2rss"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[[redirects]]
-  from = "/feed/rss"
-  to = "/.netlify/functions/json2rss"
-  status = 200
-  force = true
 
 [[headers]]
   for = "/*"
