@@ -3,7 +3,6 @@ import pkg  from 'jstoxml';
 import { Directus } from '@directus/sdk';
 import he from 'he';
 import sharp from "sharp";
-import fetch from "node-fetch"; // Fetch original image
 
 exports.handler = async function (event, context) {
 
@@ -119,35 +118,22 @@ function addLeadingZero(num) {
 
   
   async function getCompressedImage(imageUrl) {
-      try {
-          const response = await fetch(imageUrl);
-          const buffer = await response.arrayBuffer(); // Fetch image as buffer
-  
-          let quality = 80; // Start with 80% quality
-          let resizedBuffer = await sharp(Buffer.from(buffer))
-              .resize({ width: 800 }) // Resize width to 800px, auto-scale height
-              .jpeg({ quality }) // Start with 80% quality
-              .toBuffer();
-  
-          // If image is still larger than 1MB, reduce quality further
-          while (resizedBuffer.length > 1000000 && quality > 30) {
-              quality -= 10; // Decrease quality step-by-step
-              resizedBuffer = await sharp(Buffer.from(buffer))
-                  .resize({ width: 800 })
-                  .jpeg({ quality })
-                  .toBuffer();
-          }
-  
-          console.log(`Final image size: ${resizedBuffer.length / 1024} KB (Quality: ${quality}%)`);
-          
-          // Convert to base64 URL or save it to a file and return a new URL
-          return `data:image/jpeg;base64,${resizedBuffer.toString("base64")}`;
-      } catch (error) {
-          console.error("Error compressing image:", error);
-          return imageUrl; // Return original if compression fails
-      }
-  }
-  
+    try {
+        const response = await fetch(imageUrl); // No need for node-fetch
+        const buffer = await response.arrayBuffer();
+
+        const optimizedBuffer = await sharp(Buffer.from(buffer))
+            .resize(800)
+            .jpeg({ quality: 80 })
+            .toBuffer();
+
+        return `data:image/jpeg;base64,${optimizedBuffer.toString("base64")}`;
+    } catch (error) {
+        console.error("Error compressing image:", error);
+        return imageUrl; // Return original if compression fails
+    }
+}
+
 function decodeEntities(encodedString) {
     return he.decode(encodedString || "");
 }
