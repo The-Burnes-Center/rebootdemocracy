@@ -8,6 +8,12 @@
   to = "/index.html"
   status = 200
 
+[[redirects]]
+  from = "/blog/feed/rss"
+  to = "/.netlify/functions/json2rss"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
