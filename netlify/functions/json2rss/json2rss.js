@@ -57,29 +57,40 @@ publicData.data.map(e => {
     if (e.status == "published") {
         var itemcont = {};
         itemcont["item"] = {};
-        itemcont["item"]["title"] = he.decode(e.title); // Decode HTML entities
+        itemcont["item"]["title"] = decodeEntities(e.title);
         itemcont["item"]["link"] = "https://rebootdemocracy.ai/blog/" + e.slug;
         itemcont["item"]["guid"] = "https://rebootdemocracy.ai/blog/" + e.slug;
-        itemcont["item"]["description"] = he.decode(e.content); // Decode HTML entities
+        itemcont["item"]["description"] = `<![CDATA[${e.content}]]>`;
         itemcont["item"]["pubDate"] = buildRFC822Date(e.date);
+
+        // If an image exists, add it as <enclosure> FIRST
         if (e.image && e.image.id) {
+            let imageUrl = "https://content.thegovlab.com/assets/" + e.image.id;
+
             itemcont["item"]["enclosure"] = {
                 _attrs: {
-                    url: "content.thegovlab.com/assets/" + e.image.id,
-                    type: "image/jpeg"
+                    url: imageUrl,
+                    type: "image/png" // Ensure correct MIME type
                 }
             };
+
+            // Also add <media:content> for broader compatibility
             itemcont["item"]["media:content"] = {
                 _attrs: {
-                    url: "content.thegovlab.com/assets/" + e.image.id,
-                    type: "image/jpeg",
+                    url: imageUrl,
+                    type: "image/png",
                     medium: "image"
                 }
             };
+
+            // OPTIONAL: Add the image inside <description> to help Substack
+            itemcont["item"]["description"] = `<![CDATA[<img src="${imageUrl}" alt="${e.title}" /><br/>${e.content}]]>`;
         }
+
         channel.push(itemcont);
     }
 });
+
 
         const xmlOptions = {
 
