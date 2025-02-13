@@ -48,7 +48,7 @@ const publicData = await blogPAW.readByQuery(
             }
             ],
           },
-        limit: 200,
+        limit: 100,
         fields: ["*.*"]
 })
 
@@ -111,7 +111,8 @@ publicData.data.map(e=>{
                 '&aelig;': 'æ',
                 '&oelig;': 'œ',
                 '&iexcl;': '¡',
-                '&ntilde;': 'ñ'
+                '&ntilde;': 'ñ',
+                '&euro;': '€',
             },
             indent: '  '
         };
