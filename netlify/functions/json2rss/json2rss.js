@@ -2,7 +2,6 @@
 import pkg  from 'jstoxml';
 import { Directus } from '@directus/sdk';
 import he from 'he';
-import sharp from "sharp";
 
 exports.handler = async function (event, context) {
 
@@ -54,7 +53,7 @@ const publicData = await blogPAW.readByQuery(
         fields: ["*.*"]
 })
 
-publicData.data.map(async (e) => {
+publicData.data.map((e) => {
     if (e.status == "published") {
         var itemcont = {};
         itemcont["item"] = {};
@@ -65,30 +64,30 @@ publicData.data.map(async (e) => {
         itemcont["item"]["pubDate"] = buildRFC822Date(e.date);
 
         if (e.image && e.image.id) {
-            let originalImageUrl = `https://content.thegovlab.com/assets/${e.image.id}`;
-            let compressedImageUrl = await getCompressedImage(originalImageUrl); // Compress the image
+            let imageUrl = `https://content.thegovlab.com/cdn-cgi/image/width=800,quality=40/https://content.thegovlab.com/assets/${e.image.id}`;
 
             itemcont["item"]["enclosure"] = {
                 _attrs: {
-                    url: compressedImageUrl,
+                    url: imageUrl,
                     type: "image/jpeg"
                 }
             };
 
             itemcont["item"]["media:content"] = {
                 _attrs: {
-                    url: compressedImageUrl,
+                    url: imageUrl,
                     type: "image/jpeg",
                     medium: "image"
                 }
             };
 
-            itemcont["item"]["description"] = `<![CDATA[<img src="${compressedImageUrl}" alt="${e.title}" /><br/>${decodeEntities(e.content)}]]>`;
+            itemcont["item"]["description"] = `<![CDATA[<img src="${imageUrl}" alt="${e.title}" /><br/>${decodeEntities(e.content)}]]>`;
         }
 
         channel.push(itemcont);
     }
 });
+
 const xmlOptions = {
     header: true,
     indent: '  ' // Ensures proper indentation
@@ -119,24 +118,6 @@ function addLeadingZero(num) {
     return num;
   }
   
-
-  
-  async function getCompressedImage(imageUrl) {
-    try {
-        const response = await fetch(imageUrl); // No need for node-fetch
-        const buffer = await response.arrayBuffer();
-
-        const optimizedBuffer = await sharp(Buffer.from(buffer))
-            .resize(800)
-            .jpeg({ quality: 80 })
-            .toBuffer();
-
-        return `data:image/jpeg;base64,${optimizedBuffer.toString("base64")}`;
-    } catch (error) {
-        console.error("Error compressing image:", error);
-        return imageUrl; // Return original if compression fails
-    }
-}
 
 function decodeEntities(encodedString) {
     return he.decode(encodedString || "");
