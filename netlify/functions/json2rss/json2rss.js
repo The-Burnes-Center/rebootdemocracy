@@ -91,55 +91,6 @@ publicData.data.map(async (e) => {
     }
 });
 
-
-
-        const xmlOptions = {
-
-            header: true,
-            contentReplacements: {
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&apos;',
-                '&': '&amp;',
-                '&ldquo;': '"',
-                '&lsquo;': "'",
-                '&rsquo;': "'",
-                '&rdquo;': '"',
-                '&nbsp;': ' ',
-                '&ndash;': '-',
-                '&mdash;': '-',
-                '&hellip;': "...",
-                '&thinsp;': ' ',
-                '&aacute;': 'á',
-                '&eacute;': 'é',
-                '&iacute;': 'í',
-                '&oacute;': 'ó',
-                '&uacute;': 'ú',
-                '&agrave;': 'à',
-                '&egrave;': 'è',
-                '&igrave;': 'ì',
-                '&ograve;': 'ò',
-                '&ugrave;': 'ù',
-                '&auml;': 'ä',
-                '&euml;': 'ë',
-                '&iuml;': 'ï',
-                '&ouml;': 'ö',
-                '&uuml;': 'ü',
-                '&acirc;': 'â',
-                '&ecirc;': 'ê',
-                '&icirc;': 'î',
-                '&ocirc;': 'ô',
-                '&ucirc;': 'û',
-                '&AElig;': 'Æ',
-                '&aelig;': 'æ',
-                '&oelig;': 'œ',
-                '&iexcl;': '¡',
-                '&ntilde;': 'ñ',
-                '&euro;': '€',
-            },
-            indent: '  '
-        };
         const rssFeed = toXML(
             {
                 _name: 'rss',
@@ -165,22 +116,35 @@ function addLeadingZero(num) {
     return num;
   }
   
+
+  
   async function getCompressedImage(imageUrl) {
       try {
           const response = await fetch(imageUrl);
-          const buffer = await response.buffer(); // Get image buffer
+          const buffer = await response.arrayBuffer(); // Fetch image as buffer
   
-          // Compress the image to 80% quality and resize to 800px width
-          const optimizedBuffer = await sharp(buffer)
-              .resize(800) // Resize width to 800px (height auto-scales)
-              .jpeg({ quality: 80 }) // Convert to JPEG with 80% quality
+          let quality = 80; // Start with 80% quality
+          let resizedBuffer = await sharp(Buffer.from(buffer))
+              .resize({ width: 800 }) // Resize width to 800px, auto-scale height
+              .jpeg({ quality }) // Start with 80% quality
               .toBuffer();
   
-          // Convert buffer to base64 URL (or upload to a CDN and return the new URL)
-          return `data:image/jpeg;base64,${optimizedBuffer.toString("base64")}`;
+          // If image is still larger than 1MB, reduce quality further
+          while (resizedBuffer.length > 1000000 && quality > 30) {
+              quality -= 10; // Decrease quality step-by-step
+              resizedBuffer = await sharp(Buffer.from(buffer))
+                  .resize({ width: 800 })
+                  .jpeg({ quality })
+                  .toBuffer();
+          }
+  
+          console.log(`Final image size: ${resizedBuffer.length / 1024} KB (Quality: ${quality}%)`);
+          
+          // Convert to base64 URL or save it to a file and return a new URL
+          return `data:image/jpeg;base64,${resizedBuffer.toString("base64")}`;
       } catch (error) {
           console.error("Error compressing image:", error);
-          return imageUrl; // Fallback to original image if compression fails
+          return imageUrl; // Return original if compression fails
       }
   }
   
