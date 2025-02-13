@@ -62,6 +62,21 @@ publicData.data.map(e => {
         itemcont["item"]["guid"] = "https://rebootdemocracy.ai/blog/" + e.slug;
         itemcont["item"]["description"] = he.decode(e.content); // Decode HTML entities
         itemcont["item"]["pubDate"] = buildRFC822Date(e.date);
+        if (e.image && e.image.id) {
+            itemcont["item"]["enclosure"] = {
+                _attrs: {
+                    url: "content.thegovlab.com/assets/" + e.image.id,
+                    type: "image/jpeg"
+                }
+            };
+            itemcont["item"]["media:content"] = {
+                _attrs: {
+                    url: "content.thegovlab.com/assets/" + e.image.id,
+                    type: "image/jpeg",
+                    medium: "image"
+                }
+            };
+        }
         channel.push(itemcont);
     }
 });
