@@ -64,7 +64,7 @@ publicData.data.map((e) => {
         itemcont["item"]["pubDate"] = buildRFC822Date(e.date);
 
         if (e.image && e.image.id) {
-            let imageUrl = "https://content.thegovlab.com/assets/${e.image.id} + '?width=400&quality=40&format=jpg'";
+            let imageUrl = 'https://content.thegovlab.com/assets/'+e.image.id+'?width=400&quality=40&format=jpg';
 
             itemcont["item"]["enclosure"] = {
                 _attrs: {
