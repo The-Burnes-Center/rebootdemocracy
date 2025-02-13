@@ -1,6 +1,7 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
 import pkg  from 'jstoxml';
 import { Directus } from '@directus/sdk';
+import he from 'he';
 
 exports.handler = async function (event, context) {
 
@@ -52,22 +53,18 @@ const publicData = await blogPAW.readByQuery(
         fields: ["*.*"]
 })
 
-publicData.data.map(e=>{
-            if(e.status == "published")
-            {
-            var itemcont = {};
-            itemcont["item"] = {};
-            itemcont["item"]["title"] =e.title;
-            itemcont["item"]["link"] ="https://rebootdemocracy.ai/blog/"+e.slug;
-            itemcont["item"]["guid"] ="https://rebootdemocracy.ai/blog/"+e.slug;
-            
-            // const fi = e.featured_image ? e.featured_image.filename_disk: "d1c6553e-bcdc-4019-b3a7-e6376c294eec.png"
-            itemcont["item"]["description"] =e.content;
-            
-            itemcont["item"]["pubDate"] =buildRFC822Date(e.date);
-            channel.push(itemcont);
-            }
-        })
+publicData.data.map(e => {
+    if (e.status == "published") {
+        var itemcont = {};
+        itemcont["item"] = {};
+        itemcont["item"]["title"] = he.decode(e.title); // Decode HTML entities
+        itemcont["item"]["link"] = "https://rebootdemocracy.ai/blog/" + e.slug;
+        itemcont["item"]["guid"] = "https://rebootdemocracy.ai/blog/" + e.slug;
+        itemcont["item"]["description"] = he.decode(e.content); // Decode HTML entities
+        itemcont["item"]["pubDate"] = buildRFC822Date(e.date);
+        channel.push(itemcont);
+    }
+});
 
         const xmlOptions = {
 
