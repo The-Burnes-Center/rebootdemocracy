@@ -61,8 +61,8 @@ publicData.data.map(e=>{
             itemcont["item"]["link"] ="https://rebootdemocracy.ai/blog/"+e.slug;
             itemcont["item"]["guid"] ="https://rebootdemocracy.ai/blog/"+e.slug;
             
-            const fi = e.featured_image ? e.featured_image.filename_disk: "d1c6553e-bcdc-4019-b3a7-e6376c294eec.png"
-            itemcont["item"]["description"] ='<![CDATA[<img src="https://content.thegovlab.org/assets/'+fi+'"/> '+e.content+']]>';
+            // const fi = e.featured_image ? e.featured_image.filename_disk: "d1c6553e-bcdc-4019-b3a7-e6376c294eec.png"
+            itemcont["item"]["description"] =e.content;
             
             itemcont["item"]["pubDate"] =buildRFC822Date(e.date);
             channel.push(itemcont);
