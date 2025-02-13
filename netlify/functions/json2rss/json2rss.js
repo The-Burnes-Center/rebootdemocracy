@@ -60,7 +60,7 @@ publicData.data.map(e => {
         itemcont["item"]["title"] = decodeEntities(e.title);
         itemcont["item"]["link"] = "https://rebootdemocracy.ai/blog/" + e.slug;
         itemcont["item"]["guid"] = "https://rebootdemocracy.ai/blog/" + e.slug;
-        itemcont["item"]["description"] = `<![CDATA[${e.content}]]>`;
+        itemcont["item"]["description"] = `<![CDATA[${decodeEntities(e.content)}]]>`;
         itemcont["item"]["pubDate"] = buildRFC822Date(e.date);
 
         // If an image exists, add it as <enclosure> FIRST
@@ -70,7 +70,7 @@ publicData.data.map(e => {
             itemcont["item"]["enclosure"] = {
                 _attrs: {
                     url: imageUrl,
-                    type: "image/png" // Ensure correct MIME type
+                    type: "image/jpeg" // Ensure correct MIME type
                 }
             };
 
@@ -78,13 +78,13 @@ publicData.data.map(e => {
             itemcont["item"]["media:content"] = {
                 _attrs: {
                     url: imageUrl,
-                    type: "image/png",
+                    type: "image/jpeg",
                     medium: "image"
                 }
             };
 
             // OPTIONAL: Add the image inside <description> to help Substack
-            itemcont["item"]["description"] = `<![CDATA[<img src="${imageUrl}" alt="${e.title}" /><br/>${e.content}]]>`;
+            itemcont["item"]["description"] = `<![CDATA[<img src="${imageUrl}" alt="${e.title}" /><br/>${decodeEntities(e.content)}]]>`;
         }
 
         channel.push(itemcont);
