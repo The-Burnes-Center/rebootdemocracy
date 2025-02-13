@@ -5,7 +5,7 @@ import { Directus } from '@directus/sdk';
 exports.handler = async function (event, context) {
 
 const { toXML } = pkg;
-const directus = new Directus('https://content.thegovlab.org/');
+const directus = new Directus('https://content.thegovlab.com/');
 const blogPAW = directus.items("reboot_democracy_blog");
 
 var channel = [
