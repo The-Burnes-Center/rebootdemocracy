@@ -29,7 +29,7 @@ var channel = [
     },
     {_name: "atom:link",
         _attrs: {
-        href: 'https://rebootdemocracy.ai/blog/feed/rss',
+        href: 'https://rebootdemocracy.ai/feed/rss',
         rel: 'self',
         type: 'application/rss+xml',
     }
