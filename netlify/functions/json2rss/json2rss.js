@@ -2,6 +2,8 @@
 import pkg  from 'jstoxml';
 import { Directus } from '@directus/sdk';
 import he from 'he';
+import sharp from "sharp";
+import fetch from "node-fetch"; // Fetch original image
 
 exports.handler = async function (event, context) {
 
@@ -53,7 +55,7 @@ const publicData = await blogPAW.readByQuery(
         fields: ["*.*"]
 })
 
-publicData.data.map(e => {
+publicData.data.map(async (e) => {
     if (e.status == "published") {
         var itemcont = {};
         itemcont["item"] = {};
@@ -63,35 +65,32 @@ publicData.data.map(e => {
         itemcont["item"]["description"] = `<![CDATA[${decodeEntities(e.content)}]]>`;
         itemcont["item"]["pubDate"] = buildRFC822Date(e.date);
 
-        // If an image exists, add it as <enclosure> FIRST
         if (e.image && e.image.id) {
-
-            let imageUrl = "https://content.thegovlab.com/assets/${e.image.id}?w=800&h=600&quality=50&format=jpeg";
-
+            let originalImageUrl = `https://content.thegovlab.com/assets/${e.image.id}`;
+            let compressedImageUrl = await getCompressedImage(originalImageUrl); // Compress the image
 
             itemcont["item"]["enclosure"] = {
                 _attrs: {
-                    url: imageUrl,
-                    type: "image/jpeg" // Ensure correct MIME type
+                    url: compressedImageUrl,
+                    type: "image/jpeg"
                 }
             };
 
-            // Also add <media:content> for broader compatibility
             itemcont["item"]["media:content"] = {
                 _attrs: {
-                    url: imageUrl,
+                    url: compressedImageUrl,
                     type: "image/jpeg",
                     medium: "image"
                 }
             };
 
-            // OPTIONAL: Add the image inside <description> to help Substack
-            itemcont["item"]["description"] = `<![CDATA[<img src="${imageUrl}" alt="${e.title}" /><br/>${decodeEntities(e.content)}]]>`;
+            itemcont["item"]["description"] = `<![CDATA[<img src="${compressedImageUrl}" alt="${e.title}" /><br/>${decodeEntities(e.content)}]]>`;
         }
 
         channel.push(itemcont);
     }
 });
+
 
 
         const xmlOptions = {
@@ -165,7 +164,26 @@ function addLeadingZero(num) {
     while (num.length < 2) num = "0" + num;
     return num;
   }
-
+  
+  async function getCompressedImage(imageUrl) {
+      try {
+          const response = await fetch(imageUrl);
+          const buffer = await response.buffer(); // Get image buffer
+  
+          // Compress the image to 80% quality and resize to 800px width
+          const optimizedBuffer = await sharp(buffer)
+              .resize(800) // Resize width to 800px (height auto-scales)
+              .jpeg({ quality: 80 }) // Convert to JPEG with 80% quality
+              .toBuffer();
+  
+          // Convert buffer to base64 URL (or upload to a CDN and return the new URL)
+          return `data:image/jpeg;base64,${optimizedBuffer.toString("base64")}`;
+      } catch (error) {
+          console.error("Error compressing image:", error);
+          return imageUrl; // Fallback to original image if compression fails
+      }
+  }
+  
 function decodeEntities(encodedString) {
     return he.decode(encodedString || "");
 }
