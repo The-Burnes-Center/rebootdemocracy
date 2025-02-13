@@ -163,7 +163,11 @@ function addLeadingZero(num) {
     while (num.length < 2) num = "0" + num;
     return num;
   }
-  
+
+function decodeEntities(encodedString) {
+    return he.decode(encodedString || "");
+}
+
   function buildRFC822Date(dateString) {
     const dayStrings = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const monthStrings = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
