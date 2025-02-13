@@ -48,7 +48,7 @@ const publicData = await blogPAW.readByQuery(
             }
             ],
           },
-        limit: -1,
+        limit: 200,
         fields: ["*.*"]
 })
 
