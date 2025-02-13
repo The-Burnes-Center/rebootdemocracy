@@ -89,6 +89,10 @@ publicData.data.map(async (e) => {
         channel.push(itemcont);
     }
 });
+const xmlOptions = {
+    header: true,
+    indent: '  ' // Ensures proper indentation
+};
 
         const rssFeed = toXML(
             {
