@@ -65,7 +65,9 @@ publicData.data.map(e => {
 
         // If an image exists, add it as <enclosure> FIRST
         if (e.image && e.image.id) {
-            let imageUrl = "https://content.thegovlab.com/assets/" + e.image.id;
+
+            let imageUrl = "https://content.thegovlab.com/assets/${e.image.id}?w=800&h=600&quality=50&format=jpeg";
+
 
             itemcont["item"]["enclosure"] = {
                 _attrs: {
