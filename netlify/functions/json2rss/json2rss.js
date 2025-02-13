@@ -128,13 +128,13 @@ publicData.data.map(e => {
             },
             indent: '  '
         };
-        
         const rssFeed = toXML(
             {
                 _name: 'rss',
                 _attrs: {
                     version: '2.0',
-                    ["xmlns:atom"]: 'http://www.w3.org/2005/Atom'
+                    ["xmlns:atom"]: 'http://www.w3.org/2005/Atom',
+                    ["xmlns:media"]: 'http://search.yahoo.com/mrss/' // Add media namespace
                 },
                 _content: {
                     channel: channel,
@@ -142,7 +142,6 @@ publicData.data.map(e => {
             },
             xmlOptions
         );
-
     return {
         statusCode: 200,
         body: rssFeed,
