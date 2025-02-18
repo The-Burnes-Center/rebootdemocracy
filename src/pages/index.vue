@@ -16,9 +16,7 @@ import { VueFinalModal } from 'vue-final-modal';
 import { register } from 'swiper/element/bundle';
 import 'vue-final-modal/style.css';
 
-//////////////////////////////////////////
 // 1. Single ASSET_BASE_URL variable
-//////////////////////////////////////////
 const ASSET_BASE_URL = import.meta.env.DEV
   ? 'https://dev.thegovlab.com/assets/'
   : 'https://ssg-test.rebootdemocracy.ai/assets/';
@@ -37,10 +35,6 @@ function getAssetUrl(file: any, width = 800) {
   const fileName = file.filename_disk || file.id;
   return ASSET_BASE_URL + fileName + (width ? `?width=${width}` : '');
 }
-
-//////////////////////////////////////////
-// Existing code from your snippet below
-//////////////////////////////////////////
 
 // Check if we're on client-side
 const isClient = typeof window !== 'undefined';
@@ -77,10 +71,157 @@ const slider = ref<any>('');
 const wsloaded = ref<boolean>(false);
 const ini = ref<boolean>(true);
 
-// Debounce for search
+// --------------------------------------------------------
+// HYBRID SEARCH ALGORITHM: NEW SEARCH FUNCTIONS
+// --------------------------------------------------------
+
+async function searchBlog() {
+  searchloader.value = true;
+  if (searchTerm.value.trim().length > 0) {
+    searchResultsFlag.value = 1;
+    const searchTermClean = searchTerm.value.trim();
+    // Clear previous results
+    blogDataSearch.value = [];
+
+    try {
+      const [directusData, weaviateSlugs] = await Promise.all([
+        performDirectusSearch(searchTermClean),
+        performWeaviateSearch(searchTermClean)
+      ]);
+      await processSearchResults(directusData, weaviateSlugs);
+    } catch (error) {
+      console.error('Error during hybrid search:', error);
+      blogDataSearch.value = [];
+    } finally {
+      searchloader.value = false;
+    }
+  } else {
+    searchResultsFlag.value = 0;
+    // If search is cleared, show all blog posts
+    blogDataSearch.value = blogData.value;
+    searchloader.value = false;
+  }
+}
+
+async function performDirectusSearch(searchTermClean: string): Promise<any[]> {
+  try {
+    const result = await directus.request(
+      readItems('reboot_democracy_blog', {
+        limit: -1,
+        filter: {
+          _and: [
+            { date: { _lte: "$NOW(-5 hours)" } },
+            { status: { _eq: "published" } },
+            {
+              _or: [
+                { title: { _contains: searchTermClean } },
+                { excerpt: { _contains: searchTermClean } },
+                { content: { _contains: searchTermClean } },
+                { authors: { team_id: { First_Name: { _contains: searchTermClean } } } },
+                { authors: { team_id: { Last_Name: { _contains: searchTermClean } } } },
+                { authors: { team_id: { Title: { _contains: searchTermClean } } } },
+              ]
+            }
+          ]
+        },
+        sort: ["date"],
+        fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*']
+      })
+    );
+    return (result && result.data) ? result.data : result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function performWeaviateSearch(searchTermClean: string): Promise<string[]> {
+  try {
+    const response = await fetch('/.netlify/functions/search_weaviate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: searchTermClean }),
+    });
+    if (!response.ok) throw new Error('Weaviate search failed');
+    const weaviateData = await response.json();
+    return weaviateData.slugs || [];
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function processSearchResults(directusData: any[], weaviateSlugs: string[]): Promise<void> {
+  const directusSlugMap = new Map(directusData.map((post: any) => [post.slug, post]));
+  const weaviateSlugsNotInDirectus = weaviateSlugs.filter((slug: string) => !directusSlugMap.has(slug));
+  
+  let weaviateOnlyPosts: any[] = [];
+  if (weaviateSlugsNotInDirectus.length > 0) {
+    try {
+      const res = await directus.request(
+        readItems('reboot_democracy_blog', {
+          limit: -1,
+          filter: {
+            _and: [
+              { date: { _lte: "$NOW(-5 hours)" } },
+              { status: { _eq: "published" } },
+              { _or: weaviateSlugsNotInDirectus.map((slug) => ({ slug: { _eq: slug } })) }
+            ]
+          },
+          fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*']
+        })
+      );
+      weaviateOnlyPosts = (res && res.data) ? res.data : res;
+    } catch (error) {
+      console.error('Error fetching weaviate-only posts:', error);
+    }
+  }
+  
+  const overlappingSlugsSet = new Set(weaviateSlugs.filter((slug: string) => directusSlugMap.has(slug)));
+  const overlappingPosts = weaviateSlugs
+    .filter((slug: string) => overlappingSlugsSet.has(slug))
+    .map((slug: string) => directusSlugMap.get(slug));
+  
+  const directusOnlyPosts = directusData.filter((post: any) => !overlappingSlugsSet.has(post.slug));
+  
+  const weaviateOnlySlugMap = new Map(weaviateOnlyPosts.map((post: any) => [post.slug, post]));
+  const weaviateOnlyOrdered = weaviateSlugsNotInDirectus
+    .map((slug: string) => weaviateOnlySlugMap.get(slug))
+    .filter(Boolean);
+  
+  const mergedPosts = [...directusOnlyPosts, ...overlappingPosts, ...weaviateOnlyOrdered];
+  
+  const searchTermClean = searchTerm.value.trim().toLowerCase();
+  const boostedResults = mergedPosts.map((post: any) => {
+    let boost = 0;
+    if (post.content && post.content.toLowerCase().includes(searchTermClean)) {
+      boost += 100;
+    }
+    return { post, boost };
+  });
+  
+  boostedResults.sort((a, b) => {
+    const aIsBoosted = a.boost > 0;
+    const bIsBoosted = b.boost > 0;
+    if (aIsBoosted && !bIsBoosted) {
+      return -1;
+    }
+    if (!aIsBoosted && bIsBoosted) {
+      return 1;
+    }
+    if (aIsBoosted && bIsBoosted) {
+      return b.boost - a.boost;
+    }
+    return new Date(b.post.date).getTime() - new Date(a.post.date).getTime();
+  });
+  blogDataSearch.value = boostedResults.map(x => x.post);
+}
+
+// --------------------------------------------------------
+// END HYBRID SEARCH ALGORITHM
+// --------------------------------------------------------
+
 debounceSearch.value = _.debounce(searchBlog, 500);
 
-// Computed properties
+// Other helper functions and computed properties remain unchanged
 const latestBlogPost = computed(() => {
   if (Array.isArray(blogData.value) && blogData.value.length > 0) {
     return [...blogData.value].reverse()[0];
@@ -92,7 +233,6 @@ const filteredTagDataWithoutNews = computed(() => {
   return filteredTagData.value.filter(tag => tag !== "News that caught our eye");
 });
 
-// Functions
 function includesString(array: string[] | null, stringVal: string) {
   if (!array) return false;
   const lowerCasePartialSentence = stringVal.toLowerCase();
@@ -104,45 +244,6 @@ function resetSearch() {
   searchResultsFlag.value = 0;
   searchTermDisplay.value = searchTerm.value;
   searchBlog();
-}
-
-function searchBlog() {
-  searchloader.value = true;
-  let searchTArray = searchTerm.value.split(" ").filter(item => item);
-  const searchObj: any[] = [];
-
-  searchTArray.map((a) => {
-    searchObj.push({ excerpt: { _contains: a } });
-    searchObj.push({ title: { _contains: a } });
-    searchObj.push({ content: { _contains: a } });
-    searchObj.push({ authors: { team_id: { First_Name: { _contains: a } } } });
-    searchObj.push({ authors: { team_id: { Last_Name: { _contains: a } } } });
-    searchObj.push({ authors: { team_id: { Title: { _contains: a } } } });
-  });
-
-  if (searchTArray.length > 0) {
-    searchResultsFlag.value = 1;
-  } else {
-    searchResultsFlag.value = 0;
-  }
-
-  directus.request(
-    readItems('reboot_democracy_blog', {
-      limit: -1,
-      filter: {
-        _and: [{ date: { _lte: "$NOW(-5 hours)" } }, { status: { _eq: "published" } }],
-        _or: searchObj
-      },
-      sort: ["date"],
-      fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*']
-    })
-  ).then((b: any) => {
-    blogDataSearch.value = b;
-    searchloader.value = false;
-  }).catch((err) => {
-    console.error(err);
-    searchloader.value = false;
-  });
 }
 
 function formatDateTime(d1: Date) {
@@ -162,14 +263,13 @@ function loadModal() {
   directus.request(
     readItems('reboot_democracy_modal', {
       meta: 'total_count',
-      limit: -1,
       fields: ['*.*']
     })
   ).then((item: any) => {
     modalData.value = item || {};
     let storageItem = (typeof window !== 'undefined') ? localStorage.getItem("Reboot Democracy") : null;
-    showmodal.value = modalData.value.status == 'published' && 
-      (modalData.value.visibility == 'always' || (modalData.value.visibility == 'once' && storageItem != 'off'));
+    showmodal.value = modalData.value.status === 'published' && 
+      (modalData.value.visibility === 'always' || (modalData.value.visibility === 'once' && storageItem !== 'off'));
   }).catch((err) => {
     console.error(err);
   });
@@ -193,22 +293,18 @@ async function fetchBlog() {
         sort: ["date"]
       })
     );
-
     blogData.value = item;
     item.map((tag: any) => {
-      tag?.Tags?.map((subTags: string) => {
-        if (subTags != null && !includesString(filteredTagData.value, subTags)) {
-          filteredTagData.value.push(subTags);
+      tag?.Tags?.map((subTag: string) => {
+        if (subTag != null && !includesString(filteredTagData.value, subTag)) {
+          filteredTagData.value.push(subTag);
         }
-      })
-    })
-
-    // Move "News that caught our eye" to the front if exists
+      });
+    });
     const newsIndex = filteredTagData.value.indexOf("News that caught our eye");
     if (newsIndex > -1) {
       filteredTagData.value.unshift(filteredTagData.value.splice(newsIndex, 1)[0]);
     }
-
   } catch (error) {
     console.error(error);
   }
@@ -227,7 +323,7 @@ function fillMeta() {
       { property: 'twitter:image', content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b" },
       { property: 'twitter:card', content: "summary_large_image" },
     ],
-  })
+  });
 }
 
 // Watchers
@@ -241,12 +337,20 @@ watch(
 
 const isSSR = computed(() => import.meta.env.SSR);
 
-// Lifecycle hooks
+// --------------------------------------------------------
+// Lifecycle Hooks with Meta Consideration
+// --------------------------------------------------------
+
+// In production live server mode the homepage is already pre-rendered via SSR,
+// so we only need to fetch data and set meta during SSR.
+// In development we can use onMounted for live refresh.
 if (import.meta.env.SSR) {
-  onServerPrefetch(async () => {
+  
     await fetchBlog();
-  });
-} else {
+    console.log('in ssr mode', import.meta.env.SSR);
+    fillMeta();
+
+} else  {
   onMounted(async () => {
     fillMeta();
     register();
@@ -257,7 +361,6 @@ if (import.meta.env.SSR) {
   });
 }
 </script>
-
 <template>
   <div>
     <HeaderComponent></HeaderComponent>
@@ -315,7 +418,7 @@ if (import.meta.env.SSR) {
       <div class="blog-featured-row">
         <div class="first-blog-post" v-if="latestBlogPost">
           <a :href="'/blog/' + latestBlogPost.slug">
-            <div v-if="!isSSR && latestBlogPost.image">
+            <div v-if="latestBlogPost.image">
               <!-- Replacing directus.url.href with our getAssetUrl helper -->
               <img 
                 class="blog-list-img" 
@@ -357,7 +460,7 @@ if (import.meta.env.SSR) {
             v-show="index > 0 && index < 4"
           > 
             <a :href="'/blog/' + blog_item.slug">
-              <div v-if="!isSSR && blog_item.image">
+              <div v-if="blog_item.image">
                 <img 
                   class="blog-list-img" 
                   :src="getAssetUrl(blog_item.image, 300)"
@@ -412,7 +515,7 @@ if (import.meta.env.SSR) {
         v-show="index >= 4 && index < 16"
       >
         <a :href="'/blog/' + blog_item.slug">
-          <div v-if="!isSSR && blog_item.image">
+          <div v-if="blog_item.image">
             <img
               class="blog-list-img"
               :src="getAssetUrl(blog_item.image, 300)"
@@ -466,7 +569,7 @@ if (import.meta.env.SSR) {
               >
                 <div v-if="includesString(blog_item?.Tags, tag_item)">
                   <a :href="'/blog/' + blog_item.slug">
-                    <div v-if="!isSSR && blog_item.image">
+                    <div v-if="blog_item.image">
                       <img
                         class="blog-list-img"
                         :src="getAssetUrl(blog_item.image, 300)"
@@ -519,11 +622,11 @@ if (import.meta.env.SSR) {
     >
       <div
         class="allposts-post-row"
-        v-for="(blog_item, index) in blogDataSearch.slice().reverse()"
+        v-for="(blog_item, index) in blogDataSearch"
         :key="index"
       >
         <a :href="'/blog/' + blog_item.slug">
-          <div v-if="!isSSR && blog_item.image">
+          <div v-if="blog_item.image">
             <img
               class="blog-list-img"
               :src="getAssetUrl(blog_item.image, 300)"

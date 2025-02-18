@@ -23,11 +23,14 @@
      },
      (ctx) => {
        const isBlogPage = ctx.router.currentRoute.value.path.startsWith('/blog/');
-       if (!isBlogPage) {
+       const isHP = ctx.router.currentRoute.value.path.startsWith('/');
+       if (!isBlogPage && !isHP) {
          const head = createHead();
          ctx.app.use(head);
          ctx.head = head;
        }
+
+
        ctx.app.use(vuetify);
        
        // Client-only: Wait for the window to load so the DOM is ready

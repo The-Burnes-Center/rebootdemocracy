@@ -12,7 +12,7 @@ import isPast from "date-fns/isPast";
 
 // Base URL for assets. Change this variable if the base path ever changes.
 const ASSET_BASE_URL = import.meta.env.DEV
-  ? 'https://dev.rebootdemocracy.ai/assets/'
+  ? 'https://dev.thegovlab.com/assets/'
   : 'https://ssg-test.rebootdemocracy.ai/assets/';
 // Fallback image if no image is provided.
 const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235';
