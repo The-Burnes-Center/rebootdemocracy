@@ -158,7 +158,7 @@ export default defineConfig({
         );
       
       // For blog pages, remove all hydration scripts and add container divs with our SSG-components script.
-      if (route.startsWith('/blog/') || route.startsWith('/')) {
+      if (route.startsWith('/blog/')) {
         html = html.replace(/(<script[^>]*?>)([\s\S]*?<\/script>)/gi, '');
         html = html.replace(
           /<\/body>/i,

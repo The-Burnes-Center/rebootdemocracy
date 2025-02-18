@@ -354,11 +354,12 @@ if (import.meta.env.SSR) {
     loadModal();
     showmodal.value = true;
 
-} else  {
+} else if(import.meta.env.DEV) {
   onMounted(async () => {
     fillMeta();
     register();
     await fetchBlog();
+    console.log('in dev mode', import.meta.env.DEV);
     resetSearch();
     loadModal();
     showmodal.value = true;
