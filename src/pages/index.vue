@@ -349,6 +349,10 @@ if (import.meta.env.SSR) {
     await fetchBlog();
     console.log('in ssr mode', import.meta.env.SSR);
     fillMeta();
+    register();
+    resetSearch();
+    loadModal();
+    showmodal.value = true;
 
 } else  {
   onMounted(async () => {
