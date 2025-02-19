@@ -84,13 +84,7 @@ export default defineConfig({
     script: 'async',
     formatting: 'minify',
 
-    // This function builds an array of routes to statically generate.
     includedRoutes: async (paths) => {
-      // **Ensure the homepage is included:** If it isn’t already present, add "/"
-      if (!paths.includes('/')) {
-        paths.push('/');
-      }
-
       const distDir = path.join(process.cwd(), 'dist');
       let slugToBuild = process.env.SLUG_TO_BUILD;
 

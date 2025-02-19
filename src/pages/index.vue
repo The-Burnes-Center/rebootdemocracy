@@ -75,6 +75,10 @@ const ini = ref<boolean>(true);
 // HYBRID SEARCH ALGORITHM: NEW SEARCH FUNCTIONS
 // --------------------------------------------------------
 
+/**
+ * Hybrid search blog that runs both Directus and Weaviate searches in parallel.
+ * If a blog post contains the full search phrase in its content it will be heavily boosted.
+ */
 async function searchBlog() {
   searchloader.value = true;
   if (searchTerm.value.trim().length > 0) {
@@ -103,6 +107,10 @@ async function searchBlog() {
   }
 }
 
+/**
+ * Helper method to perform the Directus search.
+ * It searches across title, excerpt, content and authors’ fields.
+ */
 async function performDirectusSearch(searchTermClean: string): Promise<any[]> {
   try {
     const result = await directus.request(
@@ -134,6 +142,10 @@ async function performDirectusSearch(searchTermClean: string): Promise<any[]> {
   }
 }
 
+/**
+ * Helper method to perform the Weaviate search.
+ * It calls a Netlify function that returns an array of blog slugs.
+ */
 async function performWeaviateSearch(searchTermClean: string): Promise<string[]> {
   try {
     const response = await fetch('/.netlify/functions/search_weaviate', {
@@ -149,6 +161,11 @@ async function performWeaviateSearch(searchTermClean: string): Promise<string[]>
   }
 }
 
+/**
+ * Helper method to process and merge search results from Directus and Weaviate.
+ * In addition to merging the three groups (Directus‑only, overlapping, and Weaviate‑only),
+ * we then boost any post whose `content` field contains the full search term (case‑insensitive).
+ */
 async function processSearchResults(directusData: any[], weaviateSlugs: string[]): Promise<void> {
   const directusSlugMap = new Map(directusData.map((post: any) => [post.slug, post]));
   const weaviateSlugsNotInDirectus = weaviateSlugs.filter((slug: string) => !directusSlugMap.has(slug));
@@ -175,50 +192,61 @@ async function processSearchResults(directusData: any[], weaviateSlugs: string[]
     }
   }
   
+  // Overlapping posts: slugs returned by Weaviate that are also found in Directus
   const overlappingSlugsSet = new Set(weaviateSlugs.filter((slug: string) => directusSlugMap.has(slug)));
   const overlappingPosts = weaviateSlugs
     .filter((slug: string) => overlappingSlugsSet.has(slug))
     .map((slug: string) => directusSlugMap.get(slug));
   
+  // Directus-only posts: posts returned by Directus not in the overlapping set
   const directusOnlyPosts = directusData.filter((post: any) => !overlappingSlugsSet.has(post.slug));
   
+  // Ensure Weaviate-only posts are ordered according to the Weaviate result order.
   const weaviateOnlySlugMap = new Map(weaviateOnlyPosts.map((post: any) => [post.slug, post]));
   const weaviateOnlyOrdered = weaviateSlugsNotInDirectus
     .map((slug: string) => weaviateOnlySlugMap.get(slug))
     .filter(Boolean);
   
+  // Merge the three groups into a single array.
   const mergedPosts = [...directusOnlyPosts, ...overlappingPosts, ...weaviateOnlyOrdered];
   
+  // Now check each merged post – if its content fully includes the search term,
+  // it gets boosted to ensure it appears near the top.
   const searchTermClean = searchTerm.value.trim().toLowerCase();
   const boostedResults = mergedPosts.map((post: any) => {
     let boost = 0;
     if (post.content && post.content.toLowerCase().includes(searchTermClean)) {
-      boost += 100;
-    }
+      boost += 100; // heavy boost for an exact full phrase match
+    } 
     return { post, boost };
   });
   
+  // Inside processSearchResults() after computing the boostedResults array
   boostedResults.sort((a, b) => {
-    const aIsBoosted = a.boost > 0;
-    const bIsBoosted = b.boost > 0;
-    if (aIsBoosted && !bIsBoosted) {
-      return -1;
-    }
-    if (!aIsBoosted && bIsBoosted) {
-      return 1;
-    }
-    if (aIsBoosted && bIsBoosted) {
-      return b.boost - a.boost;
-    }
-    return new Date(b.post.date).getTime() - new Date(a.post.date).getTime();
-  });
-  blogDataSearch.value = boostedResults.map(x => x.post);
-}
+  const aIsBoosted = a.boost > 0;
+  const bIsBoosted = b.boost > 0;
+  // If one post is boosted and the other is not, push the boosted one to the top.
+  if (aIsBoosted && !bIsBoosted) {
+    return -1; // a comes first
+  }
+  if (!aIsBoosted && bIsBoosted) {
+    return 1; // b comes first
+  }
+  // If both are boosted, sort descending by boost value.
+  if (aIsBoosted && bIsBoosted) {
+    return b.boost - a.boost;
+  }
+  // If neither is boosted, sort by publication date (most recent first).
+  return new Date(b.post.date).getTime() - new Date(a.post.date).getTime();
+});
+blogDataSearch.value = boostedResults.map(x => x.post);
 
+}
 // --------------------------------------------------------
 // END HYBRID SEARCH ALGORITHM
 // --------------------------------------------------------
 
+// Debounce for search (using the new hybrid searchBlog)
 debounceSearch.value = _.debounce(searchBlog, 500);
 
 // Other helper functions and computed properties remain unchanged
@@ -263,6 +291,7 @@ function loadModal() {
   directus.request(
     readItems('reboot_democracy_modal', {
       meta: 'total_count',
+      // limit: -1,
       fields: ['*.*']
     })
   ).then((item: any) => {
@@ -301,6 +330,7 @@ async function fetchBlog() {
         }
       });
     });
+    // Move "News that caught our eye" to the front if it exists
     const newsIndex = filteredTagData.value.indexOf("News that caught our eye");
     if (newsIndex > -1) {
       filteredTagData.value.unshift(filteredTagData.value.splice(newsIndex, 1)[0]);
@@ -337,29 +367,16 @@ watch(
 
 const isSSR = computed(() => import.meta.env.SSR);
 
-// --------------------------------------------------------
-// Lifecycle Hooks with Meta Consideration
-// --------------------------------------------------------
-
-// In production live server mode the homepage is already pre-rendered via SSR,
-// so we only need to fetch data and set meta during SSR.
-// In development we can use onMounted for live refresh.
+// Lifecycle hooks
 if (import.meta.env.SSR) {
-  
+  onServerPrefetch(async () => {
     await fetchBlog();
-    console.log('in ssr mode', import.meta.env.SSR);
-    fillMeta();
-    register();
-    resetSearch();
-    loadModal();
-    showmodal.value = true;
-
-} else if(import.meta.env.DEV) {
+  });
+} else {
   onMounted(async () => {
     fillMeta();
     register();
     await fetchBlog();
-    console.log('in dev mode', import.meta.env.DEV);
     resetSearch();
     loadModal();
     showmodal.value = true;
@@ -423,7 +440,7 @@ if (import.meta.env.SSR) {
       <div class="blog-featured-row">
         <div class="first-blog-post" v-if="latestBlogPost">
           <a :href="'/blog/' + latestBlogPost.slug">
-            <div v-if="latestBlogPost.image">
+            <div v-if="!isSSR && latestBlogPost.image">
               <!-- Replacing directus.url.href with our getAssetUrl helper -->
               <img 
                 class="blog-list-img" 
@@ -465,7 +482,7 @@ if (import.meta.env.SSR) {
             v-show="index > 0 && index < 4"
           > 
             <a :href="'/blog/' + blog_item.slug">
-              <div v-if="blog_item.image">
+              <div v-if="!isSSR && blog_item.image">
                 <img 
                   class="blog-list-img" 
                   :src="getAssetUrl(blog_item.image, 300)"
@@ -520,7 +537,7 @@ if (import.meta.env.SSR) {
         v-show="index >= 4 && index < 16"
       >
         <a :href="'/blog/' + blog_item.slug">
-          <div v-if="blog_item.image">
+          <div v-if="!isSSR && blog_item.image">
             <img
               class="blog-list-img"
               :src="getAssetUrl(blog_item.image, 300)"
@@ -574,7 +591,7 @@ if (import.meta.env.SSR) {
               >
                 <div v-if="includesString(blog_item?.Tags, tag_item)">
                   <a :href="'/blog/' + blog_item.slug">
-                    <div v-if="blog_item.image">
+                    <div v-if="!isSSR && blog_item.image">
                       <img
                         class="blog-list-img"
                         :src="getAssetUrl(blog_item.image, 300)"
@@ -631,7 +648,7 @@ if (import.meta.env.SSR) {
         :key="index"
       >
         <a :href="'/blog/' + blog_item.slug">
-          <div v-if="blog_item.image">
+          <div v-if="!isSSR && blog_item.image">
             <img
               class="blog-list-img"
               :src="getAssetUrl(blog_item.image, 300)"
