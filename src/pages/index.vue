@@ -368,8 +368,17 @@ watch(
 const isSSR = computed(() => import.meta.env.SSR);
 
 // Lifecycle hooks
-if (import.meta.env.SSR) {
-  onServerPrefetch(async () => {
+// if (import.meta.env.SSR) {
+//   onServerPrefetch(async () => {
+//     fillMeta();
+//     register();
+//     await fetchBlog();
+//     resetSearch();
+//     loadModal();
+//     showmodal.value = true;
+//   });
+// } else {
+  onMounted(async () => {
     fillMeta();
     register();
     await fetchBlog();
@@ -377,16 +386,7 @@ if (import.meta.env.SSR) {
     loadModal();
     showmodal.value = true;
   });
-} else {
-  onMounted(async () => {
-    // fillMeta();
-    // register();
-    // await fetchBlog();
-    // resetSearch();
-    // loadModal();
-    // showmodal.value = true;
-  });
-}
+// }
 </script>
 <template>
   <div>
