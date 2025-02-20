@@ -379,14 +379,14 @@ if (import.meta.env.SSR) {
     showmodal.value = true;
   // });
 } else {
-  // onMounted(async () => {
-    // fillMeta();
-    // register();
-    // await fetchBlog();
-    // resetSearch();
-    // loadModal();
-    // showmodal.value = true;
-  // });
+  onMounted(async () => {
+    fillMeta();
+    register();
+    await fetchBlog();
+    resetSearch();
+    loadModal();
+    showmodal.value = true;
+  });
 }
 </script>
 <template>
