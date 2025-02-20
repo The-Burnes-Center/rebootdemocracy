@@ -10,7 +10,7 @@ import { useHead } from '@vueuse/head';
 
 import HeaderComponent from "../components/header.vue";
 import FooterComponent from "../components/footer.vue";
-// import ModalComp from "../components/modal.vue";
+import ModalComp from "../components/modal.vue";
 import { VueFinalModal } from 'vue-final-modal';
 
 import { register } from 'swiper/element/bundle';
@@ -357,35 +357,34 @@ function fillMeta() {
 }
 
 // Watchers
-// watch(
-//   () => isClient ? route.value?.fullPath : '',
-//   () => {
-//     loadModal();
-//   },
-//   { immediate: true }
-// );
+watch(
+  () => isClient ? route.value?.fullPath : '',
+  () => {
+    loadModal();
+  },
+  { immediate: true }
+);
 
 const isSSR = computed(() => import.meta.env.SSR);
 
 // Lifecycle hooks
 if (import.meta.env.SSR) {
-  // onServerPrefetch(async () => {
-    await fetchBlog();
+  onServerPrefetch(async () => {
     fillMeta();
     register();
     await fetchBlog();
     resetSearch();
     loadModal();
     showmodal.value = true;
-  // });
+  });
 } else {
   onMounted(async () => {
-    fillMeta();
-    register();
-    await fetchBlog();
-    resetSearch();
-    loadModal();
-    showmodal.value = true;
+    // fillMeta();
+    // register();
+    // await fetchBlog();
+    // resetSearch();
+    // loadModal();
+    // showmodal.value = true;
   });
 }
 </script>
