@@ -13,7 +13,7 @@ import BlogPage from '../pages/blog-page.vue';
 import BlogPost from '../pages/blog.vue';
 import AllPosts from '../pages/all-blog-posts.vue';
 import PSChat from '../pages/pschat.vue';
-
+import AllNewsItems from '../pages/AllNewsItems.vue';
 
 const routes = [
   { path:"/", component: BlogPage },
@@ -30,6 +30,7 @@ const routes = [
   { path:"/blog/:name", component: BlogPost, props:true },
   { path:"/blog", component: BlogPage },
   { path:"/all-blog-posts", component: AllPosts },
+  { path:"/weekly-news", component: AllNewsItems }, 
   { path:"/pschat", component: PSChat },
   { path: '/:catchAll(.*)', redirect: '/' },
 ]
