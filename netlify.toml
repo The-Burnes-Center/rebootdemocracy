@@ -1,0 +1,9 @@
+[build]
+  # Run the static site generation command
+  command = "npm run generate"
+  # The folder to deploy
+  publish = "dist"
+
+[context.production.environment]
+  # Set your Node version here (for example, 18 or 16)
+  NODE_VERSION = "18"
