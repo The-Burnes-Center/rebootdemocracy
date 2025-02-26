@@ -65,7 +65,7 @@
   
   // When in development, use the external asset host; when generating the static
   // site, we assume the images get downloaded locally into /images/ 
-  const ASSET_BASE_URL = isDev ? 'https://dev.thegovlab.com/assets/' : '/images/'
+  const ASSET_BASE_URL = isDev ? 'https://dev.thegovlab.com/assets/' : 'https://nuxt-ssg--burnesblogtemplate.netlify.app/images/'
   const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
   
   const route = useRoute()
