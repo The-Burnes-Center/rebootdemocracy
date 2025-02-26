@@ -2,10 +2,11 @@
     <div v-if="post">
       <!-- Blog Hero Section -->
       <div class="blog-hero">
+        <!-- Header image: if the post has an image, display it -->
         <img
           v-if="post.image"
           class="blog-img"
-          :src="ASSET_BASE_URL + post.image.filename_disk + '?width=800'"
+          :src="isSSR ? post.image.filename_disk : ASSET_BASE_URL + post.image.filename_disk + '?width=800'"
           alt="Blog header image"
         />
         <div class="blog-details">
@@ -14,6 +15,7 @@
           <p class="post-date">
             Published on <b>{{ formatDateOnly(new Date(post.date)) }}</b>
           </p>
+          <!-- Social Sharing Tray -->
           <div class="sm-tray">
             <a
               target="_blank"
@@ -46,36 +48,25 @@
       </div>
     </div>
     <div v-else>
-      <p>Loading ...</p>
+      <p>Loading …</p>
     </div>
   </template>
   
   <script lang="ts" setup>
   import { useRoute } from 'vue-router'
-  import { useHead } from '#imports'
+  import { useHead, useAsyncData } from '#imports'
   import { createDirectus, rest, readItems } from '@directus/sdk'
-  import { useAsyncData } from '#imports'
   import format from 'date-fns/format'
   import isPast from 'date-fns/isPast'
   
-
-  // Date formatting helpers.
-  function formatDateOnly(d1: Date): string {
-    return format(d1, 'MMMM d, yyyy')
-  }
-  function formatDateTime(d1: Date): string {
-    return format(d1, 'MMMM d, yyyy, h:mm aa')
-  }
-  function PastDate(d1: Date): boolean {
-    return isPast(d1)
-  }
-  
-  // Fetch a single post by slug.
   // Asset configuration.
   const ASSET_BASE_URL = import.meta.env.DEV
     ? 'https://dev.thegovlab.com/assets/'
     : 'https://ssg-test.rebootdemocracy.ai/assets/'
   const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
+  
+  // Determine if we’re in SSR mode.
+  const isSSR = import.meta.env.SSR
   
   // Get slug from route params.
   const route = useRoute()
@@ -86,6 +77,17 @@
   const normalizedSlug = String(slugParam).toLowerCase()
   
   const directus = createDirectus('https://dev.thegovlab.com').with(rest())
+  
+  // Date formatting helpers.
+  function formatDateOnly(d1: Date): string {
+    return format(d1, 'MMMM d, yyyy')
+  }
+  function formatDateTime(d1: Date): string {
+    return format(d1, 'MMMM d, yyyy, h:mm aa')
+  }
+  function PastDate(d1: Date): boolean {
+    return isPast(d1)
+  }
   
   // Function to fetch a single post.
   async function fetchPost(slugValue: string) {
@@ -103,13 +105,24 @@
     return Array.isArray(data) && data.length > 0 ? data[0] : null
   }
   
-  // Use Nuxt's async data fetching.
-  // With { server: true }, this runs on the server and its result is embedded in the payload.
-  const { data: post, error } = await useAsyncData('post', () => fetchPost(normalizedSlug), {
-    server: true
-  })
+  // Use useAsyncData to fetch the post during SSR. This data is embedded in the payload.
+  const { data: post, error } = await useAsyncData('post', async () => {
+    const fetchedPost = await fetchPost(normalizedSlug)
+    // If we have an image and we're prerendering (SSR), download it.
+    if (isSSR && fetchedPost && fetchedPost.image && fetchedPost.image.filename_disk) {
+      // Import our server-only helper.
+      const { downloadAndStoreImage } = await import('~/server/download-image')
+      // Build the remote URL from the API response.
+      const remoteUrl = ASSET_BASE_URL + fetchedPost.image.filename_disk
+      // Download the image and get the local URL.
+      const localUrl = await downloadAndStoreImage(remoteUrl)
+      // Update the image field to use the local URL.
+      fetchedPost.image.filename_disk = localUrl
+    }
+    return fetchedPost
+  }, { server: true })
   
-  // Dynamically set meta tags based on the fetched post.
+  // Set meta tags dynamically once post data is available.
   if (post.value) {
     useHead({
       title: 'RebootDemocracy.AI Blog | ' + post.value.title,
@@ -121,8 +134,8 @@
         {
           property: 'og:image',
           content: post.value.image
-            ? `${ASSET_BASE_URL}${post.value.image.filename_disk}`
-            : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`
+            ? (isSSR ? post.value.image.filename_disk : ASSET_BASE_URL + post.value.image.filename_disk)
+            : (ASSET_BASE_URL + FALLBACK_IMAGE_ID)
         },
         { property: 'og:image:width', content: '800' },
         { property: 'og:image:height', content: '800' },
@@ -131,8 +144,8 @@
         {
           property: 'twitter:image',
           content: post.value.image
-            ? `${ASSET_BASE_URL}${post.value.image.filename_disk}`
-            : `${ASSET_BASE_URL}${FALLBACK_IMAGE_ID}`
+            ? (isSSR ? post.value.image.filename_disk : ASSET_BASE_URL + post.value.image.filename_disk)
+            : (ASSET_BASE_URL + FALLBACK_IMAGE_ID)
         },
         { property: 'twitter:card', content: 'summary_large_image' }
       ]
