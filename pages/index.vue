@@ -1,5 +1,22 @@
 <template>
     <div>
+          <!-- Main Menu with Deferred Submenu -->
+      <nav class="main-menu">
+        <ul>
+          <li
+            @mouseenter="loadMenu"
+            @mouseleave="hideMenu"
+            class="menu-item"
+          >
+            <a href="#">Menu</a>
+            <LazyHydrate v-if="menuLoaded" when-visible>
+              <DeferredMenu />
+            </LazyHydrate>
+          </li>
+        </ul>
+      </nav>
+  
+      <hr />
       <h1>Static Page with Build-Time Data</h1>
       <!-- Build-time API data -->
       <div v-if="error">
@@ -20,23 +37,7 @@
   
       <hr />
   
-      <!-- Main Menu with Deferred Submenu -->
-      <nav class="main-menu">
-        <ul>
-          <li
-            @mouseenter="loadMenu"
-            @mouseleave="hideMenu"
-            class="menu-item"
-          >
-            <a href="#">Menu</a>
-            <LazyHydrate v-if="menuLoaded" when-visible>
-              <DeferredMenu />
-            </LazyHydrate>
-          </li>
-        </ul>
-      </nav>
-  
-      <hr />
+    
   
       <!-- Deferred component section -->
       <h2>Deferred Component: Client-Side API Call</h2>

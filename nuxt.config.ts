@@ -1,4 +1,5 @@
 // nuxt.config.ts
+import { resolve } from 'path'
 export default defineNuxtConfig({
   ssr: true,
 
@@ -7,7 +8,14 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/blog/**': { prerender: true }
   },
-
+  // vite: {
+  //   resolve: {
+  //     alias: {
+  //       // Note: Make sure that .nuxt/paths.js exists after build
+  //       // '#internal/nuxt/paths': resolve(__dirname, '.nuxt/paths.js')
+  //     }
+  //   }
+  // },
   nitro: {
     prerender: {
       // Enable crawling of links on your site.

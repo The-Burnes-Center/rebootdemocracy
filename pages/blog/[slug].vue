@@ -2,11 +2,10 @@
     <div v-if="post">
       <!-- Blog Hero Section -->
       <div class="blog-hero">
-        <!-- Header image: if the post has an image, display it -->
         <img
           v-if="post.image"
           class="blog-img"
-          :src="isSSR ? post.image.filename_disk : ASSET_BASE_URL + post.image.filename_disk + '?width=800'"
+          :src="computedImageUrl"
           alt="Blog header image"
         />
         <div class="blog-details">
@@ -53,22 +52,22 @@
   </template>
   
   <script lang="ts" setup>
+  import { computed } from 'vue'
   import { useRoute } from 'vue-router'
   import { useHead, useAsyncData } from '#imports'
   import { createDirectus, rest, readItems } from '@directus/sdk'
   import format from 'date-fns/format'
   import isPast from 'date-fns/isPast'
   
-  // Asset configuration.
-  const ASSET_BASE_URL = import.meta.env.DEV
-    ? 'https://dev.thegovlab.com/assets/'
-    : 'https://ssg-test.rebootdemocracy.ai/assets/'
-  const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
-  
-  // Determine if we’re in SSR mode.
+  // Determine if we’re in development mode and if we are running on the server (SSR).
+  const isDev = import.meta.env.DEV
   const isSSR = import.meta.env.SSR
   
-  // Get slug from route params.
+  // When in development, use the external asset host; when generating the static
+  // site, we assume the images get downloaded locally into /images/ 
+  const ASSET_BASE_URL = isDev ? 'https://dev.thegovlab.com/assets/' : '/images/'
+  const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
+  
   const route = useRoute()
   const slugParam = route.params.slug
   if (!slugParam) {
@@ -105,24 +104,35 @@
     return Array.isArray(data) && data.length > 0 ? data[0] : null
   }
   
-  // Use useAsyncData to fetch the post during SSR. This data is embedded in the payload.
-  const { data: post, error } = await useAsyncData('post', async () => {
+  // When generating the static site, download the image so it is served locally.
+  const { data: post } = await useAsyncData('post', async () => {
     const fetchedPost = await fetchPost(normalizedSlug)
-    // If we have an image and we're prerendering (SSR), download it.
-    if (isSSR && fetchedPost && fetchedPost.image && fetchedPost.image.filename_disk) {
-      // Import our server-only helper.
+    if (!isDev && isSSR && fetchedPost && fetchedPost.image && fetchedPost.image.filename_disk) {
+      // Download the image from the dev asset host and save it locally.
+      // This helper should return a local URL (for example "/images/filename.png").
       const { downloadAndStoreImage } = await import('~/server/download-image')
-      // Build the remote URL from the API response.
-      const remoteUrl = ASSET_BASE_URL + fetchedPost.image.filename_disk
-      // Download the image and get the local URL.
+      const remoteUrl = 'https://dev.thegovlab.com/assets/' + fetchedPost.image.filename_disk
       const localUrl = await downloadAndStoreImage(remoteUrl)
-      // Update the image field to use the local URL.
       fetchedPost.image.filename_disk = localUrl
     }
     return fetchedPost
   }, { server: true })
   
-  // Set meta tags dynamically once post data is available.
+  // Compute the proper image URL for the <img> tag and meta tags.
+  const computedImageUrl = computed(() => {
+    if (post.value?.image?.filename_disk) {
+      const imgPath = post.value.image.filename_disk
+      // If the path already starts with '/' (or with 'http'), assume it's complete.
+      if (imgPath.startsWith('/') || imgPath.startsWith('http')) {
+        return imgPath
+      } else {
+        return ASSET_BASE_URL + imgPath
+      }
+    }
+    return ASSET_BASE_URL + FALLBACK_IMAGE_ID
+  })
+  
+  // Set meta tags dynamically.
   if (post.value) {
     useHead({
       title: 'RebootDemocracy.AI Blog | ' + post.value.title,
@@ -131,22 +141,12 @@
         { name: 'description', content: post.value.excerpt },
         { property: 'og:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
         { property: 'og:description', content: post.value.excerpt },
-        {
-          property: 'og:image',
-          content: post.value.image
-            ? (isSSR ? post.value.image.filename_disk : ASSET_BASE_URL + post.value.image.filename_disk)
-            : (ASSET_BASE_URL + FALLBACK_IMAGE_ID)
-        },
+        { property: 'og:image', content: computedImageUrl.value },
         { property: 'og:image:width', content: '800' },
         { property: 'og:image:height', content: '800' },
         { property: 'twitter:title', content: 'RebootDemocracy.AI Blog | ' + post.value.title },
         { property: 'twitter:description', content: post.value.excerpt },
-        {
-          property: 'twitter:image',
-          content: post.value.image
-            ? (isSSR ? post.value.image.filename_disk : ASSET_BASE_URL + post.value.image.filename_disk)
-            : (ASSET_BASE_URL + FALLBACK_IMAGE_ID)
-        },
+        { property: 'twitter:image', content: computedImageUrl.value },
         { property: 'twitter:card', content: 'summary_large_image' }
       ]
     })
@@ -185,4 +185,3 @@
     padding: 1rem;
   }
   </style>
-  
