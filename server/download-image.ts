@@ -22,7 +22,7 @@ export async function downloadAndStoreImage(remoteUrl: string): Promise<string> 
     const localFilePath = path.join(imagesDir, filename)
     fs.writeFileSync(localFilePath, buffer)
     console.log('Image downloaded and stored at:', localFilePath)
-    return '/images/' + filename
+    return 'images/' + filename
   } catch (error) {
     console.error('Error in downloadAndStoreImage:', error)
     return remoteUrl

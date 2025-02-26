@@ -65,9 +65,15 @@
   
   // When in development, use the external asset host; when generating the static
   // site, we assume the images get downloaded locally into /images/ 
-  const ASSET_BASE_URL = isDev ? 'https://dev.thegovlab.com/assets/' : 'https://nuxt-ssg--burnesblogtemplate.netlify.app/images/'
-  const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
-  
+//   const ASSET_BASE_URL = isDev ? 'https://dev.thegovlab.com/assets/' : 'https://nuxt-ssg--burnesblogtemplate.netlify.app/images/'
+//   const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
+const ASSET_BASE_URL = isDev 
+  ? 'https://dev.thegovlab.com/assets/' 
+  : 'https://nuxt-ssg--burnesblogtemplate.netlify.app/'
+const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
+
+
+
   const route = useRoute()
   const slugParam = route.params.slug
   if (!slugParam) {
@@ -120,17 +126,11 @@
   
   // Compute the proper image URL for the <img> tag and meta tags.
   const computedImageUrl = computed(() => {
-    if (post.value?.image?.filename_disk) {
-      const imgPath = post.value.image.filename_disk
-      // If the path already starts with '/' (or with 'http'), assume it's complete.
-      if (imgPath.startsWith('/') || imgPath.startsWith('http')) {
-        return imgPath
-      } else {
-        return ASSET_BASE_URL + imgPath
-      }
-    }
-    return ASSET_BASE_URL + FALLBACK_IMAGE_ID
-  })
+  if (post.value && post.value.image && post.value.image.filename_disk) {
+    return ASSET_BASE_URL + post.value.image.filename_disk
+  }
+  return ASSET_BASE_URL + FALLBACK_IMAGE_ID
+})
   
   // Set meta tags dynamically.
   if (post.value) {
