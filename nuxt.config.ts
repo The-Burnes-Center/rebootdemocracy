@@ -1,26 +1,76 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
-  // Enable SSR by default
   ssr: true,
 
-  // Define custom route rules to test different rendering modes
+  // Route rules: explicitly mark the homepage and blog routes for prerendering.
   routeRules: {
-    '/': { prerender: true }, // Homepage: SSG (static)
-    '/products': { swr: true }, // Products: on-demand regeneration (SWR)
-    '/blog/**': { isr: true }, // Blog posts: ISR enabled
-    '/admin/**': { ssr: false } // Admin: CSR only (client-side only)
+    '/': { prerender: true },
+    '/blog/**': { prerender: true }
   },
 
-  // Modules for performance enhancements
+  nitro: {
+    prerender: {
+      // Enable crawling of links on your site.
+      crawlLinks: true,
+      // You can also add manually-specified routes using the prerender:routes hook.
+      // Here we add all published blog post routes by fetching slugs from Directus.
+      // This will run during the build and add the necessary routes for pre-rendering.
+      // routes: async () => {
+      //   try {
+      //     const { createDirectus, rest, readItems } = await import('@directus/sdk')
+      //     const directus = createDirectus('https://dev.thegovlab.com').with(rest())
+      //     const response = await directus.request(
+      //       readItems('reboot_democracy_blog', {
+      //         filter: { status: { _eq: 'published' } },
+      //         fields: ['slug'],
+      //         limit: -1
+      //       })
+      //     )
+      //     const data = response.data || response
+      //     return Array.isArray(data)
+      //       ? data.map((post) => `/blog/${post.slug}`)
+      //       : []
+      //   } catch (error) {
+      //     console.error('Error fetching blog slugs for prerendering:', error)
+      //     return []
+      //   }
+      // }
+    }
+  },
+
+  // (Optional) If you need to add dynamic routes at runtime, you can use the hook:
+  hooks: {
+    'prerender:routes': async (ctx) => {
+      try {
+        const { createDirectus, rest, readItems } = await import('@directus/sdk')
+        const directus = createDirectus('https://dev.thegovlab.com').with(rest())
+        const response = await directus.request(
+          readItems('reboot_democracy_blog', {
+            filter: { status: { _eq: 'published' } },
+            fields: ['slug'],
+            limit: -1
+          })
+        )
+        const data = response.data || response
+        if (Array.isArray(data)) {
+          data.forEach((post) => {
+            ctx.routes.add(`/blog/${post.slug}`)
+          })
+        }
+      } catch (error) {
+        console.error('Error in prerender:routes hook:', error)
+      }
+    }
+  },
+
+  // Other module and performance configurations:
   modules: [
-    '@nuxt/image',             // Optimize images with Nuxt Image
-    '@nuxtjs/google-fonts',      // Optimize fonts (Nuxt Fonts)
-    'nuxt-lazy-hydrate',         // Defer hydration of heavy components
-    '@nuxtjs/partytown'             // Offload non-essential JS to web workers
-    // Add additional modules as needed (e.g., nuxt-scripts)
+    '@nuxt/image',
+    '@nuxtjs/google-fonts',
+    'nuxt-lazy-hydrate',
+    '@nuxtjs/partytown'
   ],
 
-  // Google Fonts configuration (example)
   googleFonts: {
     families: {
       Roboto: true,
@@ -28,10 +78,8 @@ export default defineNuxtConfig({
     }
   },
 
-  // Nuxt Image configuration can be customized here if needed
   image: {
-    // Example configuration for modern image formats and responsive images
-    provider: 'ipx', // or a custom provider (like Cloudinary)
+    provider: 'ipx',
     screens: {
       xs: 320,
       sm: 640,
@@ -41,7 +89,6 @@ export default defineNuxtConfig({
     }
   },
 
-  // Additional performance optimizations (e.g., head management)
   app: {
     head: {
       title: 'My Nuxt Performance Test App',
@@ -52,4 +99,4 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-02-25'
-});
+})
