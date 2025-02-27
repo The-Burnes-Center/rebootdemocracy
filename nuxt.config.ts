@@ -54,7 +54,7 @@ export default defineNuxtConfig({
   hooks: {
     'prerender:routes': async (ctx) => {
       try {
-        let slugToBuild = null
+        let slugToBuild: string | null = null;
         if (process.env.INCOMING_HOOK_BODY) {
           try {
             const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
@@ -65,61 +65,48 @@ export default defineNuxtConfig({
             console.error('Error parsing INCOMING_HOOK_BODY:', error);
           }
         }
-        // Get the updated slug (if provided) from an environment variable
- 
 
-        const { createDirectus, rest, readItems } = await import('@directus/sdk')
-        const directus = createDirectus('https://dev.thegovlab.com').with(rest())
+        const { createDirectus, rest, readItems } = await import('@directus/sdk');
+        const directus = createDirectus('https://dev.thegovlab.com').with(rest());
         const response = await directus.request(
           readItems('reboot_democracy_blog', {
             filter: { status: { _eq: 'published' } },
             fields: ['slug'],
             limit: -1
           })
-        )
-        const data = response.data || response
+        );
+        const data = response.data || response;
 
         if (Array.isArray(data)) {
           data.forEach((post) => {
-            const route = `/blog/${post.slug}`
-
-            // Compute the expected output file for this slug.
-            // Adjust the file path as needed depending on your Nuxt generate settings.
             const normalizedSlug = post.slug.toLowerCase();
-            const renderedFilePath = path.resolve(process.cwd(), 'dist', 'blog', normalizedSlug, 'index.html');            const fileExists = fs.existsSync(renderedFilePath);
+            const route = `/blog/${post.slug}`;
 
-            /*
-              Logic:
-              1. If an UPDATED_SLUG is provided:
-                   - Force re-render that slug.
-                   - For others, if their file exists (from a previous build), skip prerendering.
-                   - If a post is new (i.e. no file yet), add it.
-              2. If UPDATED_SLUG is not provided (full rebuild mode):
-                   - Only add routes that are missing from the dist folder.
-            */
+            // Check in the dist/blog folder (the source for generated pages)
+            const renderedFilePath = path.resolve(process.cwd(), 'dist', 'blog', normalizedSlug, 'index.html');
+            const fileExists = fs.existsSync(renderedFilePath);
+
             if (slugToBuild) {
+              // When a webhook is provided, only process the matching slug.
               if (post.slug === slugToBuild) {
-                ctx.routes.add(route)
-                console.log(`Re-rendering updated route: ${route}`)
-              } else if (!fileExists) {
-                // If the post is new (file doesn't exist), we add it.
-                ctx.routes.add(route)
-                console.log(`Adding new route: ${route}`)
+                ctx.routes.add(route);
+                console.log(`Re-rendering updated route: ${route}`);
               } else {
-                console.log(`Skipping prerender for route: ${route} (file exists)`)
+                console.log(`Skipping route: ${route} (webhook update does not match)`);
               }
             } else {
+              // In full rebuild mode, add routes that are missing in the dist folder.
               if (!fileExists) {
-                ctx.routes.add(route)
-                console.log(`Adding route for prerender: ${route}`)
+                ctx.routes.add(route);
+                console.log(`Adding route for prerender: ${route}`);
               } else {
-                console.log(`Skipping prerender for route: ${route} (file exists)`)
+                console.log(`Skipping prerender for route: ${route} (file exists)`);
               }
             }
-          })
+          });
         }
       } catch (error) {
-        console.error('Error in prerender:routes hook:', error)
+        console.error('Error in prerender:routes hook:', error);
       }
     }
   },
