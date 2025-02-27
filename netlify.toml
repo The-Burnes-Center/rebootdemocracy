@@ -8,7 +8,7 @@
 [[plugins]]
 package = "netlify-plugin-cache"
   [plugins.inputs]
-  paths = ["public/images"]
+  paths = ["public/images","dist/blog"]
 
 
 [context.production.environment]
