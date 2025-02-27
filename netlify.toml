@@ -1,6 +1,6 @@
 [build]
   # Run the static site generation command
-  command = "npm run generate"
+  command = "npm run generate --no-clean"
   # The folder to deploy
   publish = "dist"
 
