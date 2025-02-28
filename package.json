@@ -2,7 +2,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "generate": "node server/generate-with-cache.js",
+    "generate": "ts-node server/generate-with-cache.ts",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
