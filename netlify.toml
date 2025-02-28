@@ -1,6 +1,6 @@
 [build]
   # Run the static site generation command
-  command = "nuxi generate --no-clean"
+  command = "nuxt generate --no-clean"
   # The folder to deploy
   publish = "dist"
 
