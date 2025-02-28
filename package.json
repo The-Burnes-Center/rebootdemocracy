@@ -7,7 +7,9 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "fs-extra": "^11.2.0"
+    "@types/node": "^22.13.5",
+    "fs-extra": "^11.2.0",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@directus/sdk": "^19.0.1",
