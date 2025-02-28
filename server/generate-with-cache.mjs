@@ -1,33 +1,18 @@
-import fs from 'fs-extra';
-import { execSync } from 'child_process';
-import path from 'path';
-
-const cacheDir = path.resolve('.cache/dist');
-const distDir = path.resolve('dist');
-
-async function restoreCache() {
-  if (await fs.pathExists(cacheDir)) {
-    console.log('Restoring cached dist folder...');
-    await fs.copy(cacheDir, distDir);
-  } else {
-    console.log('No cached dist folder found.');
-  }
-}
-
-async function saveCache() {
-  console.log('Saving dist folder to cache...');
-  await fs.copy(distDir, cacheDir);
-}
-
-async function generate() {
-  try {
-    await restoreCache();
-    execSync('nuxt generate', { stdio: 'inherit' });
-    await saveCache();
-  } catch (error) {
-    console.error('Error during generate:', error);
-    process.exit(1);
-  }
-}
-
-generate();
+module.exports = {
+  onPreBuild: async ({ utils }) => {
+    const didRestore = await utils.cache.restore('.cache/dist');
+    if (didRestore) {
+      console.log('Restored cached ".cache/dist" directory.');
+    } else {
+      console.log('No cache found for ".cache/dist" directory.');
+    }
+  },
+  onPostBuild: async ({ utils }) => {
+    const didSave = await utils.cache.save('.cache/dist');
+    if (didSave) {
+      console.log('Saved ".cache/dist" directory to cache.');
+    } else {
+      console.log('No ".cache/dist" directory found to cache.');
+    }
+  },
+};
