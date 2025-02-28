@@ -1,17 +1,13 @@
 {
+  "name": "nuxt-app",
+  "private": true,
   "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "generate": "node server/generate-with-cache.mjs",
+    "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
-  },
-  "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.13.5",
-    "fs-extra": "^11.3.0",
-    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@directus/sdk": "^19.0.1",
@@ -24,5 +20,8 @@
     "nuxt-lazy-hydrate": "^1.0.0",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "fs-extra": "^11.3.0"
   }
 }
