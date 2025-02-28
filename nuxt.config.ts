@@ -55,16 +55,17 @@ hooks: {
     'prerender:routes': async (ctx) => {
       try {
         let slugToBuild: string | null = null;
-        // if (process.env.INCOMING_HOOK_BODY) {
-        //   try {
-        //     const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
-        //     if (hookPayload.slug) {
-        //       slugToBuild = hookPayload.slug;
-        //     }
-        //   } catch (error) {
-        //     console.error('Error parsing INCOMING_HOOK_BODY:', error);
-        //   }
-        // }
+        
+        if (process.env.INCOMING_HOOK_BODY) {
+          try {
+            const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
+            if (hookPayload.slug) {
+              slugToBuild = hookPayload.slug;
+            }
+          } catch (error) {
+            console.error('Error parsing INCOMING_HOOK_BODY:', error);
+          }
+        }
 
         const { createDirectus, rest, readItems } = await import('@directus/sdk');
         const directus = createDirectus('https://dev.thegovlab.com').with(rest());
