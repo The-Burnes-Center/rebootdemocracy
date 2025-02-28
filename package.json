@@ -1,13 +1,13 @@
 {
-  "name": "nuxt-app",
-  "private": true,
-  "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "generate": "nuxt generate",
+    "generate": "node server/generate-with-cache.js",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "fs-extra": "^11.2.0"
   },
   "dependencies": {
     "@directus/sdk": "^19.0.1",
