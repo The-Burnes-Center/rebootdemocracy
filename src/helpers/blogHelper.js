@@ -21,6 +21,9 @@ export function fetchBlogData(slug) {
                 _eq: "published",
               },
             },
+            {
+              date: { _lte: '$NOW(-5 hours)' } , 
+            }
           ],
         },
       });

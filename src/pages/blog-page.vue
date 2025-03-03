@@ -464,9 +464,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
          meta: 'total_count',
          limit: -1,
           filter: {
-            status: {
-              _eq: "published",
-            },
+            _and: [{ date: { _lte: '$NOW(-5 hours)' } }, { status: { _eq: 'published' } }]
           },
          fields: [
           '*.*',
