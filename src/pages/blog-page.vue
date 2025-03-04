@@ -540,52 +540,16 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     <header-comp></header-comp>
           <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
 <ModalComp :modalData="modalData" @close="closeModal" />    </vue-final-modal>
-  <div class="blog-page-hero">
-    <h1 class="eyebrow">Reboot Democracy</h1>
-    <h1>Blog</h1>
-    <p style="padding:1rem 0 0 0">The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.</p>   
-      <div class="search-bar-section"> 
-             
-        <input
-    class="search-bar"
-    ref="searchInputRef"
-    v-model="searchTerm"
-    @keyup.enter="handleSearch"
-    type="text"
-    role="search"
-    aria-label="Search"
-    placeholder="Search"
-  />
-            
-  <span
-    type="button"
-    @click="searchTerm = ''; resetSearch();"
-    class="search-bar-cancel-btn material-symbols-outlined"
-  >
-    cancel
-  </span>
-
-  <span
-    type="button"
-    @click="resetSearch()"
-    class="search-bar-btn material-symbols-outlined"
-  >
-    search
-  </span>
-        </div>
-         <a href="/signup" class="btn btn-small btn-primary">Sign up for updates</a>
-        <!-- <div v-if="pschatLoading || pschatContent" class="pschat-result-container"> -->
-      <!-- <div v-if="pschatLoading" class="pschat-loader ">
-        
-        Retrieving context ... 
-      </div> -->
-      <!-- <div v-else v-html="renderMarkdown(pschatContent)"></div> -->
-    <!-- </div> -->
-      </div>
-
-
-<div v-if="searchloader" class="loader-blog"></div>
-
+<div class="blog-page-hero">
+    <h1><span>Reboot Democracy</span>Blog</h1>
+    <p>The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.</p>   
+    <div class="search-bar-section"> 
+      <input class="search-bar" ref="searchInputRef" v-model="searchTerm" @keyup.enter="handleSearch" type="text" role="search" aria-label="Search" placeholder="Search" />
+      <span @click="searchTerm = ''; resetSearch();" class="search-bar-cancel-btn material-symbols-outlined">cancel</span>
+      <span @click="resetSearch()" class="search-bar-btn material-symbols-outlined">search</span>
+    </div>
+    <div v-if="searchloader" class="loader-blog"></div>
+  </div>
 
 <!-- Featured Blog Section -->
 
