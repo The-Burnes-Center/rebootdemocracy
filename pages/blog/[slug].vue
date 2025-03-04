@@ -69,7 +69,7 @@
 //   const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
 const ASSET_BASE_URL = isDev 
   ? 'https://dev.thegovlab.com/assets/' 
-  : 'https://nuxt-ssg.rebootdemocracy.ai/'
+  : 'https://nuxt-ssg-rebootdemocracy.netlify.app/'
 const FALLBACK_IMAGE_ID = '4650f4e2-6cc2-407b-ab01-b74be4838235'
 
 
