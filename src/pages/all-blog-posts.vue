@@ -506,8 +506,7 @@ async fetchBlog(loadMore = false) {
     <!-- Header Component -->
     <header-comp></header-comp>
   <div class="blog-page-hero">
-    <h1 class="eyebrow">Reboot Democracy</h1>
-    <h1>All Posts</h1>
+    <h1><span>Reboot Democracy</span> Blog | All Posts</h1>
     <div class="search-bar-section">
       <input
         class="search-bar"

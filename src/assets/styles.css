@@ -591,21 +591,51 @@ a.btn:hover{
 
 }
 
-.blog-page-hero{
-  min-height: 55vh;
-  background-image:
-  linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)),
-  url('../assets/writing-image.png');
+.blog-page-hero {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto auto;
+  grid-template-areas:
+    "title"
+    "description"
+    "search";
+  
+  @media (min-width: 768px) {
+    padding: 3rem;
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "title search"
+      "description search";
+  }
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url('../assets/writing-image.png');
   background-size: cover;
   color: white;
-  padding: 20px;
-  display:flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.blog-hero {
   
+}
+
+.blog-page-hero h1 {
+  grid-area: title;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+  span { display: none; }
+
+  @media (min-width: 768px) {
+    span { display: inline; }
+  }
+}
+
+.blog-page-hero p {
+  grid-area: description;
+}
+
+.search-bar-section {
+  grid-area: search;
+}
+
+
+.blog-hero {
   width: 100%; /* This will make sure the header extends full width */
   display: flex;
   padding: 80px 43px 40px 43px;
