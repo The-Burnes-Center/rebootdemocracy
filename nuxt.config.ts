@@ -10,7 +10,8 @@ export default defineNuxtConfig({
   // Route rules: explicitly mark the homepage and blog routes for prerendering.
   routeRules: {
     '/': { prerender: true },
-    '/blog/**': { prerender: true }
+    '/blog/**': { prerender: true },
+    '/index_default': { prerender: false },
   },
   // vite: {
   //   resolve: {
@@ -23,7 +24,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       // Enable crawling of links on your site.
-      crawlLinks: true,
+      crawlLinks: false,
       // You can also add manually-specified routes using the prerender:routes hook.
       // Here we add all published blog post routes by fetching slugs from Directus.
       // This will run during the build and add the necessary routes for pre-rendering.
@@ -118,6 +119,10 @@ hooks: {
     '@nuxtjs/google-fonts',
     'nuxt-lazy-hydrate',
     '@nuxtjs/partytown'
+  ],
+  css: [
+    '~/assets/styles.css', // <-- your global CSS file
+    'vue-final-modal/style.css'
   ],
 
   googleFonts: {

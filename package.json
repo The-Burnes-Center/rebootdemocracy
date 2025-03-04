@@ -15,10 +15,12 @@
     "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/partytown": "^1.6.0",
     "date-fns": "^4.1.0",
+    "lodash": "^4.17.21",
     "netlify-plugin-cache": "^1.0.3",
     "nuxt": "^3.15.4",
     "nuxt-lazy-hydrate": "^1.0.0",
     "vue": "latest",
+    "vue-final-modal": "^4.5.5",
     "vue-router": "latest"
   },
   "devDependencies": {

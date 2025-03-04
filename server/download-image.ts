@@ -6,7 +6,7 @@ export async function downloadAndStoreImage(remoteUrl: string): Promise<string> 
   try {
     const urlObj = new URL(remoteUrl)
     const filename = path.basename(urlObj.pathname)
-    
+    console.log(remoteUrl)
     const imagesDir = path.resolve(process.cwd(), 'public', 'images')
     if (!fs.existsSync(imagesDir)) {
       fs.mkdirSync(imagesDir, { recursive: true })
