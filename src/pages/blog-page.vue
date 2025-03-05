@@ -541,8 +541,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
 <ModalComp :modalData="modalData" @close="closeModal" />    </vue-final-modal>
 <div class="blog-page-hero">
-    <h1><span>Reboot Democracy</span>Blog</h1>
-    <p>The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.</p>   
+    <h1>Rebooting Democracy in the Age of AI</h1>
+    <p>Insights on Tech and Governance from Beth Simone Noveck</p>   
     <div class="search-bar-section"> 
       <input class="search-bar" ref="searchInputRef" v-model="searchTerm" @keyup.enter="handleSearch" type="text" role="search" aria-label="Search" placeholder="Search" />
       <span @click="searchTerm = ''; resetSearch();" class="search-bar-cancel-btn material-symbols-outlined">cancel</span>
