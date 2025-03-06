@@ -124,6 +124,8 @@ export default {
         { name: 'title', content:"RebootDemocracy.AI Blog | "+this.postData[0].title },
         { name: 'description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
         { property: 'og:title', content: "RebootDemocracy.AI Blog | "+this.postData[0].title },
+        { property: 'og:type', content: "website" },
+        { property: 'og:url', content: "https://rebootdemocracy.ai/blog/"+this.postData[0].slug},
         // { property: 'og:description', content: htmlToText.textContent.substring(0,200)+'...'},
         { property: 'og:description', content: this.postData[0].excerpt!=''?this.postData[0].excerpt: htmlToText.textContent.substring(0,200)+'...'},
         { property: 'og:image', content: this.postData[0].image?this.directus._url+'assets/'+this.postData[0].image.id:this.directus._url+'assets/'+'4650f4e2-6cc2-407b-ab01-b74be4838235'},
@@ -151,6 +153,8 @@ As researchers we want to understand how best to “do democracy” in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
         { property: 'og:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
+        { property: 'og:type', content: "website"},
+        { property: 'og:url', content: "https://rebootdemocracy.ai"},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
         { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
 
