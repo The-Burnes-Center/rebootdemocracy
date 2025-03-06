@@ -7,7 +7,8 @@ export function fetchBlogData(slug) {
         fields: [
           "*.*",
           "authors.team_id.*",
-          "authors.team_id.Headshot.*"
+          "authors.team_id.Headshot.*",
+          "image.*"
         ],
         filter: {
           _and: [
