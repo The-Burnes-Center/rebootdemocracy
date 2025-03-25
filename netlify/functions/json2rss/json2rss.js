@@ -66,7 +66,7 @@ exports.handler = async function (event, context) {
       let authorNames = "";
       if (e.authors && Array.isArray(e.authors) && e.authors.length > 0) {
         authorNames = "By " + e.authors
-          .map(author => `${author.first_name} ${author.last_name}`)
+          .map(author => `${author.team_id.First_Name} ${author.team_id.Last_Name}`)
           .join(", ") + "<br/>";
       }
 
