@@ -6,7 +6,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
   css: [
+    './components/styles/index.css',
     './assets/css/index.css'
   ],
-  components: true,
+  components: {
+    global: true,
+    dirs: ['./components']
+  }
 })
