@@ -52,7 +52,7 @@ exports.handler = async function (event, context) {
       ],
     },
     limit: -1,
-    fields: ["*.*,items.reboot_democracy_weekly_news_items_id"]
+    fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
   });
 
 

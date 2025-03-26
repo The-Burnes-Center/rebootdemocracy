@@ -9,6 +9,11 @@
   to = "/index.html"
   status = 200
 
+[[redirects]]
+  from = "/newsoftheweek/feed/rss"
+  to = "/.netlify/functions/newsoftheweek"
+  status = 200
+  force = true
 
 [[headers]]
   for = "/*"
