@@ -9,6 +9,7 @@ exports.handler = async function (event, context) {
   const directus = new Directus('https://content.thegovlab.com/');
   const blogPAW = directus.items("reboot_democracy_blog");
 
+
   var channel = [
     {
       title: 'Reboot Democracy Blog'
@@ -50,8 +51,9 @@ exports.handler = async function (event, context) {
       ],
     },
     limit: -1,
-    fields: ["*.*"]
+    fields: ["*.*", "authors.team_id.*",]
   });
+
 
   publicData.data.map((e) => {
     if (e.status === "published") {
