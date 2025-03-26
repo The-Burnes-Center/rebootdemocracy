@@ -42,7 +42,6 @@ exports.handler = async function (event, context) {
   const publicData = await blogPAW.readByQuery({
     filter: {
       _and: [
-        { date: { _lte: "$NOW(-5 hours)" } },
         {
           status: {
             _eq: "published"
