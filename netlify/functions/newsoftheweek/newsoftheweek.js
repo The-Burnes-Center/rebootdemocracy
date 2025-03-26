@@ -46,8 +46,7 @@ exports.handler = async function (event, context) {
         {
           status: {
             _eq: "published"
-          },
-          sort: '-id',
+          }
         }
       ],
     },
