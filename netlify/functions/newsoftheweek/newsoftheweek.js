@@ -26,7 +26,7 @@ exports.handler = async function (event, context) {
 
   var channel = [
     {
-      title:  publicData[0].title
+      title:  publicData.data[0].title
     },
     {
       description: 'The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.'
