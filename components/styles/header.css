@@ -1,7 +1,13 @@
-.header-section{
-    background-color: #f8f9fa;
-    padding: 10px 0;
-    border-bottom: 1px solid #e9ecef;
+.header-section {
+  background-color: #f8f9fa;
+  padding: 10px 0;
+  border-bottom: 1px solid #e9ecef;
+  font-family: var(--font-inter);
+}
+
+.header-section p {
+  font-family: var(--font-inria);
+  font-weight:300
 }
 
 .my-button {
