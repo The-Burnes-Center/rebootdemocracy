@@ -74,7 +74,7 @@ exports.handler = async function (event, context) {
 
       // Handle image and content
       if (e.image && e.image.id) {
-        let imageUrl = 'https://content.thegovlab.com/assets/' + e.image.id + '?width=400&quality=40&format=jpg';
+        let imageUrl = 'https://content.thegovlab.com/assets/' + e.image.id + '?width=400&quality=70&format=jpg';
 
         itemcont["item"]["enclosure"] = {
           _attrs: {
