@@ -49,6 +49,7 @@ exports.handler = async function (event, context) {
         }
       ],
     },
+    sort: '-id',
     limit: -1,
     fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
   });
