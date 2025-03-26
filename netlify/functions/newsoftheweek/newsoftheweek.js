@@ -8,11 +8,25 @@ exports.handler = async function (event, context) {
   const { toXML } = pkg;
   const directus = new Directus('https://content.thegovlab.com/');
   const blogPAW = directus.items("reboot_democracy_weekly_news");
+  const publicData = await blogPAW.readByQuery({
+    filter: {
+      _and: [
+        {
+          status: {
+            _eq: "published"
+          }
+        }
+      ],
+    },
+    sort: 'id',
+    limit: -1,
+    fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
+  });
 
 
   var channel = [
     {
-      title: 'Reboot Democracy Blog'
+      title:  publicData[0].title
     },
     {
       description: 'The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.'
@@ -38,21 +52,6 @@ exports.handler = async function (event, context) {
       }
     }
   ];
-
-  const publicData = await blogPAW.readByQuery({
-    filter: {
-      _and: [
-        {
-          status: {
-            _eq: "published"
-          }
-        }
-      ],
-    },
-    sort: 'id',
-    limit: -1,
-    fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
-  });
 
 
   publicData.data[0].items.map( e_items => {
