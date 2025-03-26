@@ -661,7 +661,7 @@ a.btn:hover{
   height: 500px;
   max-width: 1100px;
   width:1100px;
-  object-fit: cover;
+  object-fit: fill;
 }
 .blog-img-byline
 {
