@@ -1,4 +1,4 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+
 import { defineNuxtConfig } from "nuxt/config";
 
 export default defineNuxtConfig({
@@ -9,8 +9,11 @@ export default defineNuxtConfig({
     './components/styles/index.css',
     './assets/css/index.css'
   ],
-  components: {
-    global: true,
-    dirs: ['./components']
-  }
-})
+  components: [
+    {
+      path: './components',
+      pathPrefix: false,
+      global: true
+    }
+  ]
+});
