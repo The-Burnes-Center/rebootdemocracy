@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=./",
+    "prefetch": "node scripts/fetch-directus-assets.mjs",
+    "build": "npx vite-ssg build --base=./",
     "serve": "vite preview"
   },
   "dependencies": {
