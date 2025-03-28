@@ -1,0 +1,32 @@
+.base__button {
+  position: relative;
+  padding: 0.5rem 1.85rem;
+  cursor: pointer;
+  overflow: hidden;
+  background: none;
+  border: none;
+}
+
+.base__button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-color, #0d63eb);
+  opacity: var(--bg-opacity, 1);
+  z-index: 0;
+  border: 3px solid var(--border-color, #0d63eb);
+}
+
+.base__btn-slot {
+  font-family: var(--font-inter, "Inter");
+  color: var(--text-color, #0d63eb);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 125%;
+  position: relative;
+  z-index: 1;
+}
