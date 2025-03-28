@@ -33,10 +33,9 @@ export default {
       postData: [],
       slug: this.$route.params.name,
       modalData: [],
-      showmodal: false,
+      showmodal: false, 
       directus: new Directus("https://dev.thegovlab.com/"),
       path: this.$route.fullPath,
-
           // this.debounceSearch = _.debounce(this.searchBlog, 500);
     };
   },
