@@ -44,7 +44,7 @@ export default {
       showmodal: false,
       moreresourceData: [],
       item_counter: 0,
-      directus: new Directus('https://content.thegovlab.com/'),
+      directus: new Directus('https://dev.thegovlab.com/'),
       path:this.$route.fullPath,
     }
   },

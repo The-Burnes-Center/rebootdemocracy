@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
     // Fetch blog post data.
     // Update this URL to the endpoint that returns your blog post data filtered by slug.
     const response = await axios.get(
-      `https://content.thegovlab.com/items/blog?filter[slug][_eq]=${slug}`
+      `https://dev.thegovlab.com/items/blog?filter[slug][_eq]=${slug}`
     );
     const blogPosts = response.data.data;
 
@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
     // Assume blog.image is a URL (adjust if it’s an object)
     const ogImage = blog.image
       ? blog.image 
-      : "https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235";
+      : "https://dev.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235";
 
     // Load index.html via Cheerio and update meta tags
     const $ = cheerio.load(html);

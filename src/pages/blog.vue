@@ -34,7 +34,7 @@ export default {
       slug: this.$route.params.name,
       modalData: [],
       showmodal: false,
-      directus: new Directus("https://content.thegovlab.com/"),
+      directus: new Directus("https://dev.thegovlab.com/"),
       path: this.$route.fullPath,
 
           // this.debounceSearch = _.debounce(this.searchBlog, 500);
@@ -152,7 +152,7 @@ export default {
 As researchers we want to understand how best to “do democracy” in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
-        { property: 'og:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
+        { property: 'og:image', content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
         { property: 'og:type', content: "website"},
         { property: 'og:url', content: "https://ssg-test.rebootdemocracy.ai/"},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
@@ -165,7 +165,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 As researchers we want to understand how best to “do democracy” in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
-        { property: 'twitter:image', content: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
+        { property: 'twitter:image', content: "https://dev.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })

@@ -19,8 +19,8 @@ export default {
   data() {
     return {
       teamData:[],
-      directus: new Directus('https://content.thegovlab.com/'),
-      url:'https://content.thegovlab.com/',
+      directus: new Directus('https://dev.thegovlab.com/'),
+      url:'https://dev.thegovlab.com/',
       path:this.$route.fullPath,
     }
   },
