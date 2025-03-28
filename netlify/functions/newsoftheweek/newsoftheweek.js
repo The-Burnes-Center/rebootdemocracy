@@ -29,7 +29,7 @@ exports.handler = async function (event, context) {
       title:  publicData.data[0].title
     },
     {
-      description: 'The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.'
+      description: publicData.data[0].summary
     },
     {
       link: 'https://rebootdemocracy.ai'
