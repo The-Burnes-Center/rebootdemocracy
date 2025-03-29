@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "./header.css";
 @import "./button.css";
+@import "./post-card.css";
 :root {
   --font-inter: 'Inter', sans-serif;
   --font-inria: 'Inria Sans', sans-serif;
@@ -10,5 +11,9 @@
   --font-light: 300;
   --font-regular: 400;
   --font-bold: 700;
+}
+
+h3{
+  margin:0rem;
 }
 
