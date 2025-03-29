@@ -30,6 +30,9 @@
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
+  filter: drop-shadow(0px 0px 16px rgba(0, 0, 0, 0.1))
+    drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.05))
+    drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.05));
 }
 
 .postcard__image img {
@@ -37,9 +40,6 @@
   height: 100%;
   aspect-ratio: 1/1;
   object-fit: cover;
-  filter: drop-shadow(0px 0px 16px rgba(0, 0, 0, 0.1))
-    drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.05))
-    drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.05));
 }
 
 .postcard__content {
@@ -90,7 +90,6 @@
   font-weight: 300;
   line-height: 150%;
   text-wrap: wrap;
-
 }
 
 .postcard__meta {
@@ -99,4 +98,29 @@
   font-style: italic;
   font-weight: 300;
   line-height: normal;
+}
+
+@media (max-width: 768px) {
+  .postcard__container {
+    flex-direction: column;
+    width: 21rem;
+    height: 21rem;
+  }
+  .postcard__card {
+    top: -10rem;
+    left:1.5rem;
+    flex-direction: column;
+  }
+  .postcard__content {
+    padding-left:1rem;
+    padding-right: 1rem;
+    padding-bottom: 1.5rem;
+    height: 19rem;
+    width: 21rem;
+  }
+
+  .postcard__image {
+    display: flex;
+    width: 21.3rem;
+  }
 }
