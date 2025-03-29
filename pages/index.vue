@@ -1,39 +1,62 @@
+<!-- Page that uses the TabSwitch component -->
 <template>
   <section class="p-6">
     <h1 class="text-3xl font-bold mb-4">Welcome to Reboot blog app</h1>
     <p class="text-lg text-gray-600 mb-8">
       This is the homepage powered by Nuxt 3.
     </p>
-
- 
-     <UpcomingCard
-      title="Copyright, AI, and Great Power Competition"
-      excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance."
-      imageUrl="/images/exampleImage.png"
-      :tagColor="'#5C69AB'"
-    />
-   </section>
-
-  <!-- <div class="blog-container">
-    <PostCard
-      v-for="(post, index) in blogPosts"
-      :key="post.id"
-      :tag="post.tag"
-      :title="post.title"
-      :author="post.author"
-      :excerpt="post.excerpt"
-      :imageUrl="post.imageUrl"
-      :date="post.date"
-      :tagColor="index % 2 === 0 ? '#5C69AB' : '#0D63EB'";
-    />
-  </div> -->
-
-
-   
+    <TabSwitch
+      :tabs="tabs"
+      :initialTab="0"
+      @tab-changed="onTabChanged"
+    >
+      <template #latestposts>
+        <div class="space-y-4">
+          <div
+            v-for="post in blogPosts"
+            :key="post.id"
+            class="p-4 border rounded-md shadow-sm"
+          >
+            <h2 class="text-xl font-semibold">{{ post.title }}</h2>
+            <p class="text-sm text-gray-500 mb-2">
+              by {{ post.author }} — {{ post.date }}
+            </p>
+            <p class="text-gray-700">{{ post.excerpt }}</p>
+          </div>
+        </div>
+      </template>
+    </TabSwitch>
+  </section>
 </template>
 
 <script setup>
 import { ref } from "vue";
+
+// Tab data with correct structure
+const tabs = [
+  { title: 'Latest Posts', name: 'latestposts' },
+  {
+    title: 'News that caught our eye',
+    name: 'news',
+    url: 'https://rebootdemocracy.ai/news',
+    external: true
+  },
+  {
+    title: 'Events',
+    name: 'events',
+    url: 'https://rebootdemocracy.ai/events',
+    external: true
+  },
+];
+
+// Tab state tracking
+const currentTabName = ref("latestposts");
+
+// Tab change handler - fixed function name to match template
+const onTabChanged = (index, name) => {
+  console.log(`Tab changed to index ${index} with name ${name}`);
+  currentTabName.value = name;
+};
 
 // Blog posts array with sample data
 const blogPosts = ref([
