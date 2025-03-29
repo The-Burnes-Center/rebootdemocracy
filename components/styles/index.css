@@ -3,6 +3,8 @@
 @import "./header.css";
 @import "./button.css";
 @import "./post-card.css";
+@import "./upcoming-card.css";
+
 :root {
   --font-inter: 'Inter', sans-serif;
   --font-inria: 'Inria Sans', sans-serif;

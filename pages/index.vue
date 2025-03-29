@@ -4,9 +4,17 @@
     <p class="text-lg text-gray-600 mb-8">
       This is the homepage powered by Nuxt 3.
     </p>
-  </section>
 
-  <div class="blog-container">
+ 
+     <UpcomingCard
+      title="Copyright, AI, and Great Power Competition"
+      excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance."
+      imageUrl="/images/exampleImage.png"
+      :tagColor="'#5C69AB'"
+    />
+   </section>
+
+  <!-- <div class="blog-container">
     <PostCard
       v-for="(post, index) in blogPosts"
       :key="post.id"
@@ -18,7 +26,10 @@
       :date="post.date"
       :tagColor="index % 2 === 0 ? '#5C69AB' : '#0D63EB'";
     />
-  </div>
+  </div> -->
+
+
+   
 </template>
 
 <script setup>
