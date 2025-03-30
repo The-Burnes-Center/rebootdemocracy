@@ -6,6 +6,7 @@
 @import "./upcoming-card.css";
 @import "./tab-switch.css";
 @import "./header-menu.css";
+@import "./header-dropdown.css";
 
 :root {
   --font-inter: 'Inter', sans-serif;

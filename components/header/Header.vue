@@ -7,10 +7,27 @@
     <nav>
       <HeaderMenu
         :items="[
-          { label: 'About', name: 'about' },
-          { label: 'Blog', name: 'blog' },
-          { label: 'Events', name: 'events' },
-          { label: 'Our Work', name: 'work' },
+          { label: 'About', name: 'about', to: '/about' },
+          { label: 'Blog', name: 'blog', to: '/blog' },
+          { label: 'Events', name: 'events', to: '/events' },
+          {
+            label: 'Our Work',
+            name: 'work',
+            children: [
+              {
+                label: 'About Beth Noveck',
+                name: 'research',
+                to: '/our-work/research',
+              },
+              {
+                label: 'University Teachings',
+                name: 'projects',
+                to: '/our-work/projects',
+              },
+              { label: 'Engagements', name: 'partners', to: '/our-work/partners' },
+            ],
+          },
+          { label: 'Sign up', name: 'signup', to: '/signup' },
         ]"
       />
     </nav>
@@ -32,6 +49,5 @@
         />
       </svg>
     </div>
-
   </header>
 </template>

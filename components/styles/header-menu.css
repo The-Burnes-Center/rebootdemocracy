@@ -4,11 +4,30 @@
   align-items: center;
 }
 
-.header-menu__label{
-    color: #1E1E1E;
-    font-family: var(--font-inter);
-    font-size: 1rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 125%;
+.header-menu__label {
+  color: #1e1e1e;
+  font-family: var(--font-inter);
+  font-size: 1rem;
+  --color-icon:#1e1e1e;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 125%;
+  cursor: pointer;
+}
+
+.dropdown-icon {
+  margin-left: 6px;
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+
+.active {
+  color: #0d63eb;
+  --color-icon:#0d63eb;
+ transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+.header-menu__item {
+  text-decoration: none;
 }
