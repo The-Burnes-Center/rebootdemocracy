@@ -11,7 +11,7 @@
     }"
     :class="[alignmentClass, customClass]"
   >
-    <slot v-if="$slots.default" />
+     <slot v-if="$slots.default" />
     <div v-else-if="html" v-html="text" />
     <template v-else>{{ text }}</template>
   </component>
