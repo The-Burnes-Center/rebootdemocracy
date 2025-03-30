@@ -12,10 +12,45 @@
   >
     <strong>Big Heading</strong>
   </Text>    
-  <p class="text-lg text-gray-600 mb-8">
-      This is the homepage powered by Nuxt 3.
-    </p>
+    <Title level="h1" :lineClamp="1" color="text-primary">
+    This long title will be truncated after one line
+  </Title>
 
+<!-- Two lines with ellipsis -->
+  <Title  as = "p" fontFamily="inter" weight="normal" level="h2" :lineClamp="2" color="text-primary">
+    This longer title will span up to two lines before being truncated with an ellipsis
+  </Title>
+
+<!-- Basic paragraph -->
+<Paragraph>
+  This is a standard paragraph with default styling.
+</Paragraph>
+
+<!-- Styled paragraph -->
+<Paragraph 
+  size="lg" 
+  weight="medium"
+  color="text-secondary"
+  fontFamily="inria"
+  margin="lg"
+  lineHeight="relaxed"
+>
+  This paragraph has larger text, medium weight, secondary color,
+  large margins, and relaxed line spacing.
+</Paragraph>
+
+<!-- Paragraph with line clamp -->
+<Paragraph :lineClamp="3">
+  This paragraph will display at most 3 lines of text, 
+  after which it will be truncated with an ellipsis.
+  Any additional content beyond the third line won't be visible.
+    after which it will be truncated with an ellipsis.
+</Paragraph>
+
+<!-- Paragraph with custom margins -->
+<Paragraph marginTop="xl" marginBottom="none">
+  This paragraph has extra large top margin and no bottom margin.
+</Paragraph>
     <Button variant="primary" @click="register"> Register </Button>
 
     <Button variant="secondary" @click="register"> Login </Button>
@@ -43,6 +78,7 @@
 <script setup>
 import { ref } from "vue";
 import { Button } from "#components";
+import Title from "../components/typography/Title.vue";
 
 // Tab data with correct structure
 const tabs = [
