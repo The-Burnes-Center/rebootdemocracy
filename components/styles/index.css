@@ -5,6 +5,7 @@
 @import "./post-card.css";
 @import "./upcoming-card.css";
 @import "./tab-switch.css";
+@import "./header-menu.css";
 
 :root {
   --font-inter: 'Inter', sans-serif;

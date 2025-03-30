@@ -1,0 +1,14 @@
+.menu__section {
+  display: inline-flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header-menu__label{
+    color: #1E1E1E;
+    font-family: var(--font-inter);
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 125%;
+}
