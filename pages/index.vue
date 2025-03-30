@@ -1,15 +1,26 @@
-<!-- Page that uses the TabSwitch component -->
 <template>
   <section class="p-6">
-    <h1 class="text-3xl font-bold mb-4">Welcome to Reboot blog app</h1>
-    <p class="text-lg text-gray-600 mb-8">
+  <Text 
+    as="h1" 
+    size="sm" 
+    weight="normal" 
+    align="center"
+    fontStyle="italic" 
+    fontFamily="inter" 
+    class="my-custom-class"
+    transform="uppercase"
+  >
+    <strong>Big Heading</strong>
+  </Text>    
+  <p class="text-lg text-gray-600 mb-8">
       This is the homepage powered by Nuxt 3.
     </p>
-    <TabSwitch
-      :tabs="tabs"
-      :initialTab="0"
-      @tab-changed="onTabChanged"
-    >
+
+    <Button variant="primary" @click="register"> Register </Button>
+
+    <Button variant="secondary" @click="register"> Login </Button>
+
+    <TabSwitch :tabs="tabs" :initialTab="0" @tab-changed="onTabChanged">
       <template #latestposts>
         <div class="space-y-4">
           <div
@@ -31,21 +42,22 @@
 
 <script setup>
 import { ref } from "vue";
+import { Button } from "#components";
 
 // Tab data with correct structure
 const tabs = [
-  { title: 'Latest Posts', name: 'latestposts' },
+  { title: "Latest Posts", name: "latestposts" },
   {
-    title: 'News that caught our eye',
-    name: 'news',
-    url: 'https://rebootdemocracy.ai/news',
-    external: true
+    title: "News that caught our eye",
+    name: "news",
+    url: "https://rebootdemocracy.ai/news",
+    external: true,
   },
   {
-    title: 'Events',
-    name: 'events',
-    url: 'https://rebootdemocracy.ai/events',
-    external: true
+    title: "Events",
+    name: "events",
+    url: "https://rebootdemocracy.ai/events",
+    external: true,
   },
 ];
 
