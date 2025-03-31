@@ -95,10 +95,10 @@ const transformMap = {
 
 // Define line height options
 const lineHeights = {
-  tight: "1.25",
-  normal: "1.5",
-  relaxed: "1.75",
-  loose: "2",
+  tight: "1.25", // 20px
+  normal: "1.5", // 24px
+  relaxed: "1.75", // 28px
+  loose: "2", // 32px
 } as const;
 
 const marginSizes = {

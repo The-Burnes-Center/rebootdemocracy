@@ -1,10 +1,12 @@
-
 .upcomingcard__layout {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
 }
 
 .upcomingcard__header {
+  position: relative;
+  right: -1rem;
   display: flex;
   flex-direction: row-reverse;
   gap: 1.5rem;
@@ -29,6 +31,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: flex-end;
 }
 
 .upcomingcard__tag {
@@ -39,10 +42,14 @@
 
 .upcomingcard__title {
   margin: 0.5rem 0;
+  width: 11.3rem;
+  height: 6rem;
+  flex-shrink: 0;
 }
 
 .upcomingcard__details {
   margin-top: 1rem;
+  max-width: 20.5rem;
 }
 
 .upcomingcard__excerpt {
@@ -88,7 +95,6 @@
   .desktop-view {
     display: none;
   }
-  
   .mobile-view {
     display: flex;
   }

@@ -4,6 +4,7 @@
     class="base__button"
     :class="variantClass"
     :aria-label="ariaLabel"
+    :style="buttonStyle"
   >
     <span class="base__btn-slot">
       <slot />
@@ -13,24 +14,22 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  /**
-   * Function to call when the button is clicked
-   */
-  onClick: () => void
+  onClick: () => void;
+  variant: "primary" | "secondary";
+  ariaLabel?: string;
+  width?: string;
+  height?: string;
+}>();
 
-  /**
-   * Determines the style variant of the button
-   */
-  variant: 'primary' | 'secondary'
+const variantClass = computed(() => `base__button--${props.variant}`);
 
-  /**
-   * Optional ARIA label for accessibility
-   */
-  ariaLabel?: string
-}>()
-
-/**
- * Computes the CSS class based on the button variant
- */
-const variantClass = computed(() => `base__button--${props.variant}`)
+const buttonStyle = computed(() => {
+  if (props.width || props.height) {
+    return {
+      '--button-width': props.width,
+      '--button-height': props.height
+    }
+  }
+  return {}
+})
 </script>

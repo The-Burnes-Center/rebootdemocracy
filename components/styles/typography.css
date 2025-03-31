@@ -105,16 +105,16 @@
 
 /* Line height classes */
 .paragraph-line-height-tight {
-  line-height: 1.2;
+  line-height: 1.25px;
 }
 .paragraph-line-height-normal {
-  line-height: 1.5;
+  line-height: 24px;
 }
 .paragraph-line-height-relaxed {
-  line-height: 1.75;
+  line-height: 28px;
 }
 .paragraph-line-height-loose {
-  line-height: 2;
+  line-height: 32px;
 }
 
 /* Line clamp classes */
