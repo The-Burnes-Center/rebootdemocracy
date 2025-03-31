@@ -1,0 +1,37 @@
+.page-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  width:100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden; 
+}
+
+.left-content {
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.right-content {
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+
+}
+/* Media query for responsive design */
+@media (max-width: 768px) {
+  .page-layout {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  
+  .left-content,
+  .right-content {
+    margin-bottom: 1rem;
+  }
+}
