@@ -1,29 +1,28 @@
 <template>
-  <div class="blog-container" style="margin-top:15rem;">
+  <div class="blog-container" style="margin-top:15rem; margin-left:3rem; margin-right:4rem;">
     <!-- <h1 class="blog-title">Latest Blog Posts</h1> -->
-    <UpcomingCard
+    <!-- <UpcomingCard
       title="Copyright, AI, and Great Power Competition"
       excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what’s at stake in the battle for technological dominance."
       imageUrl="/images/exampleImage.png"
       backgroundColor="#FFFFFF"
       tagColor="#5C69AB"
       :onClick="() => handleEventRegistration()"
-    />
+    /> -->
     
     <!-- Single PostCard usage -->
-    <!-- <PostCard
-    <PostCard
+    <PostCard 
       tag="Internet Archive Book Talk"
       titleText="Copyright, AI, and Great Power Competition"
       author="Jane Smith"
-      excerpt="Discover the benefits of creating a component-based design system and how it can streamline your development workflow. This guide covers the essential elements needed for a robust design system.This guide covers the essential elements needed for a robust design system.This guide covers the essential elements needed for a robust design system."
+      excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what’s at stake in the battle for technological dominance."
       imageUrl="/images/exampleImage.png"
       :date="new Date('2025-03-15')"
       variant="default"
       :hoverable="true"
       :tagIndex="0"
     />
-     -->
+    
     
     <!-- Using PostCard in a list -->
     <!-- <div class="blog-list">

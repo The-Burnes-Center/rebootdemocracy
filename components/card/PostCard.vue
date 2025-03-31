@@ -1,8 +1,12 @@
 <template>
   <!--Used reusable container card by passing variant and size-->
-  <Card size="extra-large" :variant="default" :hoverable="hoverable">
+  <Card
+    size="extra-large"
+    :variant="default"
+    :hoverable="hoverable"
+    class="desktop-view"
+  >
     <section class="postcard__container">
-
       <!--image-->
       <div class="postcard__content">
         <div v-if="imageUrl" class="postcard__image">
@@ -11,7 +15,6 @@
 
         <div class="postcard__text-content">
           <div>
-
             <!--tag-->
             <Tag
               v-if="tag"
@@ -19,10 +22,11 @@
               margin="none"
               size="xs"
               :index="tagIndex"
-              >{{ tag }}</Tag>
-          
-              <!--title-->
-            <TitleText v-if="titleText" size="xl" lineClamp="2":level="'h3'">
+              >{{ tag }}</Tag
+            >
+
+            <!--title-->
+            <TitleText v-if="titleText" size="xl" lineClamp="2" :level="'h3'">
               {{ titleText }}
             </TitleText>
           </div>
@@ -42,22 +46,79 @@
             <div v-if="date || author" class="postcard__meta">
               <Text size="xs" weight="normal" fontStyle="italic">
                 Published on
-                <Text
-                  as="span"
-                  size="xs"
-                  weight="bold"
-                  fontStyle="italic"
-                  >{{ formatDate(date) }}</Text
-                >
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  formatDate(date)
+                }}</Text>
                 <template v-if="author">
                   by
-                  <Text
-                    as="span"
-                    size="xs"
-                    weight="bold"
-                    fontStyle="italic"
-                    >{{ author }}</Text
-                  >
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    author
+                  }}</Text>
+                </template>
+              </Text>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </Card>
+
+
+  <!--Mobile view-->
+   <Card
+    size="small"
+    :variant="default"
+    :hoverable="hoverable"
+    class="mobile-view"
+  >
+    <section class="postcard__container">
+      <!--image-->
+      <div class="postcard__content">
+        <div v-if="imageUrl" class="postcard__image">
+          <img :src="imageUrl" :alt="titleText" />
+        </div>
+
+        <div class="postcard__text-content">
+          <div>
+            <!--tag-->
+            <Tag
+              v-if="tag"
+              lineHeight="normal"
+              margin="none"
+              size="xs"
+              :index="tagIndex"
+              >{{ tag }}</Tag
+            >
+
+            <!--title-->
+            <TitleText v-if="titleText" size="xl" lineClamp="2" :level="'h3'">
+              {{ titleText }}
+            </TitleText>
+          </div>
+
+          <!--excerpt-->
+          <div class="postcard__details">
+            <BodyText
+              v-if="excerpt"
+              size="base"
+              lineHeight="normal"
+              lineClamp="5"
+            >
+              {{ excerpt }}
+            </BodyText>
+
+            <!--meta info-->
+            <div v-if="date || author" class="postcard__meta">
+              <Text size="xs" weight="normal" fontStyle="italic">
+                Published on
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  formatDate(date)
+                }}</Text>
+                <template v-if="author">
+                  by
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    author
+                  }}</Text>
                 </template>
               </Text>
             </div>
