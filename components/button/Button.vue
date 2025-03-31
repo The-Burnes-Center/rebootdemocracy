@@ -30,33 +30,32 @@ const checkMobile = () => {
 
 onMounted(() => {
   checkMobile(); // Initial check
-  window.addEventListener('resize', checkMobile);
+  window.addEventListener("resize", checkMobile);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkMobile);
+  window.removeEventListener("resize", checkMobile);
 });
 
 const variantClass = computed(() => `base__button--${props.variant}`);
 
 const buttonStyle = computed(() => {
   const styles: Record<string, string> = {};
-  
+
   if (props.height) {
-    styles['--button-height'] = props.height;
+    styles["--button-height"] = props.height;
   }
-  
+
   // Only apply width on non-mobile or if explicitly set to override mobile
-  if (props.width && (!isMobile.value || props.width === '100%')) {
-    styles['--button-width'] = props.width;
+  if (props.width && (!isMobile.value || props.width === "100%")) {
+    styles["--button-width"] = props.width;
   }
-  
+
   // For mobile, ensure the width is 100%
   if (isMobile.value) {
-    styles['--button-width'] = '100%';
+    styles["--button-width"] = "100%";
   }
-  
+
   return styles;
 });
-
 </script>
