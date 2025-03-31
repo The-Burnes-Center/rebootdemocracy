@@ -1,70 +1,102 @@
 <template>
-  <section class="p-6">
-    <h1 class="text-3xl font-bold mb-4">Welcome to Reboot blog app</h1>
-    <p class="text-lg text-gray-600 mb-8">
-      This is the homepage powered by Nuxt 3.
-    </p>
-  </section>
-
   <div class="blog-container">
-    <PostCard
-      v-for="(post, index) in blogPosts"
-      :key="post.id"
-      :tag="post.tag"
-      :title="post.title"
-      :author="post.author"
-      :excerpt="post.excerpt"
-      :imageUrl="post.imageUrl"
-      :date="post.date"
-      :tagColor="index % 2 === 0 ? '#5C69AB' : '#0D63EB'";
+    <h1 class="blog-title">Latest Blog Posts</h1>
+    <UpcomingCard
+      title="Workshop: Advanced Vue Techniques"
+      excerpt="Join our virtual workshop to learn advanced Vue techniques and best practices."
+      imageUrl="/images/exampleImage.png"
+      backgroundColor="#FFFFFF"
+      tagColor="#5C69AB"
+      :onClick="() => handleEventRegistration()"
     />
+    
+    <!-- Single PostCard usage -->
+    <PostCard
+      tag="Internet Archive Book Talk"
+      titleText="Copyright, AI, and Great Power Competition"
+      author="Jane Smith"
+      excerpt="Discover the benefits of creating a component-based design system and how it can streamline your development workflow. This guide covers the essential elements needed for a robust design system.This guide covers the essential elements needed for a robust design system.This guide covers the essential elements needed for a robust design system."
+      imageUrl="/images/exampleImage.png"
+      :date="new Date('2025-03-15')"
+      variant="default"
+      :hoverable="true"
+      :tagIndex="0"
+    />
+    
+    <!-- Using PostCard in a list -->
+    <div class="blog-list">
+      <PostCard
+        v-for="(post, index) in blogPosts"
+        :key="post.id"
+        :tag="post.tag"
+        :titleText="post.titleText"
+        :author="post.author"
+        :excerpt="post.excerpt"
+        :imageUrl="post.imageUrl"
+        :date="post.date"
+        :variant="post.variant || 'default'"
+        :hoverable="true"
+        :tagIndex="index"
+      />
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue";
+<script setup lang="ts">
+import { ref } from 'vue';
 
-// Blog posts array with sample data
+// Sample blog posts data
 const blogPosts = ref([
   {
     id: 1,
-    tag: "Internet Archive Book Talk",
-    title: "Copyright, AI, and Great Power Competition",
-    author: "Angelique Casem",
-    excerpt:
-      "A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance.",
-    imageUrl: "/images/exampleImage.png",
-    date: "2025-03-10",
+    tag: "Tutorial",
+    titleText: "Getting Started with Vue 3 Composition API",
+    author: "John Doe",
+    excerpt: "Learn how to leverage the power of Vue 3's Composition API to build more maintainable components with better type support and reusable logic.",
+    imageUrl: "/images/vue-composition-api.jpg",
+    date: new Date('2025-03-20'),
+    variant: "default"
   },
   {
     id: 2,
-    tag: "Technology",
-    title: "The Future of Web Development in 2025",
-    author: "Michael Chen",
-    excerpt:
-      "Exploring the latest trends in web development, from AI-assisted coding to new frameworks that are revolutionizing how we build applications.",
-    imageUrl: "/images/exampleImage.png",
-    date: "2025-02-25",
+    tag: "Case Study",
+    titleText: "Building a Component Library from Scratch",
+    author: "Sarah Johnson",
+    excerpt: "Follow our journey of creating a reusable component library that improved development speed by 40% and ensured consistent UI across our products.",
+    imageUrl: "/images/component-library.jpg",
+    date: new Date('2025-03-10'),
+    variant: "outline"
   },
   {
     id: 3,
-    tag: "Digital Libraries",
-    title: "Preserving Knowledge in the Digital Age",
-    author: "Sarah Johnson",
-    excerpt:
-      "How modern archivists are using technology to ensure information is preserved for future generations, despite rapidly changing formats and platforms.",
-    imageUrl: "/images/exampleImage.png",
-    date: "2025-02-15",
-  },
-  {
-    id: 4,
-    tag: "Open Source",
-    title: "Community-Driven Innovation",
-    author: "Angelique Casem",
-    excerpt:
-      "The power of open source communities in driving technological innovation and making knowledge accessible to all.",
-    imageUrl: "/images/open-source.jpg",
-    date: "2025-01-28",
-  },
+    tag: "News",
+    titleText: "Vue 3.5 Release - What's New",
+    author: "Michael Chen",
+    excerpt: "Explore the latest features and improvements in Vue 3.5, including better TypeScript integration, performance enhancements, and new composition utilities.",
+    imageUrl: "/images/vue-release.jpg",
+    date: new Date('2025-02-28'),
+    variant: "flat"
+  }
 ]);
 </script>
+
+<style scoped>
+.blog-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.blog-title {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  font-weight: bold;
+}
+
+.blog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+</style>

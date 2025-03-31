@@ -1,11 +1,35 @@
-.header-section {
-  background-color: #f8f9fa;
-  padding: 10px 0;
-  border-bottom: 1px solid #e9ecef;
-  font-family: var(--font-inter);
+.header-content__section {
+  margin: 0.8rem 6.6rem;
+  display: flex;
+  justify-content: space-between;
 }
 
-.header-section p {
+.header__logo{
+  color: #0D63EB;
   font-family: var(--font-inria);
-  font-weight:300
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 125%; 
+}
+
+.search-container {
+  position: relative;
+  display: inline-block;
+}
+
+.header__search {
+  padding: 2px;
+  border-radius: 4px;
+  border: 1px solid var(--Color, #000);
+  width: 16rem;
+  height: 1.75rem;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }

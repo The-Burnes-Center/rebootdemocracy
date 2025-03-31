@@ -1,19 +1,23 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import "./header.css";
+@import "./typography.css";
 @import "./button.css";
+@import "./card.css";
 @import "./post-card.css";
+@import "./upcoming-card.css";
+@import "./tab-switch.css";
+@import "./header-menu.css";
+@import "./header-dropdown.css";
+
 :root {
-  --font-inter: 'Inter', sans-serif;
-  --font-inria: 'Inria Sans', sans-serif;
-  
+  --font-inter: "Inter", sans-serif;
+  --font-inria: "Inria Sans", sans-serif;
   /* Font Weights */
   --font-light: 300;
   --font-regular: 400;
   --font-bold: 700;
 }
 
-h3{
-  margin:0rem;
+* {
+  box-sizing: border-box;
 }
-

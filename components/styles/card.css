@@ -1,0 +1,58 @@
+.card__container {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Variants */
+.card--default {
+  box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05),
+    0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 0px 16px 0px rgba(0, 0, 0, 0.1);
+}
+
+.card--outline {
+  border: 1px solid #e0e0e0;
+  box-shadow: none;
+}
+
+.card--flat {
+  box-shadow: none;
+  background: #f9f9f9;
+}
+
+.card__content {
+  width: 100%;
+}
+
+/* Sizes - Preserving original padding values */
+.card--small {
+  padding: 0px 16px 16px 20px;
+  width: 21rem;
+  height: 21rem;
+}
+
+.card--medium {
+  padding: 39px 0px 39px 36px;
+  width: 25rem;
+  height: 25rem;
+}
+
+.card--large {
+  padding: 32px;
+  min-width: 32rem;
+  min-height: 20rem;
+}
+
+.card--extra-large {
+  padding: 27px 45px 32px 0px;
+  width: 53rem;
+  height: 17rem;
+}
+
+/* Hover effect */
+.card--hoverable {
+  cursor: pointer;
+}
+
