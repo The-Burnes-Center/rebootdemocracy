@@ -1,7 +1,7 @@
 <template>
-  <Card variant="default" size="medium" :hoverable="true" class="upcomingcard">
+  <Card variant="default" size="medium" :hoverable="true" class="desktop-view">
     <!-- Desktop View -->
-    <div class="upcomingcard__layout desktop-view">
+    <div class="upcomingcard__layout">
       <div class="upcomingcard__header">
         <div v-if="imageUrl" class="upcomingcard__image">
           <img :src="imageUrl" :alt="title" />
@@ -23,13 +23,15 @@
             size="xl"
             align="right"
             lineHeight="relaxed"
-            weight="medium"
+            weight="normal"
             class="upcomingcard__title"
           >
             {{ title }}
           </Text>
 
-          <Button variant="primary" width="123px" height="36px">Register</Button>
+          <Button variant="primary" width="123px" height="36px"
+            >Register</Button
+          >
         </div>
       </div>
 
@@ -37,54 +39,55 @@
         <BodyText
           size="base"
           weight="normal"
-           align="right"
+          align="right"
           margin="none"
           class="upcomingcard__excerpt"
-          >
+        >
           {{ excerpt }}
         </BodyText>
       </div>
     </div>
+  </Card>
 
-    <!-- Mobile View -->
-    <div class="upcomingcard__layout mobile-view">
+  <!-- Mobile View -->
+  <Card variant="default" size="small" :hoverable="true" class="mobile-view">
+    <div class="upcomingcard__layout">
       <div class="upcomingcard__mobile-image-wrapper" v-if="imageUrl">
         <img :src="imageUrl" :alt="title" />
       </div>
       <div class="upcomingcard__mobile-content">
         <Text
           as="span"
-          size="sm"
-          weight="medium"
-          color="tag-primary"
+          size="base"
+          align="right"
+          weight="extrabold"
+          lineHeight="normal"
+          color="text-primary"
           class="upcomingcard__tag"
         >
           Upcoming Event
         </Text>
-        <TitleText
-          level="h3"
-          weight="semibold"
-          :text="title"
+        <Text
+          as="span"
+          size="xl"
+          align="left"
+          lineHeight="relaxed"
+          weight="normal"
           class="upcomingcard__title"
-        />
+        >
+          {{ title }}
+        </Text>
         <BodyText
-          v-if="excerpt"
           size="base"
           weight="normal"
-          :text="excerpt"
+          align="left"
           margin="none"
           class="upcomingcard__excerpt"
-        />
+        >
+          {{ excerpt }}
+        </BodyText>
         <div class="upcomingcard__mobile-button">
-          <Button
-            label="Register"
-            bgColor="#0D63EB"
-            textColor="#0d63eb"
-            borderColor="#0d63eb"
-            :opacity="0.2"
-            :onClick="handleClick"
-            class="full-width-button"
-          />
+          <Button variant="primary" width="100%">Register</Button>
         </div>
       </div>
     </div>

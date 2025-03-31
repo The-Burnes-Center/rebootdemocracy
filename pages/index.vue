@@ -1,11 +1,9 @@
 <template>
-  <div class="blog-container">
-    <h1 class="blog-title">Latest Blog Posts</h1>
+  <div class="blog-container" style="margin-top:15rem;">
+    <!-- <h1 class="blog-title">Latest Blog Posts</h1> -->
     <UpcomingCard
       title="Copyright, AI, and Great Power Competition"
       excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what’s at stake in the battle for technological dominance."
-      title="Workshop: Advanced Vue Techniques"
-      excerpt="Join our virtual workshop to learn advanced Vue techniques and best practices."
       imageUrl="/images/exampleImage.png"
       backgroundColor="#FFFFFF"
       tagColor="#5C69AB"
@@ -28,7 +26,7 @@
      -->
     
     <!-- Using PostCard in a list -->
-    <div class="blog-list">
+    <!-- <div class="blog-list">
       <PostCard
         v-for="(post, index) in blogPosts"
         :key="post.id"
@@ -42,7 +40,7 @@
         :hoverable="true"
         :tagIndex="index"
       />
-    </div>
+    </div> -->
   </div>
 </template>
 
