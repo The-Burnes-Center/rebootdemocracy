@@ -51,7 +51,6 @@
       <div class="upcomingcard__mobile-image-wrapper" v-if="imageUrl">
         <img :src="imageUrl" :alt="title" />
       </div>
-
       <div class="upcomingcard__mobile-content">
         <Text
           as="span"
@@ -62,14 +61,12 @@
         >
           Upcoming Event
         </Text>
-
         <TitleText
           level="h3"
           weight="semibold"
           :text="title"
           class="upcomingcard__title"
         />
-
         <BodyText
           v-if="excerpt"
           size="base"
@@ -78,7 +75,6 @@
           margin="none"
           class="upcomingcard__excerpt"
         />
-
         <div class="upcomingcard__mobile-button">
           <Button
             label="Register"

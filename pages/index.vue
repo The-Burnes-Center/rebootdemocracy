@@ -4,6 +4,8 @@
     <UpcomingCard
       title="Copyright, AI, and Great Power Competition"
       excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what’s at stake in the battle for technological dominance."
+      title="Workshop: Advanced Vue Techniques"
+      excerpt="Join our virtual workshop to learn advanced Vue techniques and best practices."
       imageUrl="/images/exampleImage.png"
       backgroundColor="#FFFFFF"
       tagColor="#5C69AB"
@@ -12,6 +14,7 @@
     
     <!-- Single PostCard usage -->
     <!-- <PostCard
+    <PostCard
       tag="Internet Archive Book Talk"
       titleText="Copyright, AI, and Great Power Competition"
       author="Jane Smith"
@@ -23,6 +26,7 @@
       :tagIndex="0"
     />
      -->
+    
     <!-- Using PostCard in a list -->
     <div class="blog-list">
       <PostCard
