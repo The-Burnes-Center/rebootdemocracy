@@ -2,7 +2,7 @@
   <button
     @click="onClick"
     class="base__button"
-    :class="variantClass"
+    :class="[variantClass, { 'mobile-fullwidth': isMobile }]"
     :aria-label="ariaLabel"
     :style="buttonStyle"
   >
@@ -21,15 +21,42 @@ const props = defineProps<{
   height?: string;
 }>();
 
+const isMobile = ref(false);
+
+// Check for mobile screen size
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  checkMobile(); // Initial check
+  window.addEventListener('resize', checkMobile);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile);
+});
+
 const variantClass = computed(() => `base__button--${props.variant}`);
 
 const buttonStyle = computed(() => {
-  if (props.width || props.height) {
-    return {
-      '--button-width': props.width,
-      '--button-height': props.height
-    }
+  const styles: Record<string, string> = {};
+  
+  if (props.height) {
+    styles['--button-height'] = props.height;
   }
-  return {}
-})
+  
+  // Only apply width on non-mobile or if explicitly set to override mobile
+  if (props.width && (!isMobile.value || props.width === '100%')) {
+    styles['--button-width'] = props.width;
+  }
+  
+  // For mobile, ensure the width is 100%
+  if (isMobile.value) {
+    styles['--button-width'] = '100%';
+  }
+  
+  return styles;
+});
+
 </script>

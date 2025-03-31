@@ -51,3 +51,27 @@
   --bg-opacity: 0.2;
   --text-color: #0d63eb;
 }
+
+.mobile-fullwidth {
+  width: 100% !important;
+}
+
+@media (max-width: 768px) {
+  .base__button {
+    width: 100% !important;
+    --button-width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box !important;
+  }
+  
+  .upcomingcard__mobile-button .base__button {
+    width: 100% !important;
+    display: block;
+  }
+  
+  .upcomingcard__mobile-button {
+    width: 100%;
+    display: block;
+  }
+}
+
