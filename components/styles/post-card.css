@@ -1,4 +1,3 @@
-
 .postcard__container {
   width: 100%;
   max-width: 100%;
@@ -55,18 +54,21 @@
 @media (max-width: 768px) {
   .postcard__content {
     top: -10rem;
-    left: 1.5rem;
+    gap: 1rem;
     flex-direction: column;
   }
-  
+
   .postcard__text-content {
     padding-left: 1rem;
-    padding-right: 1rem;
-    padding-bottom: 1.5rem;
-    width: 100%;
+    width: 310.622px;
   }
-  
+
   .postcard__image {
     width: 100%;
+    position: relative;
+    left: 1rem;
+  }
+  .postcard__details {
+    gap: 0.5rem;
   }
 }

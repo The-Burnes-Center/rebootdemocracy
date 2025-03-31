@@ -29,8 +29,8 @@
 /* Sizes - Preserving original padding values */
 .card--small {
   padding: 0px 16px 16px 20px;
-  width: 21rem;
-  height: 21rem;
+  width: 21.483rem;
+  height: 21.063rem;
 }
 
 .card--medium {
