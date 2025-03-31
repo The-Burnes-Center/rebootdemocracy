@@ -8,14 +8,22 @@
       fontStyle: fontStyleValue,
       fontFamily: fontFamilyValue,
       textTransform: transformValue,
+      ...marginStyle
     }"
-    :class="[alignmentClass, customClass]"
+    :class="[alignmentClass, lineHeightClass, customClass]"
   >
-     <slot v-if="$slots.default" />
-    <div v-else-if="html" v-html="text" />
-    <template v-else>{{ text }}</template>
+    <template v-if="$slots.default">
+      <slot />
+    </template>
+    <template v-else-if="html">
+      <div v-html="text" />
+    </template>
+    <template v-else>
+      {{ text }}
+    </template>
   </component>
 </template>
+
 
 <script lang="ts" setup>
 import { computed } from "vue";
@@ -47,7 +55,8 @@ const fontWeight = {
   normal: "300",
   medium: "400",
   semibold: "500",
-  bold: "700",
+  bold: "600",
+  extrabold: "700",
 };
 
 // Define the default colors for texts
@@ -84,6 +93,23 @@ const transformMap = {
   none: "none",
 };
 
+// Define line height options
+const lineHeights = {
+  tight: "1.25",
+  normal: "1.5",
+  relaxed: "1.75",
+  loose: "2",
+} as const;
+
+const marginSizes = {
+  none: "0",
+  xs: "0.25rem", // 4px
+  sm: "0.5rem", // 8px
+  md: "1rem", // 16px
+  lg: "1.5rem", // 24px
+  xl: "2rem", // 32px
+} as const;
+
 // Props interface
 interface TextProps {
   as?: keyof typeof ElementDefaultSizes;
@@ -93,10 +119,16 @@ interface TextProps {
   align?: keyof typeof alignmentClasses;
   fontStyle?: keyof typeof fontStyleMap;
   fontFamily?: keyof typeof fontFamilyMap;
+  lineHeight?: keyof typeof lineHeights;
   class?: string;
   transform?: keyof typeof transformMap;
   text?: string;
   html?: boolean;
+  margin?: keyof typeof marginSizes;
+  marginTop?: keyof typeof marginSizes;
+  marginRight?: keyof typeof marginSizes;
+  marginBottom?: keyof typeof marginSizes;
+  marginLeft?: keyof typeof marginSizes;
 }
 
 // Define props with defaults
@@ -112,6 +144,12 @@ const props = withDefaults(defineProps<TextProps>(), {
   transform: "none",
   text: "",
   html: false,
+  margin: "none",
+  lineHeight: "normal",
+  marginTop: undefined,
+  marginRight: undefined,
+  marginBottom: undefined,
+  marginLeft: undefined,
 });
 
 const fontSize = computed(() => {
@@ -149,5 +187,42 @@ const customClass = computed(() => {
 
 const transformValue = computed(() => {
   return transformMap[props.transform];
+});
+
+// Compute line height class
+const lineHeightClass = computed(() => {
+  return `paragraph-line-height-${props.lineHeight}`;
+});
+
+const marginStyle = computed(() => {
+  const styles: Record<string, string> = {};
+
+  // If specific margins are provided, they take precedence
+  if(props.margin) {
+    styles.margin = marginSizes[props.margin];
+  }
+  if (props.marginTop) {
+    styles.marginTop = marginSizes[props.marginTop];
+  }
+  if (props.marginRight) {
+    styles.marginRight = marginSizes[props.marginRight];
+  }
+  if (props.marginBottom) {
+    styles.marginBottom = marginSizes[props.marginBottom];
+  }
+  if (props.marginLeft) {
+    styles.marginLeft = marginSizes[props.marginLeft];
+  }
+  if (
+    props.margin !== "none" &&
+    !props.marginTop &&
+    !props.marginRight &&
+    !props.marginBottom &&
+    !props.marginLeft
+  ) {
+    styles.margin = marginSizes[props.margin];
+  }
+
+  return styles;
 });
 </script>

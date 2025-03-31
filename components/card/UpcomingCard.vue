@@ -1,20 +1,32 @@
 <template>
-  <section
-    class="upcomingcard__container"
-    :style="{
-      '--card-bg-color': backgroundColor,
-      '--tag-color': tagColor || '#5C69AB',
-    }"
+  <Card
+    variant="default"
+    size="medium"
+    :hoverable="true"
+    class="upcomingcard"
   >
     <!-- Desktop View -->
-    <div class="upcomingcard__card desktop-view">
+    <div class="upcomingcard__layout desktop-view">
       <div class="upcomingcard__header">
         <div v-if="imageUrl" class="upcomingcard__image">
           <img :src="imageUrl" :alt="title" />
         </div>
         <div class="upcomingcard__content">
-          <div class="upcomingcard__tag">Upcoming Event</div>
-          <h3 v-if="title" class="upcomingcard__title">{{ title }}</h3>
+          <Text
+            as="span"
+            size="sm"
+            weight="medium"
+            color="text-primary"
+            class="upcomingcard__tag"
+          >
+            Upcoming Event
+          </Text>
+          <TitleText
+            level="h3"
+            weight="semibold"
+            :text="title"
+            class="upcomingcard__title"
+          />
           <Button
             label="Register"
             bgColor="#0D63EB"
@@ -25,24 +37,49 @@
           />
         </div>
       </div>
-      <div class="upcomingcard__details">
-        <div v-if="excerpt" class="upcomingcard__excerpt">{{ excerpt }}</div>
+      <div class="upcomingcard__details" v-if="excerpt">
+        <BodyText
+          size="base"
+          weight="normal"
+          :text="excerpt"
+          margin="none"
+          class="upcomingcard__excerpt"
+        />
       </div>
     </div>
-
+    
     <!-- Mobile View -->
-    <div class="upcomingcard__card mobile-view">
-      <div class="upcomingcard__mobile-image-wrapper">
-        <div v-if="imageUrl" class="upcomingcard__mobile-image">
-          <img :src="imageUrl" :alt="title" />
-        </div>
+    <div class="upcomingcard__layout mobile-view">
+      <div class="upcomingcard__mobile-image-wrapper" v-if="imageUrl">
+        <img :src="imageUrl" :alt="title" />
       </div>
       
       <div class="upcomingcard__mobile-content">
-        <div class="upcomingcard__tag">Upcoming Event</div>
-        <h3 v-if="title" class="upcomingcard__title">{{ title }}</h3>
+        <Text
+          as="span"
+          size="sm"
+          weight="medium"
+          color="tag-primary"
+          class="upcomingcard__tag"
+        >
+          Upcoming Event
+        </Text>
         
-        <div v-if="excerpt" class="upcomingcard__excerpt">{{ excerpt }}</div>
+        <TitleText
+          level="h3"
+          weight="semibold"
+          :text="title"
+          class="upcomingcard__title"
+        />
+        
+        <BodyText
+          v-if="excerpt"
+          size="base"
+          weight="normal"
+          :text="excerpt"
+          margin="none"
+          class="upcomingcard__excerpt"
+        />
         
         <div class="upcomingcard__mobile-button">
           <Button
@@ -57,28 +94,31 @@
         </div>
       </div>
     </div>
-  </section>
+  </Card>
 </template>
 
 <script setup lang="ts">
-interface CardProps {
+
+interface UpcomingCardProps {
   title?: string;
   excerpt?: string;
   imageUrl?: string;
   backgroundColor?: string;
   tagColor?: string;
-  handleClick?: () => void;
+  onClick?: () => void;
 }
 
-const props = withDefaults(defineProps<CardProps>(), {
+const props = withDefaults(defineProps<UpcomingCardProps>(), {
   title: "",
   excerpt: "",
   imageUrl: "",
   backgroundColor: "#FFFFFF",
   tagColor: "",
+  onClick: undefined,
 });
 
 const handleClick = () => {
-  props.handleClick ? props.handleClick() : console.log('Card clicked');
+  props.onClick ? props.onClick() : console.log('Card clicked');
 };
 </script>
+

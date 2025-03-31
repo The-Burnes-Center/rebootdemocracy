@@ -1,62 +1,102 @@
 <template>
-  <section
-    class="postcard__container"
-    :style="{
-      '--card-bg-color': backgroundColor,
-       '--tag-color': tagColor || '#5C69AB'
-    }"
-  >
-    <div class="postcard__card">
-         <div v-if="imageUrl" class="postcard__image">
-          <img :src="imageUrl" :alt="title" />
+  <!--Used reusable container card by passing variant and size-->
+  <Card size="extra-large" :variant="default" :hoverable="hoverable">
+    <section class="postcard__container">
+
+      <!--image-->
+      <div class="postcard__content">
+        <div v-if="imageUrl" class="postcard__image">
+          <img :src="imageUrl" :alt="titleText" />
         </div>
 
-        <div class="postcard__content">
-            <div>
-              <div v-if="tag" class="postcard__tag">{{ tag }}</div>
-              <h3 v-if="title" class="postcard__title">{{ title }}</h3>
+        <div class="postcard__text-content">
+          <div>
+
+            <!--tag-->
+            <Tag
+              v-if="tag"
+              lineHeight="normal"
+              margin="none"
+              size="xs"
+              :index="tagIndex"
+              >{{ tag }}</Tag>
+          
+              <!--title-->
+            <TitleText v-if="titleText" size="xl" lineClamp="2":level="'h3'">
+              {{ titleText }}
+            </TitleText>
+          </div>
+
+          <!--excerpt-->
+          <div class="postcard__details">
+            <BodyText
+              v-if="excerpt"
+              size="base"
+              lineHeight="normal"
+              lineClamp="3"
+            >
+              {{ excerpt }}
+            </BodyText>
+
+            <!--meta info-->
+            <div v-if="date || author" class="postcard__meta">
+              <Text size="xs" weight="normal" fontStyle="italic">
+                Published on
+                <Text
+                  as="span"
+                  size="xs"
+                  weight="bold"
+                  fontStyle="italic"
+                  >{{ formatDate(date) }}</Text
+                >
+                <template v-if="author">
+                  by
+                  <Text
+                    as="span"
+                    size="xs"
+                    weight="bold"
+                    fontStyle="italic"
+                    >{{ author }}</Text
+                  >
+                </template>
+              </Text>
             </div>
-            <div class="postcard__details">
-               <div v-if="excerpt" class="postcard__excerpt">{{ excerpt }}</div>
-              <div v-if="date || author" class="postcard__meta">
-                Published on <span class="date-author-text"> {{ formatDate(date) }}</span>
-                by <span v-if="author" class="date-author-text"> {{ author }}</span>
-            </div>
-            </div>
+          </div>
         </div>
-    </div>
-  </section>
+      </div>
+    </section>
+  </Card>
 </template>
 
 <script setup lang="ts">
-
 import { format, parseISO } from "date-fns";
 
-interface CardProps {
+interface PostCardProps {
   tag?: string;
-  title?: string;
+  titleText?: string;
   author?: string;
   excerpt?: string;
   imageUrl?: string;
   date?: Date | string;
-  backgroundColor?: string;
-  tagColor?: string;
+  tagIndex?: number;
+  variant?: "default" | "outline" | "flat";
+  hoverable?: boolean;
 }
 
-const props = withDefaults(defineProps<CardProps>(), {
+const props = withDefaults(defineProps<PostCardProps>(), {
   tag: "",
-  title: "",
+  titleText: "",
   author: "",
   excerpt: "",
   imageUrl: "",
-  date: new Date(), 
-  backgroundColor: "#FFFFFF",
-  tagColor: ""
+  date: new Date(),
+  tagIndex: 0,
+  variant: "default",
+  hoverable: false,
 });
 
 const formatDate = (dateValue: Date | string) => {
   if (!dateValue) return "unknown date";
-
   try {
     const date =
       typeof dateValue === "string" ? parseISO(dateValue) : dateValue;

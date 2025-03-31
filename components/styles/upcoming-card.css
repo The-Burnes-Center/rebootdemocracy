@@ -1,184 +1,95 @@
 
-.upcomingcard__container {
+.upcomingcard__layout {
   display: flex;
   flex-direction: column;
-  padding-top: 2.074rem;
-  border-radius:6px;
-  width: 25.3rem;
-  height: auto;
-  box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05),
-    0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 0px 16px 0px rgba(0, 0, 0, 0.1);
-  position: relative;
-}
-
-/* Desktop styles */
-.upcomingcard__image {
-  display: flex;
-  width: 11rem;
-  height: 11rem;
-  border-radius: 6px;
-  overflow: hidden;
-  flex-shrink: 0;
-  filter: drop-shadow(0px 0px 16px rgba(0, 0, 0, 0.1))
-    drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.05))
-    drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.05));
-}
-
-.upcomingcard__image img {
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
 }
 
 .upcomingcard__header {
   display: flex;
   flex-direction: row-reverse;
   gap: 1.5rem;
-  font-family: var(--font-inter);
-  position: relative;
-  right: -1.1rem;
+}
+
+.upcomingcard__image {
+  flex: 0 0 auto;
+  width: 180px;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.upcomingcard__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .upcomingcard__content {
+  flex: 1;
   display: flex;
-  padding-top: 6px;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  font-family: var(--font-inter);
+  gap: 0.5rem;
 }
 
 .upcomingcard__tag {
-  color: #000;
-  text-align: center;
-  font-family: Inter;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 150%;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
 }
 
 .upcomingcard__title {
-  width: 11rem;
-  height: 6rem;
-  color: #000;
-  text-align: right;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 300;
-  line-height: 28px;
+  margin: 0.5rem 0;
 }
 
 .upcomingcard__details {
-  padding: 2.5rem;
+  margin-top: 1rem;
 }
 
 .upcomingcard__excerpt {
-  color: #000;
-  text-align: right;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 300;
-  line-height: 150%;
-  font-family: var(--font-inter);
+  color: rgba(0, 0, 0, 0.7);
 }
 
-/* Mobile specific styles */
+/* Mobile view styles */
 .mobile-view {
   display: none;
 }
 
 .upcomingcard__mobile-image-wrapper {
-  position: relative;
-  height: 5rem;
-  margin-bottom: 0;
-  overflow: visible;
-}
-
-.upcomingcard__mobile-image {
-  width: 13rem;
-  height: 13rem;
-  position: absolute;
-  top: -8rem;
-  left: 1rem;
-  filter: drop-shadow(0px 0px 16px rgba(0, 0, 0, 0.1))
-    drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.05))
-    drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.05));
-  border-radius: 6px;
+  width: 100%;
+  height: 180px;
   overflow: hidden;
-  z-index: 2;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 1rem;
 }
 
-.upcomingcard__mobile-image img {
+.upcomingcard__mobile-image-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 .upcomingcard__mobile-content {
+  padding: 0 1rem 1rem;
   display: flex;
   flex-direction: column;
-  padding: 1rem 1rem 1rem 1rem;
-  border-radius: 6px;
-  font-family: var(--font-inter);
-  background-color: var(--card-bg-color, #FFFFFF);
-  position: relative;
-  z-index: 1;
-}
-
-.upcomingcard__mobile-content .upcomingcard__tag,
-.upcomingcard__mobile-content .upcomingcard__title,
-.upcomingcard__mobile-content .upcomingcard__excerpt {
-  text-align: left;
-  width: 100%;
+  gap: 0.75rem;
 }
 
 .upcomingcard__mobile-button {
   margin-top: 1rem;
-  width: 100%;
-  display: block;
 }
 
-.upcomingcard__mobile-button button,
 .full-width-button {
-  width: 100% !important;
-  display: block !important;
+  width: 100%;
 }
 
-/* Media query for mobile */
-@media (max-width: 767px) {
-  .upcomingcard__container {
-    width: 100%;
-    max-width: 21rem;
-    padding-top: 0;
-  }
-  
+/* Media query for mobile devices */
+@media (max-width: 768px) {
   .desktop-view {
     display: none;
   }
   
   .mobile-view {
-    display: block;
-    width: 100%;
+    display: flex;
   }
-  
-  .upcomingcard__title {
-    height: auto;
-    margin-top: 0;
-    padding-top: 0;
-  }
-  
-  .upcomingcard__excerpt {
-    margin-top: 1rem;
-  }
-  
-  .upcomingcard__tag {
-    margin-top: 0;
-    padding-top: 0;
-  }
-  .upcomingcard__details {
-  padding: 2.5rem;
-  width: 20rem;
-}
 }

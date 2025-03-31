@@ -3,7 +3,7 @@
     as="p"
     :size="size"
     :weight="weight"
-    :class="[marginClass, lineHeightClass, lineClampClass]"
+    :class="[marginClass, lineClampClass]"
     v-bind="$attrs"
   >
     <slot />
@@ -24,14 +24,6 @@ const marginSizes = {
   xl: "2rem", // 32px
 } as const;
 
-// Define line height options
-const lineHeights = {
-  tight: "1.2",
-  normal: "1.5",
-  relaxed: "1.75",
-  loose: "2",
-} as const;
-
 // Props interface
 interface ParagraphProps {
   size?: string;
@@ -39,7 +31,6 @@ interface ParagraphProps {
   margin?: keyof typeof marginSizes;
   marginTop?: keyof typeof marginSizes;
   marginBottom?: keyof typeof marginSizes;
-  lineHeight?: keyof typeof lineHeights;
   lineClamp?: number;
 }
 
@@ -73,11 +64,6 @@ const marginClass = computed(() => {
   }
 
   return classes.join(" ");
-});
-
-// Compute line height class
-const lineHeightClass = computed(() => {
-  return `paragraph-line-height-${props.lineHeight}`;
 });
 
 // Compute line clamp class
