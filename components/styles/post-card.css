@@ -52,6 +52,9 @@
 }
 
 @media (max-width: 768px) {
+  .postcard__container{
+    margin-top: 10rem;
+  }
   .postcard__content {
     top: -10rem;
     gap: 1rem;
