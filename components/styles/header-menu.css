@@ -8,7 +8,7 @@
   color: #1e1e1e;
   font-family: var(--font-inter);
   font-size: 1rem;
-  --color-icon:#1e1e1e;
+  --color-icon: #1e1e1e;
   font-style: normal;
   font-weight: 700;
   line-height: 125%;
@@ -23,11 +23,39 @@
 
 .active {
   color: #0d63eb;
-  --color-icon:#0d63eb;
- transform: rotate(180deg);
+  --color-icon: #0d63eb;
+}
+
+.dropdown-icon.active {
+  transform: rotate(180deg);
   transition: transform 0.3s ease;
 }
 
 .header-menu__item {
   text-decoration: none;
 }
+
+.header-menu__item-wrapper {
+  position: relative;
+}
+@media (max-width: 1050px) {
+  .menu__section {
+    flex-direction: column;
+    width: 95%;
+    text-align: left;
+  }
+
+  .header-menu__item-wrapper {
+    width: 90%;
+     border-bottom: 2px solid #0d63eb;
+  }
+
+  .header-menu__label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+  } 
+}
+
+

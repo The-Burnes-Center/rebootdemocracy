@@ -4,36 +4,31 @@
       <slot name="logo">reboot_democracy.ai</slot>
     </div>
 
-    <nav>
+     
+    <!-- Mobile menu toggle -->
+    <div class="mobile-menu-toggle" @click="toggleMobileMenu" v-if="isMobile">
+      <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <mask id="mask0_706_4166" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+          <path d="M24 0H0V24H24V0Z" fill="white"/>
+        </mask>
+        <g mask="url(#mask0_706_4166)">
+          <path d="M3 6H21M3 12H21M3 18H21" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>
+      <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M5 5L19 19M5 19L19 5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
       <HeaderMenu
-        :items="[
-          { label: 'About', name: 'about', to: '/' },
-          { label: 'Blog', name: 'blog', to: '/blog' },
-          { label: 'Events', name: 'events', to: '/events' },
-          {
-            label: 'Our Work',
-            name: 'work',
-            children: [
-              {
-                label: 'About Beth Noveck',
-                name: 'research',
-                to: '/our-work/research',
-              },
-              {
-                label: 'University Teachings',
-                name: 'projects',
-                to: '/our-work/projects',
-              },
-              { label: 'Engagements', name: 'partners', to: '/our-work/partners' },
-            ],
-          },
-          { label: 'Sign up', name: 'signup', to: '/signup' },
-        ]"
+        :items="menuItems"
+        :class="{ 'mobile-menu': isMobile }"
       />
     </nav>
 
     <!-- Search input with icon -->
-    <div class="search-container">
+     <div class="search-container" v-if="!isMobile">
       <input type="text" class="header__search" />
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -51,3 +46,62 @@
     </div>
   </header>
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
+import type { MenuItem } from '@/types/index.ts';
+
+// State for mobile menu
+const mobileMenuOpen = ref<boolean>(false);
+const isMobile = ref<boolean>(false);
+
+// Toggle mobile menu
+const toggleMobileMenu = (): void => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const menuItems: MenuItem[] = [
+  { label: 'About', name: 'about', to: '/' },
+  { label: 'Blog', name: 'blog', to: '/blog' },
+  { label: 'Events', name: 'events', to: '/events' },
+  {
+    label: 'Our Work',
+    name: 'work',
+    children: [
+      {
+        label: 'About Beth Noveck',
+        name: 'research',
+        to: '/our-work/research',
+      },
+      {
+        label: 'University Teachings',
+        name: 'projects',
+        to: '/our-work/projects',
+      },
+      { label: 'Engagements', name: 'partners', to: '/our-work/partners' },
+    ],
+  },
+  { label: 'Sign up', name: 'signup', to: '/signup' },
+];
+
+// Check if we're on mobile (screen width < 768px)
+const checkIfMobile = (): void => {
+  isMobile.value = window.innerWidth < 1050;
+  
+  // If we switch to desktop view, make sure menu is closed
+  if (!isMobile.value) {
+    mobileMenuOpen.value = false;
+  }
+};
+
+// Add resize event listener on mount
+onMounted((): void => {
+  checkIfMobile();
+  window.addEventListener('resize', checkIfMobile);
+});
+
+// Remove event listener on unmount
+onUnmounted((): void => {
+  window.removeEventListener('resize', checkIfMobile);
+});
+</script>
