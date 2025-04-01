@@ -62,8 +62,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import type { BlogPost } from "@/types/BlogPost.ts";
-import { fetchBlogData } from "@/composables/fetchBlogData.ts";
+import type { BlogPost, Author } from "@/types";
 
 // Set your Directus URL
 const directusUrl = "https://content.thegovlab.com";

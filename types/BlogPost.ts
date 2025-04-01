@@ -1,25 +1,25 @@
-interface BlogPost {
-  id: string;
+import type { Author } from './Author';
+
+export interface BlogPost {
+  id: number;
+  status: string;
+  date_created: string;
+  date_updated: string;
   title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
   date: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  Tags: string[];
+  authors: Author[];
   image?: {
-    filename_disk: string;
-    width: number;
-    height: number;
-  };
-  audio_version?: {
     id: string;
+    storage: string;
+    filename_disk: string;
+    filename_download: string;
+    title: string;
+    type: string;
+    [key: string]: any;
   };
-  ai_content_disclaimer?: boolean;
-  authors: {
-    team_id: {
-      First_Name: string;
-      Last_Name: string;
-      Headshot?: { id: string };
-      Link_to_bio?: string;
-    };
-  }[];
+  [key: string]: any;
 }
