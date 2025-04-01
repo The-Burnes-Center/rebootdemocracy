@@ -7,7 +7,7 @@
     <nav>
       <HeaderMenu
         :items="[
-          { label: 'About', name: 'about', to: '/about' },
+          { label: 'About', name: 'about', to: '/' },
           { label: 'Blog', name: 'blog', to: '/blog' },
           { label: 'Events', name: 'events', to: '/events' },
           {
