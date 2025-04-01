@@ -32,6 +32,13 @@
         imageUrl="/images/exampleImage.png"
         :onClick="handleRegisterClick"
       />
+
+        <SignUpButtonWidget
+        title="Sign Up for updates"
+        placeholder="Enter your email"
+        buttonLabel="Sign Up"
+        backgroundColor="#F9F9F9"
+      />
     </aside>
   </section>
 </template>
