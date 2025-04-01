@@ -640,6 +640,27 @@ a.btn:hover{
   grid-area: search;
 }
 
+.weeklynews-hero {
+  width: 100%; /* This will make sure the header extends full width */
+  display: flex;
+  padding: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+}
+.weeklynews-hero h1{
+
+  margin-top: -8rem;
+  z-index: 100;
+  color: #ffffff;
+}
+.weeklynews-img
+{
+  height: 200px;
+  width:100%;
+  object-fit: fill;
+}
 
 .blog-hero {
   width: 100%; /* This will make sure the header extends full width */
@@ -3930,5 +3951,97 @@ margin: 5px 10px;
       align-items: start;
     }
 
+
   }
 
+  .weeklynews-header{
+    padding: 2rem 10rem;
+  }
+  .toc {
+    padding: 1rem 10rem;
+  }
+  .news-items {
+    padding: 0rem 10rem;
+  }
+  .weeklynews-header h1{
+    font-size: 30px;
+  }
+
+  .toc ul {
+ 
+    padding-left: 0;
+    margin-top: 1em;
+  }
+  
+  .toc li {
+    color: #0D63EB;
+    margin-bottom: 0.5em;
+  }
+  
+  .toc a {
+    color: #0D63EB;
+    text-decoration: none;
+  }
+  .toc p {
+    font-size: 18px;
+    line-height: 1.8;
+    margin-left: 1em;
+  }
+  .toc-description {
+    color: #3d3d3d;
+    margin-left: 0.5em;
+  }
+  
+  .group-heading {
+    color: #0D63EB;
+    border-bottom: 1px solid #0D63EB;
+    padding-bottom: 5px;
+    margin-bottom: 1em;
+  }
+  
+  .news-item {
+    background-color: #fafafa;
+    padding: 2em;
+    display:flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom:2rem;
+
+  }
+  
+  .category-badge span {
+    background-color: #519E8A;
+    color: #ffffff;
+    font-size: 10px;
+    padding: 0.5em;
+  }
+  
+  .item-title {
+    color: #0D63EB;
+  }
+  
+  .item-meta {
+    margin: 0;
+  }
+  
+  .read-article {
+    background-color: #0D63EB;
+    color: #ffffff;
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 0.25rem 0.25rem;
+    width: fit-content;
+    font-size: 12px;
+  }
+  @media (max-width: 768px) {
+  .weeklynews-header{
+    padding: 2rem 1rem;
+  }
+  .toc {
+    padding: 1rem 1rem;
+  }
+  .news-items {
+    padding: 0rem 1rem;
+  }
+
+}

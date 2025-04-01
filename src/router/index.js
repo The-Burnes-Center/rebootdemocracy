@@ -13,7 +13,7 @@ import BlogPage from '../pages/blog-page.vue';
 import BlogPost from '../pages/blog.vue';
 import AllPosts from '../pages/all-blog-posts.vue';
 import PSChat from '../pages/pschat.vue';
-
+import WeeklyNews from '../pages/weeklynews.vue';
 
 const routes = [
   { path:"/", component: BlogPage },
@@ -28,10 +28,11 @@ const routes = [
   { path:"/team", component:Team },
   { path:"/signup", component:Signup },
   { path:"/blog/:name", component: BlogPost, props:true },
+  { path:"/newsthatcaughtoureye/:name", component: WeeklyNews, props:true },
   { path:"/blog", component: BlogPage },
   { path:"/all-blog-posts", component: AllPosts },
   { path:"/pschat", component: PSChat },
-  { path: '/:catchAll(.*)', redirect: '/' },
+  // { path: '/:catchAll(.*)', redirect: '/' },
 ]
 
 const router = createRouter({
