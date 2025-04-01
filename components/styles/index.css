@@ -8,6 +8,7 @@
 @import "./tab-switch.css";
 @import "./header-menu.css";
 @import "./header-dropdown.css";
+@import "./signup-widget.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
