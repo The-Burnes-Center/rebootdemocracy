@@ -21,7 +21,11 @@
   max-width: 100%;
   padding: 1rem;
   border-radius: 8px;
-
+}
+.blog-list{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 /* Media query for responsive design */
 @media (max-width: 768px) {
