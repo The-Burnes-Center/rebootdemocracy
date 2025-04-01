@@ -8,6 +8,10 @@
 @import "./tab-switch.css";
 @import "./header-menu.css";
 @import "./header-dropdown.css";
+@import "./signup-widget.css";
+@import "./author-badge.css";
+@import "./curator-badge.css";
+@import "./author-card.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
