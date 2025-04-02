@@ -74,11 +74,17 @@
       >
         Meet Our Team
       </Text>
-      <UpcomingCard
-        title="Copyright, AI, and Great Power Competition"
-        excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance.!"
-        imageUrl="/images/exampleImage.png"
-        :onClick="handleRegisterClick"
+         <div v-if="isEventLoading" class="loading">Loading event...</div>
+      
+      <!-- UpcomingCard with event data -->
+        <UpcomingCard
+        v-else-if="latestEvent"
+        :title="latestEvent.title"
+        :excerpt="latestEvent.description"
+        :imageUrl="latestEvent.thumbnail?.filename_disk 
+                  ? `${directusUrl}/assets/${latestEvent.thumbnail.filename_disk}` 
+                  : '/images/default.png'"
+        :onClick="() => handleEventClick(latestEvent)"
       />
       <SignUpButtonWidget
         title="Sign Up for updates"
@@ -105,13 +111,15 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import type { BlogPost, Author } from "@/types";
+import type { BlogPost, Author, Event } from "@/types";
 
 // Set your Directus URL
 const directusUrl = "https://content.thegovlab.com";
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
 const activeTab = ref(0);
+const latestEvent = ref<Event | null>(null);
+const isEventLoading = ref(true);
 
 // Function to handle tab changes
 const handleTabChange = (index: number, name: string) => {
@@ -124,6 +132,13 @@ const handleTabChange = (index: number, name: string) => {
   }
 };
 
+const handleEventClick = (event: Event) => {
+  if (event && event.link) {
+    window.open(event.link, '_blank');
+  } else {
+    console.log("Event clicked, but no URL available");
+  }
+};
 // Function to handle register button click
 const handleRegisterClick = () => {
   console.log("Register button clicked");
@@ -153,12 +168,27 @@ const loadAllBlogs = async () => {
     isLoading.value = true;
     const data = await fetchBlogData();
     postData.value = data || [];
-    console.log("Loaded blog posts:", postData.value);
   } catch (error) {
     console.error("Failed to load blogs:", error);
     postData.value = [];
   } finally {
     isLoading.value = false;
+  }
+};
+
+const loadLatestEvent = async () => {
+  try {
+    isEventLoading.value = true;
+    // You can specify a series title as an optional parameter
+    // Example: const event = await fetchLatestPastEvent("Featured Series");
+    const event = await fetchLatestPastEvent();
+    latestEvent.value = event;
+    console.log("Loaded latest event:", latestEvent.value);
+  } catch (error) {
+    console.error("Failed to load latest event:", error);
+    latestEvent.value = null;
+  } finally {
+    isEventLoading.value = false;
   }
 };
 
@@ -168,5 +198,6 @@ onMounted(() => {
   if (activeTab.value === 0) {
     loadAllBlogs();
   }
+  loadLatestEvent();
 });
 </script>
