@@ -87,17 +87,18 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .tab-switch{
+    align-items: center;
+  }
    .tab-headers {
     flex-direction: column; 
     gap: 10px;
     width: 100%;
     align-items: center;
   }
-  
   .tab-button {
     padding: 8px 5px;
   }
-  
   .tab-button.active::before {
     height: 6px; 
   }
