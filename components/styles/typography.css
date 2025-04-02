@@ -21,6 +21,7 @@
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis
 }
 
 .title-line-clamp-2 {
@@ -28,6 +29,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis
 }
 
 .title-line-clamp-3 {
@@ -35,6 +37,7 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis
 }
 
 /* Margin classes */
@@ -123,6 +126,7 @@
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .paragraph-line-clamp-2 {
@@ -130,6 +134,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis
 }
 
 .paragraph-line-clamp-3 {
@@ -137,6 +142,7 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis
 }
 
 .paragraph-line-clamp-4 {
@@ -144,6 +150,7 @@
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis
 }
 
 .paragraph-line-clamp-5 {
@@ -151,4 +158,5 @@
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis
 }

@@ -29,7 +29,7 @@
             {{ title }}
           </Text>
 
-          <Button variant="primary" width="123px" height="36px"
+          <Button variant="primary" width="123px" height="36px" @click="onClick"
             >Register</Button
           >
         </div>
@@ -40,6 +40,7 @@
           size="base"
           weight="normal"
           align="right"
+          lineClamp="4"
           margin="none"
           class="upcomingcard__excerpt"
         >
@@ -82,12 +83,14 @@
           weight="normal"
           align="left"
           margin="none"
+          lineClamp="3"
           class="upcomingcard__excerpt"
+
         >
-          {{ excerpt }}
+          {{ description }}
         </BodyText>
         <div class="upcomingcard__mobile-button">
-          <Button variant="primary" width="100%">Register</Button>
+          <Button variant="primary" width="100%" @click="onClick">Register</Button>
         </div>
       </div>
     </div>
