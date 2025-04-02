@@ -69,9 +69,8 @@
     display: block;
   }
   
-  .upcomingcard__mobile-button {
-    width: 100%;
-    display: block;
-  }
+ .upcomingcard__mobile-button {
+  margin-top: auto; 
+}
 }
 
