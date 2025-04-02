@@ -117,4 +117,7 @@
   .tab-button.active::before {
     height: 6px; 
   }
+  .tab-content{
+    margin-top:13rem;
+  }
 }

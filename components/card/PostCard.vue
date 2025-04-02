@@ -102,7 +102,7 @@
               v-if="excerpt"
               size="base"
               lineHeight="normal"
-              lineClamp="5"
+              lineClamp="3"
             >
               {{ excerpt }}
             </BodyText>
