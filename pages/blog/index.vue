@@ -3,7 +3,7 @@
     <article class="left-content">
       <!-- Show loading state -->
       <div v-if="isLoading" class="loading">Loading blogs...</div>
-      
+
       <!-- Display blogs when loaded -->
       <div v-else-if="postData.length > 0" class="blog-list">
         <PostCard
@@ -13,27 +13,43 @@
           :titleText="post.title"
           :author="getAuthorName(post)"
           :excerpt="post.excerpt || ''"
-          :imageUrl="post.image?.filename_disk ? `${directusUrl}/assets/${post.image.filename_disk}` : '/images/default.png'"
+          :imageUrl="
+            post.image?.filename_disk
+              ? `${directusUrl}/assets/${post.image.filename_disk}`
+              : '/images/default.png'
+          "
           :date="new Date(post.date)"
           :tagIndex="index % 5"
           variant="default"
           :hoverable="true"
         />
       </div>
-      
+
       <!-- No blogs found message -->
       <div v-else class="no-blogs">No blog posts found.</div>
     </article>
-    
+
     <aside class="right-content">
+      <Text
+        as="h2"
+        fontFamily="inter"
+        size="lg"
+        color="text-primary"
+        weight="bold"
+        align="left"
+        >
+        Category</Text>
+      <ListCategory
+        :title="Lawmaking"
+        :number="65"
+      />
       <UpcomingCard
         title="Copyright, AI, and Great Power Competition"
         excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance.!"
         imageUrl="/images/exampleImage.png"
         :onClick="handleRegisterClick"
       />
-
-        <SignUpButtonWidget
+      <SignUpButtonWidget
         title="Sign Up for updates"
         placeholder="Enter your email"
         buttonLabel="Sign Up"
@@ -54,7 +70,7 @@ const isLoading = ref(true);
 
 // Function to handle register button click
 const handleRegisterClick = () => {
-  console.log('Register button clicked');
+  console.log("Register button clicked");
 };
 
 // Helper function to get author name
@@ -68,7 +84,7 @@ const getAuthorName = (post: BlogPost): string => {
 
 const getPostTag = (post: BlogPost): string => {
   if (post.Tags && post.Tags.length > 0) {
-    console.log('Post tags:', post.Tags);
+    console.log("Post tags:", post.Tags);
     return post.Tags[0];
   }
   // Fallback to a default tag
@@ -81,9 +97,9 @@ const loadAllBlogs = async () => {
     isLoading.value = true;
     const data = await fetchBlogData();
     postData.value = data || [];
-    console.log('Loaded blog posts:', postData.value);
+    console.log("Loaded blog posts:", postData.value);
   } catch (error) {
-    console.error('Failed to load blogs:', error);
+    console.error("Failed to load blogs:", error);
     postData.value = [];
   } finally {
     isLoading.value = false;
