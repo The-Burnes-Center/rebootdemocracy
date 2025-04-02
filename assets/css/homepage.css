@@ -18,8 +18,8 @@
 .right-content {
   display: flex;
   flex-direction: column;
-  gap:1.3rem;
-  margin-top:4rem;
+  gap: 1.3rem;
+  margin-top: 4rem;
   width: 100%;
   max-width: 100%;
   padding: 1rem;
@@ -29,6 +29,17 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+@media (min-width: 800px) and (max-width: 1024px) {
+    .page-layout {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+    .blog-list {
+    margin-right:1rem;
+    gap: 1rem;
+  }
 }
 /* Media query for responsive design */
 @media (max-width: 768px) {
