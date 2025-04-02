@@ -7,8 +7,18 @@
       <TabSwitch
         :tabs="[
           { title: 'Latest Posts', name: 'latest-posts' },
-          { title: 'News that caught our eye', name: 'news', url: 'https://rebootdemocracy.ai/blog/news-that-caught-our-eye-51', external:true },
-          { title: 'Events', name: 'events', url: 'https://rebootdemocracy.ai/events', external:true },
+          {
+            title: 'News that caught our eye',
+            name: 'news',
+            url: 'https://rebootdemocracy.ai/blog/news-that-caught-our-eye-51',
+            external: true,
+          },
+          {
+            title: 'Events',
+            name: 'events',
+            url: 'https://rebootdemocracy.ai/events',
+            external: true,
+          },
         ]"
         @tab-changed="handleTabChange"
       >
@@ -46,11 +56,24 @@
     </article>
 
     <aside class="right-content">
-         <AuthorBadge
+      <AuthorBadge
         name="Tiago C. Peixoto"
         title="Senior Public Sector Specialist"
         imageUrl="/images/exampleImage.png"
       />
+      <Text
+        as="a"
+        href="/team"
+        size="sm"
+        fontFamily="inria"
+        align="center"
+        weight="extrabold"
+        lineHeight="normal"
+        color="link-primary"
+
+      >
+        Meet Our Team
+      </Text>
       <UpcomingCard
         title="Copyright, AI, and Great Power Competition"
         excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance.!"

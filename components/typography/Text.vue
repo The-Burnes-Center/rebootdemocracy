@@ -49,6 +49,7 @@ const ElementDefaultSizes = {
   h6: "xs",
   p: "base",
   span: "base",
+  a: "sm",
 } as const;
 
 const fontWeight = {
