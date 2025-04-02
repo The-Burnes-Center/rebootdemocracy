@@ -19,7 +19,7 @@ exports.handler = async function (event, context) {
       ],
     },
     limit: -1,
-    sort: '-id',
+    sort: '-edition',
     fields: ["*.*"]
   });
 
