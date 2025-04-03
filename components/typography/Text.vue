@@ -8,7 +8,7 @@
       fontStyle: fontStyleValue,
       fontFamily: fontFamilyValue,
       textTransform: transformValue,
-      ...marginStyle
+      ...marginStyle,
     }"
     :class="[alignmentClass, lineHeightClass, customClass]"
   >
@@ -24,7 +24,6 @@
   </component>
 </template>
 
-
 <script lang="ts" setup>
 import { computed } from "vue";
 
@@ -37,6 +36,7 @@ const SizeToRem = {
   xl: "1.25rem", // 20px
   "2xl": "1.5rem", // 24px
   "3xl": "1.875rem", // 30px
+  "4xl": "2rem", // 32px
 } as const;
 
 // Element-specific default sizes
@@ -100,6 +100,7 @@ const lineHeights = {
   normal: "1.5", // 24px
   relaxed: "1.75", // 28px
   loose: "2", // 32px
+  "extra-loose": "2.4", // 40px
 } as const;
 
 const marginSizes = {
@@ -199,7 +200,7 @@ const marginStyle = computed(() => {
   const styles: Record<string, string> = {};
 
   // If specific margins are provided, they take precedence
-  if(props.margin) {
+  if (props.margin) {
     styles.margin = marginSizes[props.margin];
   }
   if (props.marginTop) {

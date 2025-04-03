@@ -84,7 +84,6 @@ const getAuthorName = (post: BlogPost): string => {
 
 const getPostTag = (post: BlogPost): string => {
   if (post.Tags && post.Tags.length > 0) {
-    console.log("Post tags:", post.Tags);
     return post.Tags[0];
   }
   // Fallback to a default tag
