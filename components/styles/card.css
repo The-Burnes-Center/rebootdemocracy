@@ -24,31 +24,31 @@
 
 .card__content {
   width: 100%;
+  box-shadow: none;
 }
+
 
 /* Sizes - Preserving original padding values */
 .card--small {
   padding: 0px 16px 16px 20px;
-  width: 21.483rem;
-  height: 21.063rem;
+  max-width: 21.483rem;
+  max-height: 21.063rem;
 }
 
 .card--medium {
   padding: 39px 0px 39px 36px;
-  width: 25rem;
-  height: 25rem;
+  max-width: 25rem;
+  max-height: 25rem;
 }
 
 .card--large {
-  padding: 32px;
-  min-width: 32rem;
-  min-height: 20rem;
+  padding: 32px 32px 32px 40px;
 }
 
 .card--extra-large {
   padding: 27px 45px 32px 0px;
-  width: 53rem;
-  height: 17rem;
+  min-width: 53rem;
+  min-height: 17rem;
 }
 
 /* Hover effect */
