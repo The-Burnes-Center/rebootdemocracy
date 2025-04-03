@@ -20,7 +20,7 @@ exports.handler = async function (event, context) {
     },
     limit: -1,
     sort: '-id',
-    fields: ["*.*"]
+    fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
   });
 
 
@@ -57,15 +57,22 @@ exports.handler = async function (event, context) {
 
   publicData.data.map(e =>{
     
-        var itemcont = {};
-        itemcont["item"] = {};
-        itemcont["item"]["title"] = e.title;
-        itemcont["item"]["description"] = e.summary;
-        itemcont["item"]["GUID"] = e.id;
-        channel.push(itemcont);
-    
+    e.items.map( e_items => {
+      var itemcont = {};
+      itemcont["item"] = {};
+      itemcont["item"]["title"] = e_items.reboot_democracy_weekly_news_items_id.title;
+      itemcont["item"]["pubDate"] = e_items.reboot_democracy_weekly_news_items_id.date;
+      itemcont["item"]["author"] = e_items.reboot_democracy_weekly_news_items_id.author
+      itemcont["item"]["link"] =  e_items.reboot_democracy_weekly_news_items_id.url;    
+      itemcont["item"]["description"] = e_items.reboot_democracy_weekly_news_items_id.excerpt;
+      itemcont["item"]["category"] = e_items.reboot_democracy_weekly_news_items_id.category;
+      itemcont["item"]["GUID"] = e.id;
+      channel.push(itemcont);
+    }
+        
+  )
 
-    })
+  })
   const xmlOptions = {
     header: true,
     indent: '  ' // Ensures proper indentation
