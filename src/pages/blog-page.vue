@@ -52,6 +52,7 @@ export default {
       workshopData: [],
       playpause:true,
       showmodal: false,
+      weeklyNewsitem: [],
       directus: new Directus('https://content.thegovlab.com/'),
       path:this.$route.fullPath,
       slideautoplay:1,
@@ -61,6 +62,7 @@ export default {
       ini:true,
       pschatContent: '',
       pschatLoading: false,
+
     }
   },
   watch :{
@@ -99,8 +101,9 @@ export default {
  mounted()
 
   { 
+    this.fetchWeeklyNews();   
     this.fetchBlog();
-    
+  
   this.fillMeta();
    register();
   },
@@ -494,6 +497,26 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       });
     },
 
+      fetchWeeklyNews: function fetchWeeklyNews() {
+      self = this;
+
+      this.directus
+      .items('reboot_democracy_weekly_news')
+      .readByQuery({
+         meta: 'total_count',
+         limit: 1,
+         fields: [
+          '*.*'
+       ],
+       sort: '-id',
+       
+      })
+      .then((item) => {
+      self.weeklyNewsitem =  item.data[0];
+      });
+    },
+
+
   }
 }
 </script>
@@ -579,7 +602,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         
     </div>
     <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
-      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 4"> 
+      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 3"> 
        <a :href="'/blog/' + blog_item.slug">
         <div v-lazy-load>
         <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
@@ -602,6 +625,30 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             </div>
          </a>
       </div>
+
+      <div class="other-post-row" > 
+       <a :href="'/newsthatcaughtoureye/' + weeklyNewsitem.edition">
+        <div>
+        <img src= "src/assets/newsheader.jpg">
+        </div>
+        <div class="other-post-details">
+              <h3>{{weeklyNewsitem.title}}</h3>
+              <p>{{ weeklyNewsitem.summary }}</p>
+               <p v-if="weeklyNewsitem.date">Published on {{ formatDateOnly(new Date( weeklyNewsitem.date )) }} </p>
+              <div class="author-list">
+                  
+                      <div class="author-item">
+                        <div class="author-details">
+                          <p class="author-name">By {{weeklyNewsitem.author}}</p>
+                        </div>
+                      </div>
+
+                  </div>
+            </div>
+         </a>
+      </div>
+
+
     </div>
   </div>
 </div>
