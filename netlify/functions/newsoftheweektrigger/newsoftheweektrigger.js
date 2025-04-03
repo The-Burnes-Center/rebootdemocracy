@@ -20,7 +20,7 @@ exports.handler = async function (event, context) {
     },
     limit: -1,
     sort: '-id',
-    fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
+    fields: ["*.*"]
   });
 
 
@@ -57,16 +57,12 @@ exports.handler = async function (event, context) {
 
   publicData.data.map(e =>{
     
-    e.items.map( e_items => {
         var itemcont = {};
         itemcont["item"] = {};
-        itemcont["item"]["title"] = e_items.reboot_democracy_weekly_news_items_id.title;
-        itemcont["item"]["description"] = e_items.reboot_democracy_weekly_news_items_id.summary;
+        itemcont["item"]["title"] = e.title;
+        itemcont["item"]["description"] = e.summary;
         itemcont["item"]["GUID"] = e.id;
         channel.push(itemcont);
-    }
-    
-    )
     
 
     })
