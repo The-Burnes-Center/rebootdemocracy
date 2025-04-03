@@ -20,7 +20,7 @@ exports.handler = async function (event, context) {
     },
     limit: -1,
     sort: '-id',
-    fields: ["*.*"]
+    fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
   });
 
 
@@ -60,8 +60,8 @@ exports.handler = async function (event, context) {
     e.items.map( e_items => {
         var itemcont = {};
         itemcont["item"] = {};
-        itemcont["item"]["title"] = e_items.title;
-        itemcont["item"]["description"] = e_items.summary;
+        itemcont["item"]["title"] = e_items.reboot_democracy_weekly_news_items_id.title;
+        itemcont["item"]["description"] = e_items.reboot_democracy_weekly_news_items_id.summary;
         itemcont["item"]["GUID"] = e.id;
         channel.push(itemcont);
     }
