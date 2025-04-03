@@ -210,7 +210,7 @@ export default {
               {{ formatDateOnly(new Date(item.reboot_democracy_weekly_news_items_id.date)) }}
             </em></p>
           </div>
-          <div class="item-excerpt" v-html="item.reboot_democracy_weekly_news_items_id.excerpt"></div>
+          <p class="item-excerpt">{{item.reboot_democracy_weekly_news_items_id.excerpt}}</p>
           <a :href="item.reboot_democracy_weekly_news_items_id.url" class="read-article" target="_blank">
             Read article
           </a>
