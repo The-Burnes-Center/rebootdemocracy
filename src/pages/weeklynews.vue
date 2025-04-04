@@ -161,6 +161,7 @@ export default {
       <img  class="weeklynews-img" src= "../assets/newsheader.jpg" />
       <div class="weeklynews-details">
         <h1>{{postData[0].title}}</h1>
+         <p>Published on by {{postData[0].author}} on {{ formatDateOnly(new Date(postData[0].date)) }} </p>
       </div>
     </div>
     <!-- Table of Contents -->
@@ -207,7 +208,8 @@ export default {
           <div class="item-meta">
             <p><em>
               {{ item.reboot_democracy_weekly_news_items_id.author }} on 
-              {{ formatDateOnly(new Date(item.reboot_democracy_weekly_news_items_id.date)) }}
+              {{ formatDateOnly(new Date(item.reboot_democracy_weekly_news_items_id.date)) }} in 
+               {{ item.reboot_democracy_weekly_news_items_id.publication }} 
             </em></p>
           </div>
           <p class="item-excerpt">{{item.reboot_democracy_weekly_news_items_id.excerpt}}</p>

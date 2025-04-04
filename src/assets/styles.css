@@ -661,7 +661,10 @@ a.btn:hover{
   width:100%;
   object-fit: fill;
 }
-
+.weeklynews-details p{
+  color: #ffffff;
+  font-weight: 600;
+}
 .item-excerpt > *{
 font-family: Red Hat Text !important;
 }
