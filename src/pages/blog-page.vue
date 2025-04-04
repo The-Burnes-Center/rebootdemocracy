@@ -629,7 +629,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       <div class="other-post-row" > 
        <a :href="'/newsthatcaughtoureye/' + weeklyNewsitem.edition">
         <div>
-        <img src= "src/assets/newsheader.jpg">
+        <img src= "../assets/newsheader.jpg">
         </div>
         <div class="other-post-details">
               <h3>{{weeklyNewsitem.title}}</h3>
