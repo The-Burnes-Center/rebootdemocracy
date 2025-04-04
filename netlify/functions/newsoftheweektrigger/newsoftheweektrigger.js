@@ -57,21 +57,13 @@ exports.handler = async function (event, context) {
 
   publicData.data.map(e =>{
     
-    e.items.map( e_items => {
-      var itemcont = {};
-      itemcont["item"] = {};
-      itemcont["item"]["title"] = e_items.reboot_democracy_weekly_news_items_id.title;
-      itemcont["item"]["pubDate"] = e.date;
-      itemcont["item"]["author"] = e_items.reboot_democracy_weekly_news_items_id.author
-      itemcont["item"]["link"] =  e_items.reboot_democracy_weekly_news_items_id.url;    
-      itemcont["item"]["description"] = e_items.reboot_democracy_weekly_news_items_id.excerpt;
-      itemcont["item"]["category"] = e_items.reboot_democracy_weekly_news_items_id.category;
-      itemcont["item"]["GUID"] = e.id;
-      channel.push(itemcont);
-    }
-        
-  )
-
+    var itemcont = {};
+    itemcont["item"] = {};
+    itemcont["item"]["title"] = e.title;
+    itemcont["item"]["pubDate"] = e.date;
+    itemcont["item"]["GUID"] = e.id;
+    channel.push(itemcont);
+  
   })
   const xmlOptions = {
     header: true,
