@@ -12,7 +12,8 @@
 @import "./author-badge.css";
 @import "./curator-badge.css";
 @import "./author-card.css";
-
+@import "./hero.css";
+@import "./curator-overlay.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
