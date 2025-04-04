@@ -1,4 +1,22 @@
 <template>
+  <Hero
+    title="Rebooting Democracy in the Age of AI"
+    subtitle="Insights on AI, Governance and Democracy"
+    firstPartnerLogo="/images/burnes-logo-blues-1.png" 
+    firstPartnerAlt="Burnes Center for Social Change"
+    secondPartnerLogo="/images/the-govlab-logo-white.png"
+    secondPartnerAlt="The GovLab"
+  />
+
+    <div class="curator-badge-overlay">
+    <CuratorBadge
+      name="Beth Simone Noveck"
+      title="Director at Burnes Center and the Govlab"
+      imageUrl="/images/exampleImage.png"
+      moreText="More incredible things Beth done in in her"
+    />
+  </div>
+  
   <section class="page-layout">
     <article class="left-content">
       <TabSwitch
@@ -40,18 +58,6 @@
         title="Senior Public Sector Specialist"
         imageUrl="/images/exampleImage.png"
       />
-      <Text
-        as="a"
-        href="/team"
-        size="sm"
-        fontFamily="inria"
-        align="center"
-        weight="extrabold"
-        lineHeight="normal"
-        color="link-primary"
-      >
-        Meet Our Team
-      </Text>
       
       <!-- Event section with loading state -->
       <div v-if="isEventLoading" class="loading">Loading event...</div>
