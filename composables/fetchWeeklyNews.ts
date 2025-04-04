@@ -12,14 +12,14 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
     
     console.log('Fetching latest weekly news...');
     
-    const response = await directus.request(
+    const response = await directus.request<WeeklyNews[]>(
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status'],
         filter: {
-          status: { _eq: 'published' } // Only get published news
+          status: { _eq: 'published' } 
         },
         sort: ['-id'], // Sort by id in descending order (assuming newer items have higher IDs)
-        limit: 1 // We only need the most recent one
+        limit: 1 
       })
     );
     
