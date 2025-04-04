@@ -2,13 +2,13 @@
   <Hero
     title="Rebooting Democracy in the Age of AI"
     subtitle="Insights on AI, Governance and Democracy"
-    firstPartnerLogo="/images/burnes-logo-blues-1.png" 
+    firstPartnerLogo="/images/burnes-logo-blues-1.png"
     firstPartnerAlt="Burnes Center for Social Change"
     secondPartnerLogo="/images/the-govlab-logo-white.png"
     secondPartnerAlt="The GovLab"
   />
 
-    <div class="curator-badge-overlay">
+  <div class="curator-badge-overlay">
     <CuratorBadge
       name="Beth Simone Noveck"
       title="Director at Burnes Center and the Govlab"
@@ -16,13 +16,10 @@
       moreText="More incredible things Beth done in in her"
     />
   </div>
-  
+
   <section class="page-layout">
     <article class="left-content">
-      <TabSwitch
-        :tabs="tabOptions"
-        @tab-changed="handleTabChange"
-      >
+      <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
         <!-- Content for "Latest Posts" tab -->
         <template #latest-posts>
           <article class="left-content">
@@ -58,7 +55,19 @@
         title="Senior Public Sector Specialist"
         imageUrl="/images/exampleImage.png"
       />
-      
+      <Text
+        as="a"
+        href="/team"
+        size="sm"
+        fontFamily="inria"
+        align="center"
+        weight="extrabold"
+        lineHeight="normal"
+        color="link-primary"
+      >
+        Meet Our Team
+      </Text>
+
       <!-- Event section with loading state -->
       <div v-if="isEventLoading" class="loading">Loading event...</div>
       <UpcomingCard
@@ -66,9 +75,9 @@
         :title="latestEvent.title"
         :excerpt="latestEvent.description"
         :imageUrl="getImageUrl(latestEvent.thumbnail)"
-        :onClick="() => handleEventClick(latestEvent)"
+        :onClick="() => latestEvent && handleEventClick(latestEvent)"
       />
-      
+
       <SignUpButtonWidget
         title="Sign Up for updates"
         placeholder="Enter your email"
@@ -87,12 +96,11 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from "vue";
-import type { BlogPost, Author, Event, WeeklyNews } from "@/types";
-
+import type { BlogPost, Author, Event, WeeklyNews } from "@/types/index.ts";
 
 // Constants
 const directusUrl = "https://content.thegovlab.com";
-const DEFAULT_EDITION = '51';
+const DEFAULT_EDITION = "51";
 
 // State
 const postData = ref<BlogPost[]>([]);
@@ -106,34 +114,34 @@ const dataFetchError = ref<string | null>(null);
 // Computed
 const editionNumber = computed(() => {
   if (!latestWeeklyNews.value?.edition) return DEFAULT_EDITION;
-  return String(latestWeeklyNews.value.edition).replace(/\D/g, '');
+  return String(latestWeeklyNews.value.edition).replace(/\D/g, "");
 });
 
-const weeklyNewsUrl = computed(() => 
-  `https://rebootdemocracy.ai/newsthatcaughtoureye/${editionNumber.value}`
+const weeklyNewsUrl = computed(
+  () => `https://rebootdemocracy.ai/newsthatcaughtoureye/${editionNumber.value}`
 );
 
 const tabOptions = computed(() => [
-  { title: 'Latest Posts', name: 'latest-posts' },
-  { 
-    title: 'News that caught our eye',
-    name: 'news',
+  { title: "Latest Posts", name: "latest-posts" },
+  {
+    title: "News that caught our eye",
+    name: "news",
     url: weeklyNewsUrl.value,
     external: true,
   },
   {
-    title: 'Events',
-    name: 'events',
-    url: 'https://rebootdemocracy.ai/events',
+    title: "Events",
+    name: "events",
+    url: "https://rebootdemocracy.ai/events",
     external: true,
-  }
+  },
 ]);
 
 // Methods
 function getImageUrl(image: any): string {
   return image?.filename_disk
     ? `${directusUrl}/assets/${image.filename_disk}`
-    : '/images/exampleImage.png';
+    : "/images/exampleImage.png";
 }
 
 const getAuthorName = (post: BlogPost): string => {
@@ -148,18 +156,18 @@ const getPostTag = (post: BlogPost): string => {
   return post.Tags?.[0] || "Blog";
 };
 
-const handleEventClick = (event: Event) => {
-  if (event?.link) {
-    window.open(event.link, "_blank");
-  } else {
+const handleEventClick = (event: Event | null) => {
+ if (!event?.link) {
     console.log("Event clicked, but no URL available");
+    return;
   }
+  window.open(event.link, "_blank");
 };
 
 // Data loading functions
 const loadAllBlogs = async () => {
-  if (postData.value.length > 0) return; 
-  
+  if (postData.value.length > 0) return;
+
   try {
     isLoading.value = true;
     const data = await fetchBlogData();
@@ -184,8 +192,12 @@ const handleTabChange = (index: number, name: string) => {
 const loadInitialData = async () => {
   try {
     // Always fetch weekly news and event data
-    const promises = [fetchLatestPastEvent(), fetchLatestWeeklyNews()];
-    
+    const promises: (
+      | Promise<BlogPost[]>
+      | Promise<Event | null>
+      | Promise<WeeklyNews | null>
+    )[] = [fetchLatestPastEvent(), fetchLatestWeeklyNews()];
+
     // Only fetch blog data if we're on the first tab
     if (activeTab.value === 0) {
       promises.unshift(fetchBlogData());
@@ -193,20 +205,21 @@ const loadInitialData = async () => {
     } else {
       promises.unshift(Promise.resolve([]));
     }
-    
+
     const [blogData, eventData, weeklyNewsData] = await Promise.all(promises);
-    
+
     // Process results
     if (activeTab.value === 0) {
-      postData.value = blogData || [];
+      postData.value = Array.isArray(blogData) ? blogData : [];
     }
-    
-    latestEvent.value = eventData;
-    latestWeeklyNews.value = weeklyNewsData;
-    
-    if (weeklyNewsData) {
-      console.log("Latest weekly news edition:", weeklyNewsData.edition);
-    }
+
+    latestEvent.value = Array.isArray(eventData)
+      ? null
+      : (eventData as Event | null);
+    latestWeeklyNews.value =
+      Array.isArray(weeklyNewsData) || !(weeklyNewsData as WeeklyNews)?.edition
+        ? null
+        : (weeklyNewsData as WeeklyNews);
   } catch (error) {
     console.error("Error loading initial data:", error);
     dataFetchError.value = "Failed to load content. Please try again later.";
@@ -218,6 +231,4 @@ const loadInitialData = async () => {
 
 // Lifecycle hooks
 onMounted(loadInitialData);
-
 </script>
-
