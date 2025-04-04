@@ -2,7 +2,7 @@
   <!--Used reusable container card by passing variant and size-->
   <Card
     size="extra-large"
-    :variant="default"
+    :variant="'default'"
     :hoverable="hoverable"
     class="desktop-view"
   >
@@ -18,6 +18,7 @@
             <!--tag-->
             <Tag
               v-if="tag"
+              weight="normal"
               lineHeight="normal"
               margin="none"
               size="xs"
@@ -26,7 +27,7 @@
             >
 
             <!--title-->
-            <TitleText v-if="titleText" size="xl" lineClamp="2" :level="'h3'">
+            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'">
               {{ titleText }}
             </TitleText>
           </div>
@@ -37,7 +38,7 @@
               v-if="excerpt"
               size="base"
               lineHeight="normal"
-              lineClamp="3"
+              :lineClamp="3"
             >
               {{ excerpt }}
             </BodyText>
@@ -67,7 +68,7 @@
   <!--Mobile view-->
    <Card
     size="small"
-    :variant="default"
+    :variant="'default'"
     :hoverable="hoverable"
     class="mobile-view"
   >
@@ -83,6 +84,7 @@
             <!--tag-->
             <Tag
               v-if="tag"
+              weight="normal"
               lineHeight="normal"
               margin="none"
               size="xs"
@@ -91,7 +93,7 @@
             >
 
             <!--title-->
-            <TitleText v-if="titleText" size="xl" lineClamp="2" :level="'h3'">
+            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'">
               {{ titleText }}
             </TitleText>
           </div>
@@ -102,7 +104,7 @@
               v-if="excerpt"
               size="base"
               lineHeight="normal"
-              lineClamp="3"
+              :lineClamp="3"
             >
               {{ excerpt }}
             </BodyText>
@@ -150,7 +152,7 @@ const props = withDefaults(defineProps<PostCardProps>(), {
   author: "",
   excerpt: "",
   imageUrl: "",
-  date: new Date(),
+  date: undefined,
   tagIndex: 0,
   variant: "default",
   hoverable: false,
@@ -160,7 +162,7 @@ const formatDate = (dateValue: Date | string) => {
   if (!dateValue) return "unknown date";
   try {
     const date =
-      typeof dateValue === "string" ? parseISO(dateValue) : dateValue;
+      typeof dateValue === "string" ? parseISO(dateValue) : dateValue || new Date();
     return format(date, "MMMM d, yyyy");
   } catch (error) {
     console.error("Error formatting date:", error);

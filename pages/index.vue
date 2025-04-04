@@ -44,6 +44,10 @@
             </div>
             <!-- No blogs found message -->
             <div v-else class="no-blogs">No blog posts found.</div>
+            <div class="btn-mid">
+            <Button variant="primary" width="123px" height="36px" @click="handleBtnClick"
+            >View All</Button>
+            </div>
           </article>
         </template>
       </TabSwitch>
@@ -90,12 +94,13 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from "vue";
+import { useRouter } from "vue-router";
 import type { BlogPost, Author, Event, WeeklyNews } from "@/types/index.ts";
 
 // Constants
 const directusUrl = "https://content.thegovlab.com";
 const DEFAULT_EDITION = "51";
-
+const route = useRouter();
 // State
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
@@ -104,6 +109,7 @@ const latestEvent = ref<Event | null>(null);
 const isEventLoading = ref(true);
 const latestWeeklyNews = ref<WeeklyNews | null>(null);
 const dataFetchError = ref<string | null>(null);
+const featuredBlog = ref<BlogPost | null>(null);
 
 // Computed
 const editionNumber = computed(() => {
@@ -136,7 +142,7 @@ function getImageUrl(image: any, width: number = 512): string {
   if (!image?.filename_disk) {
     return "/images/exampleImage.png";
   }
-  
+
   // Construct URL with width parameter
   return `${directusUrl}/assets/${image.filename_disk}?width=${width}`;
 }
@@ -154,11 +160,15 @@ const getPostTag = (post: BlogPost): string => {
 };
 
 const handleEventClick = (event: Event | null) => {
- if (!event?.link) {
+  if (!event?.link) {
     console.log("Event clicked, but no URL available");
     return;
   }
   window.open(event.link, "_blank");
+};
+
+const handleBtnClick = () => {
+  route.push("/blog");
 };
 
 // Data loading functions
@@ -167,8 +177,24 @@ const loadAllBlogs = async () => {
 
   try {
     isLoading.value = true;
-    const data = await fetchBlogData();
-    postData.value = data || [];
+
+    // First, get featured blog
+    const featured = await fetchFeaturedBlog();
+    featuredBlog.value = featured;
+    console.log("Featured blog:", featured);
+
+    // Then get the rest of the blogs
+    const allBlogs = await fetchBlogData();
+
+    // Exclude the featured one if it exists in allBlogs
+    const remainingBlogs = featured
+      ? allBlogs.filter((blog) => blog.id !== featured.id)
+      : allBlogs;
+
+      console.log("Remaining blogs:", remainingBlogs);
+      // Final list: featured first, then others
+    postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
+
   } catch (error) {
     console.error("Failed to load blogs:", error);
     dataFetchError.value = "Failed to load blog posts. Please try again later.";

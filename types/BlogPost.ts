@@ -22,4 +22,5 @@ export interface BlogPost {
     [key: string]: any;
   };
   [key: string]: any;
+  featuredBlog?: boolean;
 }

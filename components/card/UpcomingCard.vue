@@ -40,7 +40,7 @@
           size="base"
           weight="normal"
           align="right"
-          lineClamp="4"
+          :lineClamp="4"
           margin="none"
           class="upcomingcard__excerpt"
         >
