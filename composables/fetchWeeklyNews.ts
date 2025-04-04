@@ -9,9 +9,7 @@ import { useDirectusClient } from './useDirectusClient.js';
 export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
   try {
     const { directus, readItems } = useDirectusClient();
-    
-    console.log('Fetching latest weekly news...');
-    
+        
     const response = await directus.request<WeeklyNews[]>(
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status'],
@@ -25,7 +23,7 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
     
     if (response && response.length > 0) {
       const latestNews = response[0];
-      console.log(`Latest weekly news found:`, latestNews);
+  
       return latestNews;
     } else {
       console.log('No weekly news found');
