@@ -84,12 +84,6 @@
         buttonLabel="Sign Up"
         backgroundColor="#F9F9F9"
       />
-      <CuratorBadge
-        name="Beth Simone Noveck"
-        title="Director at Burnes Center and the Govlab"
-        imageUrl="/images/exampleImage.png"
-        moreText="More incredible things Beth done in in her"
-      />
     </aside>
   </section>
 </template>
@@ -138,10 +132,13 @@ const tabOptions = computed(() => [
 ]);
 
 // Methods
-function getImageUrl(image: any): string {
-  return image?.filename_disk
-    ? `${directusUrl}/assets/${image.filename_disk}`
-    : "/images/exampleImage.png";
+function getImageUrl(image: any, width: number = 512): string {
+  if (!image?.filename_disk) {
+    return "/images/exampleImage.png";
+  }
+  
+  // Construct URL with width parameter
+  return `${directusUrl}/assets/${image.filename_disk}?width=${width}`;
 }
 
 const getAuthorName = (post: BlogPost): string => {

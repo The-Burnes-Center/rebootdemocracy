@@ -25,7 +25,7 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
     
     if (response && response.length > 0) {
       const latestNews = response[0];
-      console.log(`Latest weekly news found:`, latestNews);
+  
       return latestNews;
     } else {
       console.log('No weekly news found');
