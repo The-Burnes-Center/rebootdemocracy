@@ -18,7 +18,6 @@
             <!--tag-->
             <Tag
               v-if="tag"
-              weight="normal"
               lineHeight="normal"
               margin="none"
               size="xs"
@@ -64,9 +63,8 @@
     </section>
   </Card>
 
-
   <!--Mobile view-->
-   <Card
+  <Card
     size="small"
     :variant="'default'"
     :hoverable="hoverable"
@@ -162,7 +160,9 @@ const formatDate = (dateValue: Date | string) => {
   if (!dateValue) return "unknown date";
   try {
     const date =
-      typeof dateValue === "string" ? parseISO(dateValue) : dateValue || new Date();
+      typeof dateValue === "string"
+        ? parseISO(dateValue)
+        : dateValue || new Date();
     return format(date, "MMMM d, yyyy");
   } catch (error) {
     console.error("Error formatting date:", error);
