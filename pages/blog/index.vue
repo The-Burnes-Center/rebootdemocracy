@@ -1,36 +1,43 @@
 <template>
+  <Hero
+    title="Rebooting Democracy in the Age of AI"
+    subtitle="Insights on AI, Governance and Democracy"
+    firstPartnerLogo="/images/burnes-logo-blues-1.png"
+    firstPartnerAlt="Burnes Center for Social Change"
+    secondPartnerLogo="/images/the-govlab-logo-white.png"
+    secondPartnerAlt="The GovLab"
+  />
+
   <section class="page-layout">
-    <article class="left-content">
-      <!-- Show loading state -->
-      <div v-if="isLoading" class="loading">Loading blogs...</div>
+      <article class="left-content">
+         <div v-if="isLoading" class="loading">Loading blogs...</div>
 
-      <!-- Display blogs when loaded -->
-      <div v-else-if="postData.length > 0" class="blog-list">
-        <PostCard
-          v-for="(post, index) in postData"
-          :key="post.id"
-          :tag="getPostTag(post)"
-          :titleText="post.title"
-          :author="getAuthorName(post)"
-          :excerpt="post.excerpt || ''"
-          :imageUrl="
-            post.image?.filename_disk
-              ? `${directusUrl}/assets/${post.image.filename_disk}`
-              : '/images/default.png'
-          "
-          :date="new Date(post.date)"
-          :tagIndex="index % 5"
-          variant="default"
-          :hoverable="true"
-        />
-      </div>
+            <!-- Display blogs when loaded -->
+            <div v-else-if="postData.length > 0" class="blog-list">
+              <PostCard
+                v-for="(post, index) in postData"
+                :key="post.id"
+                :tag="getPostTag(post)"
+                :titleText="post.title"
+                :author="getAuthorName(post)"
+                :excerpt="post.excerpt || ''"
+                :imageUrl="getImageUrl(post.image)"
+                :date="new Date(post.date)"
+                :tagIndex="index % 5"
+                variant="default"
+                :hoverable="true"
+              />
+            </div>
+            <!-- No blogs found message -->
+            <div v-else class="no-blogs">No blog posts found.</div>
+            <div class="btn-mid">
+            <Button variant="primary" width="123px" height="36px" @click="handleBtnClick"
+            >View All</Button>
+            </div>
+      </article>
 
-      <!-- No blogs found message -->
-      <div v-else class="no-blogs">No blog posts found.</div>
-    </article>
-
-    <aside class="right-content">
-      <Text
+       <aside class="right-content">
+           <Text
         as="h2"
         fontFamily="inter"
         size="lg"
@@ -40,15 +47,19 @@
         >
         Category</Text>
       <ListCategory
-        :title="Lawmaking"
+        title="Lawmaking"
         :number="65"
       />
+      <!-- Event section with loading state -->
+      <div v-if="isEventLoading" class="loading">Loading event...</div>
       <UpcomingCard
-        title="Copyright, AI, and Great Power Competition"
-        excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance.!"
-        imageUrl="/images/exampleImage.png"
-        :onClick="handleRegisterClick"
+        v-else-if="latestEvent"
+        :title="latestEvent.title"
+        :excerpt="latestEvent.description"
+        :imageUrl="getImageUrl(latestEvent.thumbnail)"
+        :onClick="() => latestEvent && handleEventClick(latestEvent)"
       />
+
       <SignUpButtonWidget
         title="Sign Up for updates"
         placeholder="Enter your email"
@@ -61,21 +72,31 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import type { BlogPost, Author } from "@/types";
+import type { BlogPost, Event } from "@/types/index.ts";
 
-// Set your Directus URL
+
+// Constants
 const directusUrl = "https://content.thegovlab.com";
+
+// State
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
+const latestEvent = ref<Event | null>(null);
+const isEventLoading = ref(true);
+const dataFetchError = ref<string | null>(null);
 
-// Function to handle register button click
-const handleRegisterClick = () => {
-  console.log("Register button clicked");
-};
+// Methods
+function getImageUrl(image: any, width: number = 512): string {
+  if (!image?.filename_disk) {
+    return "/images/exampleImage.png";
+  }
 
-// Helper function to get author name
+  // Construct URL with width parameter
+  return `${directusUrl}/assets/${image.filename_disk}?width=${width}`;
+}
+
 const getAuthorName = (post: BlogPost): string => {
-  if (post.authors && post.authors.length > 0 && post.authors[0].team_id) {
+  if (post.authors?.[0]?.team_id) {
     const author = post.authors[0].team_id;
     return `${author.First_Name} ${author.Last_Name}`;
   }
@@ -83,30 +104,42 @@ const getAuthorName = (post: BlogPost): string => {
 };
 
 const getPostTag = (post: BlogPost): string => {
-  if (post.Tags && post.Tags.length > 0) {
-    return post.Tags[0];
-  }
-  // Fallback to a default tag
-  return "Blog";
+  return post.Tags?.[0] || "Blog";
 };
 
-// Function to load all blogs
-const loadAllBlogs = async () => {
+const handleEventClick = (event: Event | null) => {
+  if (!event?.link) {
+    console.log("Event clicked, but no URL available");
+    return;
+  }
+  window.open(event.link, "_blank");
+};
+
+// Load all required data concurrently
+const loadInitialData = async () => {
   try {
     isLoading.value = true;
-    const data = await fetchBlogData();
-    postData.value = data || [];
-    console.log("Loaded blog posts:", postData.value);
+    isEventLoading.value = true;
+    
+    // Fetch event data
+    const eventData = await fetchLatestPastEvent();
+    latestEvent.value = Array.isArray(eventData)
+      ? null
+      : (eventData as Event | null);
+      
+    // Fetch blog data
+    const blogData = await fetchBlogData();
+    postData.value = blogData;
+    console.log("Blogs loaded:", blogData);
+    
   } catch (error) {
-    console.error("Failed to load blogs:", error);
-    postData.value = [];
+    console.error("Error loading initial data:", error);
+    dataFetchError.value = "Failed to load content. Please try again later.";
   } finally {
     isLoading.value = false;
+    isEventLoading.value = false;
   }
 };
 
-// Load blogs when component is mounted
-onMounted(() => {
-  loadAllBlogs();
-});
+onMounted(loadInitialData);
 </script>
