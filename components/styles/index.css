@@ -27,3 +27,15 @@
 * {
   box-sizing: border-box;
 }
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.no-blogs {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}

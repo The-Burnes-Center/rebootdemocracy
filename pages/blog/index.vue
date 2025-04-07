@@ -1,7 +1,15 @@
 <template>
+  <Hero
+    title="Rebooting Democracy in the Age of AI"
+    subtitle="Insights on AI, Governance and Democracy"
+    firstPartnerLogo="/images/burnes-logo-blues-1.png"
+    firstPartnerAlt="Burnes Center for Social Change"
+    secondPartnerLogo="/images/the-govlab-logo-white.png"
+    secondPartnerAlt="The GovLab"
+  />
+
   <section class="page-layout">
     <article class="left-content">
-      <!-- Show loading state -->
       <div v-if="isLoading" class="loading">Loading blogs...</div>
 
       <!-- Display blogs when loaded -->
@@ -13,20 +21,24 @@
           :titleText="post.title"
           :author="getAuthorName(post)"
           :excerpt="post.excerpt || ''"
-          :imageUrl="
-            post.image?.filename_disk
-              ? `${directusUrl}/assets/${post.image.filename_disk}`
-              : '/images/default.png'
-          "
+          :imageUrl="getImageUrl(post.image)"
           :date="new Date(post.date)"
           :tagIndex="index % 5"
           variant="default"
           :hoverable="true"
         />
       </div>
-
       <!-- No blogs found message -->
       <div v-else class="no-blogs">No blog posts found.</div>
+      <div class="btn-mid">
+        <Button
+          variant="primary"
+          width="123px"
+          height="36px"
+          @click="handleBtnClick"
+          >View All</Button
+        >
+      </div>
     </article>
 
     <aside class="right-content">
@@ -37,18 +49,28 @@
         color="text-primary"
         weight="bold"
         align="left"
-        >
-        Category</Text>
-      <ListCategory
-        :title="Lawmaking"
-        :number="65"
-      />
+      >
+        Category</Text
+      >
+
+      <!-- Display list of categories with post counts -->
+      <div v-if="isTagsLoading" class="loading-tags">Loading categories...</div>
+      <div v-else class="category-list">
+        <div v-for="tag in tags" :key="tag.id" class="category-item">
+          <ListCategory :title="tag.name" :number="tag.count" />
+        </div>
+      </div>
+
+      <!-- Event section with loading state -->
+      <div v-if="isEventLoading" class="loading">Loading event...</div>
       <UpcomingCard
-        title="Copyright, AI, and Great Power Competition"
-        excerpt="A new paper by Joshua Levine and Tim Hwang explores how different nations approach AI policy and copyright regulation, and also what's at stake in the battle for technological dominance.!"
-        imageUrl="/images/exampleImage.png"
-        :onClick="handleRegisterClick"
+        v-else-if="latestEvent"
+        :title="latestEvent.title"
+        :excerpt="latestEvent.description"
+        :imageUrl="getImageUrl(latestEvent.thumbnail)"
+        :onClick="() => latestEvent && handleEventClick(latestEvent)"
       />
+
       <SignUpButtonWidget
         title="Sign Up for updates"
         placeholder="Enter your email"
@@ -60,22 +82,44 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
-import type { BlogPost, Author } from "@/types";
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import type { BlogPost, Event } from "@/types/index.ts";
 
-// Set your Directus URL
+// Constants
 const directusUrl = "https://content.thegovlab.com";
+const router = useRouter();
+
+// State
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
+const latestEvent = ref<Event | null>(null);
+const isEventLoading = ref(true);
+const dataFetchError = ref<string | null>(null);
 
-// Function to handle register button click
-const handleRegisterClick = () => {
-  console.log("Register button clicked");
-};
+// Category state
+interface Category {
+  id: string;
+  name: string;
+  count: number;
+}
+const tags = ref<Category[]>([]);
+const isTagsLoading = ref(true);
 
-// Helper function to get author name
+// No need for filtered posts since we're just displaying categories
+
+// Methods
+function getImageUrl(image: any, width: number = 512): string {
+  if (!image?.filename_disk) {
+    return "/images/exampleImage.png";
+  }
+
+  // Construct URL with width parameter
+  return `${directusUrl}/assets/${image.filename_disk}?width=${width}`;
+}
+
 const getAuthorName = (post: BlogPost): string => {
-  if (post.authors && post.authors.length > 0 && post.authors[0].team_id) {
+  if (post.authors?.[0]?.team_id) {
     const author = post.authors[0].team_id;
     return `${author.First_Name} ${author.Last_Name}`;
   }
@@ -83,30 +127,86 @@ const getAuthorName = (post: BlogPost): string => {
 };
 
 const getPostTag = (post: BlogPost): string => {
-  if (post.Tags && post.Tags.length > 0) {
-    return post.Tags[0];
-  }
-  // Fallback to a default tag
-  return "Blog";
+  return post.Tags?.[0] || "Blog";
 };
 
-// Function to load all blogs
-const loadAllBlogs = async () => {
+const handleEventClick = (event: Event | null) => {
+  if (!event?.link) {
+    console.log("Event clicked, but no URL available");
+    return;
+  }
+  window.open(event.link, "_blank");
+};
+
+const handleBtnClick = () => {
+  router.push("/blog"); // Assuming there's a /blog route for all blogs
+};
+
+// Extract tags from blog posts
+const extractTagsWithCounts = (posts: BlogPost[]) => {
+  if (!posts || posts.length === 0) {
+    return [];
+  }
+
+  // Create a map to count occurrences of each tag
+  const tagCounts = new Map<string, number>();
+
+  // Count occurrences of each tag across all posts
+  posts.forEach((post) => {
+    if (post.Tags && Array.isArray(post.Tags)) {
+      post.Tags.forEach((tag) => {
+        const count = tagCounts.get(tag) || 0;
+        tagCounts.set(tag, count + 1);
+      });
+    }
+  });
+
+  // Convert the map to an array of tag objects
+  const tagArray = Array.from(tagCounts.entries()).map(([name, count]) => ({
+    id: name, // Using the tag name as the ID since we don't have separate IDs
+    name,
+    count,
+  }));
+
+  // Sort by count (descending)
+  return tagArray.sort((a, b) => b.count - a.count);
+};
+
+// No filtering needed since we're just displaying categories
+
+// Load all required data concurrently
+const loadInitialData = async () => {
   try {
     isLoading.value = true;
-    const data = await fetchBlogData();
-    postData.value = data || [];
-    console.log("Loaded blog posts:", postData.value);
+    isEventLoading.value = true;
+    isTagsLoading.value = true;
+
+    // Fetch event and blog data in parallel
+    const [eventData, blogData] = await Promise.all([
+      fetchLatestPastEvent(),
+      fetchBlogData(),
+    ]);
+
+    // Set event data
+    latestEvent.value = Array.isArray(eventData)
+      ? null
+      : (eventData as Event | null);
+
+    // Set blog data
+    postData.value = blogData;
+    console.log("Blogs loaded:", blogData);
+
+    // Extract tags from blog posts
+    tags.value = extractTagsWithCounts(blogData);
   } catch (error) {
-    console.error("Failed to load blogs:", error);
-    postData.value = [];
+    console.error("Error loading initial data:", error);
+    dataFetchError.value = "Failed to load content. Please try again later.";
   } finally {
     isLoading.value = false;
+    isEventLoading.value = false;
+    isTagsLoading.value = false;
   }
 };
 
-// Load blogs when component is mounted
-onMounted(() => {
-  loadAllBlogs();
-});
+onMounted(loadInitialData);
 </script>
