@@ -15,6 +15,7 @@
 @import "./hero.css";
 @import "./curator-overlay.css";
 @import "./innovate-us-card.css";
+@import "./blog-collaborators-container.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
