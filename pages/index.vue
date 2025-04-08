@@ -1,4 +1,5 @@
 <template>
+  <!-- No need for SearchProvider wrapper anymore -->
   <Hero
     title="Rebooting Democracy in the Age of AI"
     subtitle="Insights on AI, Governance and Democracy"
@@ -17,11 +18,17 @@
     />
   </div>
 
-  <GlobalSearch/>
+  <section class="page-layout" :class="{ 'full-width': showSearchResults }">
+    <article
+      class="left-content"
+      :class="{ 'search-active': showSearchResults }"
+    >
+      <!-- Conditionally show search results when search is active -->
 
-  <section class="page-layout">
-    <article class="left-content">
-      <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
+      <GlobalSearch v-if="showSearchResults" />
+
+      <!-- Show TabSwitch only when not searching -->
+      <TabSwitch v-else :tabs="tabOptions" @tab-changed="handleTabChange">
         <!-- Content for "Latest Posts" tab -->
         <template #latest-posts>
           <article class="left-content">
@@ -47,15 +54,21 @@
             <!-- No blogs found message -->
             <div v-else class="no-blogs">No blog posts found.</div>
             <div class="btn-mid">
-            <Button variant="primary" width="123px" height="36px" @click="handleBtnClick"
-            >View All</Button>
+              <Button
+                variant="primary"
+                width="123px"
+                height="36px"
+                @click="handleBtnClick"
+                >View All</Button
+              >
             </div>
           </article>
         </template>
       </TabSwitch>
     </article>
 
-    <aside class="right-content">
+    <!-- Only show right content when not searching -->
+    <aside v-if="!showSearchResults" class="right-content">
       <AuthorBadge
         name="Tiago C. Peixoto"
         title="Senior Public Sector Specialist"
@@ -98,11 +111,19 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { BlogPost, Author, Event, WeeklyNews } from "@/types/index.ts";
+// Import the new useSearchState composable
+import useSearchState from "../composables/useSearchState";
+
+// Get search state
+const { showSearchResults } = useSearchState();
+
+// Get Algolia client
 
 // Constants
 const directusUrl = "https://content.thegovlab.com";
 const DEFAULT_EDITION = "51";
 const route = useRouter();
+
 // State
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
@@ -193,10 +214,9 @@ const loadAllBlogs = async () => {
       ? allBlogs.filter((blog) => blog.id !== featured.id)
       : allBlogs;
 
-      console.log("Remaining blogs:", remainingBlogs);
-      // Final list: featured first, then others
+    console.log("Remaining blogs:", remainingBlogs);
+    // Final list: featured first, then others
     postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
-
   } catch (error) {
     console.error("Failed to load blogs:", error);
     dataFetchError.value = "Failed to load blog posts. Please try again later.";
@@ -257,3 +277,14 @@ const loadInitialData = async () => {
 // Lifecycle hooks
 onMounted(loadInitialData);
 </script>
+
+<style scoped>
+/* Add these styles to handle the full-width layout when searching */
+.full-width {
+  display: block; /* Changes from grid to block when searching */
+}
+
+.search-active {
+  width: 100%; /* Make left content take full width when searching */
+}
+</style>

@@ -5,12 +5,16 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [
     '@nuxt/test-utils/module',
-    ['@nuxtjs/algolia', {
-      apiKey: process.env.API_KEY,
-      appId: process.env.ALGOLIA_APPLICATION_ID,
-      lite: true,
-    }]
+    '@nuxtjs/algolia'
   ],
+  algolia: {
+    apiKey: process.env.API_KEY,
+    applicationId: process.env.ALGOLIA_APPLICATION_ID,
+    lite: true,
+    instantSearch: {
+      theme: 'algolia',
+    }
+  },
   ssr: true,
   css: [
     './components/styles/index.css',
