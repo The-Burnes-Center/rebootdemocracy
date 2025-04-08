@@ -154,10 +154,10 @@ async function handleDelete(itemId) {
 
 // Webhook handler
 export default async (req, context) => {
-  const req2 = { collection: "reboot_democracy_blog", id: "28374", action: "reboot_democracy_blog.items.update" };
+  // const req2 = { collection: "reboot_democracy_blog", id: "28374", action: "reboot_democracy_blog.items.update" };
   try {
-    const { id: itemId, action } = req2;
-    // const { id: itemId, action } = await req.json();
+    // const { id: itemId, action } = req2;
+    const { id: itemId, action } = await req.json();
     const [collection, , event] = action.split('.');
 
     
