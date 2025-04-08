@@ -1,4 +1,5 @@
 <template>
+  <div class="all-posts-page">
   <Hero
     title="Rebooting Democracy in the Age of AI"
     subtitle="Insights on AI, Governance and Democracy"
@@ -7,6 +8,15 @@
     secondPartnerLogo="/images/the-govlab-logo-white.png"
     secondPartnerAlt="The GovLab"
   />
+
+    <div class="curator-badge-overlay">
+    <CuratorBadge
+      name="Beth Simone Noveck"
+      title="Director at Burnes Center and the Govlab"
+      imageUrl="/images/Beth_Simone_Noveck.png"
+      moreText="More incredible things Beth done in in her"
+    />
+  </div>
 
   <section class="page-layout">
     <article class="left-content">
@@ -79,6 +89,7 @@
       />
     </aside>
   </section>
+</div>  
 </template>
 
 <script lang="ts" setup>
