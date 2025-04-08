@@ -1,24 +1,9 @@
 .author-badge {
     display: flex;
     align-items: center;
-    /* gap: 1rem;
-    padding: 1rem; */
     width: 100%;
   }
   
-  /* .author-badge__image-container {
-    position: relative;
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    overflow: hidden;
-    /* Shadow styling based on the provided modifiers */
-    /* box-shadow: 
-      0px 0px 16px 0px rgba(0, 0, 0, 0.1),
-      0px 2px 2px 0px rgba(0, 0, 0, 0.05),
-      0px 2px 6px 0px rgba(0, 0, 0, 0.05);
-  } */ */
   
   .author-badge__image {
     width: 100%;
