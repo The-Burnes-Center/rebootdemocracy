@@ -88,6 +88,13 @@
         buttonLabel="Sign Up"
         backgroundColor="#F9F9F9"
       />
+
+      
+      <InnovateUsCard 
+        description="InnovateUS provides no-cost, at-your-own pace, and live learning. on data, digital, innovation, and AI skills for public service professionals like you."
+        buttonLabel="Learn more"
+        learnMoreUrl="https://innovateus.example.com"
+      />
     </aside>
   </section>
 </template>

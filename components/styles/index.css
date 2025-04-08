@@ -14,6 +14,7 @@
 @import "./author-card.css";
 @import "./hero.css";
 @import "./curator-overlay.css";
+@import "./innovate-us-card.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
