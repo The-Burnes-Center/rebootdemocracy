@@ -1,4 +1,5 @@
 <template>
+<div class="home-page">
   <Hero
     title="Rebooting Democracy in the Age of AI"
     subtitle="Insights on AI, Governance and Democracy"
@@ -54,11 +55,89 @@
     </article>
 
     <aside class="right-content">
-      <AuthorBadge
-        name="Tiago C. Peixoto"
-        title="Senior Public Sector Specialist"
-        imageUrl="/images/exampleImage.png"
-      />
+      <!-- Blog collaborators container -->
+      <div class="blog-collaborators-container">
+      <Text
+        as="h2"
+        fontFamily="inter"
+        size="lg"
+        color="text-primary"
+        weight="bold"
+        align="center"
+        margin="md"
+      >
+        Our Collaborators
+      </Text>
+        <!-- Row 1 -->
+        <div class="collaborators-row">
+          <AuthorBadge
+            name="Audrey Tang"
+            title="Taiwan’s first Minister of Digital Affairs"
+            imageUrl="/images/Audrey_Tang.png"
+          />
+          <AuthorBadge
+            name="Dane Gambrell"
+            title="Fellow at Burnes Center"
+            imageUrl="/images/Dane_Gambrell.png"
+          />
+        </div>
+        
+        <!-- Row 2 -->
+        <div class="collaborators-row">
+          <AuthorBadge
+            name="Tiago C. Peixoto"
+            title="Senior Public Sector Specialist"
+            imageUrl="/images/Tiago_C_Peixoto.png"
+          />
+          <AuthorBadge
+            name="Autumn Sloboda"
+            title="Fellow at Burnes Center"
+            imageUrl="/images/Autumn_Sloboda.png"
+          />
+        </div>
+        
+        <!-- Row 3 -->
+        <div class="collaborators-row">
+          <AuthorBadge
+            name="Giulio Quaggiotto"
+            title="Head of UNDP’s Strategic Innovation unit"
+            imageUrl="/images/Giulio_Quaggiotto.png"
+          />
+          <AuthorBadge
+            name="Jacob Kemp"
+            title="AI & Social Impact Fellow"
+            imageUrl="/images/Jacob_Kemp.png"
+          />
+        </div>
+        
+        <!-- Row 4 -->
+        <div class="collaborators-row">
+          <AuthorBadge
+            name="Seth Harris"
+            title="Senior Fellow at Burnes Center"
+            imageUrl="/images/Seth_Harris.png"
+          />
+          <AuthorBadge
+            name="Hannah Hetzer"
+            title="Fellow at Burnes Center"
+            imageUrl="/images/Hannah_Hetzer.png"
+          />
+        </div>
+        
+        <!-- Row 5 -->
+        <div class="collaborators-row">
+          <AuthorBadge
+            name="Bonnie McGilpin"
+            title="Fellow at Burnes Center"
+            imageUrl="/images/Bonnie_McGilpin.png"
+          />
+          <AuthorBadge
+            name="Anirudh Dinesh"
+            title="Fellow at Burnes Center"
+            imageUrl="/images/Anirudh_Dinesh.png"
+          />
+        </div>
+      </div>
       <Text
         as="a"
         href="/team"
@@ -97,6 +176,7 @@
       />
     </aside>
   </section>
+</div>
 </template>
 
 <script lang="ts" setup>
