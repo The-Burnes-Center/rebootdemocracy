@@ -80,6 +80,83 @@ function transform(record) {
   }];
 }
 
+function transformWeeklyNews(record) {
+  return record.items.map(item => {
+    const objectID = `${record.id}_${item.reboot_democracy_weekly_news_items_id.id}`;
+    return {
+      objectID,
+      author: record.author,
+      date: record.date,
+      title: record.title,
+      summary: record.summary,
+      edition: record.edition,
+      id: record.id,
+      item: item.reboot_democracy_weekly_news_items_id
+    };
+  });
+}
+
+async function fetchWeeklyNewsItem(collection, itemId) {
+  const response = await fetch(`${DIRECTUS_URL}/items/${collection}/${itemId}?fields=id,title,summary,author,edition,status,date,items.reboot_democracy_weekly_news_items_id.*`, {
+    headers: {
+      Authorization: `Bearer ${DIRECTUS_AUTH_TOKEN}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch weekly news item from Directus: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.data;
+}
+
+// Handle upsert for weekly news
+async function handleWeeklyNewsUpsert(collection, itemId) {
+  const item = await fetchWeeklyNewsItem(collection, itemId);
+  if (item.status !== 'published') {
+    console.log(`Item ${itemId} is not published. Skipping indexing.`);
+    return;
+  }
+
+  const records = transformWeeklyNews(item);
+
+  await client.saveObjects({
+    indexName: 'reboot-news-that-caught-our-eye-test',
+    objects: records,
+  });
+
+  console.log(`Indexed weekly news item ${itemId} with ${records.length} records.`);
+}
+
+// Handle delete for weekly news
+async function handleWeeklyNewsDelete(itemId) {
+  const response = await client.search({
+    requests: [{
+      indexName: 'reboot-news-that-caught-our-eye-test',
+      query: '',
+      filters: `id:${itemId}`,
+      attributesToRetrieve: ['objectID'],
+      hitsPerPage: 1000,
+      distinct: false,
+    }],
+  });
+
+  const hits = response.results && response.results[0] ? response.results[0].hits : [];
+  console.log(hits)
+  
+  if (hits.length > 0) {
+    const objectIDs = hits.map(hit => hit.objectID);
+    await client.deleteObjects({
+      indexName: 'reboot-news-that-caught-our-eye-test',
+      objectIDs,
+    });
+    console.log(`Deleted ${objectIDs.length} weekly news records for item ${itemId}.`);
+  } else {
+    console.log(`No weekly news records found for item ${itemId}.`);
+  }
+}
+
 // Fetch a single Directus item
 async function fetchDirectusItem(collection, itemId) {
   console.log(collection, itemId);
@@ -153,29 +230,52 @@ async function handleDelete(itemId) {
 }
 
 // Webhook handler
+// Updated webhook handler
 export default async (req, context) => {
-  // const req2 = { collection: "reboot_democracy_blog", id: "28374", action: "reboot_democracy_blog.items.update" };
+  
+    // const req2 = { collection: "reboot_democracy_blog", id: "28374", action: "reboot_democracy_blog.items.update" };
   try {
     // const { id: itemId, action } = req2;
     const { id: itemId, action } = await req.json();
     const [collection, , event] = action.split('.');
 
-    
-    switch (event) {
-      case 'create':
-        await handleUpsert(collection, itemId);
+    switch (collection) {
+      case 'reboot_democracy_blog':
+        switch (event) {
+          case 'create':
+            await handleUpsert(collection, itemId);
+            break;
+          case 'update':
+            await handleDelete(itemId);
+            await handleUpsert(collection, itemId);
+            break;
+          case 'delete':
+            await handleDelete(itemId);
+            break;
+          default:
+            console.log(`Unhandled event for reboot_democracy_blog: ${event}`);
+        }
         break;
-      case 'update':
-        // Purge all existing records for this item ID before reindexing
-        console.log(collection, itemId);
-        await handleDelete(itemId);
-        await handleUpsert(collection, itemId);
+
+      case 'reboot_democracy_weekly_news':
+        switch (event) {
+          case 'create':
+            await handleWeeklyNewsUpsert(collection, itemId);
+            break;
+          case 'update':
+            await handleWeeklyNewsDelete(itemId);
+            await handleWeeklyNewsUpsert(collection, itemId);
+            break;
+          case 'delete':
+            await handleWeeklyNewsDelete(itemId);
+            break;
+          default:
+            console.log(`Unhandled event for reboot_democracy_weekly_news: ${event}`);
+        }
         break;
-      case 'delete':
-        await handleDelete(itemId);
-        break;
+
       default:
-        console.log(`Unhandled event: ${event}`);
+        console.log(`Unhandled collection: ${collection}`);
     }
   } catch (error) {
     console.error('Error processing webhook:', error);
