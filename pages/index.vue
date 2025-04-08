@@ -17,6 +17,8 @@
     />
   </div>
 
+  <GlobalSearch/>
+
   <section class="page-layout">
     <article class="left-content">
       <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
