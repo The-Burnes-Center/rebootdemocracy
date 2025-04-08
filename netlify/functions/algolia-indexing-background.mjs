@@ -114,8 +114,8 @@ async function handleUpsert(collection, itemId) {
     preview: r.content.slice(0, 60) + '...',
     authors: JSON.stringify(r.authors[0])
   })));
-  // console.log('Generated Records:', records)
-return
+  console.log('Generated Records:', records)
+
   await client.saveObjects({
     indexName: ALGOLIA_INDEX_NAME,
     objects: records,
@@ -126,19 +126,22 @@ return
 
 // Handle deleted items
 async function handleDelete(itemId) {
-  const { hits } = await client.search({
+  const response = await client.search({
     requests: [{
       indexName: ALGOLIA_INDEX_NAME,
       query: '',
       filters: `id:${itemId}`,
       attributesToRetrieve: ['objectID'],
       hitsPerPage: 1000,
+      distinct: false,
     }],
   });
+  console.log("Hits found for deletion:", response);
+  const hits = response.results && response.results[0] ? response.results[0].hits : [];
+  console.log("Hits found for deletion:", hits);
 
-  const objectIDs = hits.map(hit => hit.objectID);
-
-  if (objectIDs.length > 0) {
+  if (hits.length > 0) {
+    const objectIDs = hits.map(hit => hit.objectID);
     await client.deleteObjects({
       indexName: ALGOLIA_INDEX_NAME,
       objectIDs,
@@ -151,14 +154,20 @@ async function handleDelete(itemId) {
 
 // Webhook handler
 export default async (req, context) => {
-  const req2 = { collection: "reboot_democracy_blog", id: "28374", action: "reboot_democracy_blog.items.update" };
+  // const req2 = { collection: "reboot_democracy_blog", id: "28374", action: "reboot_democracy_blog.items.create" };
   try {
-    const { id: itemId, action } = req2;
+    // const { id: itemId, action } = req2;
+    const { id: itemId, action } = await req.json();
     const [collection, , event] = action.split('.');
 
     switch (event) {
       case 'create':
+        await handleUpsert(collection, itemId);
+        break;
       case 'update':
+        // Purge all existing records for this item ID before reindexing
+        console.log(collection, itemId);
+        await handleDelete(itemId);
         await handleUpsert(collection, itemId);
         break;
       case 'delete':
