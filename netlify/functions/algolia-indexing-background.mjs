@@ -160,6 +160,7 @@ export default async (req, context) => {
     const { id: itemId, action } = await req.json();
     const [collection, , event] = action.split('.');
 
+    
     switch (event) {
       case 'create':
         await handleUpsert(collection, itemId);
