@@ -30,9 +30,15 @@
 }
 
 .loading {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #0d63eb;
+    font-weight: 300;
+    padding: 0.2rem 1rem;
+    border: 0.5px solid grey;
+    font-family: var(--font-inria);
 }
 
 .no-blogs {

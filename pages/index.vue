@@ -1,5 +1,4 @@
 <template>
-  <!-- No need for SearchProvider wrapper anymore -->
   <Hero
     title="Rebooting Democracy in the Age of AI"
     subtitle="Insights on AI, Governance and Democracy"
@@ -18,57 +17,58 @@
     />
   </div>
 
-  <section class="page-layout" :class="{ 'full-width': showSearchResults }">
+  <section class="page-layout">
     <article
       class="left-content"
       :class="{ 'search-active': showSearchResults }"
     >
-      <!-- Conditionally show search results when search is active -->
-
-      <GlobalSearch v-if="showSearchResults" />
-
-      <!-- Show TabSwitch only when not searching -->
-      <TabSwitch v-else :tabs="tabOptions" @tab-changed="handleTabChange">
-        <!-- Content for "Latest Posts" tab -->
+      <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
+        <!-- Latest Posts Tab -->
         <template #latest-posts>
           <article class="left-content">
-            <!-- Show loading state -->
-            <div v-if="isLoading" class="loading">Loading blogs...</div>
+            <!-- Show GlobalSearch when searching -->
+            <GlobalSearch v-if="showSearchResults" />
 
-            <!-- Display blogs when loaded -->
-            <div v-else-if="postData.length > 0" class="blog-list">
-              <PostCard
-                v-for="(post, index) in postData"
-                :key="post.id"
-                :tag="getPostTag(post)"
-                :titleText="post.title"
-                :author="getAuthorName(post)"
-                :excerpt="post.excerpt || ''"
-                :imageUrl="getImageUrl(post.image)"
-                :date="new Date(post.date)"
-                :tagIndex="index % 5"
-                variant="default"
-                :hoverable="true"
-              />
-            </div>
-            <!-- No blogs found message -->
-            <div v-else class="no-blogs">No blog posts found.</div>
-            <div class="btn-mid">
-              <Button
-                variant="primary"
-                width="123px"
-                height="36px"
-                @click="handleBtnClick"
-                >View All</Button
-              >
-            </div>
+            <!-- Otherwise show regular posts -->
+            <template v-else>
+              <div v-if="isLoading" class="loading">Loading blogs...</div>
+
+              <div v-else-if="postData.length > 0" class="blog-list">
+                <PostCard
+                  v-for="(post, index) in postData"
+                  :key="post.id"
+                  :tag="getPostTag(post)"
+                  :titleText="post.title"
+                  :author="getAuthorName(post)"
+                  :excerpt="post.excerpt || ''"
+                  :imageUrl="getImageUrl(post.image)"
+                  :date="new Date(post.date)"
+                  :tagIndex="index % 5"
+                  variant="default"
+                  :hoverable="true"
+                />
+              </div>
+
+              <div v-else class="no-blogs">No blog posts found.</div>
+
+              <div class="btn-mid" v-if="allBlogsLoaded && !showSearchResults">
+                <Button
+                  variant="primary"
+                  width="123px"
+                  height="36px"
+                  @click="handleBtnClick"
+                >
+                  View All
+                </Button>
+              </div>
+            </template>
           </article>
         </template>
       </TabSwitch>
     </article>
 
-    <!-- Only show right content when not searching -->
-    <aside v-if="!showSearchResults" class="right-content">
+    <!-- Sidebar -->
+    <aside class="right-content">
       <AuthorBadge
         name="Tiago C. Peixoto"
         title="Senior Public Sector Specialist"
@@ -87,7 +87,6 @@
         Meet Our Team
       </Text>
 
-      <!-- Event section with loading state -->
       <div v-if="isEventLoading" class="loading">Loading event...</div>
       <UpcomingCard
         v-else-if="latestEvent"
@@ -133,6 +132,7 @@ const isEventLoading = ref(true);
 const latestWeeklyNews = ref<WeeklyNews | null>(null);
 const dataFetchError = ref<string | null>(null);
 const featuredBlog = ref<BlogPost | null>(null);
+const allBlogsLoaded = ref(false);
 
 // Computed
 const editionNumber = computed(() => {
@@ -214,9 +214,8 @@ const loadAllBlogs = async () => {
       ? allBlogs.filter((blog) => blog.id !== featured.id)
       : allBlogs;
 
-    console.log("Remaining blogs:", remainingBlogs);
-    // Final list: featured first, then others
     postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
+    allBlogsLoaded.value = true;
   } catch (error) {
     console.error("Failed to load blogs:", error);
     dataFetchError.value = "Failed to load blog posts. Please try again later.";
@@ -277,14 +276,3 @@ const loadInitialData = async () => {
 // Lifecycle hooks
 onMounted(loadInitialData);
 </script>
-
-<style scoped>
-/* Add these styles to handle the full-width layout when searching */
-.full-width {
-  display: block; /* Changes from grid to block when searching */
-}
-
-.search-active {
-  width: 100%; /* Make left content take full width when searching */
-}
-</style>

@@ -1,11 +1,11 @@
 <template>
   <div class="search-results-container" v-if="showSearchResults">
-    <div class="search-results-header">
-      <h2>Search Results for: "{{ currentSearchQuery }}"</h2>
-    </div>
+    <!-- <div class="search-results-header">
+      <h2>Search Keyword: "{{ currentSearchQuery }}"</h2>
+    </div> -->
 
     <!-- Loading state -->
-    <div v-if="isSearching" class="loading">Loading search results...</div>
+      <div v-if="isSearching" class="loading">Loading blogs...</div>
 
     <!-- No results message -->
     <div v-else-if="typedSearchResults.length === 0" class="no-results">
@@ -68,8 +68,11 @@ const algoliaClient = getAlgoliaClient();
 setIndexName(indexName);
 
 const showLoadMore = computed(() =>
+  !isSearching.value &&
+  typedSearchResults.value.length > 0 &&
   typedSearchResults.value.length < totalResults.value
-)
+);
+
 const router = useRouter();
 
 // Get reactive state from the composable
@@ -105,85 +108,3 @@ const getItemAuthor = (item: SearchResultItem): string => {
 };
 </script>
 
-<style scoped>
-.search-results-container {
-  width: 100%;
-  margin: 2rem 0;
-}
-
-.search-results-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
-}
-
-.search-results-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.blog-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.search-result-item {
-  padding: 1.5rem;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-
-.search-result-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.search-result-item h3 {
-  margin-top: 0;
-  margin-bottom: 0.75rem;
-  font-size: 1.25rem;
-}
-
-.item-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
-  font-size: 0.85rem;
-}
-
-.item-tag {
-  background-color: #e9e9e9;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  color: #666;
-}
-
-.item-author {
-  color: #666;
-}
-
-.no-results {
-  padding: 2rem;
-  text-align: center;
-  background-color: #f9f9f9;
-  border-radius: 6px;
-}
-
-.loading {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.125rem;
-  color: #666;
-}
-
-.search-pagination {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-}
-</style>
