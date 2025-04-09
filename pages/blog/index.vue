@@ -20,12 +20,17 @@
 
   <section class="page-layout">
     <article class="left-content">
+      <!-- Add SortBy component -->
+      <div class="filter-section">
+        <SortBy @sort-changed="handleSortChange" />
+      </div>
+
       <div v-if="isLoading" class="loading">Loading blogs...</div>
 
       <!-- Display blogs when loaded -->
       <div v-else-if="postData.length > 0" class="blog-list">
         <PostCard
-          v-for="(post, index) in postData"
+          v-for="(post, index) in sortedPosts"
           :key="post.id"
           :tag="getPostTag(post)"
           :titleText="post.title"
@@ -107,6 +112,7 @@ const isLoading = ref(true);
 const latestEvent = ref<Event | null>(null);
 const isEventLoading = ref(true);
 const dataFetchError = ref<string | null>(null);
+const sortOrder = ref<string>('Latest'); // Add this for sort functionality
 
 // Category state
 interface Category {
@@ -117,7 +123,25 @@ interface Category {
 const tags = ref<Category[]>([]);
 const isTagsLoading = ref(true);
 
-// No need for filtered posts since we're just displaying categories
+// Computed property for sorted posts
+const sortedPosts = computed(() => {
+  if (!postData.value || postData.value.length === 0) return [];
+  
+  // Create a copy to avoid mutating the original data
+  const posts = [...postData.value];
+  
+  // Sort based on the selected order
+  if (sortOrder.value === 'Latest') {
+    return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  } else {
+    return posts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+});
+
+// Handle sort change
+const handleSortChange = (value: string) => {
+  sortOrder.value = value;
+};
 
 // Methods
 function getImageUrl(image: any, width: number = 512): string {
@@ -183,8 +207,6 @@ const extractTagsWithCounts = (posts: BlogPost[]) => {
   return tagArray.sort((a, b) => b.count - a.count);
 };
 
-// No filtering needed since we're just displaying categories
-
 // Load all required data concurrently
 const loadInitialData = async () => {
   try {
@@ -221,3 +243,31 @@ const loadInitialData = async () => {
 
 onMounted(loadInitialData);
 </script>
+
+<style>
+.filter-section {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.btn-mid {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+@media (max-width: 768px) {
+  .filter-section {
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+}
+</style>

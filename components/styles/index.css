@@ -16,6 +16,7 @@
 @import "./curator-overlay.css";
 @import "./innovate-us-card.css";
 @import "./blog-collaborators-container.css";
+@import "./sort-by.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
