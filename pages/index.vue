@@ -3,10 +3,6 @@
     <Hero
       title="Rebooting Democracy in the Age of AI"
       subtitle="Insights on AI, Governance and Democracy"
-      firstPartnerLogo="/images/burnes-logo-blues-1.png"
-      firstPartnerAlt="Burnes Center for Social Change"
-      secondPartnerLogo="/images/the-govlab-logo-white.png"
-      secondPartnerAlt="The GovLab"
     />
 
     <div class="curator-badge-overlay">
