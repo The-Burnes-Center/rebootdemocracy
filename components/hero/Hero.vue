@@ -21,18 +21,41 @@
       </Text>
     </div>
     
-    <div class="hero__partners">
-      <div class="hero__partner hero__first-partner">
-        <img :src="firstPartnerLogo" :alt="firstPartnerAlt" />
-      </div>
-      <div class="hero__partner hero__second-partner">
-        <img :src="secondPartnerLogo" :alt="secondPartnerAlt" />
-      </div>
+    <div class="search-content">
+    <ais-instant-search ais-instant-search :index-name="indexName" :search-client="algoliaClient">
+        <ais-search-box @input="handleSearchInput" @reset="handleSearchReset" class="custom-searchbox" />
+      </ais-instant-search>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+
+import {
+  AisInstantSearch,
+  AisSearchBox,
+  // @ts-ignore
+} from "vue-instantsearch/vue3/es";
+import useSearchState from "../../composables/useSearchState.js";
+
+const indexName = "reboot test data";
+
+const { updateSearchQuery, setIndexName, getAlgoliaClient } = useSearchState();
+const algoliaClient = getAlgoliaClient();
+setIndexName(indexName); 
+
+// Handle search input changes
+const handleSearchInput = (event: InputEvent): void => {
+  const query = (event.target as HTMLInputElement)?.value;
+  updateSearchQuery(query);
+};
+
+
+const handleSearchReset = () => {
+  updateSearchQuery("");
+};
+
+
 interface HeroProps {
   title: string;
   subtitle: string;
@@ -45,9 +68,5 @@ interface HeroProps {
 const props = withDefaults(defineProps<HeroProps>(), {
   title: "Rebooting Democracy in the Age of AI",
   subtitle: "Insights on AI, Governance and Democracy",
-  firstPartnerLogo: "",
-  firstPartnerAlt: "First Partner Logo",
-  secondPartnerLogo: "",
-  secondPartnerAlt: "Second Partner Logo"
 });
 </script>
