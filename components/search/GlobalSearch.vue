@@ -31,7 +31,18 @@
     </div>
 
     <!-- Simple pagination placeholder -->
-    <div class="search-pagination" v-if="typedSearchResults.length > 0"></div>
+   <div class="search-pagination" v-if="showLoadMore">
+      <Button 
+        variant="primary" 
+        width="150px" 
+        height="36px" 
+        @click="loadMoreResults"
+        :disabled="isSearching"
+      >
+        {{ isSearching ? 'Loading...' : 'Show More' }}
+      </Button>
+    </div>
+    
   </div>
 </template>
 
@@ -53,7 +64,14 @@ type SearchResultItem = {
   authors?: any[];
 };
 
-// Router for navigation
+const indexName = "reboot test data";
+const { loadMoreResults, setIndexName, getAlgoliaClient, totalResults } = useSearchState();
+const algoliaClient = getAlgoliaClient();
+setIndexName(indexName);
+
+const showLoadMore = computed(() =>
+  typedSearchResults.value.length < totalResults.value
+)
 const router = useRouter();
 
 // Get reactive state from the composable

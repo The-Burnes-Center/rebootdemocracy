@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     lite: true,
     instantSearch: {
       theme: 'algolia',
-    }
+    },
   },
   ssr: true,
   css: [

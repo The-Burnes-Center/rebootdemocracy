@@ -129,16 +129,6 @@ const handleSearchInput = (event: InputEvent): void => {
   updateSearchQuery(query);
 };
 
-// Add search input listeners
-const setupSearchListeners = (): void => {
-  const searchInput = document.querySelector(".ais-SearchBox-input");
-  if (searchInput) {
-    searchInput.addEventListener("input", (event) => {
-      const input = event.target as HTMLInputElement;
-      updateSearchQuery(input.value);
-    });
-  }
-};
 
 const handleSearchReset = () => {
   updateSearchQuery("");
@@ -148,9 +138,6 @@ const handleSearchReset = () => {
 onMounted((): void => {
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
-
-  // Setup search listeners after component is mounted
-  setTimeout(setupSearchListeners, 100);
 });
 
 // Remove event listener on unmount
