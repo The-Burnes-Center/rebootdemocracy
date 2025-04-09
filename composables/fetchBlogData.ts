@@ -22,8 +22,9 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
       
     const response = await directus.request(
       readItems('reboot_democracy_blog', {
+        limit: 7,
         meta: 'total_count',
-        sort: ['-date'], // 🆕 Sort by newest date first
+        sort: ['-date'], 
         fields: [
           '*.*',
           'authors.team_id.*',

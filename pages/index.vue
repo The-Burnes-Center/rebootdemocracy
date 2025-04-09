@@ -19,41 +19,56 @@
   </div>
 
   <section class="page-layout">
-    <article class="left-content">
+    <article
+      class="left-content"
+      :class="{ 'search-active': showSearchResults }"
+    >
       <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
-        <!-- Content for "Latest Posts" tab -->
+        <!-- Latest Posts Tab -->
         <template #latest-posts>
           <article class="left-content">
-            <!-- Show loading state -->
-            <div v-if="isLoading" class="loading">Loading blogs...</div>
+            <!-- Show GlobalSearch when searching -->
+            <GlobalSearch v-if="showSearchResults" />
 
-            <!-- Display blogs when loaded -->
-            <div v-else-if="postData.length > 0" class="blog-list">
-              <PostCard
-                v-for="(post, index) in postData"
-                :key="post.id"
-                :tag="getPostTag(post)"
-                :titleText="post.title"
-                :author="getAuthorName(post)"
-                :excerpt="post.excerpt || ''"
-                :imageUrl="getImageUrl(post.image)"
-                :date="new Date(post.date)"
-                :tagIndex="index % 5"
-                variant="default"
-                :hoverable="true"
-              />
-            </div>
-            <!-- No blogs found message -->
-            <div v-else class="no-blogs">No blog posts found.</div>
-            <div class="btn-mid">
-            <Button variant="primary" width="123px" height="36px" @click="handleBtnClick"
-            >View All</Button>
-            </div>
+            <!-- Otherwise show regular posts -->
+            <template v-else>
+              <div v-if="isLoading" class="loading">Loading blogs...</div>
+
+              <div v-else-if="postData.length > 0" class="blog-list">
+                <PostCard
+                  v-for="(post, index) in postData"
+                  :key="post.id"
+                  :tag="getPostTag(post)"
+                  :titleText="post.title"
+                  :author="getAuthorName(post)"
+                  :excerpt="post.excerpt || ''"
+                  :imageUrl="getImageUrl(post.image)"
+                  :date="new Date(post.date)"
+                  :tagIndex="index % 5"
+                  variant="default"
+                  :hoverable="true"
+                />
+              </div>
+
+              <div v-else class="no-blogs">No blog posts found.</div>
+
+              <div class="btn-mid" v-if="allBlogsLoaded && !showSearchResults">
+                <Button
+                  variant="primary"
+                  width="123px"
+                  height="36px"
+                  @click="handleBtnClick"
+                >
+                  View All
+                </Button>
+              </div>
+            </template>
           </article>
         </template>
       </TabSwitch>
     </article>
 
+    <!-- Sidebar -->
     <aside class="right-content">
       <!-- Blog collaborators container -->
       <div class="blog-collaborators-container">
@@ -151,7 +166,6 @@
         Meet Our Team
       </Text>
 
-      <!-- Event section with loading state -->
       <div v-if="isEventLoading" class="loading">Loading event...</div>
       <UpcomingCard
         v-else-if="latestEvent"
@@ -183,11 +197,19 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { BlogPost, Author, Event, WeeklyNews } from "@/types/index.ts";
+// Import the new useSearchState composable
+import useSearchState from "../composables/useSearchState";
+
+// Get search state
+const { showSearchResults } = useSearchState();
+
+// Get Algolia client
 
 // Constants
 const directusUrl = "https://content.thegovlab.com";
 const DEFAULT_EDITION = "51";
 const route = useRouter();
+
 // State
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
@@ -197,6 +219,7 @@ const isEventLoading = ref(true);
 const latestWeeklyNews = ref<WeeklyNews | null>(null);
 const dataFetchError = ref<string | null>(null);
 const featuredBlog = ref<BlogPost | null>(null);
+const allBlogsLoaded = ref(false);
 
 // Computed
 const editionNumber = computed(() => {
@@ -278,10 +301,8 @@ const loadAllBlogs = async () => {
       ? allBlogs.filter((blog) => blog.id !== featured.id)
       : allBlogs;
 
-      console.log("Remaining blogs:", remainingBlogs);
-      // Final list: featured first, then others
     postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
-
+    allBlogsLoaded.value = true;
   } catch (error) {
     console.error("Failed to load blogs:", error);
     dataFetchError.value = "Failed to load blog posts. Please try again later.";

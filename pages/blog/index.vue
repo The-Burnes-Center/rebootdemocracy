@@ -183,8 +183,6 @@ const extractTagsWithCounts = (posts: BlogPost[]) => {
   return tagArray.sort((a, b) => b.count - a.count);
 };
 
-// No filtering needed since we're just displaying categories
-
 // Load all required data concurrently
 const loadInitialData = async () => {
   try {

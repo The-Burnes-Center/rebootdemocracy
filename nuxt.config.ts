@@ -4,8 +4,17 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: [
-    '@nuxt/test-utils/module'
+    '@nuxt/test-utils/module',
+    '@nuxtjs/algolia'
   ],
+  algolia: {
+    apiKey: process.env.API_KEY,
+    applicationId: process.env.ALGOLIA_APPLICATION_ID,
+    lite: true,
+    instantSearch: {
+      theme: 'algolia',
+    },
+  },
   ssr: true,
   css: [
     './components/styles/index.css',
@@ -18,7 +27,7 @@ export default defineNuxtConfig({
       global: true
     }
   ],
-   app: {
+  app: {
     head: {
       link: [
         {

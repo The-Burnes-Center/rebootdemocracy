@@ -70,6 +70,7 @@
 
 .tab-content {
   padding: 20px;
+  min-width: 55.5rem;
 }
 
 .tab-pane {
