@@ -1,6 +1,5 @@
 // src/composables/useSearchState.js
 import { ref, readonly } from 'vue'
-import { useAlgoliaRef } from '#imports'
 // Shared search state
 const searchQuery = ref('')
 const showSearchResults = ref(false)
