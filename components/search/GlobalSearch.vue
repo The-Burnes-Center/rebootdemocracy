@@ -14,20 +14,17 @@
     </div>
 
     <!-- Results list -->
-    <div v-else class="blog-list">
-      <div
-        v-for="item in typedSearchResults"
-        :key="item.objectID"
-        class="search-result-item"
-      >
-        <h1>{{ item.title || "Untitled" }}</h1>
-        <p v-if="item.excerpt">{{ truncateText(item.excerpt, 150) }}</p>
-
-        <div class="item-meta">
-          <span class="item-tag">{{ getItemTag(item) }}</span>
-          <span class="item-author">{{ getItemAuthor(item) }}</span>
-        </div>
-      </div>
+    <div v-else class="blog-list-search">
+      <PostCard
+      v-for="item in typedSearchResults"
+      :key="item.objectID"
+      :tag="getItemTag(item)"
+      :titleText="item.title || 'Untitled'"
+      :excerpt="truncateText(item.excerpt ?? '', 150)"
+      :author="getItemAuthor(item)"
+      :imageUrl="item.imageUrl || '/images/exampleImage.png'"          
+      :hoverable="true"
+    />
     </div>
 
     <!-- Simple pagination placeholder -->
@@ -62,6 +59,7 @@ type SearchResultItem = {
   Tags?: string[];
   author?: string;
   authors?: any[];
+  imageUrl?: string;
 };
 
 const indexName = "reboot test data";
