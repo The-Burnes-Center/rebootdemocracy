@@ -1,199 +1,201 @@
 <template>
-<div class="home-page">
-  <Hero
-    title="Rebooting Democracy in the Age of AI"
-    subtitle="Insights on AI, Governance and Democracy"
-    firstPartnerLogo="/images/burnes-logo-blues-1.png"
-    firstPartnerAlt="Burnes Center for Social Change"
-    secondPartnerLogo="/images/the-govlab-logo-white.png"
-    secondPartnerAlt="The GovLab"
-  />
-
-  <div class="curator-badge-overlay">
-    <CuratorBadge
-      name="Beth Simone Noveck"
-      title="Director at Burnes Center and the Govlab"
-      imageUrl="/images/Beth_Simone_Noveck.png"
-      moreText="More incredible things Beth done in in her"
+  <div class="home-page">
+    <Hero
+      title="Rebooting Democracy in the Age of AI"
+      subtitle="Insights on AI, Governance and Democracy"
+      firstPartnerLogo="/images/burnes-logo-blues-1.png"
+      firstPartnerAlt="Burnes Center for Social Change"
+      secondPartnerLogo="/images/the-govlab-logo-white.png"
+      secondPartnerAlt="The GovLab"
     />
-  </div>
 
-  <section class="page-layout">
-    <article
-      class="left-content"
-      :class="{ 'search-active': showSearchResults }"
-    >
-      <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
-        <!-- Latest Posts Tab -->
-        <template #latest-posts>
-          <article class="left-content">
-            <!-- Show GlobalSearch when searching -->
-            <GlobalSearch v-if="showSearchResults" />
+    <div class="curator-badge-overlay">
+      <CuratorBadge
+        name="Beth Simone Noveck"
+        title="Director at Burnes Center and the Govlab"
+        imageUrl="/images/Beth_Simone_Noveck.png"
+        moreText="More incredible things Beth done in in her"
+      />
+    </div>
 
-            <!-- Otherwise show regular posts -->
-            <template v-else>
-              <!-- Loading state -->
-              <div v-if="isLoading" class="loading">
-                <div class="loading-spinner"></div>
-                <div>Loading blogs...</div>
-              </div>
-              <div v-else-if="postData.length > 0" class="blog-list">
-                <PostCard
-                  v-for="(post, index) in postData"
-                  :key="post.id"
-                  :tag="getPostTag(post)"
-                  :titleText="post.title"
-                  :author="getAuthorName(post)"
-                  :excerpt="post.excerpt || ''"
-                  :imageUrl="getImageUrl(post.image)"
-                  :date="new Date(post.date)"
-                  :tagIndex="index % 5"
-                  variant="default"
-                  :hoverable="true"
-                />
-              </div>
+    <section class="page-layout">
+      <article
+        class="left-content"
+        :class="{ 'search-active': showSearchResults }"
+      >
+        <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
+          <!-- Latest Posts Tab -->
+          <template #latest-posts>
+            <article class="left-content">
+              <!-- Show GlobalSearch when searching -->
+              <GlobalSearch v-if="showSearchResults" />
 
-              <div v-else class="no-blogs">No blog posts found.</div>
+              <!-- Otherwise show regular posts -->
+              <template v-else>
+                <!-- Loading state -->
+                <div v-if="isLoading" class="loading">
+                  <div class="loading-spinner"></div>
+                  <div>Loading blogs...</div>
+                </div>
+                <div v-else-if="postData.length > 0" class="blog-list">
+                  <PostCard
+                    v-for="(post, index) in postData"
+                    :key="post.id"
+                    :tag="getPostTag(post)"
+                    :titleText="post.title"
+                    :author="getAuthorName(post)"
+                    :excerpt="post.excerpt || ''"
+                    :imageUrl="getImageUrl(post.image)"
+                    :date="new Date(post.date)"
+                    :tagIndex="index % 5"
+                    variant="default"
+                    :hoverable="true"
+                  />
+                </div>
 
-              <div class="btn-mid" v-if="allBlogsLoaded && !showSearchResults">
-                <Button
-                  variant="primary"
-                  width="123px"
-                  height="36px"
-                  @click="handleBtnClick"
+                <div v-else class="no-blogs">No blog posts found.</div>
+
+                <div
+                  class="btn-mid"
+                  v-if="allBlogsLoaded && !showSearchResults"
                 >
-                  View All
-                </Button>
-              </div>
-            </template>
-          </article>
-        </template>
-      </TabSwitch>
-    </article>
+                  <Button
+                    variant="primary"
+                    width="123px"
+                    height="36px"
+                    @click="handleBtnClick"
+                  >
+                    View All
+                  </Button>
+                </div>
+              </template>
+            </article>
+          </template>
+        </TabSwitch>
+      </article>
 
-    <!-- Sidebar -->
-    <aside class="right-content">
-      <!-- Blog collaborators container -->
-      <div class="blog-collaborators-container">
-      <Text
-        as="h2"
-        fontFamily="inter"
-        size="lg"
-        color="text-primary"
-        weight="bold"
-        align="center"
-        margin="md"
-      >
-        Our Collaborators
-      </Text>
-        <!-- Row 1 -->
-        <div class="collaborators-row">
-          <AuthorBadge
-            name="Audrey Tang"
-            title="Taiwan’s first Minister of Digital Affairs"
-            imageUrl="/images/Audrey_Tang.png"
-          />
-          <AuthorBadge
-            name="Dane Gambrell"
-            title="Fellow at Burnes Center"
-            imageUrl="/images/Dane_Gambrell.png"
-          />
-        </div>
-        
-        <!-- Row 2 -->
-        <div class="collaborators-row">
-          <AuthorBadge
-            name="Tiago C. Peixoto"
-            title="Senior Public Sector Specialist"
-            imageUrl="/images/Tiago_C_Peixoto.png"
-          />
-          <AuthorBadge
-            name="Autumn Sloboda"
-            title="Fellow at Burnes Center"
-            imageUrl="/images/Autumn_Sloboda.png"
-          />
-        </div>
-        
-        <!-- Row 3 -->
-        <div class="collaborators-row">
-          <AuthorBadge
-            name="Giulio Quaggiotto"
-            title="Head of UNDP’s Strategic Innovation unit"
-            imageUrl="/images/Giulio_Quaggiotto.png"
-          />
-          <AuthorBadge
-            name="Jacob Kemp"
-            title="AI & Social Impact Fellow"
-            imageUrl="/images/Jacob_Kemp.png"
-          />
-        </div>
-        
-        <!-- Row 4 -->
-        <div class="collaborators-row">
-          <AuthorBadge
-            name="Seth Harris"
-            title="Senior Fellow at Burnes Center"
-            imageUrl="/images/Seth_Harris.png"
-          />
-          <AuthorBadge
-            name="Hannah Hetzer"
-            title="Fellow at Burnes Center"
-            imageUrl="/images/Hannah_Hetzer.png"
-          />
-        </div>
-        
-        <!-- Row 5 -->
-        <div class="collaborators-row">
-          <AuthorBadge
-            name="Bonnie McGilpin"
-            title="Fellow at Burnes Center"
-            imageUrl="/images/Bonnie_McGilpin.png"
-          />
-          <AuthorBadge
-            name="Anirudh Dinesh"
-            title="Fellow at Burnes Center"
-            imageUrl="/images/Anirudh_Dinesh.png"
-          />
-        </div>
-      </div>
-      <Text
-        as="a"
-        href="/team"
-        size="sm"
-        fontFamily="inria"
-        align="center"
-        weight="extrabold"
-        lineHeight="normal"
-        color="link-primary"
-      >
-        Meet Our Team
-      </Text>
+      <!-- Sidebar -->
+      <aside class="right-content">
+        <!-- Blog collaborators container -->
+        <div class="blog-collaborators-container">
+          <Text
+            as="h2"
+            fontFamily="inter"
+            size="lg"
+            color="text-primary"
+            weight="bold"
+            align="center"
+            margin="md"
+          >
+            Our Collaborators
+          </Text>
+          <!-- Row 1 -->
+          <div class="collaborators-row">
+            <AuthorBadge
+              name="Audrey Tang"
+              title="Taiwan’s first Minister of Digital Affairs"
+              imageUrl="/images/Audrey_Tang.png"
+            />
+            <AuthorBadge
+              name="Dane Gambrell"
+              title="Fellow at Burnes Center"
+              imageUrl="/images/Dane_Gambrell.png"
+            />
+          </div>
 
-      <div v-if="isEventLoading" class="loading">Loading event...</div>
-      <UpcomingCard
-        v-else-if="latestEvent"
-        :title="latestEvent.title"
-        :excerpt="latestEvent.description"
-        :imageUrl="getImageUrl(latestEvent.thumbnail)"
-        :onClick="() => latestEvent && handleEventClick(latestEvent)"
-      />
+          <!-- Row 2 -->
+          <div class="collaborators-row">
+            <AuthorBadge
+              name="Tiago C. Peixoto"
+              title="Senior Public Sector Specialist"
+              imageUrl="/images/Tiago_C_Peixoto.png"
+            />
+            <AuthorBadge
+              name="Autumn Sloboda"
+              title="Fellow at Burnes Center"
+              imageUrl="/images/Autumn_Sloboda.png"
+            />
+          </div>
 
-      <SignUpButtonWidget
-        title="Sign Up for updates"
-        placeholder="Enter your email"
-        buttonLabel="Sign Up"
-        backgroundColor="#F9F9F9"
-      />
+          <!-- Row 3 -->
+          <div class="collaborators-row">
+            <AuthorBadge
+              name="Giulio Quaggiotto"
+              title="Head of UNDP’s Strategic Innovation unit"
+              imageUrl="/images/Giulio_Quaggiotto.png"
+            />
+            <AuthorBadge
+              name="Jacob Kemp"
+              title="AI & Social Impact Fellow"
+              imageUrl="/images/Jacob_Kemp.png"
+            />
+          </div>
 
-      
-      <InnovateUsCard 
-        description="InnovateUS provides no-cost, at-your-own pace, and live learning. on data, digital, innovation, and AI skills for public service professionals like you."
-        buttonLabel="Learn more"
-        learnMoreUrl="https://innovateus.example.com"
-      />
-    </aside>
-  </section>
-</div>
+          <!-- Row 4 -->
+          <div class="collaborators-row">
+            <AuthorBadge
+              name="Seth Harris"
+              title="Senior Fellow at Burnes Center"
+              imageUrl="/images/Seth_Harris.png"
+            />
+            <AuthorBadge
+              name="Hannah Hetzer"
+              title="Fellow at Burnes Center"
+              imageUrl="/images/Hannah_Hetzer.png"
+            />
+          </div>
+
+          <!-- Row 5 -->
+          <div class="collaborators-row">
+            <AuthorBadge
+              name="Bonnie McGilpin"
+              title="Fellow at Burnes Center"
+              imageUrl="/images/Bonnie_McGilpin.png"
+            />
+            <AuthorBadge
+              name="Anirudh Dinesh"
+              title="Fellow at Burnes Center"
+              imageUrl="/images/Anirudh_Dinesh.png"
+            />
+          </div>
+        </div>
+        <Text
+          as="a"
+          href="/team"
+          size="sm"
+          fontFamily="inria"
+          align="center"
+          weight="extrabold"
+          lineHeight="normal"
+          color="link-primary"
+        >
+          Meet Our Team
+        </Text>
+
+        <div v-if="isEventLoading" class="loading">Loading event...</div>
+        <UpcomingCard
+          v-else-if="latestEvent"
+          :title="latestEvent.title"
+          :excerpt="latestEvent.description"
+          :imageUrl="getImageUrl(latestEvent.thumbnail)"
+          :onClick="() => latestEvent && handleEventClick(latestEvent)"
+        />
+
+        <SignUpButtonWidget
+          title="Sign Up for updates"
+          placeholder="Enter your email"
+          buttonLabel="Sign Up"
+          backgroundColor="#F9F9F9"
+        />
+
+        <InnovateUsCard
+          description="InnovateUS provides no-cost, at-your-own pace, and live learning. on data, digital, innovation, and AI skills for public service professionals like you."
+          buttonLabel="Learn more"
+          learnMoreUrl="https://innovateus.example.com"
+        />
+      </aside>
+    </section>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -205,8 +207,6 @@ import useSearchState from "../composables/useSearchState";
 
 // Get search state
 const { showSearchResults } = useSearchState();
-
-// Get Algolia client
 
 // Constants
 const directusUrl = "https://content.thegovlab.com";
