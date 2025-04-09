@@ -45,8 +45,12 @@
             <!--meta info-->
             <div v-if="date || author" class="postcard__meta">
               <Text size="xs" weight="normal" fontStyle="italic">
+                Published on
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  formatDate(date)
+                }}</Text>
                 <template v-if="author">
-                  Published by
+                  by
                   <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
                     author
                   }}</Text>
