@@ -22,7 +22,7 @@
       :titleText="item.title || 'Untitled'"
       :excerpt="truncateText(item.excerpt ?? '', 150)"
       :author="getItemAuthor(item)"
-      :imageUrl="item.imageUrl || '/images/exampleImage.png'"          
+      :imageUrl="getImageUrl(item.image)"
       :hoverable="true"
     />
     </div>
@@ -59,7 +59,7 @@ type SearchResultItem = {
   Tags?: string[];
   author?: string;
   authors?: any[];
-  imageUrl?: string;
+  image?: string;
 };
 
 const indexName = "reboot test data";
@@ -72,6 +72,16 @@ const showLoadMore = computed(() =>
   typedSearchResults.value.length > 0 &&
   typedSearchResults.value.length < totalResults.value
 );
+
+const directusUrl = "https://content.thegovlab.com"; 
+
+function getImageUrl(imageId: string | null | undefined, width: number = 512): string {
+  if (!imageId) {
+    return "/images/exampleImage.png";
+  }
+  return `${directusUrl}/assets/${imageId}?width=${width}`;
+}
+
 
 const router = useRouter();
 
