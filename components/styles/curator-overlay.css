@@ -7,3 +7,9 @@
     margin-top: -38px; /* Move up to overlap with the hero section */
     z-index: 20; /* Ensure badge appears above other elements */
   }
+
+  @media (max-width: 768px) {
+    .curator-badge-overlay {
+     display: none;
+    }
+  }
