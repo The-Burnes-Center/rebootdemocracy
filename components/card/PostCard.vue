@@ -46,7 +46,7 @@
             <div v-if="date || author" class="postcard__meta">
               <Text size="xs" weight="normal" fontStyle="italic">
                 <template v-if="author">
-                  Piblished by
+                  Published by
                   <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
                     author
                   }}</Text>
