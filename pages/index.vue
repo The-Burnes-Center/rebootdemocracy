@@ -32,8 +32,11 @@
 
             <!-- Otherwise show regular posts -->
             <template v-else>
-              <div v-if="isLoading" class="loading">Loading blogs...</div>
-
+              <!-- Loading state -->
+              <div v-if="isLoading" class="loading">
+                <div class="loading-spinner"></div>
+                <div>Loading blogs...</div>
+              </div>
               <div v-else-if="postData.length > 0" class="blog-list">
                 <PostCard
                   v-for="(post, index) in postData"

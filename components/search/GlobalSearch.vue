@@ -1,11 +1,11 @@
 <template>
   <div class="search-results-container" v-if="showSearchResults">
-    <!-- <div class="search-results-header">
-      <h2>Search Keyword: "{{ currentSearchQuery }}"</h2>
-    </div> -->
 
     <!-- Loading state -->
-      <div v-if="isSearching" class="loading">Loading blogs...</div>
+          <div v-if="isSearching" class="loading">
+            <div class="loading-spinner"></div>
+            <div>Loading blogs...</div>
+          </div>
 
     <!-- No results message -->
     <div v-else-if="typedSearchResults.length === 0" class="no-results">
