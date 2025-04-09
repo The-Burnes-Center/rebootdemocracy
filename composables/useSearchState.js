@@ -1,6 +1,6 @@
 // src/composables/useSearchState.js
 import { ref, readonly } from 'vue'
-
+import { useAlgoliaRef } from '@nuxtjs/algolia'
 // Shared search state
 const searchQuery = ref('')
 const showSearchResults = ref(false)
