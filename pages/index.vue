@@ -13,7 +13,7 @@
     <CuratorBadge
       name="Beth Simone Noveck"
       title="Director at Burnes Center and the Govlab"
-      imageUrl="/images/exampleImage.png"
+      imageUrl="/images/Beth_Simone_Noveck.png"
       moreText="More incredible things Beth done in in her"
     />
   </div>
