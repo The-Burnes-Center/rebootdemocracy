@@ -27,6 +27,11 @@ export default defineConfig({
       },
     }),
     vue(),
+        rollupOptions: {
+      external: [
+        /^\/\.netlify\/images/, // Mark Netlify image URLs as external
+      ],
+    },
     Pages({
       dirs: 'src/pages',
       extensions: ['vue', 'ts'],
@@ -47,6 +52,13 @@ export default defineConfig({
         },
     })
   ],
+  build: {
+    rollupOptions: {
+      external: [
+        /^\/\.netlify\/images/, // Mark Netlify image URLs as external
+      ],
+    },
+  },
   server: {
     host: '0.0.0.0',
     // hmr: {
