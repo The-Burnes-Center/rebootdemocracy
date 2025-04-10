@@ -166,6 +166,40 @@ function handleBtnClick() {
   router.push("/blog");
 }
 
+<<<<<<< Updated upstream
+=======
+const fetchAllTags = async (): Promise<Category[]> => {
+  try {
+    isTagsLoading.value = true;
+    const { directus, readItems } = useDirectusClient();
+    
+    // Fetch all published posts to get their tags
+    const response = await directus.request(
+      readItems('reboot_democracy_blog', {
+        limit: -1, // Get all posts, if API supports it
+        fields: ['Tags'], // Only fetch the Tags field
+        filter: {
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _lte: '$NOW(-5 hours)' } }
+          ]
+        }
+      })
+    );
+    
+    // Extract all tags with their counts
+    const blogPosts = response as BlogPost[];
+    return extractTagsWithCounts(blogPosts);
+  } catch (error) {
+    console.error('Error fetching all tags:', error);
+    return [];
+  } finally {
+    isTagsLoading.value = false;
+  }
+};
+
+// Extract tags from blog posts
+>>>>>>> Stashed changes
 const extractTagsWithCounts = (posts: BlogPost[]) => {
   if (!posts || posts.length === 0) {
     return [];
@@ -195,29 +229,55 @@ const extractTagsWithCounts = (posts: BlogPost[]) => {
   return tagArray.sort((a, b) => b.count - a.count);
 };
 
+<<<<<<< Updated upstream
 
 // Data loading
 async function loadAllBlogs() {
+=======
+const loadInitialData = async () => {
+>>>>>>> Stashed changes
   try {
     isLoading.value = true;
     const featured = await fetchFeaturedBlog();
     const allBlogs = await fetchBlogData();
 
+<<<<<<< Updated upstream
     const remainingBlogs = featured
       ? allBlogs.filter((blog) => blog.id !== featured.id)
       : allBlogs;
+=======
+    // Run these requests in parallel
+    const [eventData, blogData, allTags] = await Promise.all([
+      fetchLatestPastEvent(),
+      fetchBlogData(),
+      fetchAllTags() // New function to get all tags
+    ]);
+>>>>>>> Stashed changes
 
     postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
     allBlogsLoaded.value = true;
 
+<<<<<<< Updated upstream
     tags.value = extractTagsWithCounts(postData.value);
+=======
+    // Set blog data for display
+    postData.value = blogData;
+    
+    // Set tags from ALL blog posts, not just current page
+    tags.value = allTags;
+>>>>>>> Stashed changes
   } catch (error) {
     console.error("Failed to load blogs:", error);
     postData.value = [];
     tags.value = [];
   } finally {
     isLoading.value = false;
+<<<<<<< Updated upstream
     isTagsLoading.value = false; 
+=======
+    isEventLoading.value = false;
+    // Note: isTagsLoading is already set to false in fetchAllTags
+>>>>>>> Stashed changes
   }
 }
 
