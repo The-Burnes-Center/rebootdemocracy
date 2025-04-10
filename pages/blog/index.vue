@@ -22,10 +22,15 @@
     <article class="left-content">
       <div v-if="isLoading" class="loading">Loading blogs...</div>
 
-      <!-- Display blogs when loaded -->
-      <div v-else-if="postData.length > 0" class="blog-list">
+      <!-- Show Clear Filter button when category is selected -->
+      <div v-if="selectedCategory" class="filter-actions">
+        <Button variant="secondary" size="small" @click="clearCategoryFilter">Clear Filter</Button>
+      </div>
+
+      <!-- Display filtered blogs when loaded -->
+      <div v-if="!isLoading && displayedPosts.length > 0" class="blog-list">
         <PostCard
-          v-for="(post, index) in postData"
+          v-for="(post, index) in displayedPosts"
           :key="post.id"
           :tag="getPostTag(post)"
           :titleText="post.title"
@@ -39,15 +44,20 @@
         />
       </div>
       <!-- No blogs found message -->
-      <div v-else class="no-blogs">No blog posts found.</div>
-      <div class="btn-mid">
+      <div v-else-if="!isLoading" class="no-blogs">
+        {{ selectedCategory ? `No posts found in category "${selectedCategory}"` : 'No blog posts found.' }}
+      </div>
+      
+      <!-- Show More button appears when there are more posts to load -->
+      <div v-if="!isLoading && hasMorePosts" class="btn-mid">
         <Button
           variant="primary"
           width="123px"
           height="36px"
-          @click="handleBtnClick"
-          >View All</Button
+          @click="loadMorePosts"
         >
+          Show More
+        </Button>
       </div>
     </article>
 
@@ -60,13 +70,19 @@
         weight="bold"
         align="left"
       >
-        Category</Text
-      >
+        Category
+      </Text>
 
       <!-- Display list of categories with post counts -->
       <div v-if="isTagsLoading" class="loading-tags">Loading categories...</div>
       <div v-else class="category-list">
-        <div v-for="tag in tags" :key="tag.id" class="category-item">
+        <div 
+          v-for="tag in tags" 
+          :key="tag.id" 
+          class="category-item"
+          :class="{ 'category-item--active': selectedCategory === tag.name }"
+          @click="selectCategory(tag.name)"
+        >
           <ListCategory :title="tag.name" :number="tag.count" />
         </div>
       </div>
@@ -101,13 +117,18 @@ import { useDirectusClient } from '~/composables/useDirectusClient';
 // Constants
 const directusUrl = "https://content.thegovlab.com";
 const router = useRouter();
+const POSTS_PER_PAGE = 7; // Number of posts to display initially and load more
 
 // State
-const postData = ref<BlogPost[]>([]);
+const allPosts = ref<BlogPost[]>([]); // All blog posts
+const filteredPosts = ref<BlogPost[]>([]); // Posts filtered by current category
+const displayedPosts = ref<BlogPost[]>([]); // Posts currently displayed
 const isLoading = ref(true);
 const latestEvent = ref<Event | null>(null);
 const isEventLoading = ref(true);
 const dataFetchError = ref<string | null>(null);
+const selectedCategory = ref<string | null>(null);
+const currentPage = ref(1);
 
 // Category state
 interface Category {
@@ -117,6 +138,12 @@ interface Category {
 }
 const tags = ref<Category[]>([]);
 const isTagsLoading = ref(true);
+
+// Computed property to check if there are more posts to load
+const hasMorePosts = computed(() => {
+  const currentSource = selectedCategory.value ? filteredPosts.value : allPosts.value;
+  return displayedPosts.value.length < currentSource.length;
+});
 
 // Methods
 function getImageUrl(image: any, width: number = 512): string {
@@ -149,30 +176,93 @@ const handleEventClick = (event: Event | null) => {
 };
 
 const handleBtnClick = () => {
-  router.push("/blog"); // Assuming there's a /blog route for all blogs
+  router.push("/blog"); // Navigate to all blogs page
 };
 
-// New function to fetch all tags with their counts
-const fetchAllTags = async (): Promise<Category[]> => {
+// Function to load more posts (pagination)
+const loadMorePosts = () => {
+  if (!hasMorePosts.value) return;
+  
+  currentPage.value++;
+  const startIndex = (currentPage.value - 1) * POSTS_PER_PAGE;
+  const endIndex = startIndex + POSTS_PER_PAGE;
+  
+  // Get posts from either filtered list or all posts
+  const sourceList = selectedCategory.value ? filteredPosts.value : allPosts.value;
+  const newPosts = sourceList.slice(startIndex, endIndex);
+  
+  displayedPosts.value = [...displayedPosts.value, ...newPosts];
+};
+
+// Category selection handlers
+const selectCategory = (category: string) => {
+  selectedCategory.value = category;
+  
+  // Filter all posts by the selected category
+  filteredPosts.value = allPosts.value.filter(post => 
+    post.Tags && Array.isArray(post.Tags) && post.Tags.includes(category)
+  );
+  
+  // Reset pagination and show first page of filtered posts
+  currentPage.value = 1;
+  displayedPosts.value = filteredPosts.value.slice(0, POSTS_PER_PAGE);
+  
+  // Optionally, scroll to top when changing categories
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const clearCategoryFilter = () => {
+  selectedCategory.value = null;
+  filteredPosts.value = [];
+  
+  // Reset to initial page of all posts
+  currentPage.value = 1;
+  displayedPosts.value = allPosts.value.slice(0, POSTS_PER_PAGE);
+};
+
+// Function to fetch all blog posts
+const fetchAllBlogPosts = async (): Promise<BlogPost[]> => {
   try {
     const { directus, readItems } = useDirectusClient();
     
-    // Fetch all published posts to get their tags
+    const filter = {
+      _and: [
+        { status: { _eq: 'published' } },
+        { date: { _lte: '$NOW(-5 hours)' } }
+      ]
+    };
+    
     const response = await directus.request(
       readItems('reboot_democracy_blog', {
         limit: -1, // Get all posts, if API supports it
-        fields: ['Tags'], // Only fetch the Tags field
-        filter: {
-          _and: [
-            { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW(-5 hours)' } }
-          ]
-        }
+        sort: ['-date'], // Sort by date descending
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
+        ],
+        filter
       })
     );
     
+    return response as BlogPost[];
+  } catch (error) {
+    console.error('Error fetching all blog posts:', error);
+    return [];
+  }
+};
+
+// Function to fetch all tags with their counts
+const fetchAllTags = async (): Promise<Category[]> => {
+  try {
+    const blogPosts = await fetchAllBlogPosts();
+    allPosts.value = blogPosts;
+    
+    // Set the initially displayed posts (first page)
+    displayedPosts.value = blogPosts.slice(0, POSTS_PER_PAGE);
+    
     // Extract all tags with their counts
-    const blogPosts = response as BlogPost[];
     return extractTagsWithCounts(blogPosts);
   } catch (error) {
     console.error('Error fetching all tags:', error);
@@ -210,27 +300,23 @@ const extractTagsWithCounts = (posts: BlogPost[]) => {
   return tagArray.sort((a, b) => b.count - a.count);
 };
 
-// Load all required data concurrently
+// Load all required data
 const loadInitialData = async () => {
   try {
     isLoading.value = true;
     isEventLoading.value = true;
     isTagsLoading.value = true;
 
-    // Fetch event, blog data, and all tags in parallel
-    const [eventData, blogData, allTags] = await Promise.all([
+    // Fetch event data and all tags (which includes fetching all posts)
+    const [eventData, allTags] = await Promise.all([
       fetchLatestPastEvent(),
-      fetchBlogData(),
-      fetchAllTags() // Use the new function to get all tags
+      fetchAllTags()
     ]);
 
     // Set event data
     latestEvent.value = Array.isArray(eventData)
       ? null
       : (eventData as Event | null);
-
-    // Set blog data
-    postData.value = blogData;
     
     // Set all tags from all blog posts
     tags.value = allTags;
@@ -246,3 +332,33 @@ const loadInitialData = async () => {
 
 onMounted(loadInitialData);
 </script>
+
+<style scoped>
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.category-item {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.category-item:hover {
+  background-color: #f5f5f5;
+}
+
+.category-item--active {
+  background-color: #e6f0ff;
+  font-weight: bold;
+}
+
+.loading-tags {
+  padding: 1rem;
+  text-align: center;
+  color: #666;
+}
+</style>
