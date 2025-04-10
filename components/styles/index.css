@@ -19,6 +19,7 @@
 @import "./blog-collaborators-container.css";
 @import "./footer.css";
 @import "./quote.css";  
+@import "./blogpage.css";
 
 :root {
   --font-inter: "Inter", sans-serif;

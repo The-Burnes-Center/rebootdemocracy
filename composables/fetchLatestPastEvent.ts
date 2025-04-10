@@ -40,7 +40,6 @@ export async function fetchLatestPastEvent(seriesTitle?: string): Promise<Event 
       })
     );
 
-    console.log('Latest past event response:', response);
     
     return response && response.length > 0 ? (response[0] as Event) : null;
   } catch (error) {
@@ -82,8 +81,6 @@ export async function fetchUpcomingEvent(seriesTitle?: string): Promise<Event | 
         filter
       })
     );
-
-    console.log('Upcoming event response:', response);
 
     return response && response.length > 0 ? (response[0] as Event) : null;
   } catch (error) {

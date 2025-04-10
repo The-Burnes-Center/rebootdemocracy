@@ -5,6 +5,7 @@
     :variant="'default'"
     :hoverable="hoverable"
     class="desktop-view"
+    @click="$emit('click')"
   >
     <section class="postcard__container">
       <!--image-->
@@ -69,6 +70,7 @@
     :variant="'default'"
     :hoverable="hoverable"
     class="mobile-view"
+    @click="$emit('click')"
   >
     <section class="postcard__container">
       <!--image-->
@@ -155,6 +157,8 @@ const props = withDefaults(defineProps<PostCardProps>(), {
   variant: "default",
   hoverable: false,
 });
+
+const emit = defineEmits(['click']);
 
 const formatDate = (dateValue: Date | string) => {
   if (!dateValue) return "unknown date";

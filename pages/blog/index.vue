@@ -40,6 +40,7 @@
               :tagIndex="index % 5"
               variant="default"
               :hoverable="true"
+              @click="navigateToBlogPost(post)"
             />
           </div>
 
@@ -126,6 +127,15 @@ const latestEvent = ref<Event | null>(null);
 const isEventLoading = ref(true);
 const isFutureEvent = ref(true);
 const allBlogsLoaded = ref(false);
+
+const navigateToBlogPost = (post: BlogPost) => {
+  if (post.slug) {
+    router.push(`/blog/${post.slug}`);
+  } else {
+    console.error('Cannot navigate: Blog post has no slug', post);
+  }
+};
+
 
 // Category state
 interface Category {

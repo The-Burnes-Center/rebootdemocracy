@@ -37,6 +37,7 @@ const SizeToRem = {
   "2xl": "1.5rem", // 24px
   "3xl": "1.875rem", // 30px
   "4xl": "2rem", // 32px
+  "5xl": "2.25rem", // 36px
 } as const;
 
 // Element-specific default sizes
@@ -101,6 +102,7 @@ const lineHeights = {
   relaxed: "1.75", // 28px
   loose: "2", // 32px
   "extra-loose": "2.4", // 40px
+  "super-loose": "2.8125" // 45px
 } as const;
 
 const marginSizes = {

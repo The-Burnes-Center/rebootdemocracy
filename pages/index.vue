@@ -22,7 +22,7 @@
         <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
           <!-- Latest Posts Tab -->
           <template #latest-posts>
-            <article class="left-content">
+            <article class="left-content-blog">
               <!--               
                <blockquote class="quote-block">
               " AI in a manner that fosters public trust and confidence while protecting
@@ -54,6 +54,7 @@
                     :tagIndex="index % 5"
                     variant="default"
                     :hoverable="true"
+                    @click="navigateToBlogPost(post)"
                   />
                 </div>
 
@@ -235,6 +236,14 @@ const editionNumber = computed(() => {
   if (!latestWeeklyNews.value?.edition) return DEFAULT_EDITION;
   return String(latestWeeklyNews.value.edition).replace(/\D/g, "");
 });
+
+const navigateToBlogPost = (post: BlogPost) => {
+  if (post.slug) {
+    route.push(`/blog/${post.slug}`);
+  } else {
+    console.error('Cannot navigate: Blog post has no slug', post);
+  }
+};
 
 const weeklyNewsUrl = computed(
   () => `https://rebootdemocracy.ai/newsthatcaughtoureye/${editionNumber.value}`
