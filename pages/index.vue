@@ -22,10 +22,8 @@
         <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
           <!-- Latest Posts Tab -->
           <template #latest-posts>
-            
             <article class="left-content">
-
-<!--               
+              <!--               
                <blockquote class="quote-block">
               " AI in a manner that fosters public trust and confidence while protecting
               privacy, civil rights, civil liberties, and American values."
@@ -34,7 +32,7 @@
 
               <!-- Show GlobalSearch when searching -->
               <GlobalSearch v-if="showSearchResults" />
-              
+
               <!-- Otherwise show regular posts -->
               <template v-else>
                 <!-- Loading state -->
@@ -42,7 +40,7 @@
                   <div class="loading-spinner"></div>
                   <div>Loading blogs...</div>
                 </div>
-                
+
                 <div v-else-if="postData.length > 0" class="blog-list">
                   <PostCard
                     v-for="(post, index) in postData"
