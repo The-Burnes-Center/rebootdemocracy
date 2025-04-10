@@ -1,6 +1,6 @@
 // src/composables/useSearchState.js
 import { ref, readonly } from 'vue'
-// Shared search state
+
 const searchQuery = ref('')
 const showSearchResults = ref(false)
 const searchResults = ref([])
@@ -28,6 +28,7 @@ export default function useSearchState() {
     searchQuery.value = query
     showSearchResults.value = query.trim().length > 0
     currentPage.value = 0;
+    
     if (query.trim().length > 0 && indexNames.value.length > 0) {
       isSearching.value = true
       try {
@@ -35,13 +36,16 @@ export default function useSearchState() {
           const index = algoliaClient.initIndex(indexName)
           return index.search(query, {
             page: currentPage.value,
-            hitsPerPage: 4
+            hitsPerPage: 2
           })
         })
+        
         const results = await Promise.all(searchPromises)
-       let combinedHits = []
+        
+        let combinedHits = []
         let combinedTotalHits = 0
-      results.forEach((result, i) => {
+        
+        results.forEach((result, i) => {
           const hitsWithSource = result.hits.map(hit => ({
             ...hit,
             _sourceIndex: indexNames.value[i]
@@ -64,40 +68,55 @@ export default function useSearchState() {
     }
   }
 
- const loadMoreResults = async () => {
-  if (!searchQuery.value || indexNames.value.length === 0) return;
-
-  isSearching.value = true
-  try {
-    currentPage.value += 1
-    const pageToLoad = currentPage.value
-
-    const searchPromises = indexNames.value.map(indexName => {
-      const index = algoliaClient.initIndex(indexName)
-      return index.search(searchQuery.value, {
-        page: pageToLoad,
-        hitsPerPage: 4
+  const loadMoreResults = async () => {
+    // Don't proceed if there's no search query or no indices to search
+    if (!searchQuery.value || indexNames.value.length === 0) return;
+    
+    // Don't load more if already searching
+    if (isSearching.value) return;
+    
+    isSearching.value = true
+    
+    try {
+      // Increment the page number
+      currentPage.value += 1
+      
+      const searchPromises = indexNames.value.map(indexName => {
+        const index = algoliaClient.initIndex(indexName)
+        return index.search(searchQuery.value, {
+          page: currentPage.value,
+          hitsPerPage: 2
+        })
       })
-    })
-
-    const results = await Promise.all(searchPromises)
-    let newHits = []
-
-    results.forEach((result, i) => {
-      const hitsWithSource = result.hits.map(hit => ({
-        ...hit,
-        _sourceIndex: indexNames.value[i]
-      }))
-      newHits = [...newHits, ...hitsWithSource]
-    })
-
-    searchResults.value = [...searchResults.value, ...newHits]
-  } catch (error) {
-    console.error('Error loading more results:', error)
-  } finally {
-    isSearching.value = false
+      
+      const results = await Promise.all(searchPromises)
+      
+      // Check if we got any new hits
+      const hasNewHits = results.some(result => result.hits.length > 0)
+      
+      if (hasNewHits) {
+        let newHits = []
+        
+        results.forEach((result, i) => {
+          const hitsWithSource = result.hits.map(hit => ({
+            ...hit,
+            _sourceIndex: indexNames.value[i]
+          }))
+          
+          newHits = [...newHits, ...hitsWithSource]
+        })
+        
+        // Append new hits to existing results
+        searchResults.value = [...searchResults.value, ...newHits]
+      } else {
+        console.log('No more results available')
+      }
+    } catch (error) {
+      console.error('Error loading more results:', error)
+    } finally {
+      isSearching.value = false
+    }
   }
-}
 
   const toggleSearchVisibility = (visible) => {
     showSearchResults.value = visible
@@ -119,7 +138,7 @@ export default function useSearchState() {
     updateSearchQuery,
     toggleSearchVisibility,
     setIndexName,
-    setIndexNames, // New method
+    setIndexNames, 
     getAlgoliaClient,
     loadMoreResults,
     totalResults: readonly(totalResults),
