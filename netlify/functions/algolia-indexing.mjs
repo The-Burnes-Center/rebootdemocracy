@@ -8,7 +8,7 @@ global.TextDecoder = TextDecoder;
 const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID;
 const ALGOLIA_ADMIN_API_KEY = process.env.ALGOLIA_ADMIN_API_KEY;
 const ALGOLIA_INDEX_NAME = process.env.ALGOLIA_INDEX_NAME;
-const DIRECTUS_URL = "https://dev.thegovlab.com";
+const DIRECTUS_URL = process.env.DIRECTUS_URL;
 const DIRECTUS_AUTH_TOKEN = process.env.DIRECTUS_AUTH_TOKEN;
 
 const client = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY);
