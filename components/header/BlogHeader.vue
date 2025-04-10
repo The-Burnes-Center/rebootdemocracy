@@ -1,7 +1,15 @@
 <template>
   <header class="header-content__section">
     <div class="header__logo">
-      <slot name="logo">reboot_democracy.ai</slot>
+        <div class="hero__partner hero__first-partner">
+          <img
+            src="/images/burnes-logo-blues-1.png"
+            alt="Burnes Center for Social Change"
+          />
+        </div>
+        <div class="hero__partner hero__second-partner">
+          <img src="/images/the-govlab-logo-white.png" alt="The GovLab" />
+      </div>
     </div>
     <!-- Mobile menu toggle -->
     <div class="mobile-menu-toggle" @click="toggleMobileMenu" v-if="isMobile">
@@ -91,27 +99,27 @@ const toggleMobileMenu = (): void => {
 };
 
 const menuItems: MenuItem[] = [
-  { label: "About", name: "about", to: "/" },
+   { label: "Home", name: "home", to: "/" },
   { label: "Blog", name: "blog", to: "/blog" },
   { label: "Events", name: "events", to: "/events" },
+  {
+    label: "About",
+    name: "about",
+    children: [
+      { label: "About Us", name: "about us", to: "/about" },
+      { label: "Our Team", name: "projects", to: "/team" },
+  ]
+  },
   {
     label: "Our Work",
     name: "work",
     children: [
-      {
-        label: "About Beth Noveck",
-        name: "research",
-        to: "/our-work/research",
-      },
-      {
-        label: "University Teachings",
-        name: "projects",
-        to: "/our-work/projects",
-      },
+      { label: "About Beth Noveck", name: "research", to: "/our-work/research" },
+      { label: "University Teachings", name: "projects", to: "/our-work/projects" },
       { label: "Engagements", name: "partners", to: "/our-work/partners" },
     ],
   },
-  { label: "Sign up", name: "signup", to: "/signup" },
+  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup" },
 ];
 
 // Check if we're on mobile

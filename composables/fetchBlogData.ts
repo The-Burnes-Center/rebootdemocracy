@@ -76,3 +76,37 @@ export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
     return null;
   }
 }
+
+export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
+  const { directus, readItems } = useDirectusClient();
+  
+  try {
+    const filter = {
+      _and: [
+        { slug: { _eq: slug } },
+        { status: { _eq: 'published' } },
+        { date: { _lte: '$NOW(-5 hours)' } }
+      ]
+    };
+    
+    const response = await directus.request(
+      readItems('reboot_democracy_blog', {
+        limit: 1,
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
+        ],
+        filter
+      })
+    );
+    
+    const blogs = response as BlogPost[];
+    
+    return blogs.length ? blogs[0] : null;
+  } catch (error) {
+    console.error(`Error fetching blog with slug ${slug}:`, error);
+    return null;
+  }
+}

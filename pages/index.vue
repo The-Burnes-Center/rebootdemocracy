@@ -22,7 +22,8 @@
         <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
           <!-- Latest Posts Tab -->
           <template #latest-posts>
-            <article class="left-content">
+            <article class="left-content-blog">
+
               <!-- Show GlobalSearch when searching -->
               <GlobalSearch v-if="showSearchResults" />
 
@@ -33,6 +34,7 @@
                   <div class="loading-spinner"></div>
                   <div>Loading blogs...</div>
                 </div>
+
                 <div v-else-if="postData.length > 0" class="blog-list">
                   <PostCard
                     v-for="(post, index) in postData"
@@ -46,6 +48,7 @@
                     :tagIndex="index % 5"
                     variant="default"
                     :hoverable="true"
+                    @click="navigateToBlogPost(post)"
                   />
                 </div>
 
@@ -179,7 +182,6 @@
           :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
         />
 
-
         <SignUpButtonWidget
           title="Sign Up for updates"
           placeholder="Enter your email"
@@ -228,6 +230,14 @@ const editionNumber = computed(() => {
   if (!latestWeeklyNews.value?.edition) return DEFAULT_EDITION;
   return String(latestWeeklyNews.value.edition).replace(/\D/g, "");
 });
+
+const navigateToBlogPost = (post: BlogPost) => {
+  if (post.slug) {
+    route.push(`/blog/${post.slug}`);
+  } else {
+    console.error('Cannot navigate: Blog post has no slug', post);
+  }
+};
 
 const weeklyNewsUrl = computed(
   () => `https://rebootdemocracy.ai/newsthatcaughtoureye/${editionNumber.value}`
@@ -342,12 +352,9 @@ const loadEventData = async () => {
 // Load all required data concurrently
 const loadInitialData = async () => {
   try {
-    const promises: [
-      Promise<BlogPost[] | []>,
-      Promise<WeeklyNews | null>
-    ] = [
+    const promises: [Promise<BlogPost[] | []>, Promise<WeeklyNews | null>] = [
       activeTab.value === 0 ? fetchBlogData() : Promise.resolve([]),
-      fetchLatestWeeklyNews()
+      fetchLatestWeeklyNews(),
     ];
 
     const [blogData, weeklyNewsData] = await Promise.all(promises);
@@ -368,11 +375,9 @@ const loadInitialData = async () => {
   }
 };
 
-
 // Lifecycle hooks
 onMounted(async () => {
   await loadInitialData();
-  await loadEventData(); 
+  await loadEventData();
 });
-
 </script>
