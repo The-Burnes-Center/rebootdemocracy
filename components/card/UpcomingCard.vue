@@ -16,7 +16,7 @@
             color="text-primary"
             class="upcomingcard__tag"
           >
-            Upcoming Event
+             {{ cardTitle || 'Upcoming Event' }}
           </Text>
           <Text
             as="span"
@@ -30,7 +30,7 @@
           </Text>
 
           <Button variant="primary" width="123px" height="36px" @click="onClick"
-            >Register</Button
+            >  {{ buttonLabel || 'Register' }}</Button
           >
         </div>
       </div>
@@ -67,7 +67,7 @@
             color="text-primary"
             class="upcomingcard__tag"
           >
-            Upcoming Event
+            {{ cardTitle || 'Upcoming Event' }}
           </Text>
           <Text
             as="span"
@@ -93,7 +93,7 @@
       </div>
             <div class="upcomingcard__mobile-button">
         <Button variant="primary" width="100%" @click="onClick" class="base__button base__button--primary">
-          <span class="base__btn-slot">Register</span>
+          <span class="base__btn-slot">{{ buttonLabel || 'Register' }}</span>
         </Button>
       </div>
     </div>
@@ -108,6 +108,8 @@ interface UpcomingCardProps {
   backgroundColor?: string;
   tagColor?: string;
   onClick?: () => void;
+  buttonLabel?: string;     
+  cardTitle?: string; 
 }
 
 const props = withDefaults(defineProps<UpcomingCardProps>(), {
