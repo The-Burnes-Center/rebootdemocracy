@@ -73,7 +73,7 @@ import {
 } from "vue-instantsearch/vue3/es";
 import useSearchState from "../../composables/useSearchState.js";
 
-const indexName = "reboot test data";
+const indexName = "reboot_democracy_blog";
 
 
 const { updateSearchQuery, setIndexName, getAlgoliaClient } = useSearchState();

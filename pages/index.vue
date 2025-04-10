@@ -198,8 +198,6 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { BlogPost, Author, Event, WeeklyNews } from "@/types/index.ts";
-// Import the new useSearchState composable
-import useSearchState from "../composables/useSearchState";
 
 // Get search state
 const { showSearchResults } = useSearchState();
@@ -290,7 +288,6 @@ const loadAllBlogs = async () => {
     // First, get featured blog
     const featured = await fetchFeaturedBlog();
     featuredBlog.value = featured;
-    console.log("Featured blog:", featured);
 
     // Then get the rest of the blogs
     const allBlogs = await fetchBlogData();
