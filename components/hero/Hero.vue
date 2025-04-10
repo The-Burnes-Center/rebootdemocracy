@@ -45,7 +45,7 @@ import {
 } from "vue-instantsearch/vue3/es";
 
 const primaryIndex = "reboot_democracy_blog";
-const indices = [primaryIndex, "reboot-news-that-caught-our-eye-test"];
+const indices = [primaryIndex, "reboot_democracy_weekly_news"];
 
 const { updateSearchQuery, setIndexNames, getAlgoliaClient } = useSearchState();
 const algoliaClient = getAlgoliaClient();

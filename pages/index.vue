@@ -170,12 +170,15 @@
 
         <div v-if="isEventLoading" class="loading">Loading event...</div>
         <UpcomingCard
-          v-else-if="latestEvent"
+          v-if="latestEvent"
           :title="latestEvent.title"
           :excerpt="latestEvent.description"
           :imageUrl="getImageUrl(latestEvent.thumbnail)"
-          :onClick="() => latestEvent && handleEventClick(latestEvent)"
+          :onClick="() => handleEventClick(latestEvent)"
+          :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
+          :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
         />
+
 
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -198,6 +201,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { BlogPost, Author, Event, WeeklyNews } from "@/types/index.ts";
+import { fetchUpcomingEvent } from "~/composables/fetchLatestPastEvent";
 
 // Get search state
 const { showSearchResults } = useSearchState();
@@ -217,6 +221,7 @@ const latestWeeklyNews = ref<WeeklyNews | null>(null);
 const dataFetchError = ref<string | null>(null);
 const featuredBlog = ref<BlogPost | null>(null);
 const allBlogsLoaded = ref(false);
+const isFutureEvent = ref(true);
 
 // Computed
 const editionNumber = computed(() => {
@@ -315,47 +320,59 @@ const handleTabChange = (index: number, name: string) => {
   }
 };
 
+const loadEventData = async () => {
+  try {
+    let event = await fetchUpcomingEvent();
+
+    if (event) {
+      isFutureEvent.value = true;
+      latestEvent.value = event;
+    } else {
+      event = await fetchLatestPastEvent();
+      isFutureEvent.value = false;
+      latestEvent.value = event;
+    }
+  } catch (error) {
+    console.error("Failed to load event:", error);
+  } finally {
+    isEventLoading.value = false;
+  }
+};
+
 // Load all required data concurrently
 const loadInitialData = async () => {
   try {
-    // Always fetch weekly news and event data
-    const promises: (
-      | Promise<BlogPost[]>
-      | Promise<Event | null>
-      | Promise<WeeklyNews | null>
-    )[] = [fetchLatestPastEvent(), fetchLatestWeeklyNews()];
+    const promises: [
+      Promise<BlogPost[] | []>,
+      Promise<WeeklyNews | null>
+    ] = [
+      activeTab.value === 0 ? fetchBlogData() : Promise.resolve([]),
+      fetchLatestWeeklyNews()
+    ];
 
-    // Only fetch blog data if we're on the first tab
-    if (activeTab.value === 0) {
-      promises.unshift(fetchBlogData());
-      isLoading.value = true;
-    } else {
-      promises.unshift(Promise.resolve([]));
+    const [blogData, weeklyNewsData] = await Promise.all(promises);
+
+    if (activeTab.value === 0 && Array.isArray(blogData)) {
+      postData.value = blogData;
     }
 
-    const [blogData, eventData, weeklyNewsData] = await Promise.all(promises);
-
-    // Process results
-    if (activeTab.value === 0) {
-      postData.value = Array.isArray(blogData) ? blogData : [];
-    }
-
-    latestEvent.value = Array.isArray(eventData)
-      ? null
-      : (eventData as Event | null);
     latestWeeklyNews.value =
-      Array.isArray(weeklyNewsData) || !(weeklyNewsData as WeeklyNews)?.edition
-        ? null
-        : (weeklyNewsData as WeeklyNews);
+      weeklyNewsData && (weeklyNewsData as WeeklyNews)?.edition
+        ? weeklyNewsData
+        : null;
   } catch (error) {
     console.error("Error loading initial data:", error);
     dataFetchError.value = "Failed to load content. Please try again later.";
   } finally {
     isLoading.value = false;
-    isEventLoading.value = false;
   }
 };
 
+
 // Lifecycle hooks
-onMounted(loadInitialData);
+onMounted(async () => {
+  await loadInitialData();
+  await loadEventData(); 
+});
+
 </script>
