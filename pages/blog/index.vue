@@ -1,131 +1,113 @@
 <template>
   <div class="all-posts-page">
-    <Hero
-      title="Rebooting Democracy in the Age of AI"
-      subtitle="Insights on AI, Governance and Democracy"
-    />
+  <Hero
+    title="Rebooting Democracy in the Age of AI"
+    subtitle="Insights on AI, Governance and Democracy"
+    firstPartnerLogo="/images/burnes-logo-blues-1.png"
+    firstPartnerAlt="Burnes Center for Social Change"
+    secondPartnerLogo="/images/the-govlab-logo-white.png"
+    secondPartnerAlt="The GovLab"
+  />
 
     <div class="curator-badge-overlay">
-      <CuratorBadge
-        name="Beth Simone Noveck"
-        title="Director at Burnes Center and the Govlab"
-        imageUrl="/images/Beth_Simone_Noveck.png"
-        moreText="More incredible things Beth done in in her"
-      />
-    </div>
-
-    <section class="page-layout">
-      <!-- Main content -->
-      <article class="left-content" :class="{ 'search-active': showSearchResults }">
-        <GlobalSearch v-if="showSearchResults" />
-
-        <template v-else>
-          <!-- Loading state -->
-          <div v-if="isLoading" class="loading">
-            <div class="loading-spinner"></div>
-            <div>Loading blogs...</div>
-          </div>
-
-          <!-- Blog list -->
-          <div v-else-if="postData.length > 0" class="blog-list">
-            <PostCard
-              v-for="(post, index) in postData"
-              :key="post.id"
-              :tag="getPostTag(post)"
-              :titleText="post.title"
-              :author="getAuthorName(post)"
-              :excerpt="post.excerpt || ''"
-              :imageUrl="getImageUrl(post.image)"
-              :date="new Date(post.date)"
-              :tagIndex="index % 5"
-              variant="default"
-              :hoverable="true"
-            />
-          </div>
-
-          <!-- No blogs found -->
-          <div v-else class="no-blogs">No blog posts found.</div>
-
-          <!-- View All button -->
-          <div class="btn-mid" v-if="allBlogsLoaded">
-            <Button
-              variant="primary"
-              width="123px"
-              height="36px"
-              @click="handleBtnClick"
-            >
-              View All
-            </Button>
-          </div>
-        </template>
-      </article>
-
-      <!-- Sidebar -->
-      <aside class="right-content">
-        <Text
-          as="h2"
-          fontFamily="inter"
-          size="lg"
-          color="text-primary"
-          weight="bold"
-          align="left"
-        >
-          Category
-        </Text>
-
-        <!-- Categories -->
-        <div v-if="isTagsLoading" class="loading-tags">
-          Loading categories...
-        </div>
-        <div v-else class="category-list">
-          <div v-for="tag in tags" :key="tag.id" class="category-item">
-            <ListCategory :title="tag.name" :number="tag.count" />
-          </div>
-        </div>
-
-        <!-- Event Card -->
-        <div v-if="isEventLoading" class="loading">Loading event...</div>
-        <UpcomingCard
-          v-if="latestEvent"
-          :title="latestEvent.title"
-          :excerpt="latestEvent.description"
-          :imageUrl="getImageUrl(latestEvent.thumbnail)"
-          :onClick="() => handleEventClick(latestEvent)"
-          :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
-          :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
-        />
-
-        <!-- Sign up widget -->
-        <SignUpButtonWidget
-          title="Sign Up for updates"
-          placeholder="Enter your email"
-          buttonLabel="Sign Up"
-          backgroundColor="#F9F9F9"
-        />
-      </aside>
-    </section>
+    <CuratorBadge
+      name="Beth Simone Noveck"
+      title="Director at Burnes Center and the Govlab"
+      imageUrl="/images/Beth_Simone_Noveck.png"
+      moreText="More incredible things Beth done in in her"
+    />
   </div>
+
+  <section class="page-layout">
+    <article class="left-content">
+      <div v-if="isLoading" class="loading">Loading blogs...</div>
+
+      <!-- Display blogs when loaded -->
+      <div v-else-if="postData.length > 0" class="blog-list">
+        <PostCard
+          v-for="(post, index) in postData"
+          :key="post.id"
+          :tag="getPostTag(post)"
+          :titleText="post.title"
+          :author="getAuthorName(post)"
+          :excerpt="post.excerpt || ''"
+          :imageUrl="getImageUrl(post.image)"
+          :date="new Date(post.date)"
+          :tagIndex="index % 5"
+          variant="default"
+          :hoverable="true"
+        />
+      </div>
+      <!-- No blogs found message -->
+      <div v-else class="no-blogs">No blog posts found.</div>
+      <div class="btn-mid">
+        <Button
+          variant="primary"
+          width="123px"
+          height="36px"
+          @click="handleBtnClick"
+          >View All</Button
+        >
+      </div>
+    </article>
+
+    <aside class="right-content">
+      <Text
+        as="h2"
+        fontFamily="inter"
+        size="lg"
+        color="text-primary"
+        weight="bold"
+        align="left"
+      >
+        Category</Text
+      >
+
+      <!-- Display list of categories with post counts -->
+      <div v-if="isTagsLoading" class="loading-tags">Loading categories...</div>
+      <div v-else class="category-list">
+        <div v-for="tag in tags" :key="tag.id" class="category-item">
+          <ListCategory :title="tag.name" :number="tag.count" />
+        </div>
+      </div>
+
+      <!-- Event section with loading state -->
+      <div v-if="isEventLoading" class="loading">Loading event...</div>
+      <UpcomingCard
+        v-else-if="latestEvent"
+        :title="latestEvent.title"
+        :excerpt="latestEvent.description"
+        :imageUrl="getImageUrl(latestEvent.thumbnail)"
+        :onClick="() => latestEvent && handleEventClick(latestEvent)"
+      />
+
+      <SignUpButtonWidget
+        title="Sign Up for updates"
+        placeholder="Enter your email"
+        buttonLabel="Sign Up"
+        backgroundColor="#F9F9F9"
+      />
+    </aside>
+  </section>
+</div>  
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
-import { fetchUpcomingEvent } from "~/composables/fetchLatestPastEvent";
+import { useDirectusClient } from '~/composables/useDirectusClient';
 
 // Constants
 const directusUrl = "https://content.thegovlab.com";
 const router = useRouter();
-const { showSearchResults } = useSearchState();
-
 
 // State
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
 const latestEvent = ref<Event | null>(null);
 const isEventLoading = ref(true);
-const isFutureEvent = ref(true);
-const allBlogsLoaded = ref(false);
+const dataFetchError = ref<string | null>(null);
 
 // Category state
 interface Category {
@@ -135,8 +117,6 @@ interface Category {
 }
 const tags = ref<Category[]>([]);
 const isTagsLoading = ref(true);
-
-// No need for filtered posts since we're just displaying categories
 
 // Methods
 function getImageUrl(image: any, width: number = 512): string {
@@ -148,24 +128,59 @@ function getImageUrl(image: any, width: number = 512): string {
   return `${directusUrl}/assets/${image.filename_disk}?width=${width}`;
 }
 
-function getAuthorName(post: BlogPost): string {
-  const author = post.authors?.[0]?.team_id;
-  return author ? `${author.First_Name} ${author.Last_Name}` : "Unknown Author";
-}
+const getAuthorName = (post: BlogPost): string => {
+  if (post.authors?.[0]?.team_id) {
+    const author = post.authors[0].team_id;
+    return `${author.First_Name} ${author.Last_Name}`;
+  }
+  return "Unknown Author";
+};
 
-function getPostTag(post: BlogPost): string {
+const getPostTag = (post: BlogPost): string => {
   return post.Tags?.[0] || "Blog";
-}
+};
 
-function handleEventClick(event: Event | null) {
-  if (!event?.link) return;
+const handleEventClick = (event: Event | null) => {
+  if (!event?.link) {
+    console.log("Event clicked, but no URL available");
+    return;
+  }
   window.open(event.link, "_blank");
-}
+};
 
-function handleBtnClick() {
-  router.push("/blog");
-}
+const handleBtnClick = () => {
+  router.push("/blog"); // Assuming there's a /blog route for all blogs
+};
 
+// New function to fetch all tags with their counts
+const fetchAllTags = async (): Promise<Category[]> => {
+  try {
+    const { directus, readItems } = useDirectusClient();
+    
+    // Fetch all published posts to get their tags
+    const response = await directus.request(
+      readItems('reboot_democracy_blog', {
+        limit: -1, // Get all posts, if API supports it
+        fields: ['Tags'], // Only fetch the Tags field
+        filter: {
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _lte: '$NOW(-5 hours)' } }
+          ]
+        }
+      })
+    );
+    
+    // Extract all tags with their counts
+    const blogPosts = response as BlogPost[];
+    return extractTagsWithCounts(blogPosts);
+  } catch (error) {
+    console.error('Error fetching all tags:', error);
+    return [];
+  }
+};
+
+// Extract tags from blog posts
 const extractTagsWithCounts = (posts: BlogPost[]) => {
   if (!posts || posts.length === 0) {
     return [];
@@ -195,53 +210,39 @@ const extractTagsWithCounts = (posts: BlogPost[]) => {
   return tagArray.sort((a, b) => b.count - a.count);
 };
 
-
-// Data loading
-async function loadAllBlogs() {
+// Load all required data concurrently
+const loadInitialData = async () => {
   try {
     isLoading.value = true;
-    const featured = await fetchFeaturedBlog();
-    const allBlogs = await fetchBlogData();
+    isEventLoading.value = true;
+    isTagsLoading.value = true;
 
-    const remainingBlogs = featured
-      ? allBlogs.filter((blog) => blog.id !== featured.id)
-      : allBlogs;
+    // Fetch event, blog data, and all tags in parallel
+    const [eventData, blogData, allTags] = await Promise.all([
+      fetchLatestPastEvent(),
+      fetchBlogData(),
+      fetchAllTags() // Use the new function to get all tags
+    ]);
 
-    postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
-    allBlogsLoaded.value = true;
+    // Set event data
+    latestEvent.value = Array.isArray(eventData)
+      ? null
+      : (eventData as Event | null);
 
-    tags.value = extractTagsWithCounts(postData.value);
+    // Set blog data
+    postData.value = blogData;
+    
+    // Set all tags from all blog posts
+    tags.value = allTags;
   } catch (error) {
-    console.error("Failed to load blogs:", error);
-    postData.value = [];
-    tags.value = [];
+    console.error("Error loading initial data:", error);
+    dataFetchError.value = "Failed to load content. Please try again later.";
   } finally {
     isLoading.value = false;
-    isTagsLoading.value = false; 
-  }
-}
-
-
-async function loadEventData() {
-  try {
-    let event = await fetchUpcomingEvent();
-    if (event) {
-      isFutureEvent.value = true;
-      latestEvent.value = event;
-    } else {
-      event = await fetchLatestPastEvent();
-      isFutureEvent.value = false;
-      latestEvent.value = event;
-    }
-  } catch (error) {
-    console.error("Failed to load event:", error);
-  } finally {
     isEventLoading.value = false;
+    isTagsLoading.value = false;
   }
-}
+};
 
-onMounted(async () => {
-  await loadAllBlogs();
-  await loadEventData();
-});
+onMounted(loadInitialData);
 </script>
