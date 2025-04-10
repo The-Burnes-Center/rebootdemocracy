@@ -54,8 +54,6 @@ export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
       ]
     };
 
-    console.log("Fetching featured blog with filter:", filter);
-
     const response = await directus.request(
       readItems('reboot_democracy_blog', {
         limit: 1,
@@ -71,7 +69,6 @@ export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
     );
 
     const blogs = response as BlogPost[];
-    console.log("Featured blog response:", blogs);
 
     return blogs.length ? blogs[0] : null;
   } catch (error) {
