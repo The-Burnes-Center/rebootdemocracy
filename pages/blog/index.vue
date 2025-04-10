@@ -181,6 +181,15 @@ const selectedCategory = ref<string | null>(null);
 const selectedAuthor = ref<string | null>(null);
 const currentPage = ref(1);
 
+const navigateToBlogPost = (post: BlogPost) => {
+  if (post.slug) {
+    router.push(`/blog/${post.slug}`);
+  } else {
+    console.error('Cannot navigate: Blog post has no slug', post);
+  }
+};
+
+
 // Category state
 interface Category {
   id: string;

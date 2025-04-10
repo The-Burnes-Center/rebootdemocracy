@@ -5,12 +5,13 @@
       <div class="loading-spinner"></div>
       <div>Loading results...</div>
     </div>
-    
+
     <!-- No results message -->
     <div v-else-if="typedSearchResults.length === 0" class="no-results">
-      No results found for "{{ currentSearchQuery }}". Try a different search term.
+      No results found for "{{ currentSearchQuery }}". Try a different search
+      term.
     </div>
-    
+
     <!-- Results list -->
     <div v-else class="blog-list-search">
       <div v-if="hasRebootResults" class="result-category">
@@ -24,10 +25,11 @@
           :author="getItemAuthor(item)"
           :imageUrl="getImageUrl(item.image)"
           :hoverable="true"
+          @click="navigateToBlogPost(item)"
         />
       </div>
-      
-       <div v-if="hasNewsResults" class="result-category">
+
+      <div v-if="hasNewsResults" class="result-category">
         <h3 class="result-category-title">News that caught our Eye</h3>
         <PostCard
           v-for="item in newsResults"
@@ -35,24 +37,25 @@
           :tag="getItemTag(item)"
           :titleText="getNewsTitle(item)"
           :excerpt="getNewsExcerpt(item)"
-          :author="getItemAuthor(item)"
+          :author="getNewsItemAuthor(item)"
           :imageUrl="'/images/exampleImage.png'"
           :date="getNewsDate(item)"
           :hoverable="true"
+          @click="() => openInNewTab(item.item?.url)"
         />
       </div>
     </div>
-    
+
     <!-- Simple pagination placeholder -->
     <div class="search-pagination" v-if="showLoadMore">
-      <Button 
-        variant="primary" 
-        width="150px" 
-        height="36px" 
+      <Button
+        variant="primary"
+        width="150px"
+        height="36px"
         @click="loadMoreResults"
         :disabled="isSearching"
       >
-        {{ isSearching ? 'Loading...' : 'Show More' }}
+        {{ isSearching ? "Loading..." : "Show More" }}
       </Button>
     </div>
   </div>
@@ -60,9 +63,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 import useSearchState from "../../composables/useSearchState.js";
 
-// Define type of a single search result item
+const router = useRouter();
+
 type SearchResultItem = {
   objectID: string;
   title?: string;
@@ -74,120 +79,119 @@ type SearchResultItem = {
   author?: string;
   authors?: any[];
   image?: string;
-  _sourceIndex?: string; 
-  date?: string | null; 
+  _sourceIndex?: string;
+  date?: string | null;
   edition?: string;
   item?: {
+    author?: string;
     excerpt?: string;
     title?: string;
     date?: string;
     id?: number;
-    url?: string;
+    url: string;
   };
   summary?: string;
 };
 
-// Get reactive state from the composable
-const { 
-  searchQuery, 
-  showSearchResults, 
-  searchResults, 
-  isSearching, 
-  loadMoreResults, 
-  totalResults
+const {
+  searchQuery,
+  showSearchResults,
+  searchResults,
+  isSearching,
+  loadMoreResults,
+  totalResults,
 } = useSearchState();
 
-// Computed & typed results
 const currentSearchQuery = computed(() => searchQuery.value);
 const typedSearchResults = computed(
   () => searchResults.value as unknown as SearchResultItem[]
 );
 
-// Separate results by source index
-const rebootResults = computed(() => 
-  typedSearchResults.value.filter(item => item._sourceIndex === "reboot_democracy_blog")
+const navigateToBlogPost = (item: SearchResultItem) => {
+  if (item.slug) {
+    router.push(`/blog/${item.slug}`);
+  } else {
+    console.error("Cannot navigate: item has no slug", item);
+  }
+};
+
+const openInNewTab = (url: string | undefined) => {
+  window.open(url, '_blank');
+};
+
+const rebootResults = computed(() =>
+  typedSearchResults.value.filter(
+    (item) => item._sourceIndex === "reboot_democracy_blog"
+  )
 );
 
-const newsResults = computed(() => 
-  typedSearchResults.value.filter(item => item._sourceIndex === "reboot_democracy_weekly_news")
+const newsResults = computed(() =>
+  typedSearchResults.value.filter(
+    (item) => item._sourceIndex === "reboot_democracy_weekly_news"
+  )
 );
 
 const hasRebootResults = computed(() => rebootResults.value.length > 0);
 const hasNewsResults = computed(() => newsResults.value.length > 0);
 
-// Compute whether to show "load more" button
-const showLoadMore = computed(() =>
-  !isSearching.value &&
-  typedSearchResults.value.length > 0 &&
-  typedSearchResults.value.length < totalResults.value
+const showLoadMore = computed(
+  () =>
+    !isSearching.value &&
+    typedSearchResults.value.length > 0 &&
+    typedSearchResults.value.length < totalResults.value
 );
 
-// Image URL helper
-const directusUrl = "https://content.thegovlab.com"; 
-function getImageUrl(imageId: string | null | undefined, width: number = 512): string {
-  if (!imageId) {
-    return "/images/exampleImage.png";
-  }
-  return `${directusUrl}/assets/${imageId}?width=${width}`;
+const directusUrl = "https://content.thegovlab.com";
+
+function getImageUrl(
+  imageId: string | null | undefined,
+  width: number = 512
+): string {
+  return imageId
+    ? `${directusUrl}/assets/${imageId}?width=${width}`
+    : "/images/exampleImage.png";
 }
 
-// Truncate helper
-const truncateText = (text: string, maxLength: number): string => {
+function truncateText(text: string, maxLength: number): string {
   return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
-};
+}
 
-// Extract tag
-const getItemTag = (item: SearchResultItem): string => {
+function getItemTag(item: SearchResultItem): string {
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    return "News that caught our eye"; 
+    return "News that caught our eye";
   }
-  return item.category || (item.Tags?.[0] ?? "Article");
-};
+  return item.category || item.Tags?.[0] || "Article";
+}
 
-// Extract author name
-const getItemAuthor = (item: SearchResultItem): string => {
+function getItemAuthor(item: SearchResultItem): string {
   if (typeof item.author === "string") return item.author;
   const authorObj = item.authors?.[0]?.team_id;
   if (authorObj?.First_Name && authorObj?.Last_Name) {
     return `${authorObj.First_Name} ${authorObj.Last_Name}`;
   }
   return item.authors?.[0]?.name ?? "Unknown Author";
-};
+}
 
-const getNewsTitle = (item: SearchResultItem): string => {
-  if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    // Try to use the inner item title if available
-    if (item.item?.title) {
-      return item.item.title;
-    }
-    // Fall back to the main title
-    return item.title || 'Untitled';
-  }
-  return item.title || 'Untitled';
-};
-
-const getNewsExcerpt = (item: SearchResultItem): string => {
-  if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    // Try to use the inner item excerpt if available
-    if (item.item?.excerpt) {
-      return truncateText(item.item.excerpt, 150);
-    }
-    // Fall back to the main excerpt
-    return truncateText(item.excerpt || item.summary || '', 150);
-  }
-  return truncateText(item.excerpt || '', 150);
-};
-
-const getNewsDate = (item: SearchResultItem): Date | undefined => {
-  if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    // Try to use the inner item date first
-    if (item.item?.date) {
-      return new Date(item.item.date);
-    }
-    // Fall back to main date
-    return item.date ? new Date(item.date) : undefined;
+function getNewsItemAuthor(item: SearchResultItem): string | undefined {
+  if (typeof item?.item?.author === "string") {
+    return item.item.author;
   }
   return undefined;
-};
-</script>
+}
 
+function getNewsTitle(item: SearchResultItem): string {
+  return item.item?.title || item.title || "Untitled";
+}
+
+function getNewsExcerpt(item: SearchResultItem): string {
+  return truncateText(
+    item.item?.excerpt || item.excerpt || item.summary || "",
+    150
+  );
+}
+
+function getNewsDate(item: SearchResultItem): Date | undefined {
+  const dateString = item.item?.date || item.date;
+  return dateString ? new Date(dateString) : undefined;
+}
+</script>
