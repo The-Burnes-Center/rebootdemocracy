@@ -5,7 +5,7 @@ import { VitePluginRadar } from "vite-plugin-radar";
 import ViteFonts from 'vite-plugin-fonts'
 import Pages from "vite-plugin-pages";
 
-// https://vitejs.dev/config
+// https://vitejs.dev/config/
 export default defineConfig({
   base: "/",
   assetsInclude: ['**/*.png'],
