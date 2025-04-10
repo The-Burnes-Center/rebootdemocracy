@@ -200,7 +200,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, nextTick} from "vue";
 import { useRouter } from "vue-router";
 import type { BlogPost, Event, WeeklyNews } from "@/types/index.ts";
 import { fetchUpcomingEvent } from "~/composables/fetchLatestPastEvent";
@@ -327,9 +327,19 @@ const loadBlogData = async (force = false) => {
 const handleTabChange = (index: number, name: string) => {
   activeTab.value = index;
   if (name === "latest-posts") {
-    loadBlogData(); 
+    loadBlogData();
   }
 };
+
+watch(activeTab, (newTabIndex) => {
+  if (newTabIndex === 0 && !isLoading.value) {
+    nextTick(() => {
+      if (!blogsInitialized.value) {
+        loadBlogData();
+      }
+    });
+  }
+});
 
 const loadEventData = async () => {
   try {

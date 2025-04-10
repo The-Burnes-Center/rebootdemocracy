@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, defineProps, defineEmits } from "vue";
+import { ref, onMounted, defineProps, defineEmits, nextTick } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -49,22 +49,28 @@ const emit = defineEmits<{
   (e: "tab-changed", index: number, name: string): void;
 }>();
 
-// Fix: Use a regular variable instead of .value reference
 const activeTab = ref(props.initialTab !== undefined ? props.initialTab : 0);
 const showContent = ref(true);
 
 function handleTabClick(tab: TabItem, index: number) {
   activeTab.value = index;
   emit("tab-changed", index, tab.name);
-
+  
   if (tab.url) {
-    setTimeout(() => {
-      if (tab.external) {
-        window.open(tab.url, "_blank");
-      } else {
-        router.push(tab.url);
-      }
-    }, 100);
+    // Open the URL
+    if (tab.external) {
+      window.open(tab.url, "_blank");
+      
+      // Reset to the first tab (Latest Posts) after a short delay
+      setTimeout(() => {
+        activeTab.value = 0;
+        nextTick(() => {
+          emit("tab-changed", 0, props.tabs[0].name);
+        });
+      }, 200);
+    } else {
+      router.push(tab.url);
+    }
   }
 }
 
