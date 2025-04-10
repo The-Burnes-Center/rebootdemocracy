@@ -18,6 +18,7 @@
 @import "./innovate-us-card.css";
 @import "./blog-collaborators-container.css";
 @import "./footer.css";
+@import "./quote.css";  
 
 :root {
   --font-inter: "Inter", sans-serif;

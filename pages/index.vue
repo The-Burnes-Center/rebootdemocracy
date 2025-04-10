@@ -22,10 +22,19 @@
         <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
           <!-- Latest Posts Tab -->
           <template #latest-posts>
+            
             <article class="left-content">
+
+<!--               
+               <blockquote class="quote-block">
+              " AI in a manner that fosters public trust and confidence while protecting
+              privacy, civil rights, civil liberties, and American values."
+              <span class="quote-block-footer">— John Smith, Software Engineer</span>
+            </blockquote> -->
+
               <!-- Show GlobalSearch when searching -->
               <GlobalSearch v-if="showSearchResults" />
-
+              
               <!-- Otherwise show regular posts -->
               <template v-else>
                 <!-- Loading state -->
@@ -33,6 +42,7 @@
                   <div class="loading-spinner"></div>
                   <div>Loading blogs...</div>
                 </div>
+                
                 <div v-else-if="postData.length > 0" class="blog-list">
                   <PostCard
                     v-for="(post, index) in postData"
@@ -178,7 +188,6 @@
           :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
           :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
         />
-
 
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -342,12 +351,9 @@ const loadEventData = async () => {
 // Load all required data concurrently
 const loadInitialData = async () => {
   try {
-    const promises: [
-      Promise<BlogPost[] | []>,
-      Promise<WeeklyNews | null>
-    ] = [
+    const promises: [Promise<BlogPost[] | []>, Promise<WeeklyNews | null>] = [
       activeTab.value === 0 ? fetchBlogData() : Promise.resolve([]),
-      fetchLatestWeeklyNews()
+      fetchLatestWeeklyNews(),
     ];
 
     const [blogData, weeklyNewsData] = await Promise.all(promises);
@@ -368,11 +374,9 @@ const loadInitialData = async () => {
   }
 };
 
-
 // Lifecycle hooks
 onMounted(async () => {
   await loadInitialData();
-  await loadEventData(); 
+  await loadEventData();
 });
-
 </script>
