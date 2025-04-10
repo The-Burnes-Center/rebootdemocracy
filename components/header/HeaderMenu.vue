@@ -11,7 +11,7 @@
         v-if="!item.children"
         :to="item.to"
         class="header-menu__item"
-        :target="item.external ? '_blank' : 'self'"
+        v-bind="item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}"
       >
         <span class="header-menu__label">{{ item.label }}</span>
       </NuxtLink>
