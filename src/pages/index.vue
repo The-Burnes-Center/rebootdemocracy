@@ -441,7 +441,7 @@ export default {
 
 <!-- Header Component -->
 <header-comp></header-comp>
-<img src="http://localhost:3001/.netlify/images?url=https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/4b15233a-16ed-4cef-8935-124455a382f0.png&w=500" />
+
 <!-- Hero Section -->
 <div class="hero">
     <video autoplay loop muted playsinline>
