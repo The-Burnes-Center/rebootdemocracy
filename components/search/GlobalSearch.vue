@@ -109,7 +109,7 @@ const rebootResults = computed(() =>
 );
 
 const newsResults = computed(() => 
-  typedSearchResults.value.filter(item => item._sourceIndex === "reboot-news-that-caught-our-eye-test")
+  typedSearchResults.value.filter(item => item._sourceIndex === "reboot_democracy_weekly_news")
 );
 
 const hasRebootResults = computed(() => rebootResults.value.length > 0);
@@ -138,7 +138,7 @@ const truncateText = (text: string, maxLength: number): string => {
 
 // Extract tag
 const getItemTag = (item: SearchResultItem): string => {
-  if (item._sourceIndex === "reboot-news-that-caught-our-eye-test") {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
     return "News that caught our eye"; 
   }
   return item.category || (item.Tags?.[0] ?? "Article");
@@ -155,7 +155,7 @@ const getItemAuthor = (item: SearchResultItem): string => {
 };
 
 const getNewsTitle = (item: SearchResultItem): string => {
-  if (item._sourceIndex === "reboot-news-that-caught-our-eye-test") {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
     // Try to use the inner item title if available
     if (item.item?.title) {
       return item.item.title;
@@ -167,7 +167,7 @@ const getNewsTitle = (item: SearchResultItem): string => {
 };
 
 const getNewsExcerpt = (item: SearchResultItem): string => {
-  if (item._sourceIndex === "reboot-news-that-caught-our-eye-test") {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
     // Try to use the inner item excerpt if available
     if (item.item?.excerpt) {
       return truncateText(item.item.excerpt, 150);
@@ -179,7 +179,7 @@ const getNewsExcerpt = (item: SearchResultItem): string => {
 };
 
 const getNewsDate = (item: SearchResultItem): Date | undefined => {
-  if (item._sourceIndex === "reboot-news-that-caught-our-eye-test") {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
     // Try to use the inner item date first
     if (item.item?.date) {
       return new Date(item.item.date);
