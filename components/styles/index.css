@@ -17,6 +17,7 @@
 @import "./search-component.css";
 @import "./innovate-us-card.css";
 @import "./blog-collaborators-container.css";
+@import "./footer.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
