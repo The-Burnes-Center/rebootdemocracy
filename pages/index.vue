@@ -202,7 +202,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import type { BlogPost, Author, Event, WeeklyNews } from "@/types/index.ts";
+import type { BlogPost, Event, WeeklyNews } from "@/types/index.ts";
 import { fetchUpcomingEvent } from "~/composables/fetchLatestPastEvent";
 
 // Get search state
@@ -224,6 +224,7 @@ const dataFetchError = ref<string | null>(null);
 const featuredBlog = ref<BlogPost | null>(null);
 const allBlogsLoaded = ref(false);
 const isFutureEvent = ref(true);
+const blogsInitialized = ref(false); 
 
 // Computed
 const editionNumber = computed(() => {
@@ -264,7 +265,6 @@ function getImageUrl(image: any, width: number = 512): string {
   if (!image?.filename_disk) {
     return "/images/exampleImage.png";
   }
-
   // Construct URL with width parameter
   return `${directusUrl}/assets/${image.filename_disk}?width=${width}`;
 }
@@ -293,27 +293,28 @@ const handleBtnClick = () => {
   route.push("/blog");
 };
 
-// Data loading functions
-const loadAllBlogs = async () => {
-  if (postData.value.length > 0) return;
-
+const loadBlogData = async (force = false) => {
+  // Skip if blogs are already loaded 
+  if (blogsInitialized.value && !force) return;
+  
   try {
     isLoading.value = true;
-
+    
     // First, get featured blog
     const featured = await fetchFeaturedBlog();
     featuredBlog.value = featured;
-
+    
     // Then get the rest of the blogs
     const allBlogs = await fetchBlogData();
-
+    
     // Exclude the featured one if it exists in allBlogs
     const remainingBlogs = featured
       ? allBlogs.filter((blog) => blog.id !== featured.id)
       : allBlogs;
-
+      
     postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
     allBlogsLoaded.value = true;
+    blogsInitialized.value = true;
   } catch (error) {
     console.error("Failed to load blogs:", error);
     dataFetchError.value = "Failed to load blog posts. Please try again later.";
@@ -326,14 +327,13 @@ const loadAllBlogs = async () => {
 const handleTabChange = (index: number, name: string) => {
   activeTab.value = index;
   if (name === "latest-posts") {
-    loadAllBlogs();
+    loadBlogData(); 
   }
 };
 
 const loadEventData = async () => {
   try {
     let event = await fetchUpcomingEvent();
-
     if (event) {
       isFutureEvent.value = true;
       latestEvent.value = event;
@@ -352,26 +352,15 @@ const loadEventData = async () => {
 // Load all required data concurrently
 const loadInitialData = async () => {
   try {
-    const promises: [Promise<BlogPost[] | []>, Promise<WeeklyNews | null>] = [
-      activeTab.value === 0 ? fetchBlogData() : Promise.resolve([]),
-      fetchLatestWeeklyNews(),
-    ];
-
-    const [blogData, weeklyNewsData] = await Promise.all(promises);
-
-    if (activeTab.value === 0 && Array.isArray(blogData)) {
-      postData.value = blogData;
+    latestWeeklyNews.value = await fetchLatestWeeklyNews();
+    
+    // Load blogs if we're on the latest-posts tab
+    if (activeTab.value === 0) {
+      await loadBlogData();
     }
-
-    latestWeeklyNews.value =
-      weeklyNewsData && (weeklyNewsData as WeeklyNews)?.edition
-        ? weeklyNewsData
-        : null;
   } catch (error) {
     console.error("Error loading initial data:", error);
     dataFetchError.value = "Failed to load content. Please try again later.";
-  } finally {
-    isLoading.value = false;
   }
 };
 
@@ -380,4 +369,5 @@ onMounted(async () => {
   await loadInitialData();
   await loadEventData();
 });
+
 </script>
