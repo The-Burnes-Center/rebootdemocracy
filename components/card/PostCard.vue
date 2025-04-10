@@ -44,20 +44,37 @@
             </BodyText>
 
             <!--meta info-->
-            <div v-if="date || author" class="postcard__meta">
-              <Text size="xs" weight="normal" fontStyle="italic">
+           <div v-if="date || author" class="postcard__meta">
+            <Text size="xs" weight="normal" fontStyle="italic">
+              <!-- If both date and author exist -->
+              <template v-if="date && author">
                 Published on
                 <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
                   formatDate(date)
                 }}</Text>
-                <template v-if="author">
-                  by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                    author
-                  }}</Text>
-                </template>
-              </Text>
-            </div>
+                by
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  author
+                }}</Text>
+              </template>
+              
+              <!-- If only date exists -->
+              <template v-else-if="date">
+                Published on
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  formatDate(date)
+                }}</Text>
+              </template>
+              
+              <!-- If only author exists -->
+              <template v-else-if="author">
+                Published by
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  author
+                }}</Text>
+              </template>
+            </Text>
+          </div>
           </div>
         </div>
       </div>
@@ -110,20 +127,37 @@
             </BodyText>
 
             <!--meta info-->
-            <div v-if="date || author" class="postcard__meta">
-              <Text size="xs" weight="normal" fontStyle="italic">
+           <div v-if="date || author" class="postcard__meta">
+            <Text size="xs" weight="normal" fontStyle="italic">
+              <!-- If both date and author exist -->
+              <template v-if="date && author">
                 Published on
                 <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
                   formatDate(date)
                 }}</Text>
-                <template v-if="author">
-                  by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                    author
-                  }}</Text>
-                </template>
-              </Text>
-            </div>
+                by
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  author
+                }}</Text>
+              </template>
+              
+              <!-- If only date exists -->
+              <template v-else-if="date">
+                Published on
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  formatDate(date)
+                }}</Text>
+              </template>
+              
+              <!-- If only author exists -->
+              <template v-else-if="author">
+                Published by
+                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  author
+                }}</Text>
+              </template>
+            </Text>
+          </div>
           </div>
         </div>
       </div>

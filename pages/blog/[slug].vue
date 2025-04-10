@@ -146,6 +146,13 @@ onMounted(async () => {
             </BodyText>
           </div>
 
+               
+               <blockquote class="quote-block">
+              " AI in a manner that fosters public trust and confidence while protecting
+              privacy, civil rights, civil liberties, and American values."
+              <span class="quote-block-footer">— John Smith, Software Engineer</span>
+            </blockquote> 
+
           <!-- Blog content -->
           <div class="blog-content-container">
             <div class="blog-content" v-html="blog.content"></div>
@@ -156,6 +163,12 @@ onMounted(async () => {
       <!-- Sidebar content -->
       <aside class="right-content-blog" v-if="blog">
         <!-- Author card -->
+        <AuthorCard
+          :author="blog.authors[0]"
+          :image="getImageUrl(blog.authors[0].team_id?.image)"
+          :name="getAuthorName(blog.authors[0].team_id)"
+          :bio="blog.authors[0].team_id?.bio"
+          />
 
         <!-- Sign up widget -->
         <SignUpButtonWidget

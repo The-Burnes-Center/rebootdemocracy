@@ -23,12 +23,6 @@
           <!-- Latest Posts Tab -->
           <template #latest-posts>
             <article class="left-content-blog">
-              <!--               
-               <blockquote class="quote-block">
-              " AI in a manner that fosters public trust and confidence while protecting
-              privacy, civil rights, civil liberties, and American values."
-              <span class="quote-block-footer">— John Smith, Software Engineer</span>
-            </blockquote> -->
 
               <!-- Show GlobalSearch when searching -->
               <GlobalSearch v-if="showSearchResults" />
