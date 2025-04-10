@@ -178,7 +178,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
    
 <!-- Header Component -->
 <header-comp></header-comp>
-
+<img src="http://localhost:3001/.netlify/images?url=https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/4b15233a-16ed-4cef-8935-124455a382f0.png&w=500" />
 <div class="blog-hero">
 
   <img v-if="postData[0] && postData[0].image" class="blog-img" :src= "this.directus._url+'assets/'+postData[0].image.id+'?width=800'" />

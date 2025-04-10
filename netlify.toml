@@ -14,6 +14,8 @@
   to = "/index.html"
   status = 200
 
+[images]
+  remote_images = ["https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"]
 
 [[headers]]
   for = "/*"
