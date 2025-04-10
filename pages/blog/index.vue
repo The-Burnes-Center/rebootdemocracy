@@ -74,7 +74,7 @@
       <div v-if="!isLoading && hasMorePosts" class="btn-mid">
         <Button
           variant="primary"
-          width="123px"
+          width="140px"
           height="36px"
           @click="loadMorePosts"
         >
