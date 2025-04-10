@@ -12,36 +12,20 @@
       term.
     </div>
 
-    <!-- Results list -->
+    <!-- Combined Results list -->
     <div v-else class="blog-list-search">
-      <div v-if="hasRebootResults" class="result-category">
-        <h3 class="result-category-title">Blogs</h3>
+      <div class="result-category">
         <PostCard
-          v-for="item in rebootResults"
+          v-for="item in mergedResults"
           :key="item.objectID"
           :tag="getItemTag(item)"
-          :titleText="item.title || 'Untitled'"
-          :excerpt="truncateText(item.excerpt ?? '', 150)"
+          :titleText="getItemTitle(item)"
+          :excerpt="getItemExcerpt(item)"
           :author="getItemAuthor(item)"
-          :imageUrl="getImageUrl(item.image)"
+          :imageUrl="getItemImageUrl(item)"
+          :date="getItemDate(item)"
           :hoverable="true"
-          @click="navigateToBlogPost(item)"
-        />
-      </div>
-
-      <div v-if="hasNewsResults" class="result-category">
-        <h3 class="result-category-title">News that caught our Eye</h3>
-        <PostCard
-          v-for="item in newsResults"
-          :key="item.objectID"
-          :tag="getItemTag(item)"
-          :titleText="getNewsTitle(item)"
-          :excerpt="getNewsExcerpt(item)"
-          :author="getNewsItemAuthor(item)"
-          :imageUrl="'/images/exampleImage.png'"
-          :date="getNewsDate(item)"
-          :hoverable="true"
-          @click="() => openInNewTab(item.item?.url)"
+          @click="handleItemClick(item)"
         />
       </div>
     </div>
@@ -85,6 +69,7 @@ type SearchResultItem = {
   item?: {
     author?: string;
     excerpt?: string;
+    category?: string;
     title?: string;
     date?: string;
     id?: number;
@@ -107,17 +92,10 @@ const typedSearchResults = computed(
   () => searchResults.value as unknown as SearchResultItem[]
 );
 
-const navigateToBlogPost = (item: SearchResultItem) => {
-  if (item.slug) {
-    router.push(`/blog/${item.slug}`);
-  } else {
-    console.error("Cannot navigate: item has no slug", item);
-  }
-};
-
-const openInNewTab = (url: string | undefined) => {
-  window.open(url, '_blank');
-};
+// Create merged results from both reboot and news results
+const mergedResults = computed(() => {
+  return typedSearchResults.value;
+});
 
 const rebootResults = computed(() =>
   typedSearchResults.value.filter(
@@ -143,27 +121,31 @@ const showLoadMore = computed(
 
 const directusUrl = "https://content.thegovlab.com";
 
-function getImageUrl(
-  imageId: string | null | undefined,
-  width: number = 512
-): string {
-  return imageId
-    ? `${directusUrl}/assets/${imageId}?width=${width}`
-    : "/images/exampleImage.png";
-}
-
-function truncateText(text: string, maxLength: number): string {
-  return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
-}
-
-function getItemTag(item: SearchResultItem): string {
+// Unified handlers for all item types
+function getItemTitle(item: SearchResultItem): string {
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    return "News that caught our eye";
+    return item.item?.title || item.title || "Untitled";
   }
-  return item.category || item.Tags?.[0] || "Article";
+  return item.title || "Untitled";
+}
+
+function getItemExcerpt(item: SearchResultItem): string {
+  const text =
+    item._sourceIndex === "reboot_democracy_weekly_news"
+      ? item.item?.excerpt || item.excerpt || item.summary || ""
+      : item.excerpt || "";
+
+  return truncateText(text, 150);
 }
 
 function getItemAuthor(item: SearchResultItem): string {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
+    if (typeof item?.item?.author === "string") {
+      return item.item.author;
+    }
+    return "Unknown Author";
+  }
+
   if (typeof item.author === "string") return item.author;
   const authorObj = item.authors?.[0]?.team_id;
   if (authorObj?.First_Name && authorObj?.Last_Name) {
@@ -172,26 +154,55 @@ function getItemAuthor(item: SearchResultItem): string {
   return item.authors?.[0]?.name ?? "Unknown Author";
 }
 
-function getNewsItemAuthor(item: SearchResultItem): string | undefined {
-  if (typeof item?.item?.author === "string") {
-    return item.item.author;
+function getItemImageUrl(item: SearchResultItem): string {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
+    return "/images/exampleImage.png";
   }
-  return undefined;
+
+  return item.image
+    ? `${directusUrl}/assets/${item.image}?width=512`
+    : "/images/exampleImage.png";
 }
 
-function getNewsTitle(item: SearchResultItem): string {
-  return item.item?.title || item.title || "Untitled";
-}
+function getItemDate(item: SearchResultItem): Date | undefined {
+  const dateString =
+    item._sourceIndex === "reboot_democracy_weekly_news"
+      ? item.item?.date || item.date
+      : item.date;
 
-function getNewsExcerpt(item: SearchResultItem): string {
-  return truncateText(
-    item.item?.excerpt || item.excerpt || item.summary || "",
-    150
-  );
-}
-
-function getNewsDate(item: SearchResultItem): Date | undefined {
-  const dateString = item.item?.date || item.date;
   return dateString ? new Date(dateString) : undefined;
+}
+
+function getItemTag(item: SearchResultItem): string {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
+    return item?.item?.category || "News that caught our eye";
+  }
+  return "Blog";
+}
+
+function handleItemClick(item: SearchResultItem): void {
+  if (item._sourceIndex === "reboot_democracy_weekly_news") {
+    openInNewTab(item.item?.url);
+  } else {
+    navigateToBlogPost(item);
+  }
+}
+
+function navigateToBlogPost(item: SearchResultItem) {
+  if (item.slug) {
+    router.push(`/blog/${item.slug}`);
+  } else {
+    console.error("Cannot navigate: item has no slug", item);
+  }
+}
+
+function openInNewTab(url: string | undefined) {
+  if (url) {
+    window.open(url, "_blank");
+  }
+}
+
+function truncateText(text: string, maxLength: number): string {
+  return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
 }
 </script>
