@@ -126,7 +126,7 @@ onBeforeUnmount(() => {
               class="blog-title"
               fontFamily="inria"
               lineHeight="super-loose"
-              style="{letter-spacing: normal}""
+              style="letter-spacing: normal;"
             >
               {{ blog.title }}
             </TitleText>
