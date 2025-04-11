@@ -11,11 +11,11 @@ const totalResults = ref(0)
 
 export default function useSearchState() {
   const algoliaClient = useAlgoliaRef()
-
+  
   const setIndexName = (name) => {
     indexNames.value = [name]
   }
-
+  
   const setIndexNames = (names) => {
     if (Array.isArray(names)) {
       indexNames.value = names
@@ -23,7 +23,7 @@ export default function useSearchState() {
       indexNames.value = [names]
     }
   }
-
+  
   const updateSearchQuery = async (query) => {
     searchQuery.value = query
     showSearchResults.value = query.trim().length > 0
@@ -67,7 +67,7 @@ export default function useSearchState() {
       searchResults.value = []
     }
   }
-
+  
   const loadMoreResults = async () => {
     // Don't proceed if there's no search query or no indices to search
     if (!searchQuery.value || indexNames.value.length === 0) return;
@@ -117,13 +117,22 @@ export default function useSearchState() {
       isSearching.value = false
     }
   }
-
+  
   const toggleSearchVisibility = (visible) => {
     showSearchResults.value = visible
     if (!visible) {
       searchQuery.value = ''
       searchResults.value = []
     }
+  }
+  
+  const resetSearch = () => {
+    searchQuery.value = ''
+    showSearchResults.value = false
+    searchResults.value = []
+    isSearching.value = false
+    currentPage.value = 0
+    totalResults.value = 0
   }
   
   const getAlgoliaClient = () => {
@@ -143,5 +152,6 @@ export default function useSearchState() {
     loadMoreResults,
     totalResults: readonly(totalResults),
     indexNames: readonly(indexNames),
+    resetSearch, 
   }
 }
