@@ -19,68 +19,75 @@
   </div>
 
   <section class="page-layout">
-    <article class="left-content">
-      <div v-if="isLoading" class="loading">Loading blogs...</div>
+    <article class="left-content" :class="{ 'search-active': showSearchResults }">
+      <!-- Show GlobalSearch when searching -->
+      <GlobalSearch v-if="showSearchResults" />
 
-      <!-- Results counter and filter controls in a fixed-height container -->
-      <div class="results-and-filter">
-        <div class="results-count">
-          <Text 
-            as="span" 
-            fontFamily="inter" 
-            size="base" 
-            color="text-primary" 
-            weight="medium"
-          >
-            Showing {{ displayedPosts.length }} of {{ filteredPosts.length }} results
-            <template v-if="selectedCategory">
-              in category "{{ selectedCategory }}"
-            </template>
-            <template v-if="selectedAuthor">
-              by author "{{ selectedAuthor }}"
-            </template>
-          </Text>
+      <!-- Otherwise show regular posts content -->
+      <template v-else>
+        <div v-if="isLoading" class="loading">Loading blogs...</div>
+
+        <!-- Results counter and filter controls in a fixed-height container -->
+        <div class="results-and-filter">
+          <div class="results-count">
+            <Text 
+              as="span" 
+              fontFamily="inter" 
+              size="base" 
+              color="text-primary" 
+              weight="medium"
+            >
+              Showing {{ displayedPosts.length }} of {{ filteredPosts.length }} results
+              <template v-if="selectedCategory">
+                in category "{{ selectedCategory }}"
+              </template>
+              <template v-if="selectedAuthor">
+                by author "{{ selectedAuthor }}"
+              </template>
+            </Text>
+          </div>
+          
+          <div v-if="selectedCategory || selectedAuthor" class="filter-actions">
+            <Button variant="secondary" size="small" @click="clearFilters">Clear Filter</Button>
+          </div>
+        </div>
+
+        <!-- Display filtered blogs when loaded -->
+        <div v-if="!isLoading && displayedPosts.length > 0" class="blog-list">
+          <PostCard
+            v-for="(post, index) in displayedPosts"
+            :key="post.id"
+            :tag="getPostTag(post)"
+            :titleText="post.title"
+            :author="getAuthorName(post)"
+            :excerpt="post.excerpt || ''"
+            :imageUrl="getImageUrl(post.image)"
+            :date="new Date(post.date)"
+            :tagIndex="index % 5"
+            variant="default"
+            :hoverable="true"
+            @click="navigateToBlogPost(post)"
+          />
+        </div>
+        <!-- No blogs found message -->
+        <div v-else-if="!isLoading" class="no-blogs">
+          <span v-if="selectedCategory">No posts found in category "{{ selectedCategory }}"</span>
+          <span v-else-if="selectedAuthor">No posts found by author "{{ selectedAuthor }}"</span>
+          <span v-else>No blog posts found.</span>
         </div>
         
-        <div v-if="selectedCategory || selectedAuthor" class="filter-actions">
-          <Button variant="secondary" size="small" @click="clearFilters">Clear Filter</Button>
+        <!-- Show More button appears when there are more posts to load -->
+        <div v-if="!isLoading && hasMorePosts" class="btn-mid">
+          <Button
+            variant="primary"
+            width="140px"
+            height="36px"
+            @click="loadMorePosts"
+          >
+            Show More
+          </Button>
         </div>
-      </div>
-
-      <!-- Display filtered blogs when loaded -->
-      <div v-if="!isLoading && displayedPosts.length > 0" class="blog-list">
-        <PostCard
-          v-for="(post, index) in displayedPosts"
-          :key="post.id"
-          :tag="getPostTag(post)"
-          :titleText="post.title"
-          :author="getAuthorName(post)"
-          :excerpt="post.excerpt || ''"
-          :imageUrl="getImageUrl(post.image)"
-          :date="new Date(post.date)"
-          :tagIndex="index % 5"
-          variant="default"
-          :hoverable="true"
-        />
-      </div>
-      <!-- No blogs found message -->
-      <div v-else-if="!isLoading" class="no-blogs">
-        <span v-if="selectedCategory">No posts found in category "{{ selectedCategory }}"</span>
-        <span v-else-if="selectedAuthor">No posts found by author "{{ selectedAuthor }}"</span>
-        <span v-else>No blog posts found.</span>
-      </div>
-      
-      <!-- Show More button appears when there are more posts to load -->
-      <div v-if="!isLoading && hasMorePosts" class="btn-mid">
-        <Button
-          variant="primary"
-          width="140px"
-          height="36px"
-          @click="loadMorePosts"
-        >
-          Show More
-        </Button>
-      </div>
+      </template>
     </article>
 
     <aside class="right-content">
@@ -164,6 +171,9 @@ import { useRouter } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
 import { useDirectusClient } from '~/composables/useDirectusClient';
 
+// Get search state
+const { showSearchResults } = useSearchState();
+
 // Constants
 const directusUrl = "https://content.thegovlab.com";
 const router = useRouter();
@@ -188,7 +198,6 @@ const navigateToBlogPost = (post: BlogPost) => {
     console.error('Cannot navigate: Blog post has no slug', post);
   }
 };
-
 
 // Category state
 interface Category {
@@ -498,7 +507,7 @@ onMounted(loadInitialData);
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  min-height: 36px; /* Fixed height to prevent content jumping */
+  min-height: 36px; 
 }
 
 .results-count {
