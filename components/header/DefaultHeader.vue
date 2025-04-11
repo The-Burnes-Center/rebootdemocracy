@@ -69,7 +69,7 @@
         />
     </nav>
       
-    <Button class="btn-header" variant="primary" height="36px" @click="onClick"
+    <Button class="btn-header" variant="secondary" height="36px" @click="onClick"
             >Sign up for updates</Button
         >
   </header>
@@ -135,9 +135,12 @@ const baseMenuItems: MenuItem[] = [
     label: "Our Work",
     name: "work",
     children: [
-      { label: "About Beth Noveck", name: "research", to: "/our-work/research" },
-      { label: "University Teachings", name: "projects", to: "/our-work/projects" },
-      { label: "Engagements", name: "partners", to: "/our-work/partners" },
+      { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html" },
+      { label: "Teachings", name:"teachings", to:"https://innovate-us.org/"},
+      { label: "University Teachings", name: "projects", to: "https://www.publicentrepreneur.org/" },
+      { label: "Engagements", name: "partners", to: "https://rebootdemocracy.ai/our-engagements" },
+      { label: "Research", name: "research", to: "https://rebootdemocracy.ai/our-research" },
+       { label: "More Resources", name: "resources", to: "https://rebootdemocracy.ai/more-resources" },
     ],
   },
   { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup", external: true },
@@ -150,8 +153,7 @@ const menuItems = computed<MenuItem[]>(() =>
 );
 
 const onClick = (): void => {
-  // Use window.location.href for signup button to open in same tab
-  window.location.href = "https://rebootdemocracy.ai/signup";
+  window.location.href = "/signup";
 };
 
 const checkIfMobile = (): void => {

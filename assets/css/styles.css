@@ -484,10 +484,6 @@ a.btn:hover {
     font-family: "Space Mono", monospace;
   }
 
-  body {
-    padding-top: 60px;
-  }
-
   .header-section {
     position: fixed;
     top: 0;
@@ -3659,7 +3655,6 @@ ul {
 }
 
 .signup-form {
-  background-color: var(--purple-icon);
   display: flex;
   flex-direction: column;
   justify-content: center;
