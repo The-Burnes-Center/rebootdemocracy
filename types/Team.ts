@@ -1,8 +1,5 @@
-// types/Author.ts
-export interface Author {
-  id: number;
-  blog_id: number;
-  team_id: {
+// types/Team.ts
+export interface Team {
     id: number;
     First_Name: string;
     Last_Name: string;
@@ -13,7 +10,5 @@ export interface Author {
       filename_disk: string;
       [key: string]: any;
     };
-    [key: string]: any;
-  };
 }
 

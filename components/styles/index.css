@@ -20,6 +20,7 @@
 @import "./footer.css";
 @import "./quote.css";  
 @import "./blogpage.css";
+@import "./about.css";
 
 :root {
   --font-inter: "Inter", sans-serif;

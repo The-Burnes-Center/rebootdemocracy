@@ -11,7 +11,7 @@
           <img src="/images/the-govlab-logo-white.png" alt="The GovLab" />
       </div>
     </div>
-
+    
     <!-- Mobile menu toggle -->
     <div class="mobile-menu-toggle" @click="toggleMobileMenu" v-if="isMobile">
       <svg
@@ -60,20 +60,28 @@
         />
       </svg>
     </div>
-
+    
     <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
-        <HeaderMenu :items="menuItems" :class="{ 'mobile-menu': isMobile }" />
+        <HeaderMenu 
+          :items="menuItems" 
+          :class="{ 'mobile-menu': isMobile }" 
+          @item-click="handleMenuClick"
+        />
     </nav>
-
-      <Button class="btn-header" variant="primary" height="36px" @click="onClick"
+      
+    <Button class="btn-header" variant="primary" height="36px" @click="onClick"
             >Sign up for updates</Button
         >
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import type { MenuItem } from "@/types/index.ts";
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
 
 // State for mobile menu
 const mobileMenuOpen = ref(false);
@@ -81,6 +89,30 @@ const isMobile = ref(false);
 
 const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+// Custom handling for menu item clicks
+const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
+  // Handle team navigation
+  if (item.name === 'team') {
+    event.preventDefault();
+    if (route.path !== '/about') {
+      router.push({ 
+        path: '/about', 
+        hash: '#team-grid' 
+      });
+    } else {
+      const teamSection = document.getElementById('team-grid');
+      if (teamSection) {
+        teamSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
+  // Handle external links - open in same tab
+  else if (item.external && item.to) {
+    event.preventDefault();
+    window.location.href = item.to;
+  }
 };
 
 const baseMenuItems: MenuItem[] = [
@@ -91,9 +123,13 @@ const baseMenuItems: MenuItem[] = [
     label: "About",
     name: "about",
     children: [
-      { label: "About Us", name: "about us", to: "/about" },
-      { label: "Our Team", name: "projects", to: "/team" },
-  ]
+      { label: "About Us", name: "about", to: "/about" },
+      { 
+        label: "Our Team", 
+        name: "team", 
+        to: "/about#team-grid"
+      },
+    ]
   },
   {
     label: "Our Work",
@@ -104,16 +140,17 @@ const baseMenuItems: MenuItem[] = [
       { label: "Engagements", name: "partners", to: "/our-work/partners" },
     ],
   },
-  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup" },
+  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup", external: true },
 ];
 
 const menuItems = computed<MenuItem[]>(() =>
   isMobile.value
-    ? baseMenuItems // show all on mobile
-    : baseMenuItems.filter((item) => item.name !== "signup") 
+    ? baseMenuItems 
+    : baseMenuItems.filter((item) => item.name !== "signup")
 );
 
 const onClick = (): void => {
+  // Use window.location.href for signup button to open in same tab
   window.location.href = "https://rebootdemocracy.ai/signup";
 };
 
