@@ -7,6 +7,10 @@
   font-family: var(--font-inria);
 }
 
+.about-container h1{
+  letter-spacing: normal;
+}
+
 .team-section {
   margin-top: 2rem;
 }

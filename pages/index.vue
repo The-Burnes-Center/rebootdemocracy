@@ -96,7 +96,7 @@
         
         <Text
           as="a"
-          href="/team"
+          href="/about#team-grid"
           size="sm"
           fontFamily="inria"
           align="center"
