@@ -27,8 +27,8 @@ body {
   margin: 0;
 }
 * {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 h1.eyebrow {
@@ -482,10 +482,6 @@ a.btn:hover {
   h1 {
     font-size: 30px;
     font-family: "Space Mono", monospace;
-  }
-
-  body {
-    padding-top: 60px;
   }
 
   .header-section {
@@ -3659,7 +3655,6 @@ ul {
 }
 
 .signup-form {
-  background-color: var(--purple-icon);
   display: flex;
   flex-direction: column;
   justify-content: center;

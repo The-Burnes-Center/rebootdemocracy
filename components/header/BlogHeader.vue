@@ -146,12 +146,15 @@ const menuItems: MenuItem[] = [
     label: "Our Work",
     name: "work",
     children: [
-      { label: "About Beth Noveck", name: "research", to: "/our-work/research" },
-      { label: "University Teachings", name: "projects", to: "/our-work/projects" },
-      { label: "Engagements", name: "partners", to: "/our-work/partners" },
+      { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html" },
+      { label: "Teachings", name:"teachings", to:"https://innovate-us.org/"},
+      { label: "University Teachings", name: "projects", to: "https://www.publicentrepreneur.org/" },
+      { label: "Engagements", name: "partners", to: "https://rebootdemocracy.ai/our-engagements" },
+      { label: "Research", name: "research", to: "https://rebootdemocracy.ai/our-research" },
+       { label: "More Resources", name: "resources", to: "https://rebootdemocracy.ai/more-resources" },
     ],
   },
-  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup", external: true },
+  { label: "Sign up", name: "signup", to: "/signup" },
 ];
 
 // Check if we're on mobile
