@@ -4,7 +4,7 @@
       <Text
         as="h1"
         :size="'2xl'"
-        :weight="'light'"
+        :weight="'medium'"
         :fontFamily="'inria'"
         class="hero__title"
       >

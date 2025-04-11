@@ -60,10 +60,14 @@
       </svg>
     </div>
     <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
-      <HeaderMenu :items="menuItems" :class="{ 'mobile-menu': isMobile }" />
+      <HeaderMenu 
+        :items="menuItems" 
+        :class="{ 'mobile-menu': isMobile }"
+        @item-click="handleMenuClick" 
+      />
     </nav>
     <div class="search-container" v-if="!isMobile">
-    <ais-instant-search ais-instant-search :index-name="indexName" :search-client="algoliaClient">
+      <ais-instant-search :index-name="indexName" :search-client="algoliaClient">
         <ais-search-box @input="handleSearchInput" @reset="handleSearchReset" />
       </ais-instant-search>
     </div>
@@ -72,6 +76,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import type { MenuItem } from "@/types/index.ts";
 
 import {
@@ -81,13 +86,13 @@ import {
 } from "vue-instantsearch/vue3/es";
 import useSearchState from "../../composables/useSearchState.js";
 
+const router = useRouter();
+const route = useRoute();
 const indexName = "reboot_democracy_blog";
-
 
 const { updateSearchQuery, setIndexName, getAlgoliaClient } = useSearchState();
 const algoliaClient = getAlgoliaClient();
 setIndexName(indexName); 
-
 
 // State for mobile menu
 const mobileMenuOpen = ref<boolean>(false);
@@ -98,17 +103,44 @@ const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
 
+// Custom handling for menu item clicks
+const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
+  // Check if it's the "Our Team" item
+  if (item.name === "team") {
+    event.preventDefault();
+    
+    // Navigate to About page first if we're not already there
+    if (route.path !== '/about') {
+      router.push({ 
+        path: '/about', 
+        hash: '#team-grid' 
+      });
+    } else {
+      // We're already on the About page, just scroll to the team section
+      const teamSection = document.getElementById('team-grid');
+      if (teamSection) {
+        teamSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
+  // Handle external links - open in same tab
+  else if (item.external && item.to) {
+    event.preventDefault();
+    window.location.href = item.to; // Use window.location.href instead of window.open
+  }
+};
+
 const menuItems: MenuItem[] = [
-   { label: "Home", name: "home", to: "/" },
+  { label: "Home", name: "home", to: "/" },
   { label: "Blog", name: "blog", to: "/blog" },
   { label: "Events", name: "events", to: "/events" },
   {
     label: "About",
     name: "about",
     children: [
-      { label: "About Us", name: "about us", to: "/about" },
-      { label: "Our Team", name: "projects", to: "/team" },
-  ]
+      { label: "About Us", name: "about", to: "/about" },
+      { label: "Our Team", name: "team", to: "/about#team-grid" },
+    ]
   },
   {
     label: "Our Work",
@@ -119,7 +151,7 @@ const menuItems: MenuItem[] = [
       { label: "Engagements", name: "partners", to: "/our-work/partners" },
     ],
   },
-  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup" },
+  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup", external: true },
 ];
 
 // Check if we're on mobile
@@ -136,7 +168,6 @@ const handleSearchInput = (event: InputEvent): void => {
   const query = (event.target as HTMLInputElement)?.value;
   updateSearchQuery(query);
 };
-
 
 const handleSearchReset = () => {
   updateSearchQuery("");
