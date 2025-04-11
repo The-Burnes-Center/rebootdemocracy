@@ -561,6 +561,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
     <!-- Header Component -->
     <header-comp></header-comp>
+    <img :src="`/.netlify/images?url=${encodeURIComponent('https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/4b15233a-16ed-4cef-8935-124455a382f0.png')}&w=100`" />
           <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
 <ModalComp :modalData="modalData" @close="closeModal" />    </vue-final-modal>
 <div class="blog-page-hero">

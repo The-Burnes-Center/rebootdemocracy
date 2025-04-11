@@ -20,7 +20,7 @@ const stripHtml = html => html.replace(/<\/?[^>]+(>|$)/g, "");
 
 const COLLECTION_CONFIG = {
   reboot_democracy_blog: {
-    fields: 'id,status,image,authors.team_id.*,title,content,slug,excerpt,fullURL',
+    fields: 'id,status,image.id,image.filename_disk,date,Tags,authors.team_id.*,title,content,slug,excerpt,fullURL,audio_version.filename_disk',
     transform: transformBlogItem,
   },
   reboot_democracy_weekly_news: {
