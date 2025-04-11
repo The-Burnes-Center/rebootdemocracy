@@ -4,16 +4,6 @@
       title="Rebooting Democracy in the Age of AI"
       subtitle="Insights on AI, Governance and Democracy"
     />
-
-    <div class="curator-badge-overlay">
-      <CuratorBadge
-        name="Beth Simone Noveck"
-        title="Director at Burnes Center and the Govlab"
-        imageUrl="/images/Beth_Simone_Noveck.png"
-        moreText="More incredible things Beth done in in her"
-      />
-    </div>
-
     <section class="page-layout">
       <article
         class="left-content"
