@@ -5,3 +5,4 @@ export * from './MenuItem';
 export * from  './Event';
 export * from './WeeklyNews';
 export * from './RawSearchResultItem';
+export * from './Team';

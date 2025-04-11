@@ -161,14 +161,15 @@
         <!-- Event section with loading state -->
         <div v-if="isEventLoading" class="loading">Loading event...</div>
         <UpcomingCard
-          v-else-if="latestEvent"
+          v-if="latestEvent"
           :title="latestEvent.title"
           :excerpt="latestEvent.description"
           :imageUrl="getImageUrl(latestEvent.thumbnail)"
-          :onClick="
-            () => latestEvent?.link && window.open(latestEvent.link, '_blank')
-          "
+          :onClick="() => handleEventClick(latestEvent)"
+          :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
+          :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
         />
+
 
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -188,11 +189,13 @@ import type { BlogPost, Event } from "@/types/index.ts";
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
-const POSTS_PER_PAGE = 7; 
+const POSTS_PER_PAGE = 7;
 const router = useRouter();
 
 // State management
 const { showSearchResults, resetSearch } = useSearchState();
+const isFutureEvent = ref(true);
+
 
 // Data state
 const allPosts = ref<BlogPost[]>([]);
@@ -224,7 +227,11 @@ interface Author {
   name: string;
   count: number;
 }
-
+const handleEventClick = (event: Event | null) => {
+  if (event?.link) {
+    window.open(event.link, "_blank");
+  }
+};
 // Computed properties
 const hasMorePosts = computed(
   () => displayedPosts.value.length < filteredPosts.value.length
@@ -277,7 +284,7 @@ const updateFilteredPosts = () => {
       (post) =>
         post.Tags &&
         Array.isArray(post.Tags) &&
-        post.Tags.includes(selectedCategory.value)
+        selectedCategory.value && post.Tags.includes(selectedCategory.value)
     );
   }
 
@@ -416,15 +423,18 @@ const loadInitialData = async () => {
   try {
     isEventLoading.value = true;
 
-    // Fetch event data and all blog data in parallel
-    const [eventData, blogData] = await Promise.all([
-      fetchLatestPastEvent(),
-      fetchAllData(),
-    ]);
-
-    latestEvent.value = Array.isArray(eventData)
-      ? null
-      : (eventData as Event | null);
+    // Try to get upcoming event first
+    let event = await fetchUpcomingEvent();
+    
+    if (event) {
+      isFutureEvent.value = true;
+    } else {
+      // If no upcoming event, get the latest past event
+      event = await fetchLatestPastEvent();
+      isFutureEvent.value = false;
+    }
+    latestEvent.value = event;
+    await fetchAllData();
   } catch (error) {
     console.error("Error loading initial data:", error);
     dataFetchError.value = "Failed to load content. Please try again later.";
@@ -432,7 +442,6 @@ const loadInitialData = async () => {
     isEventLoading.value = false;
   }
 };
-
 // Lifecycle management
 onMounted(() => {
   loadInitialData();

@@ -84,7 +84,7 @@
             weight="normal"
             align="left"
             margin="none"
-            lineClamp="4"
+            :lineClamp="4"
             class="upcomingcard__excerpt"
           >
             {{ excerpt }}
