@@ -53,3 +53,10 @@
     padding-right: 0;
   }
 }
+
+
+@media (min-width: 1441px) and (max-width: 1920px) {
+  .page-layout {
+    width: 90%;
+  }
+}
