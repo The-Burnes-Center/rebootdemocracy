@@ -43,6 +43,20 @@ export default {
       immediate: true
     },
   },
+  computed: {
+    // This computed property parses the raw blog content and replaces any
+    // URLs with base "https://dev.thegovlab.com/assets/" with a DigitalOcean Spaces URL
+    // wrapped via the Netlify Images proxy.
+    processedContent() {
+      if (!this.postData || !this.postData[0] || !this.postData[0].content) return '';
+      return this.postData[0].content.replace(
+        /https:\/\/dev\.thegovlab\.com\/assets\/([a-zA-Z0-9\-]+)(\.[a-zA-Z]+)(\?[^"']*)?/g,
+        (match, fileId, ext) => {
+          return `/.netlify/images?url=${encodeURIComponent('https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/' + fileId + ext)}&w=800`;
+        }
+      );
+    }
+  },
   created() {
     this.loadModal(); 
     this.fetchBlog();
@@ -155,7 +169,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <template>
   <!-- Header Component -->
   <header-comp></header-comp>
-
+asdasd
   <div class="blog-hero">
     <!-- Static hero image using Netlify images transformation -->
     <img :src="`/.netlify/images?url=${encodeURIComponent('https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/4b15233a-16ed-4cef-8935-124455a382f0.png')}&w=100`" />
@@ -198,7 +212,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         </audio>
       </p>
     </div>
-    <div class="blog-content" v-html="postData[0].content"></div>
+    <div class="blog-content" v-html="processedContent"></div>
     <p v-if="postData[0].ai_content_disclaimer" class="blog-img-byline">Some images in this post were generated using AI.</p>
   </div>
 

@@ -246,7 +246,7 @@ export default {
           limit: -1,
           filter: {
             _and: [
-              { date: { _lte: '$NOW(-5 hours)' } }, 
+              { date: { _lte: '$NOW(-6 hours)' } }, 
               { status: { _eq: 'published' } }
             ],
             _or: slugFilters,
@@ -395,9 +395,32 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       this.showmodal = false;
       localStorage.setItem("Reboot Democracy", "off");
     },
+    
+    isEasternDST(date) {
+  const year = date.getFullYear();
+
+  // Calculate DST start: Second Sunday in March at 2:00 AM ET
+  const march = new Date(year, 2, 1); // March 1st
+  const firstSundayMarch = 7 - march.getDay();
+  const secondSundayMarch = firstSundayMarch + 7;
+  const dstStart = new Date(year, 2, secondSundayMarch, 2); // 2:00 AM
+
+  // Calculate DST end: First Sunday in November at 2:00 AM ET
+  const november = new Date(year, 10, 1); // November 1st
+  const firstSundayNovember = november.getDay() === 0 ? 1 : (1 + (7 - november.getDay()));
+  const dstEnd = new Date(year, 10, firstSundayNovember, 2); // 2:00 AM
+
+  return date >= dstStart && date < dstEnd;
+}, 
+    getDirectusNowOffset() {
+  const now = new Date();
+  return this.isEasternDST(now) ? '$NOW(-4 hours)' : '$NOW(-5 hours)';
+},
 
     fetchBlog() {
       self = this;
+      const nowOffset = self.getDirectusNowOffset(); // "$NOW(-4 hours)" or "$NOW(-5 hours)"
+
       this.directus
         .items('reboot_democracy_blog')
         .readByQuery({
@@ -405,7 +428,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           limit: -1,
           filter: {
             _and: [
-              { date: { _lte: '$NOW(-5 hours)' } },
+            { date: { _lte: nowOffset } },
               { status: { _eq: 'published' } }
             ]
           },
