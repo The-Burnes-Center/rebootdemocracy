@@ -160,7 +160,6 @@
           :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
         />
 
-
         <SignUpButtonWidget
           title="Sign Up for updates"
           placeholder="Enter your email"
@@ -185,7 +184,6 @@ const router = useRouter();
 // State management
 const { showSearchResults, resetSearch } = useSearchState();
 const isFutureEvent = ref(true);
-
 
 // Data state
 const allPosts = ref<BlogPost[]>([]);
@@ -233,9 +231,16 @@ const filteredAuthors = computed(() =>
 
 // Helper methods
 function getImageUrl(image: any, width: number = 512): string {
-  return image?.filename_disk
-    ? `${DIRECTUS_URL}/assets/${image.filename_disk}?width=${width}`
-    : "/images/exampleImage.png";
+  if (!image?.filename_disk) {
+    return "/images/exampleImage.png";
+  }
+  
+  // Base S3 URL from the meeting
+  const s3BaseUrl = "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/";
+  const fullS3Url = s3BaseUrl + image.filename_disk;
+  
+  // Use Netlify Image CDN for transformations
+  return `/.netlify/images?url=${encodeURIComponent(fullS3Url)}&w=${width}`;
 }
 
 const getAuthorName = (post: BlogPost): string => {
@@ -274,7 +279,8 @@ const updateFilteredPosts = () => {
       (post) =>
         post.Tags &&
         Array.isArray(post.Tags) &&
-        selectedCategory.value && post.Tags.includes(selectedCategory.value)
+        selectedCategory.value &&
+        post.Tags.includes(selectedCategory.value)
     );
   }
 
@@ -415,7 +421,7 @@ const loadInitialData = async () => {
 
     // Try to get upcoming event first
     let event = await fetchUpcomingEvent();
-    
+
     if (event) {
       isFutureEvent.value = true;
     } else {

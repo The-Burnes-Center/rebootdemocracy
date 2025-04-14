@@ -1,0 +1,29 @@
+[build]
+  command = "vite build"
+  functions = "netlify/functions"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/newsoftheweek/feed/rss"
+  to = "/.netlify/functions/newsoftheweek"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+  Access-Control-Allow-Origin = "*"
+
+[images]
+  remote_images = [
+    "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"
+  ]
+
+[dev]
+  targetPort = 3000
+  port = 3001
