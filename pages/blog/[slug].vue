@@ -18,11 +18,11 @@ const blog = ref<BlogPost | null>(null);
 const isLoading = ref(true);
 
 // Function to get image URL with fallback
-function getImageUrl(image: any, width: number = 600): string {
-  if (!image?.filename_disk) {
+function getImageUrl(authorHeadshot: any, width: number = 600): string {
+  if (!authorHeadshot.Headshot.id) {
     return "/images/exampleImage.png";
   }
-  return `https://content.thegovlab.com/assets/${image.filename_disk}?width=${width}`;
+  return `https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`;
 }
 
 // Function to get author name
@@ -185,12 +185,12 @@ onBeforeUnmount(() => {
       <!-- Sidebar content -->
       <aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
         <!-- Author card -->
-        <!-- <AuthorCard
+        <AuthorCard
           :author="blog.authors[0]"
-          :image="getImageUrl(blog.authors[0]?.team_id?.image)"
+          :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
           :name="getAuthorName(blog.authors[0]?.team_id)"
-          :bio="blog.authors[0]?.team_id?.bio"
-        /> -->
+          :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
+        />
 
         <!-- Sign up widget -->
         <SignUpButtonWidget

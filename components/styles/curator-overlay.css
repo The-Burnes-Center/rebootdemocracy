@@ -1,9 +1,9 @@
 .curator-badge-overlay {
     position: relative;
-    width: 90%;
+    width: 92%;
     display: flex;
     justify-content: flex-end;
-    padding-right: 6rem;
+    padding-right: 0rem;
     margin-top: -38px; /* Move up to overlap with the hero section */
     z-index: 20; /* Ensure badge appears above other elements */
   }
