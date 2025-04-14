@@ -1,4 +1,5 @@
 import { defineNuxtConfig } from "nuxt/config";
+import '@nuxtjs/algolia'; 
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -16,6 +17,9 @@ export default defineNuxtConfig({
     },
   },
   ssr: true,
+  nitro: {
+    preset: 'netlify'
+  },
   css: [
     './components/styles/index.css',
     './assets/css/index.css',
@@ -26,9 +30,5 @@ export default defineNuxtConfig({
       pathPrefix: false,
       global: true
     }
-  ],
-   nitro: {
-    preset: 'netlify'
-  }
- 
+  ]
 });

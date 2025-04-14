@@ -1,7 +1,7 @@
 [build]
   command = "npm run build"
-  publish = ".output/public"
-  functions = "netlify/functions"
+  publish = ".netlify/functions-internal"
+  functions = ".netlify/functions-internal"
 
 
 [functions]
@@ -11,6 +11,7 @@
   from = "/*"
   to = "/.netlify/functions/server"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/newsoftheweek/feed/rss"
