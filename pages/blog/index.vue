@@ -136,7 +136,7 @@
         <div v-if="isAuthorsLoading" class="loading-tags">
           Loading authors...
         </div>
-        <div v-else class="author-list">
+        <div v-else>
           <div
             v-for="author in filteredAuthors"
             :key="author.id"
@@ -160,6 +160,7 @@
           :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
         />
 
+
         <SignUpButtonWidget
           title="Sign Up for updates"
           placeholder="Enter your email"
@@ -173,17 +174,19 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { useRouter, onBeforeRouteLeave } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
 const POSTS_PER_PAGE = 7;
 const router = useRouter();
+const route = useRoute();
 
 // State management
 const { showSearchResults, resetSearch } = useSearchState();
 const isFutureEvent = ref(true);
+
 
 // Data state
 const allPosts = ref<BlogPost[]>([]);
@@ -231,16 +234,9 @@ const filteredAuthors = computed(() =>
 
 // Helper methods
 function getImageUrl(image: any, width: number = 512): string {
-  if (!image?.filename_disk) {
-    return "/images/exampleImage.png";
-  }
-  
-  // Base S3 URL from the meeting
-  const s3BaseUrl = "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/";
-  const fullS3Url = s3BaseUrl + image.filename_disk;
-  
-  // Use Netlify Image CDN for transformations
-  return `/.netlify/images?url=${encodeURIComponent(fullS3Url)}&w=${width}`;
+  return image?.filename_disk
+    ? `${DIRECTUS_URL}/assets/${image.filename_disk}?width=${width}`
+    : "/images/exampleImage.png";
 }
 
 const getAuthorName = (post: BlogPost): string => {
@@ -279,8 +275,7 @@ const updateFilteredPosts = () => {
       (post) =>
         post.Tags &&
         Array.isArray(post.Tags) &&
-        selectedCategory.value &&
-        post.Tags.includes(selectedCategory.value)
+        selectedCategory.value && post.Tags.includes(selectedCategory.value)
     );
   }
 
@@ -421,7 +416,7 @@ const loadInitialData = async () => {
 
     // Try to get upcoming event first
     let event = await fetchUpcomingEvent();
-
+    
     if (event) {
       isFutureEvent.value = true;
     } else {
@@ -438,9 +433,23 @@ const loadInitialData = async () => {
     isEventLoading.value = false;
   }
 };
+
 // Lifecycle management
 onMounted(() => {
-  loadInitialData();
+  loadInitialData().then(() => {
+    // Check for author query parameter
+    const authorParam = route.query.author as string | undefined;
+    if (authorParam) {
+      // Find the matching author from the loaded authors
+      const foundAuthor = authors.value.find(author => 
+        author.name.toLowerCase() === authorParam.toLowerCase());
+      
+      if (foundAuthor) {
+        selectedAuthor.value = foundAuthor.name;
+        updateFilteredPosts();
+      }
+    }
+  });
 });
 
 onBeforeRouteLeave((to, from, next) => {
