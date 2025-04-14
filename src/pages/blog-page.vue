@@ -458,25 +458,49 @@ Emboldened by the advent of generative AI, we are excited about the future possi
      localStorage.setItem("Reboot Democracy","off");
     
     },
-      fetchBlog: function fetchBlog() {
+    isEasternDST(date) {
+  const year = date.getFullYear();
+
+  // Calculate DST start: Second Sunday in March at 2:00 AM ET
+  const march = new Date(year, 2, 1); // March 1st
+  const firstSundayMarch = 7 - march.getDay();
+  const secondSundayMarch = firstSundayMarch + 7;
+  const dstStart = new Date(year, 2, secondSundayMarch, 2); // 2:00 AM
+
+  // Calculate DST end: First Sunday in November at 2:00 AM ET
+  const november = new Date(year, 10, 1); // November 1st
+  const firstSundayNovember = november.getDay() === 0 ? 1 : (1 + (7 - november.getDay()));
+  const dstEnd = new Date(year, 10, firstSundayNovember, 2); // 2:00 AM
+
+  return date >= dstStart && date < dstEnd;
+}, 
+    getDirectusNowOffset() {
+  const now = new Date();
+  return this.isEasternDST(now) ? '$NOW(-4 hours)' : '$NOW(-5 hours)';
+},
+
+    fetchBlog() {
       self = this;
+      const nowOffset = self.getDirectusNowOffset(); // "$NOW(-4 hours)" or "$NOW(-5 hours)"
 
       this.directus
-      .items('reboot_democracy_blog')
-      .readByQuery({
-         meta: 'total_count',
-         limit: -1,
+        .items('reboot_democracy_blog')
+        .readByQuery({
+          meta: 'total_count',
+          limit: -1,
           filter: {
-            _and: [{ date: { _lte: '$NOW(-5 hours)' } }, { status: { _eq: 'published' } }]
+            _and: [
+            { date: { _lte: nowOffset } },
+              { status: { _eq: 'published' } }
+            ]
           },
-         fields: [
-          '*.*',
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*'
-       ],
-       sort:["date"]
-       
-      })
+          fields: [
+            '*.*',
+            'authors.team_id.*',
+            'authors.team_id.Headshot.*'
+          ],
+          sort: ["date"]
+        })
       .then((item) => {
       self.blogData =  item.data;
       
@@ -561,6 +585,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
     <!-- Header Component -->
     <header-comp></header-comp>
+    
           <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
 <ModalComp :modalData="modalData" @close="closeModal" />    </vue-final-modal>
 <div class="blog-page-hero">
