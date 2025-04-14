@@ -27,5 +27,8 @@ export default defineNuxtConfig({
       global: true
     }
   ],
+   nitro: {
+    preset: 'netlify'
+  }
  
 });
