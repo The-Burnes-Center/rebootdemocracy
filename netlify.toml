@@ -3,6 +3,10 @@
   publish = ".netlify/functions-internal"
   functions = ".netlify/functions-internal"
 
+
+[functions]
+  included_files = ["./.netlify/functions-internal/**"] 
+  
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/server"
