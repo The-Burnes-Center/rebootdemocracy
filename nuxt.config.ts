@@ -18,7 +18,7 @@ export default defineNuxtConfig({
   ssr: true,
   css: [
     './components/styles/index.css',
-    './assets/css/index.css'
+    './assets/css/index.css',
   ],
   components: [
     {
@@ -27,19 +27,5 @@ export default defineNuxtConfig({
       global: true
     }
   ],
-  app: {
-    head: {
-      link: [
-        {
-          rel: 'preconnect',
-          href: 'https://fonts.googleapis.com'
-        },
-        {
-          rel: 'preconnect',
-          href: 'https://fonts.gstatic.com',
-          crossorigin: "anonymous",
-        }
-      ]
-    }
-  }
+ 
 });

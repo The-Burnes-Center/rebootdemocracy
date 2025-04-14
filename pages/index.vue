@@ -96,7 +96,7 @@
         
         <Text
           as="a"
-          href="/team"
+          href="/about#team-grid"
           size="sm"
           fontFamily="inria"
           align="center"
@@ -205,8 +205,7 @@ const tabOptions = computed(() => [
   {
     title: "Events",
     name: "events",
-    url: "https://rebootdemocracy.ai/events",
-    external: true,
+    url: "/events",
   },
 ]);
 

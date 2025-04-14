@@ -23,7 +23,41 @@ export interface Event {
   };
   partner_logo: any | null;
   transcript_file: any | null;
-  event_series: any[];
+  event_series: Array<{
+    general_events_series_id?: {
+      title?: string;
+      description?: string;
+      full_description?: string;
+    };
+  }>;
   authors: any[];
   contributors: any[];
+  instructor?: Instructor[];
+}
+
+export interface Thumbnail {
+  id: string;
+  storage: string;
+  filename_disk: string;
+  uploaded_on: string;
+}
+
+export interface GeneralEventsSeries {
+  id: string;
+  title: string;
+  description: string;
+  full_description: string;
+}
+
+export interface Instructor {
+  innovate_us_instructors_id: {
+    headshot: {
+      id: string;
+    };
+  };
+}
+
+export interface EventItem {
+  event_element: Event;
+  series_name: string;
 }
