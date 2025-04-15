@@ -10,9 +10,9 @@ export default defineNuxtConfig({
   ],
   nitro: {
     output: {
-        dir: 'ssg',
-        serverDir: 'ssg/server',
-        publicDir: 'ssg/public'
+        dir: '.output',
+        serverDir: '.output/server',
+        publicDir: '.output/public'
     }
   },
   algolia: {
