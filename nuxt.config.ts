@@ -17,6 +17,7 @@ export default defineNuxtConfig({
     },
   },
   ssr: true,
+
   css: [
     './components/styles/index.css',
     './assets/css/index.css',
