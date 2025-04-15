@@ -1,7 +1,18 @@
 [build]
-  command = "npm run generate" 
-  functions = "netlify/functions"
-  publish = "dist" 
+  command = "npm run build" # Using Nuxt SSR mode
+  functions = "netlify/functions" # Preserve existing functions directory
+  publish = ".output/public" # Nuxt 3 SSR output directory
+
+[[redirects]]
+  from = "/our-work"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/builders/server"
+  status = 200
 
 [[redirects]]
   from = "/newsoftheweek/feed/rss"
@@ -13,7 +24,12 @@
   for = "/*"
   [headers.values]
   Access-Control-Allow-Origin = "*"
-  Cache-Control = "public, max-age=31536000" 
+
+  
+# Nuxt-specific settings
+[build.environment]
+  NODE_VERSION = "18"
+  NITRO_PRESET = "netlify"
 
 [images]
   remote_images = [
