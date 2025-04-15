@@ -82,12 +82,6 @@ const validTeamMembers = computed(() => {
   });
 });
 
-function getImageUrl(image: any, width: number = 512): string {
-  return image?.id
-    ? `${DIRECTUS_URL}/assets/${image.id}/${image.filename_disk}?width=${width}`
-    : "/images/exampleImage.png";
-}
-
 onMounted(async () => {
   try {
     team.value = await fetchTeamData();
