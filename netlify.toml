@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build" # Using Nuxt SSR mode
+  command = "npm run build" 
   functions = "netlify/functions" 
   publish = ".output/public" 
 
