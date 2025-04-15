@@ -71,15 +71,14 @@
         <!-- Blog collaborators container -->
         <div class="blog-collaborators-container">
           <Text
-            as="h2"
+            as="h3"
             fontFamily="inter"
             size="lg"
             color="text-primary"
             weight="bold"
             align="center"
-            margin="md"
           >
-            Our Collaborators
+            Our Contributors
           </Text>
           
           <!-- Collaborators rows -->
