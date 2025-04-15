@@ -17,9 +17,6 @@ export default defineNuxtConfig({
     },
   },
   ssr: true,
-  nitro: {
-    preset: 'netlify'
-  },
   css: [
     './components/styles/index.css',
     './assets/css/index.css',
