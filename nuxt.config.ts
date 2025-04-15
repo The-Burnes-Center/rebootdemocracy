@@ -17,7 +17,9 @@ export default defineNuxtConfig({
     },
   },
   ssr: true,
-
+   routeRules: {
+    '/': { prerender: true },
+  },
   css: [
     './components/styles/index.css',
     './assets/css/index.css',
