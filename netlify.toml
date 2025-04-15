@@ -1,7 +1,13 @@
 [build]
-  command = "npm run generate" 
-  functions = "netlify/functions"
-  publish = "dist" 
+  command = "npm run build" 
+  functions = "netlify/functions" 
+  publish = ".output/public" 
+
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
 
 [[redirects]]
   from = "/newsoftheweek/feed/rss"
@@ -13,13 +19,11 @@
   for = "/*"
   [headers.values]
   Access-Control-Allow-Origin = "*"
-  Cache-Control = "public, max-age=31536000" 
-
-[images]
-  remote_images = [
-    "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"
-  ]
+  Cache-Control = "public, max-age=31536000"
 
 [dev]
+  # Adjusted for Nuxt development
+  command = "nuxt dev"
   targetPort = 3000
-  port = 3001
+  port = 8888
+

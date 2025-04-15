@@ -6,7 +6,7 @@
         <NuxtLink to="/" class="footer__link">About</NuxtLink>
         <NuxtLink to="/blog" class="footer__link">Blog</NuxtLink>
         <NuxtLink to="/events" class="footer__link">Events</NuxtLink>
-        <NuxtLink to="/our-work" class="footer__link">Our Work</NuxtLink>
+        <NuxtLink to="/signup" class="footer__link">Our Work</NuxtLink>
         <NuxtLink to="/signup" class="footer__link">Sign up</NuxtLink>
       </div>
 
