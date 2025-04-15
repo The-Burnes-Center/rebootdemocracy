@@ -62,7 +62,10 @@ type SearchResultItem = {
   Tags?: string[];
   author?: string;
   authors?: any[];
-  image?: string;
+  image?: string | {
+    id?: string;
+    filename_disk?: string;
+  };
   _sourceIndex?: string;
   date?: string | null;
   edition?: string;
@@ -159,9 +162,14 @@ function getItemImageUrl(item: SearchResultItem): string {
     return "/images/exampleImage.png";
   }
 
-  return item.image
-    ? `${directusUrl}/assets/${item.image}?width=512`
-    : "/images/exampleImage.png";
+  if (
+    typeof item.image === "object" &&
+    item.image?.filename_disk
+  ) {
+    return `${directusUrl}/assets/${item.image.filename_disk}?width=512`;
+  }
+
+  return "/images/exampleImage.png";
 }
 
 function getItemDate(item: SearchResultItem): Date | undefined {
