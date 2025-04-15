@@ -97,14 +97,20 @@ const typedSearchResults = computed(
 
 // Create merged results from both reboot and news results
 const mergedResults = computed(() => {
-  return typedSearchResults.value;
+  const today = new Date();
+  return typedSearchResults.value.filter((item) => {
+    const dateStr =
+      item._sourceIndex === "reboot_democracy_weekly_news"
+        ? item.item?.date || item.date
+        : item.date;
+
+    if (!dateStr) return false;
+
+    const itemDate = new Date(dateStr);
+    return itemDate < today; 
+  });
 });
 
-const rebootResults = computed(() =>
-  typedSearchResults.value.filter(
-    (item) => item._sourceIndex === "reboot_democracy_blog"
-  )
-);
 
 const newsResults = computed(() =>
   typedSearchResults.value.filter(
