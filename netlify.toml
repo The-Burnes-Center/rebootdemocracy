@@ -31,8 +31,4 @@
   command = "nuxt dev"
   targetPort = 3000
   port = 8888
-  
-# Nuxt-specific settings
-[build.environment]
-  NODE_VERSION = "18"
-  NITRO_PRESET = "netlify"
+
