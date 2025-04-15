@@ -3,11 +3,6 @@
   functions = "netlify/functions" 
   publish = ".output/public" 
 
-[[redirects]]
-  from = "/our-work"
-  to = "/"
-  status = 301
-  force = true
 
 [[redirects]]
   from = "/*"
