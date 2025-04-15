@@ -118,7 +118,7 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
 const baseMenuItems: MenuItem[] = [
   { label: "Home", name: "home", to: "/" },
   { label: "Blog", name: "blog", to: "/blog" },
-  { label: "Events", name: "events", to: "/events" },
+  { label: "Events", name: "events", to: "https://rebootdemocracy.ai/events" },
   {
     label: "About",
     name: "about",
@@ -153,7 +153,7 @@ const menuItems = computed<MenuItem[]>(() =>
 );
 
 const onClick = (): void => {
-  window.location.href = "/signup";
+  window.location.href = "https://rebootdemocracy.ai/signup";
 };
 
 const checkIfMobile = (): void => {

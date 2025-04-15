@@ -205,7 +205,8 @@ const tabOptions = computed(() => [
   {
     title: "Events",
     name: "events",
-    url: "/events",
+    url: "https://rebootdemocracy.ai/events",
+    external: true,
   },
 ]);
 
