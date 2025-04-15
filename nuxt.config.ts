@@ -8,6 +8,13 @@ export default defineNuxtConfig({
     '@nuxt/test-utils/module',
     '@nuxtjs/algolia'
   ],
+  nitro: {
+    output: {
+        dir: 'ssg',
+        serverDir: 'ssg/server',
+        publicDir: 'ssg/public'
+    }
+  },
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
     applicationId: process.env.ALGOLIA_APP_ID,
