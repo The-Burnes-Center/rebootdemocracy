@@ -133,7 +133,7 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
 const menuItems: MenuItem[] = [
   { label: "Home", name: "home", to: "/" },
   { label: "Blog", name: "blog", to: "/blog" },
-  { label: "Events", name: "events", to: "https://rebootdemocracy.ai/events" },
+  { label: "Events", name: "events", to: "/events" },
   {
     label: "About",
     name: "about",
@@ -154,7 +154,7 @@ const menuItems: MenuItem[] = [
        { label: "More Resources", name: "resources", to: "https://rebootdemocracy.ai/more-resources" },
     ],
   },
-  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup" },
+  { label: "Sign up", name: "signup", to: "/signup" },
 ];
 
 // Check if we're on mobile

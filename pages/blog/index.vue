@@ -232,12 +232,6 @@ const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)
 );
 
-// Helper methods
-function getImageUrl(image: any, width: number = 512): string {
-  return image?.filename_disk
-    ? `${DIRECTUS_URL}/assets/${image.filename_disk}?width=${width}`
-    : "/images/exampleImage.png";
-}
 
 const getAuthorName = (post: BlogPost): string => {
   const author = post.authors?.[0]?.team_id;
