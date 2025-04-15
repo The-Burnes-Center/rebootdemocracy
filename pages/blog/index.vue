@@ -229,18 +229,20 @@ const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)
 );
 
-// Helper methods
 function getImageUrl(image: any, width: number = 512): string {
   if (!image?.filename_disk) {
     return "/images/exampleImage.png";
   }
-  
-  // Base S3 URL from the meeting
+
   const s3BaseUrl = "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/";
   const fullS3Url = s3BaseUrl + image.filename_disk;
-  
-  // Use Netlify Image CDN for transformations
-  return `/.netlify/images?url=${encodeURIComponent(fullS3Url)}&w=${width}`;
+
+  // Use Netlify CDN only in production
+  if (process.env.NODE_ENV === "production") {
+    return `/.netlify/images?url=${encodeURIComponent(fullS3Url)}&w=${width}`;
+  } else {
+    return `${fullS3Url}`; 
+  }
 }
 
 const getAuthorName = (post: BlogPost): string => {
@@ -401,8 +403,9 @@ const fetchAllData = async () => {
 
     tags.value = extractTagsWithCounts(blogPosts);
     authors.value = extractAuthorsWithCounts(blogPosts);
-
+    
     return { posts: blogPosts, tags: tags.value, authors: authors.value };
+
   } catch (error) {
     console.error("Error fetching data:", error);
     return { posts: [], tags: [], authors: [] };
