@@ -1,7 +1,9 @@
 <template>
   <div class="about-container">
     <TitleText level="h1" weight="bold">About Us</TitleText>
-    <Text margin="md">This is the about page of our application.</Text>
+    <Text margin="md">We use artificial intelligence to help institutions and communities solve problems together. We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+      Better governance, Better outcomes, Increased trust in institutions And in one another. As researchers we want to understand how best to “do democracy” in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.
+    </Text>
     
     <div class="team-section">
       <TitleText level="h1" weight="bold" >Our Team</TitleText>
