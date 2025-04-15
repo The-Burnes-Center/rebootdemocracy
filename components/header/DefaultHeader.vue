@@ -143,7 +143,7 @@ const baseMenuItems: MenuItem[] = [
        { label: "More Resources", name: "resources", to: "https://rebootdemocracy.ai/more-resources" },
     ],
   },
-  { label: "Sign up", name: "signup", to: "https://rebootdemocracy.ai/signup", external: true },
+  { label: "Sign up", name: "signup", to: "/signup", external: true },
 ];
 
 const menuItems = computed<MenuItem[]>(() =>

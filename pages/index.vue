@@ -71,15 +71,14 @@
         <!-- Blog collaborators container -->
         <div class="blog-collaborators-container">
           <Text
-            as="h2"
+            as="h3"
             fontFamily="inter"
             size="lg"
             color="text-primary"
             weight="bold"
             align="center"
-            margin="md"
           >
-            Our Collaborators
+            Our Contributors
           </Text>
           
           <!-- Collaborators rows -->
@@ -205,16 +204,11 @@ const tabOptions = computed(() => [
   {
     title: "Events",
     name: "events",
-    url: "/events",
+    url: "https://rebootdemocracy.ai/events",
+    external: true,
   },
 ]);
 
-// Methods
-function getImageUrl(image: any, width: number = 512): string {
-  return image?.filename_disk 
-    ? `${DIRECTUS_URL}/assets/${image.filename_disk}?width=${width}`
-    : "/images/exampleImage.png";
-}
 
 const getAuthorName = (post: BlogPost): string => {
   const author = post.authors?.[0]?.team_id;

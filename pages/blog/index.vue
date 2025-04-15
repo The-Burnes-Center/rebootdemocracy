@@ -4,7 +4,7 @@
       title="Rebooting Democracy in the Age of AI"
       subtitle="Insights on AI, Governance and Democracy"
     />
-    <section class="page-layout">
+    <section class="all-posts-page-layout">
       <article
         class="left-content"
         :class="{ 'search-active': showSearchResults }"
@@ -90,7 +90,7 @@
         </template>
       </article>
 
-      <aside class="right-content">
+      <aside class="all-posts-right-content">
         <!-- Categories section -->
         <Text
           as="h2"
@@ -136,7 +136,7 @@
         <div v-if="isAuthorsLoading" class="loading-tags">
           Loading authors...
         </div>
-        <div v-else class="author-list">
+        <div v-else>
           <div
             v-for="author in filteredAuthors"
             :key="author.id"
@@ -174,13 +174,14 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { useRouter, onBeforeRouteLeave } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
 const POSTS_PER_PAGE = 7;
 const router = useRouter();
+const route = useRoute();
 
 // State management
 const { showSearchResults, resetSearch } = useSearchState();
@@ -231,12 +232,6 @@ const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)
 );
 
-// Helper methods
-function getImageUrl(image: any, width: number = 512): string {
-  return image?.filename_disk
-    ? `${DIRECTUS_URL}/assets/${image.filename_disk}?width=${width}`
-    : "/images/exampleImage.png";
-}
 
 const getAuthorName = (post: BlogPost): string => {
   const author = post.authors?.[0]?.team_id;
@@ -432,9 +427,23 @@ const loadInitialData = async () => {
     isEventLoading.value = false;
   }
 };
+
 // Lifecycle management
 onMounted(() => {
-  loadInitialData();
+  loadInitialData().then(() => {
+    // Check for author query parameter
+    const authorParam = route.query.author as string | undefined;
+    if (authorParam) {
+      // Find the matching author from the loaded authors
+      const foundAuthor = authors.value.find(author => 
+        author.name.toLowerCase() === authorParam.toLowerCase());
+      
+      if (foundAuthor) {
+        selectedAuthor.value = foundAuthor.name;
+        updateFilteredPosts();
+      }
+    }
+  });
 });
 
 onBeforeRouteLeave((to, from, next) => {

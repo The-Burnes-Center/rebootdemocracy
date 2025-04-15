@@ -62,7 +62,10 @@ type SearchResultItem = {
   Tags?: string[];
   author?: string;
   authors?: any[];
-  image?: string;
+  image?: string | {
+    id?: string;
+    filename_disk?: string;
+  };
   _sourceIndex?: string;
   date?: string | null;
   edition?: string;
@@ -94,14 +97,20 @@ const typedSearchResults = computed(
 
 // Create merged results from both reboot and news results
 const mergedResults = computed(() => {
-  return typedSearchResults.value;
+  const today = new Date();
+  return typedSearchResults.value.filter((item) => {
+    const dateStr =
+      item._sourceIndex === "reboot_democracy_weekly_news"
+        ? item.item?.date || item.date
+        : item.date;
+
+    if (!dateStr) return false;
+
+    const itemDate = new Date(dateStr);
+    return itemDate < today; 
+  });
 });
 
-const rebootResults = computed(() =>
-  typedSearchResults.value.filter(
-    (item) => item._sourceIndex === "reboot_democracy_blog"
-  )
-);
 
 const newsResults = computed(() =>
   typedSearchResults.value.filter(
@@ -156,13 +165,16 @@ function getItemAuthor(item: SearchResultItem): string {
 
 function getItemImageUrl(item: SearchResultItem): string {
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    return "/images/exampleImage.png";
+    return "/images/exampleImage.png"; 
   }
 
-  return item.image
-    ? `${directusUrl}/assets/${item.image}?width=512`
-    : "/images/exampleImage.png";
+  if (typeof item.image === "object" && item.image?.filename_disk) {
+    return getImageUrl(item.image, 512);
+  }
+
+  return "/images/exampleImage.png";
 }
+
 
 function getItemDate(item: SearchResultItem): Date | undefined {
   const dateString =
