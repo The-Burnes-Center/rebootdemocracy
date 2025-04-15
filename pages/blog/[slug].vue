@@ -191,7 +191,6 @@ onBeforeUnmount(() => {
           :name="getAuthorName(blog.authors[0]?.team_id)"
           :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
         />
-
         <!-- Sign up widget -->
         <SignUpButtonWidget
           title="Sign Up for updates"
