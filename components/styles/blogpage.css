@@ -10,6 +10,28 @@
   gap: 2rem;
 }
 
+.all-posts-page-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.all-posts-right-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  margin-top: 4rem;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
 .left-content-blog {
   padding-right: 1rem;
 }
