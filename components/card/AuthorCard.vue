@@ -38,31 +38,47 @@
       </Text>
     </div>
     
-    <div class="author-card__footer">
-      <a :href="articlesLink" class="author-card__link">
-        <Text
-          as="span"
-          size="base"
-          weight="bold"
-          color="link-primary"
-        >
-          View all articles
-        </Text>
-      </a>
-    </div>
+      <Button 
+        class="view-all-articles"
+        @click="viewAllArticles"
+        variant="primary"
+        width="100%"
+        height="36px"
+      >
+        View All Articles
+      </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-interface AuthorCardProps {
-  name: string;
-  title: string;
-  bio: string;
-  imageUrl: string;
-  articlesLink?: string;
-}
+import { useRouter } from 'vue-router';
 
-const props = withDefaults(defineProps<AuthorCardProps>(), {
-  articlesLink: '#'
+const props = defineProps({
+  author: {
+    type: Object,
+    required: true
+  },
+  imageUrl: {
+    type: String,
+    default: '/images/exampleImage.png'
+  },
+  name: {
+    type: String,
+    default: 'Unknown Author'
+  },
+  bio: {
+    type: String,
+    default: ''
+  }
 });
+
+const router = useRouter();
+
+// Function to navigate to the blog index page with author filter
+const viewAllArticles = () => {
+  router.push({
+    path: '/blog',
+    query: { author: props.name }
+  });
+};
 </script>
