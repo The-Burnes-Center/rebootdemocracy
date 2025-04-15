@@ -4,7 +4,7 @@
       title="Rebooting Democracy in the Age of AI"
       subtitle="Insights on AI, Governance and Democracy"
     />
-    <section class="page-layout">
+    <section class="all-posts-page-layout">
       <article
         class="left-content"
         :class="{ 'search-active': showSearchResults }"
@@ -90,7 +90,7 @@
         </template>
       </article>
 
-      <aside class="right-content">
+      <aside class="all-posts-right-content">
         <!-- Categories section -->
         <Text
           as="h2"
