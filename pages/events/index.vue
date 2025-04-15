@@ -198,11 +198,12 @@ export default defineComponent({
                     :key="index"
                   >
                     <img
-                      :src="
-                        'https://content.thegovlab.com/assets/' +
-                        instructor_item.innovate_us_instructors_id.headshot.id
-                      "
-                    />
+                    :src="getImageUrl({
+                      filename_disk:
+                        instructor_item.innovate_us_instructors_id.headshot?.filename_disk
+                    })"
+                  />
+
                   </div>
                 </div>
                 <div class="event-text">

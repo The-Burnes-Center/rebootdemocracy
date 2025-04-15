@@ -21,6 +21,7 @@
 @import "./quote.css";  
 @import "./blogpage.css";
 @import "./about.css";
+@import "./homepage.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
