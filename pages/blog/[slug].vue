@@ -160,6 +160,11 @@ onBeforeUnmount(() => {
               </Text>
             </div>
 
+            <AudioPlayer 
+              audioSrc="/path/to/your-audio-file.mp3"
+              autoplay="false"
+            />
+
             <!-- <blockquote class="quote-block">
               " AI in a manner that fosters public trust and confidence while
               protecting privacy, civil rights, civil liberties, and American
