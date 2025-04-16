@@ -23,6 +23,7 @@
 @import "./about.css";
 @import "./homepage.css";
 @import "./share-widget.css";
+@import "./audio-player.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
