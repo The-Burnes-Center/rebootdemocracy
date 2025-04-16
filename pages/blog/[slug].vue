@@ -193,6 +193,11 @@ onBeforeUnmount(() => {
           buttonLabel="Sign Up"
           backgroundColor="#F9F9F9"
         />
+        <ShareWidget 
+        url="https://rebootdemocracy.ai/blog/your-post-slug"
+        title="Your post title"
+        description="A brief description of your content"
+        />
       </aside>
     </section>
   </div>
