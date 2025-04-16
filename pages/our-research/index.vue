@@ -4,7 +4,6 @@ import { format, isPast, isFuture } from "date-fns";
 import { useRoute } from "vue-router";
 import type { IndexData, ResourceItem } from "../../types/index.ts";
 
-
 // State management
 const route = useRoute();
 const articleData = ref<ResourceItem[]>([]);
@@ -34,45 +33,42 @@ const isFutureDate = (d1: Date | string): boolean => {
   return isFuture(new Date(d1));
 };
 
-// Fetch index data from Directus - using hardcoded values if needed
+// Reference for the scroller div
+const resourceScroller = ref<HTMLElement | null>(null);
+
+// Fetch index data from Directus
 const fetchIndex = async () => {
   try {
-    // We'll try to fetch, but we already have default values
-    const response = await directus.request(
+    // Add explicit type for the response
+    const response = (await directus.request(
       readItems("reboot_democracy", {
         meta: "total_count",
         limit: 1,
-        fields: ["id", "engagement_title", "engagement_description"],
+        fields: [
+          "research_title",
+          "research_description",
+          "research_questions_description",
+          "research_questions_content",
+        ],
       })
-    );
-    
-    const responseData = response as IndexData;
-    
-    if (responseData && responseData.id) {
-      if (responseData.engagement_title) {
-        indexData.value.engagement_title = responseData.engagement_title;
-      }
-      if (responseData.engagement_description) {
-        indexData.value.engagement_description = responseData.engagement_description;
-      }
+    )) as IndexData;
+
+    // Directly assign the response to indexData
+    if (response) {
+      indexData.value = { ...response };
     }
-    
-    console.log("Index data used:", indexData.value);
   } catch (error) {
     console.error("Error fetching index data:", error);
   }
 };
+
 // Fetch article data from Directus
 const fetchArticle = async () => {
   try {
     const filter = {
-      _or: [
-        {
-          type: {
-            _eq: "Engagement",
-          },
-        },
-      ],
+      type: {
+        _eq: "Case Study",
+      },
     };
 
     const response = await directus.request(
@@ -82,10 +78,9 @@ const fetchArticle = async () => {
         sort: ["-id"],
         fields: [
           "id",
-          "type",
+          "case_study_type",
           "thumbnail.id",
-          "stage",
-          "partner",
+          "thumbnail.filename_disk",
           "title",
           "description",
           "link",
@@ -97,11 +92,17 @@ const fetchArticle = async () => {
     // Check if we got any data
     if (response && Array.isArray(response)) {
       articleData.value = response as ResourceItem[];
-      console.log("Article data processed:", articleData.value);
     }
   } catch (error) {
     console.error("Error fetching article data:", error);
     articleData.value = [];
+  }
+};
+
+// Scroll to top function
+const scrollTop = () => {
+  if (resourceScroller.value) {
+    resourceScroller.value.scrollTop = 0;
   }
 };
 
@@ -111,7 +112,6 @@ const loadAllData = async () => {
   dataFetchError.value = null;
 
   try {
-    // Execute requests, but don't worry too much if index data fails
     await fetchIndex();
     await fetchArticle();
   } catch (error) {
@@ -131,74 +131,102 @@ onMounted(() => {
 <template>
   <!-- Header Component -->
   <HeaderComponent />
-  <div class="resource-page our-engagements-page">
+  <div class="resource-page our-research-page">
     <div v-if="isLoading" class="loading">
       <div class="loader"></div>
       <p>Loading content...</p>
     </div>
     <template v-else>
       <div class="resource-description">
-        <h1>{{ indexData.engagement_title }}</h1>
+        <h1>{{ indexData.research_title }}</h1>
         <p
           class="our-work-description"
-          v-html="indexData.engagement_description"
+          v-html="indexData.research_description"
         ></p>
         <div class="resource-menu">
           <ul>
             <li
-              @click="selectedType = 'All'"
+              @click="
+                selectedType = 'All';
+                scrollTop();
+              "
               :class="{ isActive: selectedType == 'All' }"
             >
-              All Engagements
+              All Case Studies
+            </li>
+            <li
+              @click="
+                selectedType = 'CrowdLaw';
+                scrollTop();
+              "
+              :class="{ isActive: selectedType == 'CrowdLaw' }"
+            >
+              CrowdLaw
+            </li>
+            <li
+              @click="
+                selectedType = 'Virtual Communities';
+                scrollTop();
+              "
+              :class="{ isActive: selectedType == 'Virtual Communities' }"
+            >
+              Virtual Communities
+            </li>
+            <li
+              @click="
+                selectedType = 'Smarter State';
+                scrollTop();
+              "
+              :class="{ isActive: selectedType == 'Smarter State' }"
+            >
+              Smarter State
+            </li>
+            <li
+              @click="
+                selectedType = 'Collective Intelligence';
+                scrollTop();
+              "
+              :class="{ isActive: selectedType == 'Collective Intelligence' }"
+            >
+              Collective Intelligence
+            </li>
+            <li
+              @click="
+                selectedType = 'All';
+                scrollTop();
+              "
+              :class="{ isActive: selectedType == '' }"
+            >
+              <a href="#research">Research Questions</a>
             </li>
           </ul>
         </div>
       </div>
       <div class="resource-scroll-section">
-        <div class="resource-scroller">
+        <div class="resource-scroller" ref="resourceScroller">
           <div v-if="articleData.length === 0" class="no-content">
-            <p>No engagements found.</p>
+            <p>No case studies found.</p>
           </div>
           <template v-else v-for="item in articleData" :key="item.id">
             <div
               class="featured-items"
-              v-show="item.type == selectedType || selectedType == 'All'"
+              v-if="
+                item.case_study_type == selectedType || selectedType == 'All'
+              "
             >
               <div class="featured-item-text">
+                <h5 class="eyebrow">{{ item.case_study_type }}</h5>
                 <div class="resource-item-img">
                   <img
-                    v-if="item.thumbnail && item.thumbnail.id"
-                    :src="
-                      directus.url +
-                      'assets/' +
-                      item.thumbnail.id +
-                      '?width=648'
-                    "
-                    alt="Engagement thumbnail"
-                  />
-                  <img
-                    v-else
-                    :src="
-                      directus.url +
-                      'assets/a23c4d59-eb04-4d2a-ab9b-74136043954c?quality=80'
-                    "
-                    alt="Default thumbnail"
+                    v-if="item.thumbnail"
+                    :src="getImageUrl(item.thumbnail)"
+                    alt="Case study thumbnail"
                   />
                 </div>
-                <div
-                  class="event-tag-row"
-                  v-if="item.stage && item.stage.length > 0"
-                >
-                  <div class="engagement_dot"></div>
-                  <p>{{ item.stage[0] }}</p>
-                </div>
-                <h5 class="eyebrow peach">
-                  Partner: {{ item.partner || "Various" }}
-                </h5>
-                <h4>{{ item.title || "Engagement Project" }}</h4>
-                <p>{{ item.description || "No description available." }}</p>
+                <h4>{{ item.title }}</h4>
+                <p>{{ item.description }}</p>
                 <a
-                  class="btn btn-small btn-secondary"
+                  class="btn btn-small btn-blue"
                   :href="item.link || '#'"
                   :target="item.link ? '_blank' : '_self'"
                 >
@@ -211,6 +239,16 @@ onMounted(() => {
       </div>
       <div class="resource-image"></div>
     </template>
+  </div>
+  <div id="research" class="research-questions">
+    <div class="research-questions-description">
+      <h2>Research Questions</h2>
+      <div v-html="indexData.research_questions_description"></div>
+    </div>
+    <div
+      class="research-questions-content"
+      v-html="indexData.research_questions_content"
+    ></div>
   </div>
   <Mailing />
   <FooterComponent />
@@ -249,6 +287,14 @@ h1 {
   font-weight: 700;
   line-height: normal;
   letter-spacing: -2.5px;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  font-family: "Space Grotesk", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 h4 {
@@ -262,14 +308,17 @@ h5.eyebrow {
   width: fit-content;
   padding: 0.2em 0.5em;
   font-size: 0.7em;
+  margin: 0;
 }
 
 p,
+ul,
 li {
   font-family: "Red Hat Text", sans-serif;
   font-weight: 500;
   margin: 0;
   padding: 0;
+  line-height: 1.5;
 }
 
 .eyebrow {
@@ -298,10 +347,14 @@ a.btn:hover {
   cursor: pointer;
 }
 
-.btn-secondary {
-  color: #000000;
-  background: var(--peach-action);
-  border: 1px solid #000000;
+.btn-blue {
+  color: #ffffff;
+  background: var(--blue-light);
+}
+
+.btn-blue:hover {
+  color: #ffffff;
+  background: var(--blue-action);
 }
 
 .btn-small {
@@ -345,7 +398,7 @@ a.btn:hover {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: var(--peach-action) transparent;
+  border-color: var(--blue-action) transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -410,7 +463,6 @@ a.btn:hover {
   background-position: center;
   margin-left: -12rem;
 }
-
 .resource-menu li {
   font-family: "Space Mono", monospace;
   font-size: 20px;
@@ -429,13 +481,71 @@ a.btn:hover {
   gap: 20px;
 }
 
+.resource-menu a {
+  text-decoration: none;
+}
+
+.resource-menu a:visited {
+  color: unset;
+}
+
 .resource-menu li:hover {
   cursor: pointer;
 }
 
-.resource-menu li.isActive {
-  color: var(--peach-text);
+/* Research specific styles */
+.our-research-page .resource-description {
+  background-color: var(--blue-light);
 }
+
+.our-research-page .resource-scroll-section {
+  background-color: var(--blue-light);
+}
+
+.our-research-page .resource-scroller {
+  background-color: var(--blue-action);
+}
+
+.our-research-page .resource-image {
+  background-image: url("/images/research-image.png");
+}
+
+.our-research-page .resource-menu li.isActive {
+  color: var(--blue-text);
+}
+
+/* Research questions section */
+.research-questions {
+  background-color: var(--teal-light);
+  display: flex;
+  flex-direction: row;
+  padding: 2rem 5rem;
+  gap: 6rem;
+}
+
+.research-questions-description {
+  width: 50%;
+}
+
+.research-questions-description p{
+    line-height: 1.5;
+}
+
+.research-questions-content {
+  width: 50%;
+}
+
+/* For Vue 3 */
+:deep(.research-questions-content ol) {
+  background-color: #ffffff !important;
+  border: 1px solid #000000;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 2rem 4rem;
+  line-height: 2;
+}
+
 
 /* Featured Items Styles */
 .featured-items {
@@ -478,44 +588,6 @@ a.btn:hover {
   width: 100%;
   object-fit: cover;
   object-position: center;
-}
-
-/* Engagement Specific Styles */
-.our-engagements-page .resource-description {
-  background-color: var(--peach-light);
-}
-
-.our-engagements-page .resource-scroll-section {
-  background-color: var(--peach-light);
-}
-
-.our-engagements-page .resource-scroller {
-  background-color: var(--peach-action);
-}
-
-.our-engagements-page .resource-image {
-  background-image: url("/images/eel-image.png");
-}
-
-.our-engagements-page .resource-menu li.isActive {
-  color: var(--peach-text);
-}
-
-.engagement_dot {
-  height: 15px;
-  width: 15px;
-  background-color: red;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.event-tag-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 5px;
-  height: 40px;
 }
 
 /* Responsive Styles */
@@ -566,6 +638,20 @@ a.btn:hover {
     width: 100%;
     margin: 0;
     padding: 10px;
+  }
+
+  .research-questions {
+    flex-direction: column;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .research-questions-description {
+    width: 100%;
+  }
+
+  .research-questions-content {
+    width: 100%;
   }
 }
 </style>

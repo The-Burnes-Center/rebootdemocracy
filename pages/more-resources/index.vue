@@ -1,9 +1,46 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { format, isPast, isFuture } from "date-fns";
-import { useRoute } from "vue-router";
-import type { IndexData, ResourceItem } from "../../types/index.ts";
+import MailingListComponent from "../../components/mailing/Mailing.vue";
 
+import { useDirectusClient } from '../../composables/useDirectusClient';
+import { useRoute } from 'vue-router';
+
+// Import your image utility function
+import { getImageUrl } from '../../composables/useImageUrl'
+
+// Define interfaces for type safety
+interface IndexData {
+  more_resources_title?: string;
+  more_resources_description?: string;
+  [key: string]: any;
+}
+
+interface Thumbnail {
+  id: string;
+  filename_disk?: string;
+  [key: string]: any;
+}
+
+interface TeamMember {
+  [key: string]: any;
+}
+
+interface Author {
+  team_id?: TeamMember;
+  [key: string]: any;
+}
+
+interface ResourceItem {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  link: string;
+  thumbnail?: Thumbnail;
+  authors?: Author[];
+  [key: string]: any;
+}
 
 // State management
 const route = useRoute();
@@ -13,8 +50,9 @@ const selectedType = ref("All");
 const path = ref(route.fullPath);
 const isLoading = ref(true);
 const dataFetchError = ref<string | null>(null);
+const resourceScroller = ref<HTMLElement | null>(null);
 
-// Import Directus client
+// Import Directus client using the composable
 const { directus, readItems } = useDirectusClient();
 
 // Helper formatting functions
@@ -34,70 +72,66 @@ const isFutureDate = (d1: Date | string): boolean => {
   return isFuture(new Date(d1));
 };
 
-// Fetch index data from Directus - using hardcoded values if needed
+// Scroll to top function
+const scrollTop = () => {
+  if (resourceScroller.value) {
+    resourceScroller.value.scrollTop = 0;
+  }
+};
+
+// Fetch index data from Directus
 const fetchIndex = async () => {
   try {
-    // We'll try to fetch, but we already have default values
     const response = await directus.request(
       readItems("reboot_democracy", {
         meta: "total_count",
-        limit: 1,
-        fields: ["id", "engagement_title", "engagement_description"],
+        limit: -1,
+        fields: ["*.*"],
       })
     );
-    
-    const responseData = response as IndexData;
-    
-    if (responseData && responseData.id) {
-      if (responseData.engagement_title) {
-        indexData.value.engagement_title = responseData.engagement_title;
-      }
-      if (responseData.engagement_description) {
-        indexData.value.engagement_description = responseData.engagement_description;
-      }
+
+    if (response) {
+      indexData.value = response;
     }
-    
-    console.log("Index data used:", indexData.value);
   } catch (error) {
     console.error("Error fetching index data:", error);
+    dataFetchError.value = "Failed to load content. Please try again later.";
   }
 };
+
 // Fetch article data from Directus
 const fetchArticle = async () => {
   try {
-    const filter = {
-      _or: [
-        {
-          type: {
-            _eq: "Engagement",
-          },
-        },
-      ],
-    };
-
     const response = await directus.request(
       readItems("reboot_democracy_resources", {
         meta: "total_count",
         limit: -1,
         sort: ["-id"],
-        fields: [
-          "id",
-          "type",
-          "thumbnail.id",
-          "stage",
-          "partner",
-          "title",
-          "description",
-          "link",
-        ],
-        filter,
+        fields: ["*.*", "thumbnail.*", "authors.team_id.*"],
+        filter: {
+          _or: [
+            {
+              type: {
+                _eq: "Resources",
+              },
+            },
+            {
+              type: {
+                _eq: "Video",
+              },
+            },
+            {
+              type: {
+                _eq: "Podcast",
+              },
+            },
+          ],
+        },
       })
     );
 
-    // Check if we got any data
     if (response && Array.isArray(response)) {
       articleData.value = response as ResourceItem[];
-      console.log("Article data processed:", articleData.value);
     }
   } catch (error) {
     console.error("Error fetching article data:", error);
@@ -109,9 +143,7 @@ const fetchArticle = async () => {
 const loadAllData = async () => {
   isLoading.value = true;
   dataFetchError.value = null;
-
   try {
-    // Execute requests, but don't worry too much if index data fails
     await fetchIndex();
     await fetchArticle();
   } catch (error) {
@@ -129,91 +161,85 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Header Component -->
-  <HeaderComponent />
-  <div class="resource-page our-engagements-page">
+
+  <div class="resource-page our-writing-page">
     <div v-if="isLoading" class="loading">
       <div class="loader"></div>
       <p>Loading content...</p>
     </div>
+    <div v-else-if="dataFetchError" class="error-message">
+      <p>{{ dataFetchError }}</p>
+    </div>
     <template v-else>
       <div class="resource-description">
-        <h1>{{ indexData.engagement_title }}</h1>
-        <p
+        <h1>{{ indexData.more_resources_title }}</h1>
+        <div
           class="our-work-description"
-          v-html="indexData.engagement_description"
-        ></p>
+          v-html="indexData.more_resources_description || ''"
+        ></div>
         <div class="resource-menu">
           <ul>
             <li
-              @click="selectedType = 'All'"
+              @click="selectedType = 'All'; scrollTop();"
               :class="{ isActive: selectedType == 'All' }"
             >
-              All Engagements
+              All Resources
+            </li>
+            <li
+              @click="selectedType = 'Resources'; scrollTop();"
+              :class="{ isActive: selectedType == 'Resources' }"
+            >
+              Process Docs and Worksheets
+            </li>
+            <li
+              @click="selectedType = 'Podcast'; scrollTop();"
+              :class="{ isActive: selectedType == 'Podcast' }"
+            >
+              Podcast
+            </li>
+            <li
+              @click="selectedType = 'Video'; scrollTop();"
+              :class="{ isActive: selectedType == 'Video' }"
+            >
+              Video
             </li>
           </ul>
         </div>
       </div>
       <div class="resource-scroll-section">
-        <div class="resource-scroller">
+        <div class="resource-scroller" ref="resourceScroller">
           <div v-if="articleData.length === 0" class="no-content">
-            <p>No engagements found.</p>
+            <p>No resources found.</p>
           </div>
-          <template v-else v-for="item in articleData" :key="item.id">
-            <div
-              class="featured-items"
-              v-show="item.type == selectedType || selectedType == 'All'"
-            >
-              <div class="featured-item-text">
-                <div class="resource-item-img">
-                  <img
-                    v-if="item.thumbnail && item.thumbnail.id"
-                    :src="
-                      directus.url +
-                      'assets/' +
-                      item.thumbnail.id +
-                      '?width=648'
-                    "
-                    alt="Engagement thumbnail"
-                  />
-                  <img
-                    v-else
-                    :src="
-                      directus.url +
-                      'assets/a23c4d59-eb04-4d2a-ab9b-74136043954c?quality=80'
-                    "
-                    alt="Default thumbnail"
-                  />
-                </div>
-                <div
-                  class="event-tag-row"
-                  v-if="item.stage && item.stage.length > 0"
-                >
-                  <div class="engagement_dot"></div>
-                  <p>{{ item.stage[0] }}</p>
-                </div>
-                <h5 class="eyebrow peach">
-                  Partner: {{ item.partner || "Various" }}
-                </h5>
-                <h4>{{ item.title || "Engagement Project" }}</h4>
-                <p>{{ item.description || "No description available." }}</p>
-                <a
-                  class="btn btn-small btn-secondary"
-                  :href="item.link || '#'"
-                  :target="item.link ? '_blank' : '_self'"
-                >
-                  Details <i class="fa-regular fa-arrow-right"></i>
-                </a>
+          <div 
+            v-for="item in articleData" 
+            :key="item.id"
+            class="featured-items"
+            v-show="item.type === selectedType || selectedType === 'All'"
+          >
+            <div class="featured-item-text">
+              <div class="resource-item-img">
+                <img
+                  v-if="item.thumbnail"
+                  :src="getImageUrl(item.thumbnail)"
+                  :alt="item.title || 'Resource thumbnail'"
+                  @error="e => e.target.src = '/images/exampleImage.png'"
+                />
               </div>
+              <h5 class="eyebrow peach">{{ item.type }}</h5>
+              <h4>{{ item.title }}</h4>
+              <p>{{ item.description }}</p>
+              <a class="btn btn-small btn-secondary" :href="item.link" target="_blank"
+                >Details <i class="fa-regular fa-arrow-right"></i
+              ></a>
             </div>
-          </template>
+          </div>
         </div>
       </div>
       <div class="resource-image"></div>
     </template>
   </div>
-  <Mailing />
-  <FooterComponent />
+  <MailingListComponent />
 </template>
 
 <style scoped>
@@ -249,6 +275,14 @@ h1 {
   font-weight: 700;
   line-height: normal;
   letter-spacing: -2.5px;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  font-family: "Space Grotesk", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 h4 {
@@ -262,14 +296,17 @@ h5.eyebrow {
   width: fit-content;
   padding: 0.2em 0.5em;
   font-size: 0.7em;
+  margin: 0;
 }
 
 p,
+ul,
 li {
   font-family: "Red Hat Text", sans-serif;
   font-weight: 500;
   margin: 0;
   padding: 0;
+  line-height: 1.5;
 }
 
 .eyebrow {
@@ -298,10 +335,14 @@ a.btn:hover {
   cursor: pointer;
 }
 
-.btn-secondary {
-  color: #000000;
-  background: var(--peach-action);
-  border: 1px solid #000000;
+.btn-blue {
+  color: #ffffff;
+  background: var(--blue-light);
+}
+
+.btn-blue:hover {
+  color: #ffffff;
+  background: var(--blue-action);
 }
 
 .btn-small {
@@ -309,6 +350,12 @@ a.btn:hover {
   padding: 0 15px;
   height: 35px;
   min-height: 35px;
+}
+
+.btn-secondary {
+  color: #000000;
+  background: var(--peach-action);
+  border: 1px solid #000000;
 }
 
 /* Loading and Error Styles */
@@ -345,7 +392,7 @@ a.btn:hover {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: var(--peach-action) transparent;
+  border-color: var(--blue-action) transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -429,6 +476,14 @@ a.btn:hover {
   gap: 20px;
 }
 
+.resource-menu a {
+  text-decoration: none;
+}
+
+.resource-menu a:visited {
+  color: unset;
+}
+
 .resource-menu li:hover {
   cursor: pointer;
 }
@@ -480,42 +535,21 @@ a.btn:hover {
   object-position: center;
 }
 
-/* Engagement Specific Styles */
-.our-engagements-page .resource-description {
+/* Our writing specific styles */
+.our-writing-page .resource-description {
   background-color: var(--peach-light);
 }
 
-.our-engagements-page .resource-scroll-section {
+.our-writing-page .resource-scroll-section {
   background-color: var(--peach-light);
 }
 
-.our-engagements-page .resource-scroller {
+.our-writing-page .resource-scroller {
   background-color: var(--peach-action);
 }
 
-.our-engagements-page .resource-image {
-  background-image: url("/images/eel-image.png");
-}
-
-.our-engagements-page .resource-menu li.isActive {
-  color: var(--peach-text);
-}
-
-.engagement_dot {
-  height: 15px;
-  width: 15px;
-  background-color: red;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.event-tag-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 5px;
-  height: 40px;
+.our-writing-page .resource-image {
+  background-image: url("/images/writing-image.png");
 }
 
 /* Responsive Styles */
@@ -524,15 +558,15 @@ a.btn:hover {
     font-size: 30px;
     font-family: "Space Mono", monospace;
   }
-
+  
   .resource-page {
     flex-wrap: wrap;
   }
-
+  
   .resource-description {
     width: 100%;
   }
-
+  
   .resource-scroll-section {
     display: flex;
     flex-direction: row;
@@ -540,28 +574,28 @@ a.btn:hover {
     padding: 0;
     align-self: flex-end;
   }
-
+  
   .resource-scroller {
     max-height: 1000px;
   }
-
+  
   .resource-image {
     width: 10%;
     height: 1000px;
     align-self: flex-start;
     margin-left: 0;
   }
-
+  
   .resource-item-img img {
     height: 112px;
   }
-
+  
   .featured-items {
     width: 75vw;
     min-height: max-content;
     overflow: unset;
   }
-
+  
   .featured-item-text {
     width: 100%;
     margin: 0;
