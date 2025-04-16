@@ -16,13 +16,24 @@
   </div>
 </template>
 
-<style scoped>
-/* Mailing list section styles */
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+:root {
+  --purple-icon: rgba(219, 198, 254, 1);
+  --yellow-action: rgba(255, 180, 70, 1);
+}
 .mailing-list-section {
   display: flex;
   flex-direction: row;
   width: 100%;
-  background-color: rgba(219, 198, 254, 1);
+  background-color: var(--purple-icon);
+}
+
+.mailing-list-section h3{
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  margin:0;
 }
 
 .mailing-list-row {
@@ -72,11 +83,7 @@ a.btn {
   height: 42px;
 }
 
-/* CSS Variables imported from main CSS */
-:root {
-  --purple-icon: rgba(219, 198, 254, 1);
-  --yellow-action: rgba(255, 180, 70, 1);
-}
+
 
 /* Responsive styles */
 @media (max-width: 768px) {
