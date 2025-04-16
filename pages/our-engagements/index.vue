@@ -129,8 +129,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Header Component -->
-  <HeaderComponent />
+
   <div class="resource-page our-engagements-page">
     <div v-if="isLoading" class="loading">
       <div class="loader"></div>
@@ -213,36 +212,22 @@ onMounted(() => {
     </template>
   </div>
   <Mailing />
-  <FooterComponent />
+
 </template>
 
-<style scoped>
+<style >
 /* Import fonts */
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 /* CSS Variables */
 :root {
-  --yellow-light: rgba(255, 235, 205, 1);
-  --yellow-action: rgba(255, 180, 70, 1);
-  --yellow-icon: rgba(255, 215, 156, 1);
-  --yellow-rich: rgba(36, 21, 0, 1);
-  --blue-text: rgba(0, 120, 156, 1);
-  --blue-light: rgba(224, 248, 255, 1);
-  --blue-action: #65d0f0;
-  --blue-rich: rgba(1, 42, 55, 1);
-  --peach-action: rgba(247, 158, 130, 1);
+ --peach-action: rgba(247, 158, 130, 1);
   --peach-light: rgba(255, 233, 229, 1);
-  --peach-rich: #5c1c00;
   --peach-text: rgba(214, 53, 18, 1);
-  --peach-icon: rgba(246, 190, 182, 1);
-  --purple-icon: rgba(219, 198, 254, 1);
-  --teal-light: rgba(218, 250, 235, 1);
-  --teal-action: #0bcac4;
-  --teal-text: rgba(4, 120, 127, 1);
 }
 
 /* Typography Styles */
-h1 {
+.our-engagements-page h1 {
   font-family: "Space Grotesk", sans-serif;
   font-size: 62.5px;
   font-style: normal;
@@ -251,28 +236,28 @@ h1 {
   letter-spacing: -2.5px;
 }
 
-h4 {
+.our-engagements-page h4 {
   font-family: "Space Grotesk", sans-serif;
   font-size: 18px;
   margin: 0;
   padding: 0;
 }
 
-h5.eyebrow {
+.our-engagements-page h5.eyebrow {
   width: fit-content;
   padding: 0.2em 0.5em;
   font-size: 0.7em;
 }
 
-p,
-li {
+.our-engagements-page p,
+.our-engagements-page li {
   font-family: "Red Hat Text", sans-serif;
   font-weight: 500;
   margin: 0;
   padding: 0;
 }
 
-.eyebrow {
+.our-engagements-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
   font-family: "Space Mono", monospace;
@@ -280,7 +265,7 @@ li {
 }
 
 /* Button Styles */
-a.btn {
+.our-engagements-page a.btn {
   font-size: 0.8rem;
   margin: 0;
   font-weight: 700;
@@ -294,17 +279,17 @@ a.btn {
   color: #000000;
 }
 
-a.btn:hover {
+.our-engagements-page a.btn:hover {
   cursor: pointer;
 }
 
-.btn-secondary {
+.our-engagements-page .btn-secondary {
   color: #000000;
   background: var(--peach-action);
   border: 1px solid #000000;
 }
 
-.btn-small {
+.our-engagements-page .btn-small {
   width: fit-content;
   padding: 0 15px;
   height: 35px;
@@ -312,9 +297,9 @@ a.btn:hover {
 }
 
 /* Loading and Error Styles */
-.loading,
-.error-message,
-.no-content {
+.our-engagements-page .loading,
+.our-engagements-page .error-message,
+.our-engagements-page .no-content {
   padding: 2rem;
   text-align: center;
   font-family: "Red Hat Text", sans-serif;
@@ -322,7 +307,7 @@ a.btn:hover {
   width: 100%;
 }
 
-.loading {
+.our-engagements-page .loading {
   color: #666;
   display: flex;
   flex-direction: column;
@@ -331,17 +316,17 @@ a.btn:hover {
   gap: 1rem;
 }
 
-.error-message {
+.our-engagements-page .error-message {
   color: #c8102e;
 }
 
-.no-content {
+.our-engagements-page .no-content {
   color: #666;
   font-style: italic;
 }
 
 /* Loader animation */
-.loader {
+.our-engagements-page .loader {
   width: 48px;
   height: 48px;
   border: 5px solid;
@@ -520,7 +505,7 @@ a.btn:hover {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  h1 {
+  .our-engagements-page h1 {
     font-size: 30px;
     font-family: "Space Mono", monospace;
   }

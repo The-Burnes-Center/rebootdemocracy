@@ -542,7 +542,7 @@ onMounted(() => {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  h1 {
+  .resource-page h1 {
     font-size: 30px;
     font-family: "Space Mono", monospace;
   }
