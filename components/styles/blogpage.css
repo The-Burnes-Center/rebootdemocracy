@@ -1,13 +1,30 @@
 .blog-detail {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 1rem 0.2rem;
+}
+
+.blog-excerpt {
+  margin-top: 2rem;
+}
+
+p.excerpt-paragraph {
+  font-size: 16px;
+  line-height: 22.4px;
+  font-family: 'Inria Sans', sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  color: #062C51;
 }
 
 .page-layout-blog {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
+}
+
+.right-content-blog {
+  padding-left: 2rem;
 }
 
 p > strong {
@@ -26,11 +43,11 @@ p a::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -2px;
+  bottom: 0; 
   width: 100%;
-  height: 6px;
+  height: 8px; 
   background-color: rgba(255, 105, 180, 0.3);
-  z-index: -1;
+  z-index: -1; 
   border-radius: 2px;
 }
 
@@ -87,6 +104,7 @@ p a::after {
   font-style: normal;
   font-weight: 300;
   line-height: 150%;
+  padding-left: 5rem;
 }
 
 
