@@ -198,12 +198,14 @@ export default defineComponent({
                     :key="index"
                   >
                     <img
-                    :src="getImageUrl({
-                      filename_disk:
-                        instructor_item.innovate_us_instructors_id.headshot?.filename_disk
-                    })"
-                  />
-
+                      :src="
+                        getImageUrl({
+                          filename_disk:
+                            instructor_item.innovate_us_instructors_id.headshot
+                              ?.filename_disk,
+                        })
+                      "
+                    />
                   </div>
                 </div>
                 <div class="event-text">
@@ -317,35 +319,19 @@ export default defineComponent({
   </div>
 </template>
 <style>
-/* Color Variables */
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
-:root {
+ :root {
   font-size: 16px;
-  --yellow-light: rgba(255, 235, 205, 1);
   --yellow-action: rgba(255, 180, 70, 1);
-  --yellow-icon: rgba(255, 215, 156, 1);
-  --yellow-rich: rgba(36, 21, 0, 1);
   --blue-text: rgba(0, 120, 156, 1);
   --blue-light: rgba(224, 248, 255, 1);
-  --blue-action: #65d0f0;
   --blue-rich: rgba(1, 42, 55, 1);
   --peach-action: rgba(247, 158, 130, 1);
-  --peach-light: rgba(255, 233, 229, 1);
-  --peach-rich: #5c1c00;
-  --peach-text: rgba(214, 53, 18, 1);
-  --peach-icon: rgba(246, 190, 182, 1);
-  --purple-icon: rgba(219, 198, 254, 1);
-  --teal-light: rgba(218, 250, 235, 1);
-  --teal-action: #0bcac4;
-  --teal-text: rgba(4, 120, 127, 1);
-  --nu-red: #c8102e;
-  --dark-grey: rgba(91, 88, 85, 1);
-  --featured-box-height: 10px;
 }
 
 /* Typography */
-h1 {
+.events-page h1 {
   font-family: "Space Grotesk", sans-serif;
   font-size: 62.5px;
   font-style: normal;
@@ -356,12 +342,12 @@ h1 {
   padding: 0;
 }
 
-h2 {
+.events-page h2 {
   font-family: "Space Grotesk", sans-serif;
   margin: 0;
 }
 
-h3 {
+.events-page h3 {
   font-family: "Space Grotesk", sans-serif;
   font-size: 24px;
   margin: 0;
@@ -369,19 +355,19 @@ h3 {
   padding: 0;
 }
 
-h5.eyebrow {
+.events-page h5.eyebrow {
   width: fit-content;
   padding: 0.2em 0.5em;
   font-size: 0.7em;
 }
 
-p,
-li {
+.events-page p,
+.events-page li {
   font-family: "Red Hat Text", sans-serif;
   font-weight: 500;
 }
 
-.eyebrow {
+.events-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
   font-family: "Space Mono", monospace;
@@ -389,7 +375,7 @@ li {
 }
 
 /* Button Styles */
-a.btn {
+.events-page a.btn {
   font-size: 0.8rem;
   margin: 0;
   font-weight: 700;
@@ -403,41 +389,41 @@ a.btn {
   color: #000000;
 }
 
-a.btn:hover {
+.events-page a.btn:hover {
   cursor: pointer;
 }
 
-.btn-primary {
+.events-page .btn-primary {
   color: #ffffff;
   background: var(--yellow-action) !important;
   border: 1px solid #000000;
 }
 
-.register-btn {
+.events-page .register-btn {
   color: #ffffff;
   background: var(--yellow-action) !important;
   height: 100% !important;
   margin-top: 20px !important;
 }
 
-.btn-dark {
+.events-page .btn-dark {
   color: #000000 !important;
 }
 
-.btn-secondary {
+.events-page .btn-secondary {
   color: #000000;
   background: var(--peach-action);
   border: 1px solid #000000;
 }
 
-.btn-medium {
+.events-page .btn-medium {
   width: fit-content;
   min-height: 42px;
   padding: 0 15px;
   height: 42px;
 }
 
-.btn-row {
+.events-page .btn-row {
   display: flex;
   width: 100%;
   flex-direction: row;
@@ -635,7 +621,6 @@ p.event-date {
   -webkit-line-clamp: 5;
   line-clamp: 5;
   -webkit-box-orient: vertical;
-  
 }
 
 .event-speakers a {
@@ -693,7 +678,7 @@ p.event-date {
   width: 75%;
   height: 75%;
 }
-.past-event-col-2 p{
+.past-event-col-2 p {
   margin: 0;
   padding: 0;
 }
@@ -745,7 +730,7 @@ img.partner-logo-img {
 
 .event-title {
   margin-bottom: 1rem;
-    line-height: 1.5;
+  line-height: 1.5;
 }
 
 .event-type {
@@ -771,7 +756,6 @@ img.partner-logo-img {
   justify-content: flex-start;
   flex-grow: 1;
   padding-top: 0;
-
 }
 
 /* Past Events Section */
@@ -806,13 +790,12 @@ img.partner-logo-img {
   height: fit-content;
   display: flex;
   flex-direction: column;
-  gap:0.5rem;
+  gap: 0.5rem;
 }
-
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  h1 {
+  .events-page h1 {
     font-size: 30px;
     font-family: "Space Mono", monospace;
   }

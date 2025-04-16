@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  background-color: var(--purple-icon);
+  background-color: rgba(219, 198, 254, 1);
 }
 
 .mailing-list-row {
