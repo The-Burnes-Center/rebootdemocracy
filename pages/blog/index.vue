@@ -6,7 +6,7 @@
     />
     <section class="all-posts-page-layout">
       <article
-        class="left-content"
+        class="all-posts-left-content"
         :class="{ 'search-active': showSearchResults }"
       >
         <!-- Show GlobalSearch when searching -->
