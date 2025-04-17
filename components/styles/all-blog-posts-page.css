@@ -1,0 +1,31 @@
+@media (max-width: 768px) {
+    .all-posts-page-layout {
+      grid-template-columns: 1fr;
+      padding: 0;
+    }
+  
+
+    .blog-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12rem;
+      margin-top: 10rem;
+    }
+
+    .all-posts-right-content {
+        padding-left: 0;
+    }
+
+    .all-posts-right-content .card__container.card--default.card--small.card--hoverable.mobile-view {
+        margin-top: 12rem;
+    }
+
+    .all-posts-right-content .signup__container {
+        margin-bottom: 2rem;
+    }
+
+    .all-posts-left-content {
+        margin-top: 2rem;
+    }
+  }

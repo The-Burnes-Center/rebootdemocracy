@@ -24,6 +24,7 @@
 @import "./homepage.css";
 @import "./share-widget.css";
 @import "./audio-player.css";
+@import "./all-blog-posts-page.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
