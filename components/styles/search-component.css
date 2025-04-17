@@ -116,7 +116,13 @@
 
 @media (max-width: 768px) {
  .result-category {
-  gap:12rem;
+  gap:5rem;
  }
+ .search-results-container {
+  width: 100%;
+  margin: 2rem 0;
+  min-width: auto;
+}
+
 }
 

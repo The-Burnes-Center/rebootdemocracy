@@ -115,7 +115,7 @@
   }
 
   .tab-content {
-    margin-top: 13rem;
+    margin-top: 3rem;
     padding: 15px 2px;
     min-width: unset; /* Remove the hardcoded width */
   }

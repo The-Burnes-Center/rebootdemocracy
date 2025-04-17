@@ -1,9 +1,17 @@
+
 .blog-detail {
   max-width: 1300px;
   margin: 0 auto;
   padding: 1rem 0.2rem;
 }
-
+.blog-header-flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
 .blog-excerpt {
   margin-top: 2rem;
 }
@@ -43,11 +51,11 @@ p a::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: 0; 
+  bottom: 0;
   width: 100%;
-  height: 8px; 
+  height: 8px;
   background-color: rgba(255, 105, 180, 0.3);
-  z-index: -1; 
+  z-index: -1;
   border-radius: 2px;
 }
 
@@ -76,6 +84,15 @@ p a::after {
   padding-right: 1rem;
 }
 
+.blog-header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
 .blog-back-btn {
   background: none;
   border: none;
@@ -89,13 +106,13 @@ p a::after {
   padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom:1rem;
+  justify-content: flex-start;
+  margin-bottom: 0;
 }
 
 .publication-info {
-  margin-top:2rem;
-  margin-bottom:2rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .blog-content {
@@ -107,17 +124,73 @@ p a::after {
   padding-left: 5rem;
 }
 
+/* Mobile search container styling */
+.mobile-search-container {
+  display: none; /* Hidden by default */
+  width: 100%;
+  max-width: 220px;
+}
 
+.mobile-search-box {
+  width: 95%;
+}
+
+.mobile-search-box input {
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #E0E0E0;
+  padding: 15px 40px;
+  font-size: 14px;
+  background-color: #F9F9F9;
+}
+
+/* Media queries */
 @media (max-width: 768px) {
+    .blog-header-flex {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 3rem;
+  }
   .page-layout-blog {
     grid-template-columns: 1fr;
   }
   
-  .left-content-blog{
+  .left-content-blog {
     padding-right: 0;
+  }
+
+  .blog-content {
+    padding-left: 0;
+  }
+  
+  /* Show mobile search on mobile devices */
+  .mobile-search-container {
+    display: block;
+  }
+  
+  .blog-header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .mobile-search-container {
+    max-width: 100%;
+  }
+  
+  .right-content-blog {
+    padding-left: 0;
+    margin-top: 2rem;
   }
 }
 
+@media (min-width: 769px) {
+  /* Hide mobile search on desktop */
+  .mobile-search-container {
+    display: none;
+  }
+}
 
 @media (min-width: 1441px) and (max-width: 1920px) {
   .page-layout {
