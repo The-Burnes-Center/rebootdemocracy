@@ -94,6 +94,10 @@
     align-items: center;
   }
 
+  .search-active .tab-headers {
+    display: none !important;
+  }
+
   .tab-headers {
     display: flex;
     flex-direction: column;
