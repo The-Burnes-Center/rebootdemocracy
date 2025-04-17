@@ -6,3 +6,5 @@ export * from  './Event';
 export * from './WeeklyNews';
 export * from './RawSearchResultItem';
 export * from './Team';
+export * from './IndexData';
+export * from './ResourceItem';

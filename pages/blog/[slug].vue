@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
                   fill="black"
                 />
               </svg>
-              <Text as="span" size="sm" weight="medium">Blog</Text>
+              <Text as="span" size="md" weight="800" marginLeft="sm">Blog</Text>
             </button>
 
             <!-- Blog title -->
@@ -130,6 +130,13 @@ onBeforeUnmount(() => {
             >
               {{ blog.title }}
             </TitleText>
+
+            <!-- Excerpt -->
+            <div v-if="blog.excerpt" class="blog-excerpt">
+              <p class="excerpt-paragraph">
+                {{ blog.excerpt }}
+              </p>
+            </div>
 
             <!-- Publication info (date and author) -->
             <div class="publication-info">
@@ -153,26 +160,19 @@ onBeforeUnmount(() => {
               </Text>
             </div>
 
-            <!-- Excerpt -->
-            <div v-if="blog.excerpt" class="blog-excerpt">
-              <BodyText
-                size="lg"
-                fontFamily="inria"
-                lineHeight="relaxed"
-                fontStyle="italic"
-              >
-                {{ blog.excerpt }}
-              </BodyText>
-            </div>
+            <AudioPlayer 
+              audioSrc="/path/to/your-audio-file.mp3"
+              autoplay="false"
+            />
 
-            <blockquote class="quote-block">
+            <!-- <blockquote class="quote-block">
               " AI in a manner that fosters public trust and confidence while
               protecting privacy, civil rights, civil liberties, and American
               values."
               <span class="quote-block-footer"
                 >— John Smith, Software Engineer</span
               >
-            </blockquote>
+            </blockquote> -->
 
             <!-- Blog content -->
             <div class="blog-content-container">
@@ -197,6 +197,11 @@ onBeforeUnmount(() => {
           placeholder="Enter your email"
           buttonLabel="Sign Up"
           backgroundColor="#F9F9F9"
+        />
+        <ShareWidget 
+        url="https://rebootdemocracy.ai/blog/your-post-slug"
+        title="Your post title"
+        description="A brief description of your content"
         />
       </aside>
     </section>

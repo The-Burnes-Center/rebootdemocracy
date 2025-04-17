@@ -1,0 +1,135 @@
+.audio-player {
+    display: flex;
+    width: 852px;
+    height: 56px;
+    background-color: #FFFFFF;
+    border-radius: 6px;
+    padding: 16px;
+    align-items: center;
+    box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.1),
+                0px 2px 2px 0px rgba(0, 0, 0, 0.05),
+                0px 2px 6px 0px rgba(0, 0, 0, 0.05);
+    gap: 24px;
+    margin-bottom: 4rem;
+  }
+  
+  .audio-player__play-button,
+  .audio-player__volume-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .audio-player__play-button img,
+  .audio-player__volume-button img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+  
+  .audio-player__controls {
+    display: flex;
+    width: 710px;
+    height: 24px;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .audio-player__time {
+    font-family: var(--font-inter);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #000000;
+    text-align: center;
+  }
+  
+  .current-time {
+    width: 46px;
+    height: 24px;
+  }
+  
+  .total-time {
+    width: 43px;
+    height: 24px;
+  }
+  
+  .audio-player__progress-container {
+    width: 589px;
+    height: 4px;
+    background-color: #FAFAFA;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .audio-player__progress-bar {
+    height: 100%;
+    background-color: #0D63EB;
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: width 0.1s linear;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 900px) {
+    .audio-player {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    
+    .audio-player__controls {
+      width: calc(100% - 72px); /* Accounting for play and volume buttons */
+    }
+    
+    .audio-player__progress-container {
+      width: calc(100% - 105px); /* Accounting for time displays */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .audio-player {
+      height: auto;
+      padding: 12px;
+      gap: 12px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .audio-player__controls {
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    
+    .audio-player__progress-container {
+      order: 3;
+      width: 100%;
+      margin-top: 8px;
+    }
+    
+    .current-time {
+      order: 1;
+    }
+    
+    .total-time {
+      order: 2;
+    }
+    
+    .audio-player__play-button {
+      order: 1;
+    }
+    
+    .audio-player__volume-button {
+      order: 4;
+      align-self: flex-end;
+    }
+  }

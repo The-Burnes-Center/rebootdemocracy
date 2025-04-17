@@ -9,33 +9,21 @@
         />
       </div>
       <div class="author-card__info">
-        <Text 
-          as="h3" 
-          size="sm" 
-          weight="bold" 
-          class="author-card__name"
+        <h3 
+          class="author-name"
         >
           {{ name }}
-        </Text>
-        <Text 
-          as="p" 
-          size="xs" 
-          weight="normal" 
-          class="author-card__title"
-        >
-          {{ title }}
-        </Text>
+        </h3>
+        <h4 class="author-title">
+          Reboot Team Author
+        </h4>
       </div>
     </div>
     
     <div class="author-card__body">
-      <Text 
-        as="p" 
-        weight="light" 
-        class="author-card__bio"
-      >
+      <p class="author-bio">
         {{ bio }}
-      </Text>
+      </p>
     </div>
     
       <Button 
