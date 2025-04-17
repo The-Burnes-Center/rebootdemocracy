@@ -89,6 +89,7 @@
   }
   .mobile-view {
     display: flex;
+    margin-top:10rem;
   }
   .upcomingcard__tag{
     padding: 0rem 0rem;

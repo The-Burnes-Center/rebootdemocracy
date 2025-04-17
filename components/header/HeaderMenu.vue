@@ -12,6 +12,7 @@
         :to="item.to"
         class="header-menu__item"
         v-bind="item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}"
+        @click="emitItemClick(item, $event)"
       >
         <span class="header-menu__label">{{ item.label }}</span>
       </NuxtLink>
@@ -47,6 +48,7 @@
           :items="item.children"
           :openDropdown="openDropdown"
           :index="index"
+          @item-click="handleDropdownItemClick"
         />
       </div>
     </div>
@@ -63,6 +65,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits(['item-click']);
 
 const openDropdown = ref<number | null>(null);
 const isMobile = ref<boolean>(false);
@@ -97,5 +100,15 @@ function handleMouseLeave(index: number): void {
   if (!isMobile.value) {
     openDropdown.value = null;
   }
+}
+
+// Emit click event to parent
+function emitItemClick(item: MenuItem, event: MouseEvent): void {
+  emit('item-click', item, event);
+}
+
+// Handle clicks from dropdown items
+function handleDropdownItemClick(item: MenuItem, event: MouseEvent): void {
+  emit('item-click', item, event);
 }
 </script>

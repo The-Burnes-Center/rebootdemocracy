@@ -7,8 +7,17 @@ import { onMounted, onBeforeUnmount, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { BlogPost } from "@/types/BlogPost";
 import { format } from "date-fns";
+import useSearchState from "../../composables/useSearchState.js";
+//@ts-ignore
+import { AisInstantSearch, AisSearchBox } from "vue-instantsearch/vue3/es";
 
-const { showSearchResults, setIndexNames, resetSearch } = useSearchState();
+const {
+  showSearchResults,
+  setIndexNames,
+  resetSearch,
+  updateSearchQuery,
+  getAlgoliaClient,
+} = useSearchState();
 
 const route = useRoute();
 const router = useRouter();
@@ -16,6 +25,34 @@ const router = useRouter();
 const blogslug = computed(() => route.params.slug as string);
 const blog = ref<BlogPost | null>(null);
 const isLoading = ref(true);
+// For Algolia search
+const primaryIndex = "reboot_democracy_blog";
+const indices = [primaryIndex, "reboot_democracy_weekly_news"];
+const algoliaClient = getAlgoliaClient();
+
+// Handle search input changes
+const handleSearchInput = (event: InputEvent): void => {
+  const query = (event.target as HTMLInputElement)?.value;
+  updateSearchQuery(query);
+};
+
+const handleSearchReset = () => {
+  updateSearchQuery("");
+};
+const isMobile = ref(false);
+
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  handleResize();
+  window.addEventListener("resize", handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+});
 
 // Function to get image URL with fallback
 function getImageUrl(authorHeadshot: any, width: number = 600): string {
@@ -48,13 +85,10 @@ function formatDate(dateValue: Date | string) {
 
 // Reset search results when component is mounted
 onMounted(async () => {
-  // Reset the search first
   resetSearch();
-  
-  setIndexNames([
-    "reboot_democracy_blog",
-    "reboot_democracy_weekly_news"
-  ]);
+
+  setIndexNames(indices);
+
   try {
     isLoading.value = true;
     if (blogslug.value) {
@@ -69,7 +103,6 @@ onMounted(async () => {
 
 // Clean up when navigating away from this component
 onBeforeUnmount(() => {
-  // Also reset search when leaving the page
   resetSearch();
 });
 </script>
@@ -78,7 +111,8 @@ onBeforeUnmount(() => {
   <div class="blog-detail">
     <section class="page-layout-blog">
       <article class="left-content-blog">
-        <GlobalSearch v-if="showSearchResults" />
+        <!-- For desktop, show GlobalSearch at top -->
+        <GlobalSearch v-if="showSearchResults && !isMobile" />
 
         <!-- Loading state -->
         <template v-else>
@@ -101,24 +135,41 @@ onBeforeUnmount(() => {
 
           <!-- Blog content -->
           <template v-else>
-            <button class="blog-back-btn" @click="router.push('/blog')">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                class="icon"
-              >
-                <path
-                  d="M15.7957 18.7041C16.0071 18.9154 16.1258 19.2021 16.1258 19.5009C16.1258 19.7998 16.0071 20.0865 15.7957 20.2978C15.5844 20.5092 15.2977 20.6279 14.9989 20.6279C14.7 20.6279 14.4133 20.5092 14.202 20.2978L6.70198 12.7978C6.5971 12.6933 6.51388 12.5691 6.4571 12.4324C6.40032 12.2956 6.37109 12.149 6.37109 12.0009C6.37109 11.8529 6.40032 11.7063 6.4571 11.5695C6.51388 11.4328 6.5971 11.3086 6.70198 11.2041L14.202 3.70406C14.4133 3.49272 14.7 3.37399 14.9989 3.37399C15.2977 3.37399 15.5844 3.49272 15.7957 3.70406C16.0071 3.91541 16.1258 4.20205 16.1258 4.50094C16.1258 4.79982 16.0071 5.08647 15.7957 5.29781L9.09354 12L15.7957 18.7041Z"
-                  fill="black"
-                />
-              </svg>
-              <Text as="span" size="md" weight="800" marginLeft="sm">Blog</Text>
-            </button>
+            <div class="blog-header-flex">
+              <button class="blog-back-btn" @click="router.push('/blog')">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  class="icon"
+                >
+                  <path
+                    d="M15.7957 18.7041C16.0071 18.9154 16.1258 19.2021 16.1258 19.5009C16.1258 19.7998 16.0071 20.0865 15.7957 20.2978C15.5844 20.5092 15.2977 20.6279 14.9989 20.6279C14.7 20.6279 14.4133 20.5092 14.202 20.2978L6.70198 12.7978C6.5971 12.6933 6.51388 12.5691 6.4571 12.4324C6.40032 12.2956 6.37109 12.149 6.37109 12.0009C6.37109 11.8529 6.40032 11.7063 6.4571 11.5695C6.51388 11.4328 6.5971 11.3086 6.70198 11.2041L14.202 3.70406C14.4133 3.49272 14.7 3.37399 14.9989 3.37399C15.2977 3.37399 15.5844 3.49272 15.7957 3.70406C16.0071 3.91541 16.1258 4.20205 16.1258 4.50094C16.1258 4.79982 16.0071 5.08647 15.7957 5.29781L9.09354 12L15.7957 18.7041Z"
+                    fill="black"
+                  />
+                </svg>
+                <Text as="span" size="sm" weight="extrabold" marginLeft="sm"
+                  >Blog</Text
+                >
+              </button>
 
-            <!-- Blog title -->
+              <div class="mobile-search-container">
+                <ais-instant-search
+                  :index-name="primaryIndex"
+                  :search-client="algoliaClient"
+                >
+                  <ais-search-box
+                    @input="handleSearchInput"
+                    @reset="handleSearchReset"
+                    class="mobile-search-box"
+                  />
+                </ais-instant-search>
+              </div>
+            </div>
+
+          <GlobalSearch v-if="showSearchResults && isMobile" />
             <TitleText
               :level="'h1'"
               size="5xl"
@@ -126,10 +177,11 @@ onBeforeUnmount(() => {
               class="blog-title"
               fontFamily="inria"
               lineHeight="super-loose"
-              style="letter-spacing: normal;"
+              style="letter-spacing: normal"
             >
               {{ blog.title }}
             </TitleText>
+
 
             <!-- Excerpt -->
             <div v-if="blog.excerpt" class="blog-excerpt">
@@ -143,11 +195,11 @@ onBeforeUnmount(() => {
               <Text size="sm" weight="normal" fontStyle="italic">
                 Published on
                 <Text as="span" size="sm" weight="bold" fontStyle="italic">
-                  {{ formatDate(blog.date) }}
+                  {{ blog ? formatDate(blog.date) : "unknown date" }}
                 </Text>
                 <template
                   v-if="
-                    blog.authors &&
+                    blog?.authors &&
                     blog.authors.length > 0 &&
                     blog.authors[0]?.team_id
                   "
@@ -160,7 +212,7 @@ onBeforeUnmount(() => {
               </Text>
             </div>
 
-            <AudioPlayer 
+            <AudioPlayer
               audioSrc="/path/to/your-audio-file.mp3"
               autoplay="false"
             />
@@ -176,20 +228,31 @@ onBeforeUnmount(() => {
 
             <!-- Blog content -->
             <div class="blog-content-container">
-              <div class="blog-content" v-html="blog.content"></div>
+              <div class="blog-content" v-html="blog?.content"></div>
             </div>
           </template>
         </template>
       </article>
 
       <!-- Sidebar content -->
-      <aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
+      <aside
+        class="right-content-blog"
+        v-if="
+          blog &&
+          blog.authors &&
+          blog.authors.length > 0 &&
+          blog.authors[0]?.team_id
+        "
+      >
         <!-- Author card -->
         <AuthorCard
           :author="blog.authors[0]"
           :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
           :name="getAuthorName(blog.authors[0]?.team_id)"
-          :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
+          :bio="
+            getAuthorName(blog.authors[0]?.team_id) +
+            ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'
+          "
         />
         <!-- Sign up widget -->
         <SignUpButtonWidget
@@ -198,10 +261,10 @@ onBeforeUnmount(() => {
           buttonLabel="Sign Up"
           backgroundColor="#F9F9F9"
         />
-        <ShareWidget 
-        url="https://rebootdemocracy.ai/blog/your-post-slug"
-        title="Your post title"
-        description="A brief description of your content"
+        <ShareWidget
+          url="https://rebootdemocracy.ai/blog/your-post-slug"
+          title="Your post title"
+          description="A brief description of your content"
         />
       </aside>
     </section>
