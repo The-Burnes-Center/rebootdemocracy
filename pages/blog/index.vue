@@ -16,6 +16,75 @@
         <template v-else>
           <div v-if="isLoading" class="loading">Loading blogs...</div>
 
+          <div class="mobile-category-and-authors">  
+            <!-- Categories section with toggle -->
+            <div class="section-header" @click="toggleCategoriesVisible">
+              <Text
+                as="h2"
+                fontFamily="inter"
+                size="lg"
+                color="text-primary"
+                weight="bold"
+                align="left"
+              >
+                Category
+              </Text>
+              <div class="toggle-icon">
+                <i :class="isCategoriesVisible ? 'icon-chevron-up' : 'icon-chevron-down'"></i>
+              </div>
+            </div>
+
+            <!-- Display list of categories with post counts (togglable) -->
+            <div v-if="isTagsLoading && isCategoriesVisible" class="loading-tags">
+              Loading categories...
+            </div>
+            <div v-else-if="isCategoriesVisible" class="category-list">
+              <div
+                v-for="tag in tags"
+                :key="tag.id"
+                class="category-item"
+                :class="{ 'category-item--active': selectedCategory === tag.name }"
+                @click="selectCategory(tag.name)"
+              >
+                <ListCategory :title="tag.name" :number="tag.count" />
+              </div>
+            </div>
+
+            <!-- Authors section with toggle -->
+            <div class="section-header" @click="toggleAuthorsVisible">
+              <Text
+                as="h2"
+                fontFamily="inter"
+                size="lg"
+                color="text-primary"
+                weight="bold"
+                align="left"
+                class="section-title"
+              >
+                Authors
+              </Text>
+              <div class="toggle-icon">
+                <i :class="isAuthorsVisible ? 'icon-chevron-up' : 'icon-chevron-down'"></i>
+              </div>
+            </div>
+
+            <!-- Display list of authors with post counts (togglable) -->
+            <div v-if="isAuthorsLoading && isAuthorsVisible" class="loading-tags">
+              Loading authors...
+            </div>
+            <div v-else-if="isAuthorsVisible">
+              <div
+                v-for="author in filteredAuthors"
+                :key="author.id"
+                class="author-item"
+                :class="{ 'author-item--active': selectedAuthor === author.name }"
+                @click="selectAuthor(author.name)"
+              >
+                <ListCategory :title="author.name" :number="author.count" />
+              </div>
+            </div>
+          </div>
+
           <!-- Results counter and filter controls in a fixed-height container -->
           <div class="results-and-filter">
             <div class="results-count">
@@ -91,6 +160,7 @@
       </article>
 
       <aside class="all-posts-right-content">
+      <div class="desktop-category-and-authors">  
         <!-- Categories section -->
         <Text
           as="h2"
@@ -147,6 +217,7 @@
             <ListCategory :title="author.name" :number="author.count" />
           </div>
         </div>
+      </div>
 
         <!-- Event section with loading state -->
         <div v-if="isEventLoading" class="loading">Loading event...</div>
@@ -159,7 +230,6 @@
           :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
           :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
         />
-
 
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -187,6 +257,18 @@ const route = useRoute();
 const { showSearchResults, resetSearch } = useSearchState();
 const isFutureEvent = ref(true);
 
+// Toggle state for mobile category/authors
+const isCategoriesVisible = ref(false); // Initially collapsed on mobile
+const isAuthorsVisible = ref(false); // Initially collapsed on mobile
+
+// Toggle functions
+const toggleCategoriesVisible = () => {
+  isCategoriesVisible.value = !isCategoriesVisible.value;
+};
+
+const toggleAuthorsVisible = () => {
+  isAuthorsVisible.value = !isAuthorsVisible.value;
+};
 
 // Data state
 const allPosts = ref<BlogPost[]>([]);
@@ -456,56 +538,3 @@ watch([selectedCategory, selectedAuthor], () => {
   updateFilteredPosts();
 });
 </script>
-
-<style scoped>
-.results-and-filter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  min-height: 36px;
-}
-
-.results-count {
-  flex: 1;
-}
-
-.filter-actions {
-  flex-shrink: 0;
-}
-
-.section-title {
-  margin-top: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.category-list,
-.author-list {
-  margin-bottom: 1.5rem;
-}
-
-.category-item,
-.author-item {
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.category-item:hover,
-.author-item:hover {
-  background-color: #f5f5f5;
-}
-
-.category-item--active,
-.author-item--active {
-  background-color: #e6f0ff;
-  font-weight: bold;
-}
-
-.loading-tags {
-  padding: 1rem;
-  text-align: center;
-  color: #666;
-}
-</style>

@@ -49,6 +49,18 @@
 }
 /* Media query for responsive design */
 @media (max-width: 768px) {
+  .upcoming-card-container {
+    padding: 2rem;
+  }
+
+  .hero__container {
+    height: 15vh;
+  }
+
+  .blog-collaborators-container {
+    display: none;
+  }
+
   .page-layout {
     grid-template-columns: 1fr;
     padding: 1rem 0.5rem;
