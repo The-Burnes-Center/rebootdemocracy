@@ -94,10 +94,6 @@
     align-items: center;
   }
 
-  .search-active .tab-headers {
-    display: none !important;
-  }
-
   .tab-headers {
     display: flex;
     flex-direction: column;
@@ -115,7 +111,7 @@
   }
 
   .tab-content {
-    margin-top: 3rem;
+    margin-top: 13rem;
     padding: 15px 2px;
     min-width: unset; /* Remove the hardcoded width */
   }
