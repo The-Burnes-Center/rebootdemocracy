@@ -31,7 +31,7 @@
     </div>
 
     <!-- Simple pagination placeholder -->
-    <div class="search-pagination btn-mid" v-if="showLoadMore">
+    <div class="search-pagination" v-if="showLoadMore">
       <Button
         variant="primary"
         width="150px"

@@ -5,12 +5,13 @@
     }
   
 
-    .blog-list {
+    .all-posts-left-content .blog-list {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 12rem;
       margin-top: 10rem;
+      padding: 1rem;
     }
 
     .all-posts-right-content {
@@ -22,7 +23,7 @@
     }
 
     .all-posts-right-content .signup__container {
-        margin-bottom: 2rem;
+        margin: 2rem auto;
     }
 
     .all-posts-left-content {

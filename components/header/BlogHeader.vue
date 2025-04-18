@@ -67,40 +67,42 @@
       />
     </nav>
     <div class="search-container" v-if="!isMobile">
-      <ais-instant-search :index-name="primaryIndex" :search-client="algoliaClient">
+      <ais-instant-search :index-name="indexName" :search-client="algoliaClient">
         <ais-search-box @input="handleSearchInput" @reset="handleSearchReset" />
       </ais-instant-search>
     </div>
   </header>
 </template>
+
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import type { MenuItem } from "@/types/index.ts";
+
 import {
   AisInstantSearch,
   AisSearchBox,
   // @ts-ignore
 } from "vue-instantsearch/vue3/es";
 import useSearchState from "../../composables/useSearchState.js";
+
 const router = useRouter();
 const route = useRoute();
+const indexName = "reboot_democracy_blog";
 
-// Update to use multiple indices
-const primaryIndex = "reboot_democracy_blog";
-const indices = [primaryIndex, "reboot_democracy_weekly_news"];
-
-const { updateSearchQuery, setIndexNames, getAlgoliaClient } = useSearchState();
+const { updateSearchQuery, setIndexName, getAlgoliaClient } = useSearchState();
 const algoliaClient = getAlgoliaClient();
-setIndexNames(indices); // Changed from setIndexName to setIndexNames
+setIndexName(indexName); 
 
 // State for mobile menu
 const mobileMenuOpen = ref<boolean>(false);
 const isMobile = ref<boolean>(false);
+
 // Toggle mobile menu
 const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
+
 // Custom handling for menu item clicks
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
   // Check if it's the "Our Team" item
@@ -121,12 +123,13 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
       }
     }
   }
-
+  // Handle external links - open in same tab
   else if (item.external && item.to) {
     event.preventDefault();
-    window.location.href = item.to; 
+    window.location.href = item.to; // Use window.location.href instead of window.open
   }
 };
+
 const menuItems: MenuItem[] = [
   { label: "Home", name: "home", to: "/" },
   { label: "Blog", name: "blog", to: "/blog" },
@@ -153,6 +156,7 @@ const menuItems: MenuItem[] = [
   },
   { label: "Sign up", name: "signup", to: "/signup" },
 ];
+
 // Check if we're on mobile
 const checkIfMobile = (): void => {
   isMobile.value = window.innerWidth < 1050;
@@ -161,24 +165,29 @@ const checkIfMobile = (): void => {
     mobileMenuOpen.value = false;
   }
 };
+
 // Handle search input changes
 const handleSearchInput = (event: InputEvent): void => {
   const query = (event.target as HTMLInputElement)?.value;
   updateSearchQuery(query);
 };
+
 const handleSearchReset = () => {
   updateSearchQuery("");
 };
+
 // Add resize event listener on mount
 onMounted((): void => {
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
 });
+
 // Remove event listener on unmount
 onUnmounted((): void => {
   window.removeEventListener("resize", checkIfMobile);
 });
 </script>
+
 <style scoped>
 .search-container {
   position: relative;

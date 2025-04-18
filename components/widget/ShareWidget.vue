@@ -5,6 +5,7 @@
       size="base"
       weight="bold"
       class="share-widget__text"
+      :align="align"
     >
       Share
     </Text>
@@ -50,12 +51,14 @@ interface ShareWidgetProps {
   url?: string;
   title?: string;
   description?: string;
+  align?: string;
 }
 
 const props = withDefaults(defineProps<ShareWidgetProps>(), {
   url: window.location.href,
   title: document.title,
-  description: ''
+  description: '',
+  align: 'left',
 });
 
 const getShareUrl = (platform: string) => {

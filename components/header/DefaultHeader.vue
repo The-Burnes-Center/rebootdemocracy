@@ -93,11 +93,6 @@ const toggleMobileMenu = (): void => {
 
 // Custom handling for menu item clicks
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
-  // Close mobile menu when any item is clicked
-  if (isMobile.value) {
-    mobileMenuOpen.value = false;
-  }
-
   // Handle team navigation
   if (item.name === 'team') {
     event.preventDefault();
