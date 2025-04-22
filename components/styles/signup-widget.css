@@ -59,7 +59,6 @@
   @media (max-width: 480px) {
     .signup__container {
       width: 100%;
-      max-width: 346px;
       height: auto;
       padding: 20px;
     }

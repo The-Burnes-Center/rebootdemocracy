@@ -1,0 +1,160 @@
+/* Original CSS */
+.mobile-category-and-authors {
+  display: none;
+}
+
+@media (max-width: 768px) {
+    .all-posts-page-layout {
+      grid-template-columns: 1fr;
+      padding: 0;
+    }
+  
+    .all-posts-left-content .blog-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12rem;
+      margin-top: 10rem;
+      padding: 1rem;
+    }
+
+    .all-posts-right-content {
+        padding-left: 0;
+    }
+
+    .all-posts-right-content .card__container.card--default.card--small.card--hoverable.mobile-view {
+        margin-top: 12rem;
+        align-self: center;
+    }
+
+    .all-posts-right-content .signup__container {
+        margin: 2rem auto;
+    }
+
+    .all-posts-left-content {
+        margin-top: 2rem;
+    }
+
+    .desktop-category-and-authors {
+      display: none;
+    }
+
+    .mobile-category-and-authors {
+      display: initial;
+    }
+    
+    /* Modified for mobile: Clear Filter button on next line */
+    .results-and-filter {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    
+    .filter-actions {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+    }
+}
+
+/* Toggle functionality CSS */
+.mobile-category-and-authors .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.mobile-category-and-authors .toggle-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.mobile-category-and-authors .icon-chevron-up,
+.mobile-category-and-authors .icon-chevron-down {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.mobile-category-and-authors .icon-chevron-up {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 15 12 9 6 15'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.mobile-category-and-authors .icon-chevron-down {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* Animation for category list and author list */
+.mobile-category-and-authors .category-list,
+.mobile-category-and-authors .author-item {
+  max-height: 1000px; /* A value larger than the maximum possible height */
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+/* Add spacing after lists to separate from the next header */
+.mobile-category-and-authors .category-list {
+  margin-bottom: 1rem;
+}
+
+/* Add margin to the section title to maintain spacing even when collapsed */
+.mobile-category-and-authors .section-title {
+  margin-top: 1.5rem;
+}
+
+/* Existing styles for section title, category list, and author list */
+.results-and-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  min-height: 36px;
+}
+
+.results-count {
+  flex: 1;
+}
+
+.filter-actions {
+  flex-shrink: 0;
+}
+
+.section-title {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.category-list,
+.author-list {
+  margin-bottom: 1.5rem;
+}
+
+.category-item,
+.author-item {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.category-item:hover,
+.author-item:hover {
+  background-color: #f5f5f5;
+}
+
+.category-item--active,
+.author-item--active {
+  background-color: #e6f0ff;
+  font-weight: bold;
+}
+
+.loading-tags {
+  padding: 1rem;
+  text-align: center;
+  color: #666;
+}

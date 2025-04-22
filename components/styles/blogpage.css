@@ -107,14 +107,52 @@ p a::after {
   padding-left: 5rem;
 }
 
+.share-widget-mobile {
+  display: none;
+}
+
 
 @media (max-width: 768px) {
   .page-layout-blog {
     grid-template-columns: 1fr;
+    gap: 0rem;
   }
   
   .left-content-blog{
     padding-right: 0;
+  }
+
+  p.excerpt-paragraph {
+    padding: 0.5rem;
+  }
+ 
+  .blog-content {
+    padding: 0 0.8rem;
+  }
+
+  .blog-detail h1.text-left.paragraph-line-height-super-loose.blog-title {
+    padding: 0.5rem;
+  }
+
+  .right-content-blog {
+    padding: 1rem;
+  }
+
+  .left-content-blog .text-left.paragraph-line-height-super-loose.blog-title{
+    padding: 0.2rem;
+  }
+
+  .publication-info {
+    margin-top: 0;
+    padding-left: 0.5rem;
+  }
+
+  .share-widget-desktop {
+    display: none;
+  }
+
+  .share-widget-mobile {
+    display: initial;
   }
 }
 

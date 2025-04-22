@@ -107,15 +107,16 @@
         </Text>
 
         <div v-if="isEventLoading" class="loading">Loading event...</div>
-        <UpcomingCard
-          v-if="latestEvent"
-          :title="latestEvent.title"
-          :excerpt="latestEvent.description"
-          :imageUrl="getImageUrl(latestEvent.thumbnail)"
-          :onClick="() => handleEventClick(latestEvent)"
-          :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
-          :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
-        />
+        <div  v-if="latestEvent" class="upcoming-card-container">
+          <UpcomingCard
+            :title="latestEvent.title"
+            :excerpt="latestEvent.description"
+            :imageUrl="getImageUrl(latestEvent.thumbnail)"
+            :onClick="() => handleEventClick(latestEvent)"
+            :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
+            :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
+          />
+        </div>
 
         <SignUpButtonWidget
           title="Sign Up for updates"
