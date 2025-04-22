@@ -19,10 +19,10 @@ const isLoading = ref(true);
 
 // Function to get image URL with fallback
 function getImageUrl(authorHeadshot: any, width: number = 600): string {
-  if (!authorHeadshot.Headshot.id) {
+  if (!authorHeadshot || !authorHeadshot.id) {
     return "/images/exampleImage.png";
   }
-  return `https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`;
+  return `https://content.thegovlab.com/assets/${authorHeadshot.id}?width=${width}`;
 }
 
 // Function to get author name
@@ -50,7 +50,7 @@ function formatDate(dateValue: Date | string) {
 onMounted(async () => {
   // Reset the search first
   resetSearch();
-  
+ 
   setIndexNames([
     "reboot_democracy_blog",
     "reboot_democracy_weekly_news"
@@ -160,19 +160,13 @@ onBeforeUnmount(() => {
               </Text>
             </div>
 
-            <AudioPlayer 
-              audioSrc="/path/to/your-audio-file.mp3"
-              autoplay="false"
-            />
-
-            <!-- <blockquote class="quote-block">
-              " AI in a manner that fosters public trust and confidence while
-              protecting privacy, civil rights, civil liberties, and American
-              values."
-              <span class="quote-block-footer"
-                >— John Smith, Software Engineer</span
-              >
-            </blockquote> -->
+            <!-- Audio component -->
+            <div class="audio-version" v-if="blog?.audio_version">
+              <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.</em></p>
+              <AudioPlayer
+                :audioSrc="`https://content.thegovlab.com/assets/${blog.audio_version.id}`"
+              />
+            </div>
 
             <!-- Blog content -->
             <div class="blog-content-container">
@@ -185,7 +179,7 @@ onBeforeUnmount(() => {
       <!-- Sidebar content -->
       <aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
         <div class="share-widget-mobile">
-          <ShareWidget 
+          <ShareWidget
             url="https://rebootdemocracy.ai/blog/your-post-slug"
             title="Your post title"
             description="A brief description of your content"
@@ -207,7 +201,7 @@ onBeforeUnmount(() => {
           backgroundColor="#F9F9F9"
         />
         <div class="share-widget-desktop">
-        <ShareWidget 
+        <ShareWidget
         url="https://rebootdemocracy.ai/blog/your-post-slug"
         title="Your post title"
         description="A brief description of your content"

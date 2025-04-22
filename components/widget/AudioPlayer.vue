@@ -1,44 +1,44 @@
 <template>
   <div class="audio-player">
-    <button 
-      class="audio-player__play-button" 
+    <button
+      class="audio-player__play-button"
       @click="togglePlay"
       :aria-label="isPlaying ? 'Pause' : 'Play'"
     >
-      <img 
-        :src="isPlaying ? '/images/PauseButton.svg' : '/images/PlayButton.svg'" 
-        alt="Play/Pause Button" 
+      <img
+        :src="isPlaying ? '/images/PauseButton.svg' : '/images/PlayButton.svg'"
+        alt="Play/Pause Button"
       />
     </button>
-    
+   
     <div class="audio-player__controls">
       <div class="audio-player__time current-time">{{ formatTime(currentTime) }}</div>
-      
+     
       <div class="audio-player__progress-container" @click="seek">
-        <div 
-          class="audio-player__progress-bar" 
+        <div
+          class="audio-player__progress-bar"
           :style="{ width: `${progressPercentage}%` }"
         ></div>
       </div>
-      
+     
       <div class="audio-player__time total-time">{{ formatTime(duration) }}</div>
     </div>
-    
-    <button 
-      class="audio-player__volume-button" 
+   
+    <button
+      class="audio-player__volume-button"
       @click="toggleMute"
       :aria-label="isMuted ? 'Unmute' : 'Mute'"
     >
-      <img 
-        :src="isMuted ? '/images/MuteButton.svg' : '/images/VolumeButton.svg'" 
-        alt="Volume Button" 
+      <img
+        :src="isMuted ? '/images/MuteButton.svg' : '/images/VolumeButton.svg'"
+        alt="Volume Button"
       />
     </button>
-    
+   
     <!-- Hidden audio element -->
-    <audio 
-      ref="audioElement" 
-      :src="audioSrc"
+    <audio
+      ref="audioElement"
+      :src="validAudioSrc"
       @timeupdate="onTimeUpdate"
       @loadedmetadata="onLoadedMetadata"
       @ended="onEnded"
@@ -59,6 +59,19 @@ const props = withDefaults(defineProps<AudioPlayerProps>(), {
   autoplay: false
 });
 
+// Make sure we have a valid audio URL that works with the player
+const validAudioSrc = computed(() => {
+  if (!props.audioSrc) return '';
+ 
+  // If URL already has https:// prefix, use it as is
+  if (props.audioSrc.startsWith('http')) {
+    return props.audioSrc;
+  }
+ 
+  // Otherwise, ensure it has the proper Directus base URL
+  return `https://content.thegovlab.com/assets/${props.audioSrc.replace(/^\//, '')}`;
+});
+
 // Refs
 const audioElement = ref<HTMLAudioElement | null>(null);
 const isPlaying = ref(false);
@@ -75,31 +88,31 @@ const progressPercentage = computed(() => {
 // Event handlers
 const togglePlay = () => {
   if (!audioElement.value) return;
-  
+ 
   if (isPlaying.value) {
     audioElement.value.pause();
   } else {
     audioElement.value.play();
   }
-  
+ 
   isPlaying.value = !isPlaying.value;
 };
 
 const toggleMute = () => {
   if (!audioElement.value) return;
-  
+ 
   audioElement.value.muted = !audioElement.value.muted;
   isMuted.value = audioElement.value.muted;
 };
 
 const seek = (event: MouseEvent) => {
   if (!audioElement.value) return;
-  
+ 
   const progressContainer = event.currentTarget as HTMLElement;
   const rect = progressContainer.getBoundingClientRect();
   const offsetX = event.clientX - rect.left;
   const clickPositionPercentage = (offsetX / rect.width) * 100;
-  
+ 
   const seekTime = (clickPositionPercentage / 100) * duration.value;
   audioElement.value.currentTime = seekTime;
   currentTime.value = seekTime;
@@ -123,10 +136,10 @@ const onEnded = () => {
 // Format time to MM:SS
 const formatTime = (timeInSeconds: number): string => {
   if (isNaN(timeInSeconds) || timeInSeconds === Infinity) return '00:00';
-  
+ 
   const minutes = Math.floor(timeInSeconds / 60);
   const seconds = Math.floor(timeInSeconds % 60);
-  
+ 
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
@@ -149,7 +162,7 @@ watch(() => props.audioSrc, (newSrc) => {
     // Reset the player
     currentTime.value = 0;
     isPlaying.value = false;
-    
+   
     // Load the new audio
     audioElement.value.load();
   }
