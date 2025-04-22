@@ -23,6 +23,9 @@ function getImageUrl(authorHeadshot: any, width: number = 600): string {
   if (!authorHeadshot.Headshot.id) {
     return "/images/exampleImage.png";
   }
+  console.log(authorHeadshot);
+  console.log(authorHeadshot.Headshot.id);
+  console.log(`https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`);
   return `https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`;
 }
 
