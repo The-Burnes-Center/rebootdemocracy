@@ -19,10 +19,10 @@ const isLoading = ref(true);
 
 // Function to get image URL with fallback
 function getImageUrl(authorHeadshot: any, width: number = 600): string {
-  if (!authorHeadshot || !authorHeadshot.id) {
+  if (!authorHeadshot.Headshot.id) {
     return "/images/exampleImage.png";
   }
-  return `https://content.thegovlab.com/assets/${authorHeadshot.id}?width=${width}`;
+  return `https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`;
 }
 
 // Function to get author name
