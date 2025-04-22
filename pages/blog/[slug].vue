@@ -22,6 +22,9 @@ function getImageUrl(authorHeadshot: any, width: number = 600): string {
   if (!authorHeadshot.Headshot.id) {
     return "/images/exampleImage.png";
   }
+  console.log(authorHeadshot);
+  console.log(authorHeadshot.Headshot.id);
+  console.log(`https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`);
   return `https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`;
 }
 
@@ -50,7 +53,7 @@ function formatDate(dateValue: Date | string) {
 onMounted(async () => {
   // Reset the search first
   resetSearch();
- 
+  
   setIndexNames([
     "reboot_democracy_blog",
     "reboot_democracy_weekly_news"
@@ -160,13 +163,19 @@ onBeforeUnmount(() => {
               </Text>
             </div>
 
-            <!-- Audio component -->
-            <div class="audio-version" v-if="blog?.audio_version">
-              <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.</em></p>
-              <AudioPlayer
-                :audioSrc="`https://content.thegovlab.com/assets/${blog.audio_version.id}`"
-              />
-            </div>
+            <AudioPlayer 
+              audioSrc="/path/to/your-audio-file.mp3"
+              autoplay="false"
+            />
+
+            <!-- <blockquote class="quote-block">
+              " AI in a manner that fosters public trust and confidence while
+              protecting privacy, civil rights, civil liberties, and American
+              values."
+              <span class="quote-block-footer"
+                >— John Smith, Software Engineer</span
+              >
+            </blockquote> -->
 
             <!-- Blog content -->
             <div class="blog-content-container">
@@ -176,38 +185,38 @@ onBeforeUnmount(() => {
         </template>
       </article>
 
-<!-- Sidebar content -->
-<aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
-  <div class="share-widget-mobile">
-    <ShareWidget
-      :slug="blogslug"
-      :title="blog.title"
-      :description="blog.excerpt || ''"
-      align="center"
-    />
-  </div>
-  <!-- Author card -->
-  <AuthorCard
-    :author="blog.authors[0]"
-    :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
-    :name="getAuthorName(blog.authors[0]?.team_id)"
-    :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
-  />
-  <!-- Sign up widget -->
-  <SignUpButtonWidget
-    title="Sign Up for updates"
-    placeholder="Enter your email"
-    buttonLabel="Sign Up"
-    backgroundColor="#F9F9F9"
-  />
-  <div class="share-widget-desktop">
-    <ShareWidget
-      :slug="blogslug"
-      :title="blog.title"
-      :description="blog.excerpt || ''"
-    />
-  </div>
-</aside>
+      <!-- Sidebar content -->
+      <aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
+        <div class="share-widget-mobile">
+          <ShareWidget 
+            url="https://rebootdemocracy.ai/blog/your-post-slug"
+            title="Your post title"
+            description="A brief description of your content"
+            align="center"
+          />
+        </div>
+        <!-- Author card -->
+        <AuthorCard
+          :author="blog.authors[0]"
+          :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
+          :name="getAuthorName(blog.authors[0]?.team_id)"
+          :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
+        />
+        <!-- Sign up widget -->
+        <SignUpButtonWidget
+          title="Sign Up for updates"
+          placeholder="Enter your email"
+          buttonLabel="Sign Up"
+          backgroundColor="#F9F9F9"
+        />
+        <div class="share-widget-desktop">
+        <ShareWidget 
+        url="https://rebootdemocracy.ai/blog/your-post-slug"
+        title="Your post title"
+        description="A brief description of your content"
+        />
+        </div>
+      </aside>
     </section>
   </div>
 </template>
