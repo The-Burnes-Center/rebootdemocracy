@@ -60,6 +60,9 @@ exports.handler = async function (event, context) {
     var itemcont = {};
     itemcont["item"] = {};
     itemcont["item"]["title"] = e.title;
+    itemcont["item"]["description"] = {
+      _cdata: decodeEntities(e.events || '')
+    };    
     itemcont["item"]["pubDate"] = e.date;
     itemcont["item"]["GUID"] = e.id;
     channel.push(itemcont);
