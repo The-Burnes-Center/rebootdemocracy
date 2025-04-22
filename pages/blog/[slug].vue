@@ -176,38 +176,38 @@ onBeforeUnmount(() => {
         </template>
       </article>
 
-      <!-- Sidebar content -->
-      <aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
-        <div class="share-widget-mobile">
-          <ShareWidget
-            url="https://rebootdemocracy.ai/blog/your-post-slug"
-            title="Your post title"
-            description="A brief description of your content"
-            align="center"
-          />
-        </div>
-        <!-- Author card -->
-        <AuthorCard
-          :author="blog.authors[0]"
-          :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
-          :name="getAuthorName(blog.authors[0]?.team_id)"
-          :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
-        />
-        <!-- Sign up widget -->
-        <SignUpButtonWidget
-          title="Sign Up for updates"
-          placeholder="Enter your email"
-          buttonLabel="Sign Up"
-          backgroundColor="#F9F9F9"
-        />
-        <div class="share-widget-desktop">
-        <ShareWidget
-        url="https://rebootdemocracy.ai/blog/your-post-slug"
-        title="Your post title"
-        description="A brief description of your content"
-        />
-        </div>
-      </aside>
+<!-- Sidebar content -->
+<aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
+  <div class="share-widget-mobile">
+    <ShareWidget
+      :slug="blogslug"
+      :title="blog.title"
+      :description="blog.excerpt || ''"
+      align="center"
+    />
+  </div>
+  <!-- Author card -->
+  <AuthorCard
+    :author="blog.authors[0]"
+    :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
+    :name="getAuthorName(blog.authors[0]?.team_id)"
+    :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
+  />
+  <!-- Sign up widget -->
+  <SignUpButtonWidget
+    title="Sign Up for updates"
+    placeholder="Enter your email"
+    buttonLabel="Sign Up"
+    backgroundColor="#F9F9F9"
+  />
+  <div class="share-widget-desktop">
+    <ShareWidget
+      :slug="blogslug"
+      :title="blog.title"
+      :description="blog.excerpt || ''"
+    />
+  </div>
+</aside>
     </section>
   </div>
 </template>

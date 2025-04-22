@@ -47,35 +47,62 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
 interface ShareWidgetProps {
   url?: string;
   title?: string;
   description?: string;
   align?: string;
+  slug?: string; // Add slug property
 }
 
+const route = useRoute();
 const props = withDefaults(defineProps<ShareWidgetProps>(), {
-  url: window.location.href,
-  title: document.title,
+  url: '',
+  title: '',
   description: '',
   align: 'left',
+  slug: '', // Default to empty string
+});
+
+// Compute the actual URL to share
+const actualUrl = computed(() => {
+  // If a specific URL is provided, use it
+  if (props.url && props.url !== 'https://rebootdemocracy.ai/blog/your-post-slug') {
+    return props.url;
+  }
+
+  // Otherwise, build it from current route or slug
+  const baseUrl = 'https://rebootdemocracy.ai/blog/';
+  const slug = props.slug || (route.params.slug as string) || '';
+  
+  return baseUrl + slug;
+});
+
+// Compute the actual title to share
+const actualTitle = computed(() => {
+  if (props.title && props.title !== 'Your post title') {
+    return props.title;
+  }
+  
+  return document.title || 'Reboot Democracy Article';
 });
 
 const getShareUrl = (platform: string) => {
-  const encodedUrl = encodeURIComponent(props.url);
-  const encodedTitle = encodeURIComponent(props.title);
-  const encodedDescription = encodeURIComponent(props.description);
+  const encodedUrl = encodeURIComponent(actualUrl.value);
+  const encodedTitle = encodeURIComponent(actualTitle.value);
 
   switch (platform) {
     case 'x':
-      return `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+      return `http://twitter.com/share?url=${encodedUrl}&text=${encodedTitle}`;
     case 'facebook':
       return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
     case 'linkedin':
-      return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+      return `https://linkedin.com/shareArticle?url=${encodedUrl}&title=${encodedTitle}`;
     case 'bluesky':
-      // Bluesky doesn't have a standard sharing URL yet, so we'll create a text to share
-      return `https://bsky.app/intent?text=${encodedTitle}%20${encodedUrl}`;
+      return `https://bsky.app/intent/compose?text=${encodedUrl}`;
     default:
       return '#';
   }
