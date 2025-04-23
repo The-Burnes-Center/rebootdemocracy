@@ -131,6 +131,28 @@ p a::after {
   margin-top: 5rem;
 }
 
+/* Category eyebrow styling */
+.blog-category-eyebrow {
+  margin: 1rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.blog-category-eyebrow span {
+  background-color: #0d63eb;
+  color: white;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 3px;
+  display: inline-block;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(13, 99, 235, 0.2);
+}
+
+
 @media (max-width: 1150px) and (min-width: 769px) {
 
    .related-posts-section {
@@ -160,6 +182,15 @@ p a::after {
     gap: 6rem;
     padding:2rem 2rem;
 
+  }
+
+  .blog-category-eyebrow {
+    margin: 0.75rem 0.5rem 1rem;
+  }
+  
+  .blog-category-eyebrow span {
+    font-size: 12px;
+    padding: 4px 10px;
   }
   
 .related-posts-list {
