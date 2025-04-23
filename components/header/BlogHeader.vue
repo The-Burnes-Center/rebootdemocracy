@@ -63,7 +63,7 @@
       <HeaderMenu
         :items="menuItems"
         :class="{ 'mobile-menu': isMobile }"
-        @item-click="handleMenuClick"
+        @item-click="handleMenuItemClick"
       />
     </nav>
     <div class="search-container" v-if="!isMobile">
@@ -135,6 +135,16 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
   else if (item.external && item.to) {
     event.preventDefault();
     window.location.href = item.to;
+  }
+};
+
+const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
+  // First handle the normal click behavior
+  handleMenuClick(item, event);
+
+  // mob handle
+  if (isMobile.value) {
+    mobileMenuOpen.value = false;
   }
 };
 

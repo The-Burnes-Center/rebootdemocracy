@@ -14,6 +14,7 @@
   line-height: 125%;
   cursor: pointer;
 }
+
 .topic-label {
   background-color: black;
   color: white;
@@ -59,22 +60,53 @@
   --color-icon: white;
 }
 
+/* Mobile dropdown styles for inline display */
+.header-dropdown__mobile {
+  width: 100%;
+  background: white;
+  border-left: 2px solid #0d63eb;
+  margin: 0.5rem 0 0.5rem 1rem;
+  padding-left: 1rem;
+}
+
+.header-dropdown__item-mobile {
+  display: block;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  border-bottom: 0.5px solid #e0e0e0;
+}
+
+.header-dropdown__itemLabel-mobile {
+  font-family: var(--font-inter);
+  color: #1e1e1e;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.25rem 0;
+  display: block;
+}
+
+.header-dropdown__item-mobile:hover {
+  background-color: #f0f0f0;
+}
+
 @media (max-width: 1050px) {
   .menu__section {
     flex-direction: column;
-    width: 95%;
+    width: 100%;
     text-align: left;
+    padding: 0;
   }
 
   .header-menu__item-wrapper {
-    width: 90%;
-    border-bottom: 2px solid #0d63eb;
+    width: 100%;
+    border-bottom: 1px solid #e0e0e0;
   }
 
   .header-menu__label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0;
+    padding: 1rem;
+    width: 100%;
   }
 }

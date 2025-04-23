@@ -65,7 +65,7 @@
         <HeaderMenu 
           :items="menuItems" 
           :class="{ 'mobile-menu': isMobile }" 
-          @item-click="handleMenuClick"
+          @item-click="handleMenuItemClick"
         />
     </nav>
       
@@ -120,7 +120,14 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
     window.location.href = item.to;
   }
 };
-
+const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
+  // First handle the normal click behavior
+  handleMenuClick(item, event);
+  //mob handle
+  if (isMobile.value) {
+    mobileMenuOpen.value = false;
+  }
+};
 const baseMenuItems = ref<MenuItem[]>([
   {
     label: "Topic",
