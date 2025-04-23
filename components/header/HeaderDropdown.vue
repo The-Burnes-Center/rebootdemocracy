@@ -1,16 +1,20 @@
 <template>
   <div class="header-dropdown__container" v-if="openDropdown === index">
-    <NuxtLink
-      v-for="(item, index) in items"
-      :key="index"
-      :to="item.to"
-      class="header-dropdown__item"
-      :target="item.external ? '_blank' : 'self'"
-    >
-      <span class="header-dropdown__itemLabel">{{ item.label }}</span>
-    </NuxtLink>
+    <div class="header-dropdown__inner">
+      <NuxtLink
+        v-for="(item, index) in items"
+        :key="index"
+        :to="item.to"
+        class="header-dropdown__item"
+        :target="item.external ? '_blank' : 'self'"
+      >
+        <span class="header-dropdown__itemLabel">{{ item.label }}</span>
+      </NuxtLink>
+    </div>
   </div>
 </template>
+
+
 
 <script lang="ts" setup>
 

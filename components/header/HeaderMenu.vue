@@ -4,14 +4,16 @@
       v-for="(item, index) in items"
       :key="index"
       class="header-menu__item-wrapper"
-      @mouseover="handleMouseOver(index)"
-      @mouseleave="handleMouseLeave(index)"
+      @mouseenter="handleMouseOver(index)"
+      @mouseleave="handleMouseLeaveWithDelay"
     >
       <NuxtLink
         v-if="!item.children"
         :to="item.to"
         class="header-menu__item"
-        v-bind="item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}"
+        v-bind="
+          item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+        "
       >
         <span class="header-menu__label">{{ item.label }}</span>
       </NuxtLink>
@@ -42,20 +44,22 @@
             />
           </svg>
         </span>
-        <HeaderDropdown
-          v-if="item.children && openDropdown === index"
-          :items="item.children"
-          :openDropdown="openDropdown"
-          :index="index"
-        />
       </div>
     </div>
   </section>
+   <HeaderDropdown
+        v-if="openDropdown !== null && items[openDropdown]?.children?.length"
+        :items="(items[openDropdown]?.children ?? []) as DropdownItem[]"
+        :openDropdown="openDropdown"
+        :index="openDropdown"
+        @mouseenter="cancelClose"
+        @mouseleave="handleMouseLeaveWithDelay"
+      />
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import type { MenuItem } from '@/types/index.ts';
+import { ref, onMounted } from "vue";
+import type { DropdownItem, MenuItem } from "@/types/index.ts";
 
 interface Props {
   items: MenuItem[];
@@ -70,10 +74,10 @@ const isMobile = ref<boolean>(false);
 // Check if mobile on mount and when resized
 onMounted((): (() => void) => {
   checkIfMobile();
-  window.addEventListener('resize', checkIfMobile);
+  window.addEventListener("resize", checkIfMobile);
 
   return (): void => {
-    window.removeEventListener('resize', checkIfMobile);
+    window.removeEventListener("resize", checkIfMobile);
   };
 });
 
@@ -98,4 +102,17 @@ function handleMouseLeave(index: number): void {
     openDropdown.value = null;
   }
 }
+
+let closeTimeout: ReturnType<typeof setTimeout>;
+
+function handleMouseLeaveWithDelay() {
+  closeTimeout = setTimeout(() => {
+    openDropdown.value = null;
+  }, 500); // 200ms delay
+}
+
+function cancelClose() {
+  clearTimeout(closeTimeout);
+}
+
 </script>
