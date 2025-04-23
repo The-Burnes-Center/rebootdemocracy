@@ -190,9 +190,8 @@ const menuItems = ref<MenuItem[]>([
 
 
 
-// Function to populate topic menu with tags
 const populateTopicMenu = (tags: TagItem[]) => {
-  const topicMenuItem = menuItems.value.find((item) => item.name === "topic");
+  const topicMenuItem = baseMenuItems.value.find((item) => item.name === "topic");
 
   if (topicMenuItem && topicMenuItem.children) {
     topicMenuItem.children = tags.map((tag) => ({

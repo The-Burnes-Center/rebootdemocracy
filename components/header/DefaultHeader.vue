@@ -195,7 +195,6 @@ const fetchAllBlogTags = async (): Promise<TagItem[]> => {
 };
 
 const populateTopicMenu = (tags: TagItem[]) => {
-  // Since menuItems is now a computed property, we need to access the original ref
   const topicMenuItem = baseMenuItems.value.find((item) => item.name === "topic");
 
   if (topicMenuItem && topicMenuItem.children) {
