@@ -168,10 +168,13 @@ onBeforeUnmount(() => {
               </Text>
             </div>
 
-            <AudioPlayer
-              audioSrc="/path/to/your-audio-file.mp3"
-              autoplay="false"
-            />
+            <!-- Audio component -->
+            <div class="audio-version" v-if="blog?.audio_version">
+              <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.</em></p>
+              <AudioPlayer
+                :audioSrc="`https://content.thegovlab.com/assets/${blog.audio_version.id}`"
+              />
+            </div>
 
             <!-- Blog content -->
             <div class="blog-content-container">
