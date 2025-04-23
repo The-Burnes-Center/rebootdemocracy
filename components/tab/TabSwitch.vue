@@ -2,18 +2,30 @@
 <template>
   <div class="tab-switch">
     <div class="tab-headers">
-      <button
-        v-for="(tab, index) in tabs"
-        :key="index"
-        class="tab-button"
-        :class="{ active: activeTab === index }"
-        @click="handleTabClick(tab, index)"
-      >
-        <span class="tab-label" :class="{ active: activeTab === index }">
-          {{ tab.title }}
-        </span>
-      </button>
+      <div class="tab-buttons">
+        <button
+          v-for="(tab, index) in tabs"
+          :key="index"
+          class="tab-button"
+          :class="{ active: activeTab === index }"
+          @click="handleTabClick(tab, index)"
+        >
+          <span class="tab-label" :class="{ active: activeTab === index }">
+            {{ tab.title }}
+          </span>
+        </button>
+      </div>
+      
+      <div class="filter-container" v-if="showFilter && activeTab === 0">
+        <FilterDropdown
+          :options="tagOptions"
+          :defaultSelected="selectedTag || 'All Topics'"
+          label="Filter by:"
+          @option-selected="handleTagFilter"
+        />
+      </div>
     </div>
+
     <div v-if="showContent" class="tab-content">
       <div
         v-for="(tab, index) in tabs"
@@ -25,6 +37,7 @@
       </div>
     </div>
   </div>
+  
 </template>
 
 <script lang="ts" setup>
@@ -40,14 +53,33 @@ interface TabItem {
   external?: boolean;
 }
 
-const props = defineProps<{
-  tabs: TabItem[];
-  initialTab?: number;
-}>();
+const props = defineProps({
+  tabs: {
+    type: Array as () => TabItem[],
+    required: true
+  },
+  initialTab: {
+    type: Number,
+    default: 0
+  },
+  showFilter: {
+    type: Boolean,
+    default: true
+  },
+  tagOptions: {
+     type: Array as () => string[],
+  default: () => []
+  },
+  selectedTag: {
+    type: String,
+    default: ''
+  }
+});
 
-const emit = defineEmits<{
-  (e: "tab-changed", index: number, name: string): void;
-}>();
+const emit = defineEmits([
+  'tab-changed', 
+  'tag-filter'
+]);
 
 const activeTab = ref(props.initialTab !== undefined ? props.initialTab : 0);
 const showContent = ref(true);
@@ -55,12 +87,12 @@ const showContent = ref(true);
 function handleTabClick(tab: TabItem, index: number) {
   activeTab.value = index;
   emit("tab-changed", index, tab.name);
-  
+
   if (tab.url) {
     // Open the URL
     if (tab.external) {
       window.open(tab.url, "_blank");
-      
+
       // Reset to the first tab (Latest Posts) after a short delay
       setTimeout(() => {
         activeTab.value = 0;
@@ -74,6 +106,11 @@ function handleTabClick(tab: TabItem, index: number) {
   }
 }
 
+function handleTagFilter(option: string | { name: string }) {
+  const tagValue = typeof option === 'string' ? option : option.name;
+  emit("tag-filter", tagValue);
+}
+
 onMounted(() => {
   if (props.tabs.length > 0) {
     const initialIndex = activeTab.value;
@@ -81,3 +118,4 @@ onMounted(() => {
   }
 });
 </script>
+

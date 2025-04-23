@@ -1,3 +1,4 @@
+
 .tab-switch {
   width: 100%;
   display: flex;
@@ -7,10 +8,22 @@
 
 .tab-headers {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 30px;
+  flex-wrap: nowrap; 
+}
+
+.tab-buttons {
+  display: flex;
   gap: 20px;
-  padding: 0 20px;
-  flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
+  flex-wrap: wrap;
+  flex: 1; 
+}
+
+.filter-container {
+  margin-left: auto; 
+  flex-shrink: 0; 
 }
 
 .tab-button {
@@ -88,8 +101,8 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-   .tab-switch {
-    margin-top:1rem;
+  .tab-switch {
+    margin-top: 1rem;
     justify-content: center;
     align-items: center;
   }
@@ -97,10 +110,23 @@
   .tab-headers {
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
-    overflow-x: auto;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 0 15px;
+  }
+  
+  .tab-buttons {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     gap: 8px;
   }
+  
+  .filter-container {
+    width: 100%;
+    margin-left: 0;
+  }
+  
   .tab-button {
     white-space: nowrap;
   }
@@ -111,7 +137,7 @@
   }
 
   .tab-content {
-    margin-top: 13rem;
+    margin-top: 12rem;
     padding: 15px 2px;
     min-width: unset; /* Remove the hardcoded width */
   }

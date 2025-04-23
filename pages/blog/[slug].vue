@@ -138,6 +138,11 @@ onBeforeUnmount(() => {
             >
               {{ blog.title }}
             </TitleText>
+            
+            <!-- Category eyebrow - NEW ADDITION -->
+            <div v-if="blog.Tags && blog.Tags.length > 0" class="blog-category-eyebrow">
+              <span>{{ blog.Tags[0] }}</span>
+            </div>
 
             <!-- Excerpt -->
             <div v-if="blog.excerpt" class="blog-excerpt">

@@ -191,3 +191,24 @@ export async function fetchAllBlogPosts (): Promise<BlogPost[]> {
 }
 
 
+export async function fetchAllUniqueTags(): Promise<string[]> {
+  try {
+    const blogPosts = await fetchAllBlogPosts();
+    
+    const uniqueTags = new Set<string>();
+
+    blogPosts.forEach((post) => {
+      if (post.Tags && Array.isArray(post.Tags)) {
+        post.Tags.forEach((tag) => {
+          uniqueTags.add(tag);
+        });
+      }
+    });
+
+    return Array.from(uniqueTags).sort((a, b) => a.localeCompare(b));
+  } catch (error) {
+    console.error('Error fetching unique tags:', error);
+    return [];
+  }
+}
+

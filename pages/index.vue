@@ -16,7 +16,12 @@
 
     <section class="page-layout">
       <article class="left-content" :class="{ 'search-active': showSearchResults }">
-        <TabSwitch :tabs="tabOptions" @tab-changed="handleTabChange">
+         <TabSwitch 
+            :tabs="tabOptions" 
+            :tagOptions="tagOptions"
+            @tab-changed="handleTabChange"
+           @tag-filter="(tag) => { selected = tag; handleTagFilter(tag) }"
+          >
           <!-- Latest Posts Tab -->
           <template #latest-posts>
             <article class="left-content-blog">
@@ -55,7 +60,7 @@
                     variant="primary"
                     width="123px"
                     height="36px"
-                    @click="() => router.push('/blog')"
+                     @click="navigateToAllPosts"
                   >
                     View All
                   </Button>
@@ -158,6 +163,8 @@ const featuredBlog = ref<BlogPost | null>(null);
 const allBlogsLoaded = ref(false);
 const isFutureEvent = ref(true);
 const blogsInitialized = ref(false);
+const tagOptions = ref<string[]>(['All Topics']);
+const selected = ref<string>('All Topics');
 
 // Collaborators data structure
 const collaborators = [
@@ -239,6 +246,13 @@ const handleTabChange = (index: number, name: string) => {
   }
 };
 
+const navigateToAllPosts = () => {
+  const tag = selected.value !== 'All Topics' ? selected.value : null;
+  const routeQuery = tag ? { category: encodeURIComponent(tag) } : {};
+  router.push({ path: '/blog', query: routeQuery });
+};
+
+
 // Data loading functions
 const loadBlogData = async (force = false) => {
   if (blogsInitialized.value && !force) return;
@@ -294,6 +308,33 @@ const loadEventData = async () => {
   }
 };
 
+
+
+const handleTagFilter = async (selectedTag: string) => {
+  selected.value = selectedTag; 
+  isLoading.value = true;
+
+  if (selectedTag === 'All Topics') {
+    await loadBlogData(true);
+  } else {
+    const allBlogs = await fetchAllBlogPosts();
+    const filteredBlogs = allBlogs.filter(post =>
+      post.Tags && post.Tags.includes(selectedTag)
+    );
+
+    const featured = await fetchFeaturedBlog();
+
+    const displayBlogs = featured && featured.Tags?.includes(selectedTag)
+      ? [featured, ...filteredBlogs.slice(0, 6)]
+      : filteredBlogs.slice(0, 7);
+
+    postData.value = displayBlogs;
+  }
+
+  isLoading.value = false;
+};
+
+
 const loadInitialData = async () => {
   try {
     resetSearch();
@@ -324,6 +365,14 @@ onMounted(async () => {
     loadInitialData(),
     loadEventData()
   ]);
+
+  try {
+  // Fetch unique tags and add to options
+  const uniqueTags = await fetchAllUniqueTags()
+  tagOptions.value = ['All Topics', ...uniqueTags]
+} catch (error) {
+  console.error('Error fetching tags:', error)
+}
 });
 
 // Watch for tab changes
