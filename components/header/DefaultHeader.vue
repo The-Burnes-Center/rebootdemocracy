@@ -65,7 +65,7 @@
         <HeaderMenu 
           :items="menuItems" 
           :class="{ 'mobile-menu': isMobile }" 
-          @item-click="handleMenuClick"
+          @item-click="handleMenuItemClick"
         />
     </nav>
       
@@ -76,9 +76,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import type { MenuItem } from "@/types/index.ts";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import type { BlogPost, MenuItem } from "@/types/index.ts";
 import { useRouter, useRoute } from 'vue-router';
+
+
+interface TagItem {
+  id: string;
+  name: string;
+}
 
 const router = useRouter();
 const route = useRoute();
@@ -114,8 +120,20 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
     window.location.href = item.to;
   }
 };
-
-const baseMenuItems: MenuItem[] = [
+const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
+  // First handle the normal click behavior
+  handleMenuClick(item, event);
+  //mob handle
+  if (isMobile.value) {
+    mobileMenuOpen.value = false;
+  }
+};
+const baseMenuItems = ref<MenuItem[]>([
+  {
+    label: "Topic",
+    name: "topic",
+    children: [],
+  },
   { label: "Home", name: "home", to: "/" },
   { label: "Blog", name: "blog", to: "/blog" },
   { label: "Events", name: "events", to: "/events" },
@@ -144,12 +162,12 @@ const baseMenuItems: MenuItem[] = [
     ],
   },
   { label: "Sign up", name: "signup", to: "/signup", external: true },
-];
+]);
 
 const menuItems = computed<MenuItem[]>(() =>
   isMobile.value
-    ? baseMenuItems 
-    : baseMenuItems.filter((item) => item.name !== "signup")
+    ? baseMenuItems.value 
+    : baseMenuItems.value.filter((item) => item.name !== "signup")
 );
 
 const onClick = (): void => {
@@ -163,9 +181,59 @@ const checkIfMobile = (): void => {
   }
 };
 
-onMounted((): void => {
+const fetchAllBlogTags = async (): Promise<TagItem[]> => {
+  try {
+    const blogPosts = await fetchAllBlogPosts();
+    return extractTags(blogPosts);
+  } catch (error) {
+    console.error("Error fetching blog tags:", error);
+    return [];
+  }
+};
+
+const populateTopicMenu = (tags: TagItem[]) => {
+  // Since menuItems is now a computed property, we need to access the original ref
+  const topicMenuItem = baseMenuItems.value.find((item) => item.name === "topic");
+
+  if (topicMenuItem && topicMenuItem.children) {
+    topicMenuItem.children = tags.map((tag) => ({
+      label: tag.name,
+      name: `topic-${tag.name.toLowerCase().replace(/\s+/g, "-")}`,
+      to: `/blog?category=${encodeURIComponent(tag.name)}`,
+    }));
+  }
+};
+
+const extractTags = (posts: BlogPost[]): TagItem[] => {
+  if (!posts || posts.length === 0) return [];
+
+  // Create a Set to store unique tags
+  const uniqueTags = new Set();
+
+  // Collect all unique tags from posts
+  posts.forEach((post) => {
+    if (post.Tags && Array.isArray(post.Tags)) {
+      post.Tags.forEach((tag) => {
+        uniqueTags.add(tag);
+      });
+    }
+  });
+
+  return Array.from(uniqueTags)
+    .map((name) => ({ id: name, name }))
+    .sort((a, b) => a.name.localeCompare(b.name)); 
+};
+
+
+onMounted(async (): Promise<void> => {
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
+  try {
+    const tags = await fetchAllBlogTags();
+    populateTopicMenu(tags);
+  } catch (error) {
+    console.error("Error loading blog tags for menu:", error);
+  }
 });
 
 onUnmounted((): void => {
