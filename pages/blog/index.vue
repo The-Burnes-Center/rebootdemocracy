@@ -258,8 +258,8 @@ const { showSearchResults, resetSearch } = useSearchState();
 const isFutureEvent = ref(true);
 
 // Toggle state for mobile category/authors
-const isCategoriesVisible = ref(false); // Initially collapsed on mobile
-const isAuthorsVisible = ref(false); // Initially collapsed on mobile
+const isCategoriesVisible = ref(false); 
+const isAuthorsVisible = ref(false); 
 
 // Toggle functions
 const toggleCategoriesVisible = () => {
@@ -369,6 +369,10 @@ const updateFilteredPosts = () => {
 const selectCategory = (category: string) => {
   selectedAuthor.value = null;
   selectedCategory.value = category;
+
+  router.push({
+    query: { category: encodeURIComponent(category) }
+  });
   updateFilteredPosts();
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
@@ -376,6 +380,9 @@ const selectCategory = (category: string) => {
 const selectAuthor = (author: string) => {
   selectedCategory.value = null;
   selectedAuthor.value = author;
+  router.push({
+    query: { author: encodeURIComponent(author) }
+  });
   updateFilteredPosts();
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
@@ -383,43 +390,12 @@ const selectAuthor = (author: string) => {
 const clearFilters = () => {
   selectedCategory.value = null;
   selectedAuthor.value = null;
+  router.push({ query: {} });
   filteredPosts.value = allPosts.value;
   currentPage.value = 1;
   displayedPosts.value = allPosts.value.slice(0, POSTS_PER_PAGE);
 };
 
-// Data fetching
-const fetchAllBlogPosts = async (): Promise<BlogPost[]> => {
-  try {
-    const { directus, readItems } = useDirectusClient();
-
-    const filter = {
-      _and: [
-        { status: { _eq: "published" } },
-        { date: { _lte: "$NOW(-5 hours)" } },
-      ],
-    };
-
-    const response = await directus.request(
-      readItems("reboot_democracy_blog", {
-        limit: -1,
-        sort: ["-date"],
-        fields: [
-          "*.*",
-          "authors.team_id.*",
-          "authors.team_id.Headshot.*",
-          "image.*",
-        ],
-        filter,
-      })
-    );
-
-    return response as BlogPost[];
-  } catch (error) {
-    console.error("Error fetching all blog posts:", error);
-    return [];
-  }
-};
 
 // Data processing
 const extractTagsWithCounts = (posts: BlogPost[]): Category[] => {
@@ -510,9 +486,55 @@ const loadInitialData = async () => {
   }
 };
 
-// Lifecycle management
+
+onBeforeRouteLeave((to, from, next) => {
+  resetSearch();
+  next();
+});
+
+
+watch(
+  [
+    () => route.query.category,
+    () => route.query.author
+  ],
+  ([newCategory, newAuthor]) => {
+    if (newCategory) {
+      selectedCategory.value = decodeURIComponent(newCategory as string);
+      selectedAuthor.value = null;
+    } else if (!route.query.author) {
+      selectedCategory.value = null;
+    }
+    
+    // Handle author parameter
+    if (newAuthor) {
+      selectedAuthor.value = decodeURIComponent(newAuthor as string);
+      if (!newCategory) {
+        selectedCategory.value = null;
+      }
+    } else if (!route.query.category) {
+      selectedAuthor.value = null;
+    }
+    
+    if (allPosts.value.length > 0) {
+      updateFilteredPosts();
+    }
+  }
+);
+// Watch for filter changes
+watch([selectedCategory, selectedAuthor], () => {
+  updateFilteredPosts();
+});
+
 onMounted(() => {
   loadInitialData().then(() => {
+    // Check for category query parameter
+    const categoryParam = route.query.category as string | undefined;
+    if (categoryParam) {
+      selectedCategory.value = decodeURIComponent(categoryParam);
+      updateFilteredPosts();
+    }
+    
     // Check for author query parameter
     const authorParam = route.query.author as string | undefined;
     if (authorParam) {
@@ -526,15 +548,5 @@ onMounted(() => {
       }
     }
   });
-});
-
-onBeforeRouteLeave((to, from, next) => {
-  resetSearch();
-  next();
-});
-
-// Watch for filter changes
-watch([selectedCategory, selectedAuthor], () => {
-  updateFilteredPosts();
 });
 </script>

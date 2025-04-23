@@ -42,6 +42,38 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
   }
 }
 
+export async function fetchAllBlogPosts (): Promise<BlogPost[]> {
+  try {
+    const { directus, readItems } = useDirectusClient();
+
+    const filter = {
+      _and: [
+        { status: { _eq: "published" } },
+        { date: { _lte: "$NOW(-5 hours)" } },
+      ],
+    };
+
+    const response = await directus.request(
+      readItems("reboot_democracy_blog", {
+        limit: -1,
+        sort: ["-date"],
+        fields: [
+          "*.*",
+          "authors.team_id.*",
+          "authors.team_id.Headshot.*",
+          "image.*",
+        ],
+        filter,
+      })
+    );
+
+    return response as BlogPost[];
+  } catch (error) {
+    console.error("Error fetching all blog posts:", error);
+    return [];
+  }
+};
+
 export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
   const { directus, readItems } = useDirectusClient();
 

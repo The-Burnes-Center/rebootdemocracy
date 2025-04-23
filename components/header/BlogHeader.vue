@@ -1,14 +1,14 @@
 <template>
   <header class="header-content__section">
     <div class="header__logo">
-        <div class="hero__partner hero__first-partner">
-          <img
-            src="/images/burnes-logo-blues-1.png"
-            alt="Burnes Center for Social Change"
-          />
-        </div>
-        <div class="hero__partner hero__second-partner">
-          <img src="/images/the-govlab-logo-white.png" alt="The GovLab" />
+      <div class="hero__partner hero__first-partner">
+        <img
+          src="/images/burnes-logo-blues-1.png"
+          alt="Burnes Center for Social Change"
+        />
+      </div>
+      <div class="hero__partner hero__second-partner">
+        <img src="/images/the-govlab-logo-white.png" alt="The GovLab" />
       </div>
     </div>
     <!-- Mobile menu toggle -->
@@ -60,14 +60,17 @@
       </svg>
     </div>
     <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
-      <HeaderMenu 
-        :items="menuItems" 
+      <HeaderMenu
+        :items="menuItems"
         :class="{ 'mobile-menu': isMobile }"
-        @item-click="handleMenuClick" 
+        @item-click="handleMenuClick"
       />
     </nav>
     <div class="search-container" v-if="!isMobile">
-      <ais-instant-search :index-name="indexName" :search-client="algoliaClient">
+      <ais-instant-search
+        :index-name="indexName"
+        :search-client="algoliaClient"
+      >
         <ais-search-box @input="handleSearchInput" @reset="handleSearchReset" />
       </ais-instant-search>
     </div>
@@ -77,7 +80,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import type { MenuItem } from "@/types/index.ts";
+import type { BlogPost, MenuItem } from "@/types/index.ts";
 
 import {
   AisInstantSearch,
@@ -86,13 +89,18 @@ import {
 } from "vue-instantsearch/vue3/es";
 import useSearchState from "../../composables/useSearchState.js";
 
+interface TagItem {
+  id: string;
+  name: string;
+}
+
 const router = useRouter();
 const route = useRoute();
 const indexName = "reboot_democracy_blog";
 
 const { updateSearchQuery, setIndexName, getAlgoliaClient } = useSearchState();
 const algoliaClient = getAlgoliaClient();
-setIndexName(indexName); 
+setIndexName(indexName);
 
 // State for mobile menu
 const mobileMenuOpen = ref<boolean>(false);
@@ -108,29 +116,34 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
   // Check if it's the "Our Team" item
   if (item.name === "team") {
     event.preventDefault();
-    
+
     // Navigate to About page first if we're not already there
-    if (route.path !== '/about') {
-      router.push({ 
-        path: '/about', 
-        hash: '#team-grid' 
+    if (route.path !== "/about") {
+      router.push({
+        path: "/about",
+        hash: "#team-grid",
       });
     } else {
       // We're already on the About page, just scroll to the team section
-      const teamSection = document.getElementById('team-grid');
+      const teamSection = document.getElementById("team-grid");
       if (teamSection) {
-        teamSection.scrollIntoView({ behavior: 'smooth' });
+        teamSection.scrollIntoView({ behavior: "smooth" });
       }
     }
   }
   // Handle external links - open in same tab
   else if (item.external && item.to) {
     event.preventDefault();
-    window.location.href = item.to; // Use window.location.href instead of window.open
+    window.location.href = item.to;
   }
 };
 
-const menuItems: MenuItem[] = [
+const menuItems = ref<MenuItem[]>([
+  {
+    label: "Topic",
+    name: "topic",
+    children: [],
+  },
   { label: "Home", name: "home", to: "/" },
   { label: "Blog", name: "blog", to: "/blog" },
   { label: "Events", name: "events", to: "/events" },
@@ -140,22 +153,74 @@ const menuItems: MenuItem[] = [
     children: [
       { label: "About Us", name: "about", to: "/about" },
       { label: "Our Team", name: "team", to: "/about#team-grid" },
-    ]
+    ],
   },
   {
     label: "Our Work",
     name: "work",
     children: [
-      { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html" },
-      { label: "Teachings", name:"teachings", to:"https://innovate-us.org/"},
-      { label: "University Teachings", name: "projects", to: "https://www.publicentrepreneur.org/" },
+      {
+        label: "About Beth Noveck",
+        name: "research",
+        to: "https://thegovlab.org/beth-simone-noveck.html",
+      },
+      { label: "Teachings", name: "teachings", to: "https://innovate-us.org/" },
+      {
+        label: "University Teachings",
+        name: "projects",
+        to: "https://www.publicentrepreneur.org/",
+      },
       { label: "Engagements", name: "partners", to: "/our-engagements" },
       { label: "Research", name: "research", to: "/our-research" },
-       { label: "More Resources", name: "resources", to: "/more-resources" },
+      { label: "More Resources", name: "resources", to: "/more-resources" },
     ],
   },
   { label: "Sign up", name: "signup", to: "/signup" },
-];
+]);
+
+const fetchAllBlogTags = async (): Promise<TagItem[]> => {
+  try {
+    const blogPosts = await fetchAllBlogPosts();
+    return extractTags(blogPosts);
+  } catch (error) {
+    console.error("Error fetching blog tags:", error);
+    return [];
+  }
+};
+
+// Function to populate topic menu with tags
+const populateTopicMenu = (tags: TagItem[]) => {
+  const topicMenuItem = menuItems.value.find((item) => item.name === "topic");
+
+  if (topicMenuItem && topicMenuItem.children) {
+    topicMenuItem.children = tags.map((tag) => ({
+      label: tag.name,
+      name: `topic-${tag.name.toLowerCase().replace(/\s+/g, "-")}`,
+      to: `/blog?category=${encodeURIComponent(tag.name)}`,
+    }));
+  }
+};
+
+const extractTags = (posts: BlogPost[]): TagItem[] => {
+  if (!posts || posts.length === 0) return [];
+
+  // Create a Set to store unique tags
+  const uniqueTags = new Set<string>();
+
+  // Collect all unique tags from posts
+  posts.forEach((post) => {
+    if (post.Tags && Array.isArray(post.Tags)) {
+      post.Tags.forEach((tag) => {
+        uniqueTags.add(tag);
+      });
+    }
+  });
+
+  // Convert Set to array of objects with id and name
+  return Array.from(uniqueTags)
+    .map((name) => ({ id: name, name }))
+    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+};
 
 // Check if we're on mobile
 const checkIfMobile = (): void => {
@@ -177,13 +242,19 @@ const handleSearchReset = () => {
 };
 
 // Add resize event listener on mount
-onMounted((): void => {
+onMounted(async (): Promise<void> => {
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
+  try {
+    const tags = await fetchAllBlogTags();
+    populateTopicMenu(tags);
+  } catch (error) {
+    console.error("Error loading blog tags for menu:", error);
+  }
 });
 
 // Remove event listener on unmount
-onUnmounted((): void => {
+onUnmounted(async (): Promise<void> => {
   window.removeEventListener("resize", checkIfMobile);
 });
 </script>
