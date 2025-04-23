@@ -39,7 +39,7 @@ interface InnovateUsCardProps {
 const props = withDefaults(defineProps<InnovateUsCardProps>(), {
   description: "InnovateUS provides no-cost, at-your-own pace, and live learning. on data, digital, innovation, and AI skills for public service professionals like you.",
   buttonLabel: "Learn more",
-  learnMoreUrl: "#"
+  learnMoreUrl: "https://innovate-us.org/"
 });
 
 const handleLearnMoreClick = () => {
