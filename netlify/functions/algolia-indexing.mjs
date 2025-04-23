@@ -1,119 +1,149 @@
+// -----------------------------------------------------------------------------
+// ingest_and_index.mjs
+//  • Node ≥18 (ESM) – run by your serverless function / webhook runtime
+//  • ENV VARS required:
+//      ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY, DIRECTUS_URL,
+//      DIRECTUS_AUTH_TOKEN
+// -----------------------------------------------------------------------------
+
 import { algoliasearch } from 'algoliasearch';
 import { TextEncoder, TextDecoder } from 'util';
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Configuration
-const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID;
-const ALGOLIA_ADMIN_API_KEY = process.env.ALGOLIA_ADMIN_API_KEY;
-const ALGOLIA_INDEX_NAME = process.env.ALGOLIA_INDEX_NAME;
-const DIRECTUS_URL = process.env.DIRECTUS_URL;
-const DIRECTUS_AUTH_TOKEN = process.env.DIRECTUS_AUTH_TOKEN;
+// ─── Config ───────────────────────────────────────────────────────────────────
+const {
+  ALGOLIA_APP_ID,
+  ALGOLIA_ADMIN_API_KEY,
+  DIRECTUS_URL,
+  DIRECTUS_AUTH_TOKEN
+} = process.env;
 
 const client = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY);
-// Helpers
-const getStringByteLength = str => Buffer.byteLength(str, 'utf8');
 
-// Add this missing helper function:
-const stripHtml = html => html.replace(/<\/?[^>]+(>|$)/g, "");
+// ─── Generic helpers ──────────────────────────────────────────────────────────
+const getStringByteLength = (str) => Buffer.byteLength(str, 'utf8');
+const stripHtml = (html) => html.replace(/<\/?[^>]+(>|$)/g, '');
 
+// ─── Eastern-time epoch helpers (no external library) ────────────────────────
+function isEasternDST(dUTC) {
+  const y = dUTC.getUTCFullYear();
+
+  // DST starts: 2nd Sunday in March @ 02:00 ET → 07:00 UTC (still EST) :contentReference[oaicite:0]{index=0}
+  const march1 = new Date(Date.UTC(y, 2, 1));
+  const secondSunday = 1 + ((7 - march1.getUTCDay()) % 7) + 7;
+  const dstStartUTC = Date.UTC(y, 2, secondSunday, 7);
+
+  // DST ends: 1st Sunday in Nov @ 02:00 ET → 06:00 UTC (still EDT) :contentReference[oaicite:1]{index=1}
+  const nov1 = new Date(Date.UTC(y, 10, 1));
+  const firstSunday = 1 + ((7 - nov1.getUTCDay()) % 7);
+  const dstEndUTC = Date.UTC(y, 10, firstSunday, 6);
+
+  return dUTC.getTime() >= dstStartUTC && dUTC.getTime() < dstEndUTC;
+}
+
+/**
+ * Convert an ISO-8601 string that represents *Eastern wall-clock time*
+ * into Unix-seconds epoch (DST-aware). Returns null on parse error.
+ */
+function isoToEpoch(iso) {
+  if (typeof iso !== 'string' || !iso.trim()) return null;
+  const m = iso.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
+  );
+  if (!m) return null;
+
+  const [, Y, M, D, h, mnt, s = '0'] = m;
+  const millisUTC = Date.UTC(+Y, +M - 1, +D, +h, +mnt, +s); // use UTC() :contentReference[oaicite:2]{index=2}
+  const offset = isEasternDST(new Date(millisUTC)) ? 4 * 3600 : 5 * 3600; // EDT/EST :contentReference[oaicite:3]{index=3}
+  return Math.floor(millisUTC / 1000) + offset;
+}
+
+// ─── Collection-specific config ──────────────────────────────────────────────
 const COLLECTION_CONFIG = {
   reboot_democracy_blog: {
-    fields: 'id,status,image.id,image.filename_disk,date,Tags,authors.team_id.*,title,content,slug,excerpt,fullURL,audio_version.filename_disk',
+    fields:
+      'id,status,image.id,image.filename_disk,date,Tags,authors.team_id.*,title,content,slug,excerpt,fullURL,audio_version.filename_disk',
     transform: transformBlogItem,
   },
   reboot_democracy_weekly_news: {
-    fields: 'id,title,summary,author,edition,status,date,items.reboot_democracy_weekly_news_items_id.*',
+    fields:
+      'id,title,summary,author,edition,status,date,items.reboot_democracy_weekly_news_items_id.*',
     transform: transformWeeklyNewsItem,
   },
 };
 
-// Generic fetch function
+// ─── Directus fetcher ────────────────────────────────────────────────────────
 async function fetchItem(collection, itemId, fields) {
-  const response = await fetch(`${DIRECTUS_URL}/items/${collection}/${itemId}?fields=${fields}`, {
-    headers: { Authorization: `Bearer ${DIRECTUS_AUTH_TOKEN}` },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch item from Directus: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.data;
+  const res = await fetch(
+    `${DIRECTUS_URL}/items/${collection}/${itemId}?fields=${fields}`,
+    { headers: { Authorization: `Bearer ${DIRECTUS_AUTH_TOKEN}` } }
+  );
+  if (!res.ok) throw new Error(`Directus fetch failed: ${res.statusText}`);
+  return (await res.json()).data;
 }
 
-// Transform functions
+// ─── Transform functions ─────────────────────────────────────────────────────
 function transformBlogItem(record) {
-  const maxChunkSize = 7000;
-  const { content, ...nonContentFields } = record;
+  const maxChunk = 7000;
+  const { content = '', date, ...rest } = record;
+  const epoch = isoToEpoch(date);
+  const base = { ...rest, date, date_at_epoch: epoch };
 
-  if (!content) {
-    return [{ ...nonContentFields, objectID: `${record.id}_part0`, content: '', part: 0 }];
-  }
+  // chunk HTML-stripped content if needed
+  const words = stripHtml(content).split(' ');
+  const out = [];
+  let chunk = '', size = 0, part = 0;
 
-  const plainText = stripHtml(content);
-  const words = plainText.split(' ');
-  const records = [];
-  let currentChunk = '';
-  let currentSize = 0;
-  let part = 0;
-
-  for (const word of words) {
-    const wordWithSpace = word + ' ';
-    const wordSize = getStringByteLength(wordWithSpace);
-
-    if (currentSize + wordSize > maxChunkSize && currentChunk !== '') {
-      records.push({ ...nonContentFields, objectID: `${record.id}_part${part}`, content: currentChunk.trim(), part });
-      part++;
-      currentChunk = wordWithSpace;
-      currentSize = wordSize;
+  for (const w of words) {
+    const plus = w + ' ';
+    const bytes = getStringByteLength(plus);
+    if (size + bytes > maxChunk && chunk) {
+      out.push({ ...base, objectID: `${record.id}_part${part}`, content: chunk.trim(), part });
+      part++; chunk = plus; size = bytes;
     } else {
-      currentChunk += wordWithSpace;
-      currentSize += wordSize;
+      chunk += plus; size += bytes;
     }
   }
-
-  if (currentChunk.trim() !== '') {
-    records.push({ ...nonContentFields, objectID: `${record.id}_part${part}`, content: currentChunk.trim(), part });
+  if (chunk.trim()) {
+    out.push({ ...base, objectID: `${record.id}_part${part}`, content: chunk.trim(), part });
   }
-
-  return records;
+  return out;
 }
 
 function transformWeeklyNewsItem(record) {
-  return record.items.map(item => ({
-    objectID: `${record.id}_${item.reboot_democracy_weekly_news_items_id.id}`,
+  const epoch = isoToEpoch(record.date);
+  return record.items.map(i => ({
+    objectID: `${record.id}_${i.reboot_democracy_weekly_news_items_id.id}`,
+    id: record.id,
     author: record.author,
-    date: record.date,
     title: record.title,
     summary: record.summary,
     edition: record.edition,
-    id: record.id,
-    item: item.reboot_democracy_weekly_news_items_id,
+    date: record.date,
+    date_at_epoch: epoch,
+    item: i.reboot_democracy_weekly_news_items_id,
   }));
 }
 
-// Generic upsert handler
+// ─── Algolia upsert / delete helpers ─────────────────────────────────────────
 async function handleUpsert(collection, itemId) {
-  const config = COLLECTION_CONFIG[collection];
-  if (!config) throw new Error(`No config found for collection: ${collection}`);
+  const cfg = COLLECTION_CONFIG[collection];
+  const item = await fetchItem(collection, itemId, cfg.fields);
 
-  const item = await fetchItem(collection, itemId, config.fields);
   if (item.status && item.status !== 'published') {
-    console.log(`Item ${itemId} is not published. Skipping indexing.`);
+    console.log(`Skip: item ${itemId} not published`);
     return;
   }
 
-  const records = config.transform(item);
-  await client.saveObjects({ indexName: collection, objects: records });
-
-  console.log(`Indexed item ${itemId} into ${collection} with ${records.length} records.`);
+  const objects = cfg.transform(item);
+  await client.saveObjects({ indexName: collection, objects }); // v5 saveObjects :contentReference[oaicite:4]{index=4}
+  console.log(`Indexed ${objects.length} record(s) for ${itemId}`);
 }
 
-// Generic delete handler
 async function handleDelete(collection, itemId) {
-  const response = await client.search({
+  const { results } = await client.search({
     requests: [{
       indexName: collection,
       query: '',
@@ -122,50 +152,34 @@ async function handleDelete(collection, itemId) {
       hitsPerPage: 1000,
       distinct: false,
     }],
-  });
-console.log(response)
+  }); // search API v5 :contentReference[oaicite:5]{index=5}
 
-  const hits = response.results?.[0]?.hits || [];
-  if (hits.length > 0) {
-    const objectIDs = hits.map(hit => hit.objectID);
-    await client.deleteObjects({ indexName: collection, objectIDs });
-    console.log(`Deleted ${objectIDs.length} records for item ${itemId} from ${collection}.`);
-  } else {
-    console.log(`No records found for item ${itemId} in ${collection}.`);
-  }
+  const hits = results?.[0]?.hits ?? [];
+  if (!hits.length) return;
+
+  await client.deleteObjects({
+    indexName: collection,
+    objectIDs: hits.map(h => h.objectID),
+  });
+  console.log(`Deleted ${hits.length} record(s) for ${itemId}`);
 }
 
-// Simplified webhook handler
-export default async (req, context) => {
+// ─── Webhook entry ───────────────────────────────────────────────────────────
+export default async (req, ctx) => {
   try {
-    // Uncomment the next line in production to extract the request payload.
     const { id: itemId, action } = await req.json();
-
-    // Test payload for local testing:
-    // const testPayload = { collection: "reboot_democracy_weekly_news", id: "62", action: "reboot_democracy_weekly_news.items.update" };
-    // const { id: itemId, action } = testPayload;
     const [collection, , event] = action.split('.');
 
     if (!COLLECTION_CONFIG[collection]) {
-      console.log(`Unhandled collection: ${collection}`);
-      return;
+      console.log(`Unhandled collection: ${collection}`); return;
     }
 
-    switch (event) {
-      case 'create':
-        await handleUpsert(collection, itemId);
-        break;
-      case 'update':
-        await handleDelete(collection, itemId);
-        await handleUpsert(collection, itemId);
-        break;
-      case 'delete':
-        await handleDelete(collection, itemId);
-        break;
-      default:
-        console.log(`Unhandled event: ${event}`);
-    }
-  } catch (error) {
-    console.error('Error processing webhook:', error);
+    if (event === 'create')            await handleUpsert(collection, itemId);
+    else if (event === 'update') {     await handleDelete(collection, itemId);
+                                        await handleUpsert(collection, itemId); }
+    else if (event === 'delete')       await handleDelete(collection, itemId);
+    else                               console.log(`Unhandled event: ${event}`);
+  } catch (err) {
+    console.error('Webhook error:', err);
   }
 };
