@@ -16,6 +16,7 @@ const router = useRouter();
 const blogslug = computed(() => route.params.slug as string);
 const blog = ref<BlogPost | null>(null);
 const isLoading = ref(true);
+const relatedBlogs = ref<BlogPost[]>([]);
 
 // Function to get image URL with fallback
 function getImageUrl(authorHeadshot: any, width: number = 600): string {
@@ -53,15 +54,19 @@ function formatDate(dateValue: Date | string) {
 onMounted(async () => {
   // Reset the search first
   resetSearch();
-  
-  setIndexNames([
-    "reboot_democracy_blog",
-    "reboot_democracy_weekly_news"
-  ]);
+
+  setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
   try {
     isLoading.value = true;
     if (blogslug.value) {
       blog.value = await fetchBlogBySlug(blogslug.value);
+      if (blog.value?.Tags?.length) {
+        relatedBlogs.value = await fetchRelatedBlogsByTags(
+          blog.value.Tags,
+          blogslug.value
+        );
+        console.log("Related blogs:", relatedBlogs.value);
+      }
     }
   } catch (error) {
     console.error("Error loading blog post:", error);
@@ -129,7 +134,7 @@ onBeforeUnmount(() => {
               class="blog-title"
               fontFamily="inria"
               lineHeight="super-loose"
-              style="letter-spacing: normal;"
+              style="letter-spacing: normal"
             >
               {{ blog.title }}
             </TitleText>
@@ -163,19 +168,13 @@ onBeforeUnmount(() => {
               </Text>
             </div>
 
-            <AudioPlayer 
-              audioSrc="/path/to/your-audio-file.mp3"
-              autoplay="false"
-            />
-
-            <!-- <blockquote class="quote-block">
-              " AI in a manner that fosters public trust and confidence while
-              protecting privacy, civil rights, civil liberties, and American
-              values."
-              <span class="quote-block-footer"
-                >— John Smith, Software Engineer</span
-              >
-            </blockquote> -->
+            <!-- Audio component -->
+            <div class="audio-version" v-if="blog?.audio_version">
+              <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.</em></p>
+              <AudioPlayer
+                :audioSrc="`https://content.thegovlab.com/assets/${blog.audio_version.id}`"
+              />
+            </div>
 
             <!-- Blog content -->
             <div class="blog-content-container">
@@ -186,9 +185,17 @@ onBeforeUnmount(() => {
       </article>
 
       <!-- Sidebar content -->
-      <aside class="right-content-blog" v-if="blog && blog.authors && blog.authors.length > 0 && blog.authors[0]?.team_id">
+      <aside
+        class="right-content-blog"
+        v-if="
+          blog &&
+          blog.authors &&
+          blog.authors.length > 0 &&
+          blog.authors[0]?.team_id
+        "
+      >
         <div class="share-widget-mobile">
-          <ShareWidget 
+          <ShareWidget
             url="https://rebootdemocracy.ai/blog/your-post-slug"
             title="Your post title"
             description="A brief description of your content"
@@ -200,7 +207,10 @@ onBeforeUnmount(() => {
           :author="blog.authors[0]"
           :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
           :name="getAuthorName(blog.authors[0]?.team_id)"
-          :bio="getAuthorName(blog.authors[0]?.team_id) + ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'"
+          :bio="
+            getAuthorName(blog.authors[0]?.team_id) +
+            ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'
+          "
         />
         <!-- Sign up widget -->
         <SignUpButtonWidget
@@ -210,13 +220,15 @@ onBeforeUnmount(() => {
           backgroundColor="#F9F9F9"
         />
         <div class="share-widget-desktop">
-        <ShareWidget 
-        url="https://rebootdemocracy.ai/blog/your-post-slug"
-        title="Your post title"
-        description="A brief description of your content"
-        />
+          <ShareWidget
+            url="https://rebootdemocracy.ai/blog/your-post-slug"
+            title="Your post title"
+            description="A brief description of your content"
+          />
         </div>
       </aside>
     </section>
   </div>
+  <!--Related Articles section-->
+   <RelatedBlogCards :relatedBlogs="relatedBlogs" />
 </template>
