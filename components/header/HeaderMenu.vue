@@ -26,7 +26,7 @@
       >
         <span
           class="header-menu__label"
-          :class="{ active: openDropdown === index }"
+          :class="{ 'active': openDropdown === index, 'topic-label': item.name === 'topic' }"
         >
           {{ item.label }}
           <svg
@@ -36,7 +36,7 @@
             viewBox="0 0 12 8"
             fill="none"
             class="dropdown-icon"
-            :class="{ active: openDropdown === index }"
+            :class="{ 'active': openDropdown === index, 'topic-icon': item.name === 'topic' }"
           >
             <path
               d="M12 2L6 8L-2.62268e-07 2L1.4 0.6L6 5.2L10.6 0.599999L12 2Z"
