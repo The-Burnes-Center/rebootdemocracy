@@ -8,21 +8,40 @@
     <div class="signup__content">
       <h3 class="signup__title">{{ title }}</h3>
       
-      <div class="signup__form">
+      <form 
+        class="signup__form"
+        action="https://innovate-us.us14.list-manage.com/subscribe/post?u=36f840aa1f979805ce7b81fa7&amp;id=cb864aff13&amp;f_id=003bf8e0f0"
+        method="post"
+        id="mc-embedded-subscribe-form"
+        name="mc-embedded-subscribe-form"
+        target="_self"
+        novalidate
+        @submit.prevent="handleSubmit"
+      >
         <input 
           type="email" 
-          class="signup__input" 
+          name="EMAIL"
+          class="signup__input required" 
+          id="mce-EMAIL"
           :placeholder="placeholder"
           v-model="email"
+          required
         />
+        
+        <!-- Honeypot field to prevent spam -->
+        <div aria-hidden="true" style="position: absolute; left: -5000px;">
+          <input type="text" name="b_36f840aa1f979805ce7b81fa7_cb864aff13" tabindex="-1" v-model="honeypot">
+        </div>
+        
+        <div v-if="emailError" class="error-message">{{ emailError }}</div>
         
         <Button
           variant="primary"
           width="100%"
           height="36px"
-          :onClick="handleSignUp"
+          type="submit"
         >{{ buttonLabel }}</Button>
-      </div>
+      </form>
     </div>
   </section>
 </template>
@@ -45,12 +64,43 @@ const props = withDefaults(defineProps<SignUpProps>(), {
 });
 
 const email = ref('');
+const honeypot = ref('');
+const emailError = ref('');
 
-const handleSignUp = () => {
-  if (email.value) {
-    console.log('Signing up with email:', email.value);
-    // Here you would typically call an API to handle the subscription
-    email.value = ''; // Reset the input field
+const validateEmail = () => {
+  // Reset error first
+  emailError.value = '';
+  
+  // Get the email value
+  const emailValue = email.value.trim();
+  
+  // Check if email is empty
+  if (emailValue === '') {
+    emailError.value = 'Email address is required';
+    return false;
   }
+  
+  // Check if email is valid using a basic pattern
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(emailValue)) {
+    emailError.value = 'Please enter a valid email address';
+    return false;
+  }
+  
+  return true;
+};
+
+const handleSubmit = (event: Event) => {
+  // Validate before submission
+  if (!validateEmail()) {
+    return;
+  }
+  
+  // If validation passes, submit the form
+  const form = event.target as HTMLFormElement;
+  form.submit();
+  
+  // Reset form after submission
+  email.value = '';
 };
 </script>
