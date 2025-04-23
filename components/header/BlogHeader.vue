@@ -188,15 +188,7 @@ const menuItems = ref<MenuItem[]>([
   { label: "Sign up", name: "signup", to: "/signup" },
 ]);
 
-const fetchAllBlogTags = async (): Promise<TagItem[]> => {
-  try {
-    const blogPosts = await fetchAllBlogPosts();
-    return extractTags(blogPosts);
-  } catch (error) {
-    console.error("Error fetching blog tags:", error);
-    return [];
-  }
-};
+
 
 // Function to populate topic menu with tags
 const populateTopicMenu = (tags: TagItem[]) => {
@@ -211,25 +203,17 @@ const populateTopicMenu = (tags: TagItem[]) => {
   }
 };
 
-const extractTags = (posts: BlogPost[]): TagItem[] => {
-  if (!posts || posts.length === 0) return [];
-
-  // Create a Set to store unique tags
-  const uniqueTags = new Set<string>();
-
-  // Collect all unique tags from posts
-  posts.forEach((post) => {
-    if (post.Tags && Array.isArray(post.Tags)) {
-      post.Tags.forEach((tag) => {
-        uniqueTags.add(tag);
-      });
-    }
-  });
-
-  // Convert Set to array of objects with id and name
-  return Array.from(uniqueTags)
-    .map((name) => ({ id: name, name }))
-    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+const fetchAllBlogTags = async (): Promise<TagItem[]> => {
+  try {
+    const uniqueTags = await fetchAllUniqueTags();
+    return uniqueTags.map(tag => ({ 
+      id: tag, 
+      name: tag 
+    }));
+  } catch (error) {
+    console.error("Error fetching blog tags:", error);
+    return [];
+  }
 };
 
 // Check if we're on mobile
