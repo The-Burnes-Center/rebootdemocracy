@@ -27,7 +27,7 @@
             >
 
             <!--title-->
-            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'">
+            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'" weight="medium">
               {{ titleText }}
             </TitleText>
           </div>
@@ -39,6 +39,7 @@
               size="base"
               lineHeight="normal"
               :lineClamp="3"
+              weight="medium"
             >
               {{ excerpt }}
             </BodyText>
@@ -110,7 +111,7 @@
             >
 
             <!--title-->
-            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'">
+            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'" weight="medium">
               {{ titleText }}
             </TitleText>
           </div>
@@ -122,6 +123,7 @@
               size="base"
               lineHeight="normal"
               :lineClamp="3"
+              weight="medium"
             >
               {{ excerpt }}
             </BodyText>
