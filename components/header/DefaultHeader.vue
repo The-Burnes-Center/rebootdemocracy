@@ -183,8 +183,11 @@ const checkIfMobile = (): void => {
 
 const fetchAllBlogTags = async (): Promise<TagItem[]> => {
   try {
-    const blogPosts = await fetchAllBlogPosts();
-    return extractTags(blogPosts);
+    const uniqueTags = await fetchAllUniqueTags();
+    return uniqueTags.map(tag => ({ 
+      id: tag, 
+      name: tag 
+    }));
   } catch (error) {
     console.error("Error fetching blog tags:", error);
     return [];
@@ -202,26 +205,6 @@ const populateTopicMenu = (tags: TagItem[]) => {
       to: `/blog?category=${encodeURIComponent(tag.name)}`,
     }));
   }
-};
-
-const extractTags = (posts: BlogPost[]): TagItem[] => {
-  if (!posts || posts.length === 0) return [];
-
-  // Create a Set to store unique tags
-  const uniqueTags = new Set();
-
-  // Collect all unique tags from posts
-  posts.forEach((post) => {
-    if (post.Tags && Array.isArray(post.Tags)) {
-      post.Tags.forEach((tag) => {
-        uniqueTags.add(tag);
-      });
-    }
-  });
-
-  return Array.from(uniqueTags)
-    .map((name) => ({ id: name, name }))
-    .sort((a, b) => a.name.localeCompare(b.name)); 
 };
 
 

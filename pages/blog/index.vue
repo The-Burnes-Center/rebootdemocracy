@@ -16,7 +16,7 @@
         <template v-else>
           <div v-if="isLoading" class="loading">Loading blogs...</div>
 
-          <div class="mobile-category-and-authors">  
+          <div class="mobile-category-and-authors">
             <!-- Categories section with toggle -->
             <div class="section-header" @click="toggleCategoriesVisible">
               <Text
@@ -30,12 +30,21 @@
                 Category
               </Text>
               <div class="toggle-icon">
-                <i :class="isCategoriesVisible ? 'icon-chevron-up' : 'icon-chevron-down'"></i>
+                <i
+                  :class="
+                    isCategoriesVisible
+                      ? 'icon-chevron-up'
+                      : 'icon-chevron-down'
+                  "
+                ></i>
               </div>
             </div>
 
             <!-- Display list of categories with post counts (togglable) -->
-            <div v-if="isTagsLoading && isCategoriesVisible" class="loading-tags">
+            <div
+              v-if="isTagsLoading && isCategoriesVisible"
+              class="loading-tags"
+            >
               Loading categories...
             </div>
             <div v-else-if="isCategoriesVisible" class="category-list">
@@ -43,7 +52,9 @@
                 v-for="tag in tags"
                 :key="tag.id"
                 class="category-item"
-                :class="{ 'category-item--active': selectedCategory === tag.name }"
+                :class="{
+                  'category-item--active': selectedCategory === tag.name,
+                }"
                 @click="selectCategory(tag.name)"
               >
                 <ListCategory :title="tag.name" :number="tag.count" />
@@ -64,12 +75,19 @@
                 Authors
               </Text>
               <div class="toggle-icon">
-                <i :class="isAuthorsVisible ? 'icon-chevron-up' : 'icon-chevron-down'"></i>
+                <i
+                  :class="
+                    isAuthorsVisible ? 'icon-chevron-up' : 'icon-chevron-down'
+                  "
+                ></i>
               </div>
             </div>
 
             <!-- Display list of authors with post counts (togglable) -->
-            <div v-if="isAuthorsLoading && isAuthorsVisible" class="loading-tags">
+            <div
+              v-if="isAuthorsLoading && isAuthorsVisible"
+              class="loading-tags"
+            >
               Loading authors...
             </div>
             <div v-else-if="isAuthorsVisible">
@@ -77,7 +95,9 @@
                 v-for="author in filteredAuthors"
                 :key="author.id"
                 class="author-item"
-                :class="{ 'author-item--active': selectedAuthor === author.name }"
+                :class="{
+                  'author-item--active': selectedAuthor === author.name,
+                }"
                 @click="selectAuthor(author.name)"
               >
                 <ListCategory :title="author.name" :number="author.count" />
@@ -160,64 +180,66 @@
       </article>
 
       <aside class="all-posts-right-content">
-      <div class="desktop-category-and-authors">  
-        <!-- Categories section -->
-        <Text
-          as="h2"
-          fontFamily="inter"
-          size="lg"
-          color="text-primary"
-          weight="bold"
-          align="left"
-        >
-          Category
-        </Text>
-
-        <!-- Display list of categories with post counts -->
-        <div v-if="isTagsLoading" class="loading-tags">
-          Loading categories...
-        </div>
-        <div v-else class="category-list">
-          <div
-            v-for="tag in tags"
-            :key="tag.id"
-            class="category-item"
-            :class="{ 'category-item--active': selectedCategory === tag.name }"
-            @click="selectCategory(tag.name)"
+        <div class="desktop-category-and-authors">
+          <!-- Categories section -->
+          <Text
+            as="h2"
+            fontFamily="inter"
+            size="lg"
+            color="text-primary"
+            weight="bold"
+            align="left"
           >
-            <ListCategory :title="tag.name" :number="tag.count" />
+            Category
+          </Text>
+
+          <!-- Display list of categories with post counts -->
+          <div v-if="isTagsLoading" class="loading-tags">
+            Loading categories...
+          </div>
+          <div v-else class="category-list">
+            <div
+              v-for="tag in tags"
+              :key="tag.id"
+              class="category-item"
+              :class="{
+                'category-item--active': selectedCategory === tag.name,
+              }"
+              @click="selectCategory(tag.name)"
+            >
+              <ListCategory :title="tag.name" :number="tag.count" />
+            </div>
+          </div>
+
+          <!-- Authors section -->
+          <Text
+            as="h2"
+            fontFamily="inter"
+            size="lg"
+            color="text-primary"
+            weight="bold"
+            align="left"
+            class="section-title"
+          >
+            Authors
+          </Text>
+
+          <!-- Display list of authors with post counts -->
+          <div v-if="isAuthorsLoading" class="loading-tags">
+            Loading authors...
+          </div>
+          <div v-else>
+            <div
+              v-for="author in filteredAuthors"
+              :key="author.id"
+              class="author-item"
+              :class="{ 'author-item--active': selectedAuthor === author.name }"
+              @click="selectAuthor(author.name)"
+            >
+              <ListCategory :title="author.name" :number="author.count" />
+            </div>
           </div>
         </div>
-
-        <!-- Authors section -->
-        <Text
-          as="h2"
-          fontFamily="inter"
-          size="lg"
-          color="text-primary"
-          weight="bold"
-          align="left"
-          class="section-title"
-        >
-          Authors
-        </Text>
-
-        <!-- Display list of authors with post counts -->
-        <div v-if="isAuthorsLoading" class="loading-tags">
-          Loading authors...
-        </div>
-        <div v-else>
-          <div
-            v-for="author in filteredAuthors"
-            :key="author.id"
-            class="author-item"
-            :class="{ 'author-item--active': selectedAuthor === author.name }"
-            @click="selectAuthor(author.name)"
-          >
-            <ListCategory :title="author.name" :number="author.count" />
-          </div>
-        </div>
-      </div>
 
         <!-- Event section with loading state -->
         <div v-if="isEventLoading" class="loading">Loading event...</div>
@@ -258,8 +280,8 @@ const { showSearchResults, resetSearch } = useSearchState();
 const isFutureEvent = ref(true);
 
 // Toggle state for mobile category/authors
-const isCategoriesVisible = ref(false); 
-const isAuthorsVisible = ref(false); 
+const isCategoriesVisible = ref(false);
+const isAuthorsVisible = ref(false);
 
 // Toggle functions
 const toggleCategoriesVisible = () => {
@@ -314,7 +336,6 @@ const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)
 );
 
-
 const getAuthorName = (post: BlogPost): string => {
   const author = post.authors?.[0]?.team_id;
   return author ? `${author.First_Name} ${author.Last_Name}` : "Unknown Author";
@@ -351,7 +372,8 @@ const updateFilteredPosts = () => {
       (post) =>
         post.Tags &&
         Array.isArray(post.Tags) &&
-        selectedCategory.value && post.Tags.includes(selectedCategory.value)
+        selectedCategory.value &&
+        post.Tags.includes(selectedCategory.value)
     );
   }
 
@@ -371,7 +393,7 @@ const selectCategory = (category: string) => {
   selectedCategory.value = category;
 
   router.push({
-    query: { category: encodeURIComponent(category) }
+    query: { category: encodeURIComponent(category) },
   });
   updateFilteredPosts();
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -381,7 +403,7 @@ const selectAuthor = (author: string) => {
   selectedCategory.value = null;
   selectedAuthor.value = author;
   router.push({
-    query: { author: encodeURIComponent(author) }
+    query: { author: encodeURIComponent(author) },
   });
   updateFilteredPosts();
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -395,7 +417,6 @@ const clearFilters = () => {
   currentPage.value = 1;
   displayedPosts.value = allPosts.value.slice(0, POSTS_PER_PAGE);
 };
-
 
 // Data processing
 const extractTagsWithCounts = (posts: BlogPost[]): Category[] => {
@@ -468,7 +489,7 @@ const loadInitialData = async () => {
 
     // Try to get upcoming event first
     let event = await fetchUpcomingEvent();
-    
+
     if (event) {
       isFutureEvent.value = true;
     } else {
@@ -486,18 +507,13 @@ const loadInitialData = async () => {
   }
 };
 
-
 onBeforeRouteLeave((to, from, next) => {
   resetSearch();
   next();
 });
 
-
 watch(
-  [
-    () => route.query.category,
-    () => route.query.author
-  ],
+  [() => route.query.category, () => route.query.author],
   ([newCategory, newAuthor]) => {
     if (newCategory) {
       selectedCategory.value = decodeURIComponent(newCategory as string);
@@ -505,7 +521,7 @@ watch(
     } else if (!route.query.author) {
       selectedCategory.value = null;
     }
-    
+
     // Handle author parameter
     if (newAuthor) {
       selectedAuthor.value = decodeURIComponent(newAuthor as string);
@@ -515,7 +531,7 @@ watch(
     } else if (!route.query.category) {
       selectedAuthor.value = null;
     }
-    
+
     if (allPosts.value.length > 0) {
       updateFilteredPosts();
     }
@@ -531,17 +547,19 @@ onMounted(() => {
     // Check for category query parameter
     const categoryParam = route.query.category as string | undefined;
     if (categoryParam) {
-      selectedCategory.value = decodeURIComponent(categoryParam);
+      const decodedCategory = decodeURIComponent(categoryParam);
+      selectedCategory.value = decodedCategory;
       updateFilteredPosts();
     }
-    
+
     // Check for author query parameter
     const authorParam = route.query.author as string | undefined;
     if (authorParam) {
       // Find the matching author from the loaded authors
-      const foundAuthor = authors.value.find(author => 
-        author.name.toLowerCase() === authorParam.toLowerCase());
-      
+      const foundAuthor = authors.value.find(
+        (author) => author.name.toLowerCase() === authorParam.toLowerCase()
+      );
+
       if (foundAuthor) {
         selectedAuthor.value = foundAuthor.name;
         updateFilteredPosts();

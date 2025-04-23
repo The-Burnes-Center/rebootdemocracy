@@ -62,9 +62,7 @@
           :key="childIdx"
           :to="childItem.to"
           class="header-dropdown__item-mobile"
-          v-bind="
-            childItem.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}
-          "
+          v-bind="{}"
           @click="emitItemClick(childItem, $event)"
         >
           <span class="header-dropdown__itemLabel-mobile">{{ childItem.label }}</span>
