@@ -1,4 +1,3 @@
-// Modified HeaderDropdown.vue template
 <template>
   <div class="header-dropdown__container" v-if="openDropdown === index">
     <div class="header-dropdown__inner">
@@ -8,6 +7,7 @@
         :to="item.to"
         class="header-dropdown__item"
         :target="item.external ? '_blank' : 'self'"
+        @click="handleItemClick"
       >
         <span class="header-dropdown__itemLabel">{{ item.label }}</span>
       </NuxtLink>
@@ -28,4 +28,11 @@ defineProps<{
   index: number;
   openDropdown: number | null;
 }>();
+
+const emit = defineEmits(['close']);
+
+function handleItemClick() {
+  emit('close');
+}
+
 </script>

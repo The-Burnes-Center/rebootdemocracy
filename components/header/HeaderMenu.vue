@@ -105,9 +105,13 @@ const isMobile = ref<boolean>(false);
 onMounted(() => {
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
+  document.addEventListener("click", handleOutsideClick);
 });
 
-onUnmounted(() => window.removeEventListener("resize", checkIfMobile));
+onUnmounted(() => {
+  window.removeEventListener("resize", checkIfMobile);
+  document.removeEventListener("click", handleOutsideClick);
+});
 
 function checkIfMobile(): void {
   isMobile.value = window.innerWidth < 1050;
@@ -117,32 +121,34 @@ function toggleDropdownDesktopMobile(index: number): void {
   openDropdown.value = openDropdown.value === index ? null : index;
 }
 
-function handleMouseOver(index: number): void {
-  if (!isMobile.value) {
-    openDropdown.value = index;
-  }
-}
-
 function closeDropdown(): void {
   openDropdown.value = null;
 }
 function handleOutsideClick(event: MouseEvent): void {
   if (!isMobile.value && openDropdown.value !== null) {
-    // Check if click was outside the header menu
-    const menuElement = document.querySelector('.menu__section');
-    const dropdownElement = document.querySelector('.header-dropdown');
+    const menuElement = document.querySelector(".menu__section");
+    const dropdownElement = document.querySelector(".header-dropdown__container");
     
-    if (menuElement && dropdownElement) {
-      if (!menuElement.contains(event.target as Node) && 
-          !dropdownElement.contains(event.target as Node)) {
-        openDropdown.value = null;
+    if (event.target instanceof Element) {
+      const clickedOnMenuLabel = event.target.closest('.header-menu__label');
+      if (clickedOnMenuLabel) {
+        return;
       }
+    }
+    
+    const clickedOutside = !(menuElement?.contains(event.target as Node) || 
+                             dropdownElement?.contains(event.target as Node));
+    
+    if (clickedOutside) {
+      openDropdown.value = null;
     }
   }
 }
 
 // Emit click event to parent to close mobile menu
 function emitItemClick(item: MenuItem, event: MouseEvent): void {
-  emit("item-click", item, event);
+  emit('item-click', item, event);
+  // Close dropdown after clicking an item
+  openDropdown.value = null;
 }
 </script>

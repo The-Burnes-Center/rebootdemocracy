@@ -16,8 +16,8 @@
   margin: 0 auto;
   padding: 2rem 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
-  gap: 2rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 2fr));
+  gap: 1.5rem 1rem;
 }
 
 .header-dropdown__item {
@@ -57,7 +57,7 @@
   .header-dropdown__inner {
     display: flex;
     flex-direction: column;
-        padding: 0 0 0 1rem; /* Add left padding for nested appearance */
+    padding: 0 0 0 1rem; 
 
   }
 
