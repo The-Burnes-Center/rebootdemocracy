@@ -25,19 +25,18 @@
   align-items: center;
   text-decoration: none;
   cursor: pointer;
-  padding-bottom: 0.005rem;
-  border-bottom: 0.5px solid #e0e0e0; 
-  transition: border-color 0.2s ease;
+  
 }
 
 .header-dropdown__itemLabel {
   font-family: var(--font-inter);
   color: #1e1e1e;
-  padding: 0.5rem;
   font-size: 1rem;
   font-weight: 700;
   text-align: left;
   text-transform: capitalize;
+  border-bottom: 1px solid #e0e0e0; 
+  transition: border-color 0.2s ease;
 }
 
 .header-dropdown__item:hover {
