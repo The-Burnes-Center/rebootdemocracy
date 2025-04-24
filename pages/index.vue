@@ -19,8 +19,20 @@
         class="left-content"
         :class="{ 'search-active': showSearchResults }"
       >
-      <div
-          v-if="isMobile && !isLoading && selected !== 'All Topics'"
+        <!-- Mobile search display -->
+        <div v-if="showSearchResults && isMobile" class="search-container" :class="{ 'mobile-search': isMobile }">
+          <div class="search-results-container" :class="{ 'mobile-container': isMobile }">
+            <div class="search-results-header">
+              <h2>Search Results for "{{ searchQuery }}"</h2>
+            </div>
+            <!-- Pass the searchQuery prop to GlobalSearch -->
+            <GlobalSearch :searchQuery="searchQuery" />
+          </div>
+        </div>
+        
+        <!-- Mobile filter bar -->
+        <div
+          v-if="isMobile && !isLoading && selected !== 'All Topics' && !showSearchResults"
           class="results-and-filter"
         >
           <div class="results-count">
@@ -45,8 +57,9 @@
           </div>
         </div>
 
-        
+        <!-- Hide TabSwitch when showing search results on mobile -->
         <TabSwitch
+          v-if="!(showSearchResults && isMobile)"
           :tabs="tabOptions"
           :tagOptions="tagOptions"
           @tab-changed="handleTabChange"
@@ -60,9 +73,8 @@
           <!-- Latest Posts Tab -->
           <template #latest-posts>
             <article class="left-content-blog">
-              <!-- Show GlobalSearch when searching -->
-              <GlobalSearch v-if="showSearchResults" />
-
+              <!-- Show GlobalSearch when searching on desktop -->
+              <GlobalSearch v-if="showSearchResults && !isMobile" :searchQuery="searchQuery" />
               <!-- Otherwise show regular posts -->
               <template v-else>
                 <!-- Loading state -->
@@ -105,7 +117,7 @@
 
                 <!-- Blog list section -->
                 <div v-if="!isLoading && postData.length > 0" class="blog-list">
-                   <PostCard
+                  <PostCard
                     v-for="(post, index) in postData"
                     :key="post.id"
                     :tag="post.Tags?.[0] || 'Blog'"
@@ -120,8 +132,6 @@
                     :hoverable="true"
                     @click="navigateToBlogPost(post)"
                   />
-
-                  
                 </div>
 
                 <!-- No blogs found message -->
@@ -223,7 +233,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch, nextTick } from "vue";
+import { ref, onMounted, computed, watch, nextTick, onUnmounted } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event, NewsItem, WeeklyNews } from "@/types/index.ts";
 
@@ -233,7 +243,7 @@ const DEFAULT_EDITION = "51";
 const router = useRouter();
 
 // State
-const { showSearchResults, resetSearch } = useSearchState();
+const { showSearchResults, resetSearch, searchQuery } = useSearchState();
 const postData = ref<BlogPost[]>([]);
 const isLoading = ref(true);
 const activeTab = ref(0);
@@ -567,3 +577,4 @@ onBeforeRouteLeave((to, from, next) => {
   next();
 });
 </script>
+
