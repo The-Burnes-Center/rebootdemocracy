@@ -4,7 +4,7 @@
     size="extra-large"
     :variant="'default'"
     :hoverable="hoverable"
-    class="desktop-view"
+    :class="['desktop-view', { 'featured-post': isFeatured }]"
     @click="$emit('click')"
   >
     <section class="postcard__container">
@@ -16,18 +16,35 @@
 
         <div class="postcard__text-content">
           <div>
-            <!--tag-->
-            <Tag
-              v-if="tag"
-              lineHeight="normal"
-              margin="none"
-              size="xs"
-              :index="tagIndex"
-              >{{ tag }}</Tag
-            >
+            <!--tag with featured badge-->
+            <div class="tag-container">
+              <Tag
+                v-if="tag"
+                lineHeight="normal"
+                margin="none"
+                size="xs"
+                :index="tagIndex"
+                >{{ tag }}</Tag
+              >
+              <span v-if="isFeatured" class="tag-separator">|</span>
+              <Tag
+                v-if="isFeatured"
+                lineHeight="normal"
+                margin="none"
+                size="xs"
+                :index="0"
+                >Featured</Tag
+              >
+            </div>
 
             <!--title-->
-            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'" weight="semibold">
+            <TitleText
+              v-if="titleText"
+              size="xl"
+              :lineClamp="2"
+              :level="'h3'"
+              weight="semibold"
+            >
               {{ titleText }}
             </TitleText>
           </div>
@@ -45,37 +62,37 @@
             </BodyText>
 
             <!--meta info-->
-           <div v-if="date || author" class="postcard__meta">
-            <Text size="xs" weight="normal" fontStyle="italic">
-              <!-- If both date and author exist -->
-              <template v-if="date && author">
-                Published on
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  formatDate(date)
-                }}</Text>
-                by
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  author
-                }}</Text>
-              </template>
-              
-              <!-- If only date exists -->
-              <template v-else-if="date">
-                Published on
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  formatDate(date)
-                }}</Text>
-              </template>
-              
-              <!-- If only author exists -->
-              <template v-else-if="author">
-                Published by
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  author
-                }}</Text>
-              </template>
-            </Text>
-          </div>
+            <div v-if="date || author" class="postcard__meta">
+              <Text size="xs" weight="normal" fontStyle="italic">
+                <!-- If both date and author exist -->
+                <template v-if="date && author">
+                  Published on
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    formatDate(date)
+                  }}</Text>
+                  by
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    author
+                  }}</Text>
+                </template>
+
+                <!-- If only date exists -->
+                <template v-else-if="date">
+                  Published on
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    formatDate(date)
+                  }}</Text>
+                </template>
+
+                <!-- If only author exists -->
+                <template v-else-if="author">
+                  Published by
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    author
+                  }}</Text>
+                </template>
+              </Text>
+            </div>
           </div>
         </div>
       </div>
@@ -87,7 +104,7 @@
     size="small"
     :variant="'default'"
     :hoverable="hoverable"
-    class="mobile-view"
+    :class="['mobile-view', { 'featured-post': isFeatured }]"
     @click="$emit('click')"
   >
     <section class="postcard__container">
@@ -99,19 +116,36 @@
 
         <div class="postcard__text-content">
           <div>
-            <!--tag-->
-            <Tag
-              v-if="tag"
-              weight="normal"
-              lineHeight="normal"
-              margin="none"
-              size="xs"
-              :index="tagIndex"
-              >{{ tag }}</Tag
-            >
+            <!--tag with featured badge-->
+            <div class="tag-container">
+              <Tag
+                v-if="tag"
+                weight="normal"
+                lineHeight="normal"
+                margin="none"
+                size="xs"
+                :index="tagIndex"
+                >{{ tag }}</Tag
+              >
+              <span v-if="isFeatured" class="tag-separator">|</span>
+              <Tag
+                v-if="isFeatured"
+                lineHeight="normal"
+                margin="none"
+                size="xs"
+                index="0"
+                >Featured</Tag
+              >
+            </div>
 
             <!--title-->
-            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'" weight="medium">
+            <TitleText
+              v-if="titleText"
+              size="lg"
+              :lineClamp="2"
+              :level="'h3'"
+              weight="medium"
+            >
               {{ titleText }}
             </TitleText>
           </div>
@@ -122,44 +156,44 @@
               v-if="excerpt"
               size="base"
               lineHeight="normal"
-              :lineClamp="3"
+              :lineClamp="isFeatured ? 4 : 3"
               weight="medium"
             >
               {{ excerpt }}
             </BodyText>
 
             <!--meta info-->
-           <div v-if="date || author" class="postcard__meta">
-            <Text size="xs" weight="normal" fontStyle="italic">
-              <!-- If both date and author exist -->
-              <template v-if="date && author">
-                Published on
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  formatDate(date)
-                }}</Text>
-                by
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  author
-                }}</Text>
-              </template>
-              
-              <!-- If only date exists -->
-              <template v-else-if="date">
-                Published on
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  formatDate(date)
-                }}</Text>
-              </template>
-              
-              <!-- If only author exists -->
-              <template v-else-if="author">
-                Published by
-                <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
-                  author
-                }}</Text>
-              </template>
-            </Text>
-          </div>
+            <div v-if="date || author" class="postcard__meta">
+              <Text size="xs" weight="normal" fontStyle="italic">
+                <!-- If both date and author exist -->
+                <template v-if="date && author">
+                  Published on
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    formatDate(date)
+                  }}</Text>
+                  by
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    author
+                  }}</Text>
+                </template>
+
+                <!-- If only date exists -->
+                <template v-else-if="date">
+                  Published on
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    formatDate(date)
+                  }}</Text>
+                </template>
+
+                <!-- If only author exists -->
+                <template v-else-if="author">
+                  Published by
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                    author
+                  }}</Text>
+                </template>
+              </Text>
+            </div>
           </div>
         </div>
       </div>
@@ -180,6 +214,7 @@ interface PostCardProps {
   tagIndex?: number;
   variant?: "default" | "outline" | "flat";
   hoverable?: boolean;
+  isFeatured?: boolean; // New prop to indicate if blog post is featured
 }
 
 const props = withDefaults(defineProps<PostCardProps>(), {
@@ -192,9 +227,10 @@ const props = withDefaults(defineProps<PostCardProps>(), {
   tagIndex: 0,
   variant: "default",
   hoverable: false,
+  isFeatured: false, // Default to not featured
 });
 
-const emit = defineEmits(['click']);
+const emit = defineEmits(["click"]);
 
 const formatDate = (dateValue: Date | string) => {
   if (!dateValue) return "unknown date";
