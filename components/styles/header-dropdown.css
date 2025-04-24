@@ -1,9 +1,9 @@
 .header-dropdown__container {
   position: absolute;
   top: 100%;
-  left: 0;
-  right: 0;
-  width: 100%;
+  left: -6.8rem;
+  width: 100vw;
+  padding:0rem; 
   background: white;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -12,12 +12,11 @@
 }
 
 .header-dropdown__inner {
-  max-width: 1300px;
-  margin: 0 auto;
+  width: 100%;
   padding: 2rem 2rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 2fr));
-  gap: 1.5rem 1rem;
+  gap: 2rem 3rem;
 }
 
 .header-dropdown__item {
@@ -55,6 +54,7 @@
   }
 
   .header-dropdown__inner {
+      width: 100%;
     display: flex;
     flex-direction: column;
     padding: 0 0 0 1rem; 
