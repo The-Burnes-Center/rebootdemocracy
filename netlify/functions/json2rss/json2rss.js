@@ -1,6 +1,6 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
 import pkg from 'jstoxml';
-import { Directus } from '@directus/sdk';
+import * as Directus from '@directus/sdk';
 import he from 'he';
 
 exports.handler = async function (event, context) {
