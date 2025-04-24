@@ -169,6 +169,17 @@ export default {
       }
     };
 
+    // Function to determine which URL to use based on environment
+    const getFunctionUrl = () => {
+      // When in development mode and using localhost, try the direct path
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return '/.netlify/functions/pschat';
+      }
+      
+      // Otherwise, use the redirect path which should work in production
+      return '/api/pschat';
+    };
+
     const sendMessage = async () => {
       if (userInput.value.trim() === '' || isLoading.value) return;
 
@@ -184,51 +195,25 @@ export default {
       const botMessage = { type: 'bot', content: '', sourceDocuments: [] };
       messages.value.push(botMessage);
 
-      // Try multiple URL patterns
-      const urlsToTry = [
-        '/api/pschat',                 // Redirect defined in netlify.toml
-        '/.netlify/functions/pschat',  // Direct function path
-        '/pschat',                     // Simple endpoint for local development
-        '/server/api/pschat'           // Nuxt server API endpoint
-      ];
-
-      let response = null;
-      let error = null;
-
-      // Try each URL until one works
-      for (const url of urlsToTry) {
-        try {
-          console.log(`Trying to fetch from: ${url}`);
-          response = await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify({
-              message: messageContent,
-              conversation: messages.value.slice(0, -1) // Remove last placeholder message
-            }),
-            headers: { 'Content-Type': 'application/json' }
-          });
-          
-          if (response.ok) {
-            console.log(`Successfully connected to: ${url}`);
-            break; // Exit the loop if we get a successful response
-          } else {
-            console.warn(`Failed to fetch from ${url}: ${response.status} ${response.statusText}`);
-          }
-        } catch (err) {
-          console.warn(`Error fetching from ${url}:`, err);
-          error = err;
-        }
-      }
-
-      // If we still don't have a valid response
-      if (!response || !response.ok) {
-        console.error('All URLs failed', error);
-        botMessage.content = 'Sorry, I cannot connect to the server at the moment. Please try again later.';
-        isLoading.value = false;
-        return;
-      }
+      const functionUrl = getFunctionUrl();
+      console.log(`Attempting to fetch from: ${functionUrl}`);
 
       try {
+        // Fetch the bot's response
+        const response = await fetch(functionUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            message: messageContent,
+            conversation: messages.value.slice(0, -1) // Remove last placeholder message
+          }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          console.error(`Server response not OK: ${response.status} ${response.statusText}`);
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        }
+
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
