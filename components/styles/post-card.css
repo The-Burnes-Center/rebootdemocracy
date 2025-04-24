@@ -1,3 +1,4 @@
+
 .postcard__container {
   width: 100%;
   max-width: 100%;
@@ -51,8 +52,21 @@
   align-items: center;
 }
 
-/* post-card for individual blog page */
+/* Featured post styles */
 
+.tag-container{
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  
+}
+ /* Featured mobile styles */
+  .featured-post {
+    background: linear-gradient(135deg, rgba(13, 99, 235, 0.1), rgba(13, 99, 235, 0.05));
+  }
+
+
+/* post-card for individual blog page */
 .blog-related-posts .postcard__container {
   margin-top: 10rem;
 }
@@ -80,19 +94,20 @@
 
 /* Mobile width */
 @media (max-width: 768px) {
-  .postcard__container{
+  .postcard__container {
     margin-top: 10rem;
   }
+  
   .postcard__content {
     top: -19rem;
     gap: 1rem;
     flex-direction: column;
   }
-
+  
   .postcard__text-content {
     padding-left: 0.2rem;
   }
-
+  
   .postcard__image {
     width: 100%;
     position: relative;

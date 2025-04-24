@@ -105,7 +105,7 @@
 
                 <!-- Blog list section -->
                 <div v-if="!isLoading && postData.length > 0" class="blog-list">
-                  <PostCard
+                   <PostCard
                     v-for="(post, index) in postData"
                     :key="post.id"
                     :tag="post.Tags?.[0] || 'Blog'"
@@ -115,10 +115,13 @@
                     :imageUrl="getImageUrl(post.image)"
                     :date="new Date(post.date)"
                     :tagIndex="index % 5"
+                    :isFeatured="isFeaturedPost(post)"
                     variant="default"
                     :hoverable="true"
                     @click="navigateToBlogPost(post)"
                   />
+
+                  
                 </div>
 
                 <!-- No blogs found message -->
@@ -248,6 +251,10 @@ const isMobile = ref(false);
 
 const checkIfMobile = () => {
   isMobile.value = window.innerWidth < 1050;
+};
+
+const isFeaturedPost = (post: BlogPost | NewsItem): boolean => {
+  return featuredBlog.value !== null && post.id === featuredBlog.value.id;
 };
 
 // Collaborators data structure
