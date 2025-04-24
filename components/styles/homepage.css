@@ -47,7 +47,7 @@
   border-radius: 6px;
 }
 
-.results-and-filter {
+.home-page .results-and-filter {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -57,11 +57,11 @@
   border-radius: 6px;
 }
 
-.results-count {
+.home-page .results-count {
   flex: 1;
 }
 
-.filter-actions {
+.home-page .filter-actions {
   margin-left: 16px;
 }
 
