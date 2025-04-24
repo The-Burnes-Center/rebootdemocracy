@@ -1,7 +1,9 @@
 .menu__section {
-  display: inline-flex;
+  display: flex;
   gap: 1.5rem;
   align-items: center;
+  width: 100%;
+   position: relative;
 }
 
 .header-menu__label {
