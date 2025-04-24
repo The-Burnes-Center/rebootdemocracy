@@ -217,6 +217,7 @@
           buttonLabel="Learn more"
           learnMoreUrl="https://innovate-us.org/"
         />
+        <Chat />
       </aside>
     </section>
   </div>

@@ -26,6 +26,7 @@
 @import "./audio-player.css";
 @import "./all-blog-posts-page.css";
 @import "./filter-dropdown.css";
+@import "./chat.css";
 
 :root {
   --font-inter: "Inter", sans-serif;
