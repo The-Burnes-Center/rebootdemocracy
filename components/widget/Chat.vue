@@ -29,32 +29,32 @@
             </a>
           </div>
         </div>
-    <div v-for="(message, index) in messages" :key="index" :class="['message', message.type]">
-    <div v-if="message.type === 'user'" class="user-message">
-      {{ message.content }}
-    </div>
-    <div v-else class="bot-message">
-      <div v-if="message.content">
-        <div v-html="renderMarkdown(message.content)"></div>
-        <div v-if="message.sourceDocuments && message.sourceDocuments.length > 0" class="source-documents">
-          <h4>Sources:</h4>
-          <ul>
-            <li v-for="(source, index) in message.sourceDocuments" :key="index">
-              <a :href="source.url" target="_blank">{{ source.title }}</a>
-            </li>
-          </ul>
+        <div v-for="(message, index) in messages" :key="index" :class="['message', message.type]">
+          <div v-if="message.type === 'user'" class="user-message">
+            {{ message.content }}
+          </div>
+          <div v-else class="bot-message">
+            <div v-if="message.content">
+              <div v-html="renderMarkdown(message.content)"></div>
+              <div v-if="message.sourceDocuments && message.sourceDocuments.length > 0" class="source-documents">
+                <h4>Sources:</h4>
+                <ul>
+                  <li v-for="(source, index) in message.sourceDocuments" :key="index">
+                    <a :href="source.url" target="_blank">{{ source.title }}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div v-else class="typing-indicator">
+              <!-- Loader/spinner -->
+              <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div v-else class="typing-indicator">
-        <!-- Loader/spinner -->
-        <div class="typing-dots">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-        </div>
-      </div>
-    </div>
-  </div>
       </div>
       <div style="font-size: 0.7rem; font-weight: 600; padding: 5px">
       powered by <a target="_blank" href="https://github.com/CitizensFoundation/policy-synth?tab=readme-ov-file#rag-chatbot">PolicySynth RAG</a>
@@ -62,12 +62,12 @@
       <div class="input-area">
         <form @submit.prevent="sendMessage">
           <textarea
-  v-model="userInput"
-  :placeholder="isLoading ? 'Generating response...' : 'Ask a question here!'"
-  :disabled="isLoading"
-  class="chat-input"
-  @keydown.enter="handleEnterKey"
-></textarea>
+            v-model="userInput"
+            :placeholder="isLoading ? 'Generating response...' : 'Ask a question here!'"
+            :disabled="isLoading"
+            class="chat-input"
+            @keydown.enter="handleEnterKey"
+          ></textarea>
           <button
             type="submit"
             class="submit-button"
@@ -119,9 +119,13 @@ export default {
         // This is an existing session, load saved state
         const savedState = localStorage.getItem('chatbotState');
         if (savedState) {
-          const { botOpen: savedBotOpen, messages: savedMessages } = JSON.parse(savedState);
-          botOpen.value = savedBotOpen;
-          messages.value = savedMessages;
+          try {
+            const { botOpen: savedBotOpen, messages: savedMessages } = JSON.parse(savedState);
+            botOpen.value = savedBotOpen;
+            messages.value = savedMessages;
+          } catch (error) {
+            console.error('Error parsing saved chat state:', error);
+          }
         }
       }
     });
@@ -130,10 +134,14 @@ export default {
     watch(messages, () => {
       scrollToBottom();
       // Save state to localStorage
-      localStorage.setItem('chatbotState', JSON.stringify({
-        botOpen: botOpen.value,
-        messages: messages.value
-      }));
+      try {
+        localStorage.setItem('chatbotState', JSON.stringify({
+          botOpen: botOpen.value,
+          messages: messages.value
+        }));
+      } catch (error) {
+        console.error('Error saving chat state:', error);
+      }
     }, { deep: true, flush: 'post' });
 
     const openFunc = () => {
@@ -176,23 +184,51 @@ export default {
       const botMessage = { type: 'bot', content: '', sourceDocuments: [] };
       messages.value.push(botMessage);
 
-      try {
-        console.log('Sending request to backend...');
-        // Fetch the bot's response - use redirected URL
-        const response = await fetch('/api/pschat', {
-          method: 'POST',
-          body: JSON.stringify({ 
-            message: messageContent, 
-            conversation: messages.value.slice(0, -1) // Remove last placeholder message
-          }),
-          headers: { 'Content-Type': 'application/json' },
-        });
+      // Try multiple URL patterns
+      const urlsToTry = [
+        '/api/pschat',                 // Redirect defined in netlify.toml
+        '/.netlify/functions/pschat',  // Direct function path
+        '/pschat',                     // Simple endpoint for local development
+        '/server/api/pschat'           // Nuxt server API endpoint
+      ];
 
-        if (!response.ok) {
-          console.error('Server response not OK:', response.status, response.statusText);
-          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+      let response = null;
+      let error = null;
+
+      // Try each URL until one works
+      for (const url of urlsToTry) {
+        try {
+          console.log(`Trying to fetch from: ${url}`);
+          response = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({
+              message: messageContent,
+              conversation: messages.value.slice(0, -1) // Remove last placeholder message
+            }),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (response.ok) {
+            console.log(`Successfully connected to: ${url}`);
+            break; // Exit the loop if we get a successful response
+          } else {
+            console.warn(`Failed to fetch from ${url}: ${response.status} ${response.statusText}`);
+          }
+        } catch (err) {
+          console.warn(`Error fetching from ${url}:`, err);
+          error = err;
         }
+      }
 
+      // If we still don't have a valid response
+      if (!response || !response.ok) {
+        console.error('All URLs failed', error);
+        botMessage.content = 'Sorry, I cannot connect to the server at the moment. Please try again later.';
+        isLoading.value = false;
+        return;
+      }
+
+      try {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
@@ -242,7 +278,16 @@ export default {
           }
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error processing response:', error);
+        
+        // Add detailed error logging
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+          console.error('Network error. This might be because:');
+          console.error('1. The function URL is incorrect');
+          console.error('2. The server is not running');
+          console.error('3. CORS issues are preventing the request');
+        }
+        
         botMessage.content = 'Sorry, an error occurred while processing your request. Please try again later.';
         // Update messages to reflect error
         messages.value = [...messages.value];

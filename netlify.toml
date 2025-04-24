@@ -3,6 +3,13 @@ command = "npm run generate"
 publish = ".output/public/"
 functions = "netlify/functions"
 
+# Add these redirects BEFORE the wildcard redirect
+[[redirects]]
+from = "/pschat"
+to = "/.netlify/functions/pschat"
+status = 200
+force = true
+
 [[redirects]]
 from = "/api/pschat"
 to = "/.netlify/functions/pschat"
@@ -10,15 +17,16 @@ status = 200
 force = true
 
 [[redirects]]
-from = "/*"
-to = "/.netlify/functions/server"
-status = 200
-
-[[redirects]]
 from = "/newsoftheweek/feed/rss"
 to = "/.netlify/functions/newsoftheweek"
 status = 200
 force = true
+
+# Wildcard redirect should come LAST
+[[redirects]]
+from = "/*"
+to = "/.netlify/functions/server"
+status = 200
 
 [[headers]]
 for = "/*"

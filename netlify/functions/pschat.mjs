@@ -1,6 +1,7 @@
 const weaviate = require('weaviate-ts-client');
 const { OpenAI } = require("openai");
 
+// Setup weaviate client with fallbacks
 const weaviateClient = weaviate.client({
   scheme: process.env.VITE_WEAVIATE_HTTP_SCHEME || 'https',
   host: process.env.VITE_WEAVIATE_HOST || 'your-weaviate-cluster-url.weaviate.network',
@@ -8,6 +9,7 @@ const weaviateClient = weaviate.client({
   headers: { 'X-OpenAI-Api-Key': process.env.VITE_OPENAI_API_KEY }
 });
 
+// Setup OpenAI client
 const openaiClient = new OpenAI({
   apiKey: process.env.VITE_OPENAI_API_KEY,
 });
@@ -120,8 +122,8 @@ function formatSearchResults(results) {
   `.trim()).join('\n\n');
 }
 
-// Updated handler function for compatibility with Netlify Functions
-exports.handler = async function(event, context) {
+// Function handler compatible with Netlify Functions
+async function functionHandler(event, context) {
   console.log('Function invoked');
   
   if (event.httpMethod !== 'POST') {
@@ -246,4 +248,12 @@ Your thoughtful answer in markdown:
       body: JSON.stringify({ error: 'An error occurred processing your message' })
     };
   }
+}
+
+// Export for Netlify Functions
+exports.handler = functionHandler;
+
+// Also export as named export for local server route
+module.exports = {
+  handler: functionHandler
 };
