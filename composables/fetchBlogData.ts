@@ -194,6 +194,7 @@ export async function fetchAllBlogPosts (): Promise<BlogPost[]> {
 export async function fetchAllUniqueTags(): Promise<string[]> {
   try {
     const blogPosts = await fetchAllBlogPosts();
+    const weeklyNewsItems = await fetchWeeklyNewsItems();
     
     const uniqueTags = new Set<string>();
 
@@ -202,6 +203,13 @@ export async function fetchAllUniqueTags(): Promise<string[]> {
         post.Tags.forEach((tag) => {
           uniqueTags.add(tag);
         });
+      }
+    });
+
+     // Add categories from news items as tags
+    weeklyNewsItems.forEach((newsItem) => {
+      if (newsItem.category) {
+        uniqueTags.add(newsItem.category);
       }
     });
 
