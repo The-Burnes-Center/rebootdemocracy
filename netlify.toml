@@ -1,7 +1,7 @@
 [build]
 command = "npm run generate"
 publish = ".output/public/"
-functions = "netlify/functions"    
+functions = "netlify/functions"
 
 [[redirects]]
 from = "/*"
@@ -11,7 +11,7 @@ status = 200
 [[redirects]]
 from = "/api/*"
 to = "/.netlify/functions/:splat"
-status = 200  # Add this redirect for API endpoints
+status = 200
 
 [[redirects]]
 from = "/newsoftheweek/feed/rss"
@@ -21,9 +21,9 @@ force = true
 
 [[headers]]
 for = "/*"
-  [headers.values]
-  Access-Control-Allow-Origin = "*"
-  Cache-Control = "public, max-age=31536000"
+[headers.values]
+Access-Control-Allow-Origin = "*"
+Cache-Control = "public, max-age=31536000"
 
 [dev]
 command = "nuxt dev"
@@ -32,6 +32,4 @@ port = 8888
 
 
 [images]
-  remote_images = [
-    "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"
-  ]
+remote_images = ["https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"]

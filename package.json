@@ -15,6 +15,8 @@
     "@nuxtjs/algolia": "^1.11.2",
     "algoliasearch": "^5.23.3",
     "date-fns": "^4.1.0",
+    "he": "^1.2.0",
+    "jstoxml": "^7.0.1",
     "nuxt": "^3.16.1",
     "openai": "^4.57.1",
     "vue": "^3.5.13",
