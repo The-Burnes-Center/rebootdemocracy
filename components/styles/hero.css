@@ -92,7 +92,10 @@
     padding-bottom: 0;
   }
   .search-content {
-    display: none;
+    display: block;
+    padding-bottom:1rem;
+    margin-right: 0;
+    margin-left: 2rem;
 }
 
   .hero__title {
@@ -106,5 +109,10 @@
     text-align: center;
     width: 100%;
     height: auto;
+  }
+
+  .custom-searchbox input {
+    width: 100%;
+    max-width: 100%;
   }
 }

@@ -83,7 +83,7 @@
   }
 
   .hero__container {
-    height: 15vh;
+    height: auto;
   }
 
   .blog-collaborators-container {
