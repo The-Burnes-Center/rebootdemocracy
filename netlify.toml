@@ -1,18 +1,32 @@
 [build]
 command = "npm run generate"
 publish = ".output/public/"
+functions = "netlify/functions"
+
+# Add these redirects BEFORE the wildcard redirect
+[[redirects]]
+from = "/pschat"
+to = "/.netlify/functions/pschat"
+status = 200
+force = true
 
 [[redirects]]
-from = "/*"
-to = "/.netlify/functions/server"
+from = "/api/pschat"
+to = "/.netlify/functions/pschat"
 status = 200
-
+force = true
 
 [[redirects]]
 from = "/newsoftheweek/feed/rss"
 to = "/.netlify/functions/newsoftheweek"
 status = 200
 force = true
+
+# Wildcard redirect should come LAST
+[[redirects]]
+from = "/*"
+to = "/.netlify/functions/server"
+status = 200
 
 [[headers]]
 for = "/*"
@@ -24,10 +38,9 @@ for = "/*"
 command = "nuxt dev"
 targetPort = 3000
 port = 8888
-
+functions = "netlify/functions"
 
 [images]
   remote_images = [
     "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"
   ]
-
