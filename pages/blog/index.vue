@@ -631,14 +631,26 @@ onMounted(() => {
   loadInitialData().then(() => {
     // Check for category query parameter
     const categoryParam = route.query.category as string | undefined;
+    const sourceParam = route.query.source as string | undefined;
+    
     if (categoryParam) {
       // Find the matching category from the loaded tags
+      const categoryName = decodeURIComponent(categoryParam);
       const foundCategory = tags.value.find(tag => 
-        tag.name.toLowerCase() === categoryParam.toLowerCase());
+        tag.name === categoryName || tag.name.toLowerCase() === categoryName.toLowerCase());
       
       if (foundCategory) {
         selectedCategory.value = foundCategory.name;
-        updateFilteredPosts();
+        
+        // If source=all, we want to include both blogs and news items
+        if (sourceParam === 'all') {
+          // We don't need to fetch again as fetchAllData() already did this
+          // Just make sure the filtering logic in updateFilteredPosts includes news items
+          updateFilteredPosts();
+        } else {
+          // Regular filtering (current behavior)
+          updateFilteredPosts();
+        }
       }
     }
     
