@@ -143,7 +143,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch, nextTick } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
-import type { BlogPost, Event, WeeklyNews } from "@/types/index.ts";
+import type { BlogPost, Event, NewsItem, WeeklyNews } from "@/types/index.ts";
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
@@ -218,17 +218,24 @@ const tabOptions = computed(() => [
 ]);
 
 
-const getAuthorName = (post: BlogPost): string => {
-  const author = post.authors?.[0]?.team_id;
-  return author ? `${author.First_Name} ${author.Last_Name}` : "Unknown Author";
+const getAuthorName = (post: BlogPost | NewsItem): string => {
+  if ('authors' in post && post.authors && post.authors.length > 0) {
+    const author = post.authors[0]?.team_id;
+    return author ? `${author.First_Name} ${author.Last_Name}` : "Unknown Author";
+  } else if ('author' in post && post.author) {
+    return post.author;
+  }
+  return "Unknown Author";
 };
 
-const navigateToBlogPost = (post: BlogPost) => {
-  if (post.slug) {
+const navigateToBlogPost = (post: BlogPost | NewsItem) => {
+  if ('slug' in post && post.slug) {
     resetSearch();
     router.push(`/blog/${post.slug}`);
+  } else if ('url' in post && post.url) {
+    window.open(post.url, "_blank");
   } else {
-    console.error('Cannot navigate: Blog post has no slug', post);
+    console.error('Cannot navigate: Item has no slug or URL', post);
   }
 };
 
@@ -248,7 +255,10 @@ const handleTabChange = (index: number, name: string) => {
 
 const navigateToAllPosts = () => {
   const tag = selected.value !== 'All Topics' ? selected.value : null;
-  const routeQuery = tag ? { category: encodeURIComponent(tag) } : {};
+  const routeQuery = tag 
+    ? { category: encodeURIComponent(tag), source: 'all' } 
+    : { source: 'all' };
+  
   router.push({ path: '/blog', query: routeQuery });
 };
 
@@ -308,8 +318,6 @@ const loadEventData = async () => {
   }
 };
 
-
-
 const handleTagFilter = async (selectedTag: string) => {
   selected.value = selectedTag; 
   isLoading.value = true;
@@ -317,16 +325,48 @@ const handleTagFilter = async (selectedTag: string) => {
   if (selectedTag === 'All Topics') {
     await loadBlogData(true);
   } else {
-    const allBlogs = await fetchAllBlogPosts();
+    // Fetch both blog posts and news items
+    const [allBlogs, allNewsItems] = await Promise.all([
+      fetchAllBlogPosts(),
+      fetchWeeklyNewsItems()
+    ]);
+    
+    // Filter blog posts by tags
     const filteredBlogs = allBlogs.filter(post =>
       post.Tags && post.Tags.includes(selectedTag)
     );
-
+    
+    // Filter news items by category
+    const filteredNewsItems = allNewsItems.filter(newsItem =>
+      newsItem.category === selectedTag
+    );
+    
+    // Convert news items to a format compatible with blog posts
+    // This is needed because newsItems have a different structure than blog posts
+    const newsItemsAsBlogs = filteredNewsItems.map(newsItem => ({
+      id: newsItem.id?.toString() || `news-${newsItem.url}`,
+      title: newsItem.title || 'Untitled',
+      excerpt: newsItem.excerpt || '',
+      date: newsItem.date || new Date().toISOString(),
+      url: newsItem.url,
+      Tags: newsItem.category ? [newsItem.category] : [],
+      // You'll need to handle any other required fields for PostCard component
+    } as unknown as BlogPost));
+    
+    // Combine filtered blogs and news items
+    const combinedResults = [...filteredBlogs, ...newsItemsAsBlogs];
+    
+    // Sort by date (newest first)
+    combinedResults.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    // Check if featured blog has the selected tag
     const featured = await fetchFeaturedBlog();
-
+    
     const displayBlogs = featured && featured.Tags?.includes(selectedTag)
-      ? [featured, ...filteredBlogs.slice(0, 6)]
-      : filteredBlogs.slice(0, 7);
+      ? [featured, ...combinedResults.slice(0, 6)]
+      : combinedResults.slice(0, 7);
 
     postData.value = displayBlogs;
   }

@@ -191,7 +191,7 @@ const menuItems = ref<MenuItem[]>([
 
 
 const populateTopicMenu = (tags: TagItem[]) => {
-  const topicMenuItem = baseMenuItems.value.find((item) => item.name === "topic");
+  const topicMenuItem = menuItems.value.find((item) => item.name === "topic");
 
   if (topicMenuItem && topicMenuItem.children) {
     topicMenuItem.children = tags.map((tag) => ({
