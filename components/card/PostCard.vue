@@ -27,7 +27,7 @@
             >
 
             <!--title-->
-            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'" weight="medium">
+            <TitleText v-if="titleText" size="xl" :lineClamp="2" :level="'h3'" weight="semibold">
               {{ titleText }}
             </TitleText>
           </div>

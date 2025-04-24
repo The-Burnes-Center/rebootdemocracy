@@ -20,7 +20,7 @@
             :tabs="tabOptions" 
             :tagOptions="tagOptions"
             @tab-changed="handleTabChange"
-           @tag-filter="(tag) => { selected = tag; handleTagFilter(tag) }"
+            @tag-filter="(tag) => { selected = tag; handleTagFilter(tag) }"
           >
           <!-- Latest Posts Tab -->
           <template #latest-posts>
@@ -36,7 +36,32 @@
                   <div>Loading blogs...</div>
                 </div>
 
-                <div v-else-if="postData.length > 0" class="blog-list">
+                <!-- Filter indicator - This appears when a tag filter is active -->
+                <div v-if="!isLoading && selected !== 'All Topics'" class="results-and-filter">
+                  <div class="results-count">
+                    <Text
+                      as="span"
+                      fontFamily="inter"
+                      size="base"
+                      color="text-primary"
+                      weight="medium"
+                    >
+                      Showing blogs filtered by "{{ selected }}"
+                    </Text>
+                  </div>
+                  <div class="filter-actions">
+                    <Button 
+                      variant="secondary" 
+                      size="small" 
+                      @click="() => { selected = 'All Topics'; handleTagFilter('All Topics') }"
+                    >
+                      Clear Filter
+                    </Button>
+                  </div>
+                </div>
+
+                <!-- Blog list section -->
+                <div v-if="!isLoading && postData.length > 0" class="blog-list">
                   <PostCard
                     v-for="(post, index) in postData"
                     :key="post.id"
@@ -53,14 +78,16 @@
                   />
                 </div>
 
-                <div v-else class="no-blogs">No blog posts found.</div>
+                <!-- No blogs found message -->
+                <div v-else-if="!isLoading" class="no-blogs">No blog posts found.</div>
 
+                <!-- View all button -->
                 <div class="btn-mid" v-if="allBlogsLoaded && !showSearchResults">
                   <Button
                     variant="primary"
                     width="123px"
                     height="36px"
-                     @click="navigateToAllPosts"
+                    @click="navigateToAllPosts"
                   >
                     View All
                   </Button>
@@ -112,7 +139,7 @@
         </Text>
 
         <div v-if="isEventLoading" class="loading">Loading event...</div>
-        <div  v-if="latestEvent" class="upcoming-card-container">
+        <div v-if="latestEvent" class="upcoming-card-container">
           <UpcomingCard
             :title="latestEvent.title"
             :excerpt="latestEvent.description"
@@ -341,8 +368,6 @@ const handleTagFilter = async (selectedTag: string) => {
       newsItem.category === selectedTag
     );
     
-    // Convert news items to a format compatible with blog posts
-    // This is needed because newsItems have a different structure than blog posts
     const newsItemsAsBlogs = filteredNewsItems.map(newsItem => ({
       id: newsItem.id?.toString() || `news-${newsItem.url}`,
       title: newsItem.title || 'Untitled',
@@ -350,7 +375,6 @@ const handleTagFilter = async (selectedTag: string) => {
       date: newsItem.date || new Date().toISOString(),
       url: newsItem.url,
       Tags: newsItem.category ? [newsItem.category] : [],
-      // You'll need to handle any other required fields for PostCard component
     } as unknown as BlogPost));
     
     // Combine filtered blogs and news items
