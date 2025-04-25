@@ -1,87 +1,3 @@
-<script setup lang="ts">
-definePageMeta({
-  layout: "blog",
-});
-
-import { onMounted, onBeforeUnmount, ref, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import type { BlogPost } from "@/types/BlogPost";
-import { format } from "date-fns";
-
-const { showSearchResults, setIndexNames, resetSearch } = useSearchState();
-
-const route = useRoute();
-const router = useRouter();
-
-const blogslug = computed(() => route.params.slug as string);
-const blog = ref<BlogPost | null>(null);
-const isLoading = ref(true);
-const relatedBlogs = ref<BlogPost[]>([]);
-
-// Function to get image URL with fallback
-function getImageUrl(authorHeadshot: any, width: number = 600): string {
-  if (!authorHeadshot.Headshot.id) {
-    return "/images/exampleImage.png";
-  }
-  console.log(authorHeadshot);
-  console.log(authorHeadshot.Headshot.id);
-  console.log(`https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`);
-  return `https://content.thegovlab.com/assets/${authorHeadshot.Headshot.id}?width=${width}`;
-}
-
-// Function to get author name
-function getAuthorName(author: any): string {
-  if (!author) return "Unknown Author";
-  return `${author.First_Name || ""} ${author.Last_Name || ""}`.trim();
-}
-
-// Function to format date using date-fns (consistent with your PostCard)
-function formatDate(dateValue: Date | string) {
-  if (!dateValue) return "unknown date";
-  try {
-    const date =
-      typeof dateValue === "string"
-        ? new Date(dateValue)
-        : dateValue || new Date();
-    return format(date, "MMMM d, yyyy");
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return "invalid date";
-  }
-}
-
-// Reset search results when component is mounted
-onMounted(async () => {
-  // Reset the search first
-  resetSearch();
-
-  setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
-  try {
-    isLoading.value = true;
-    if (blogslug.value) {
-      blog.value = await fetchBlogBySlug(blogslug.value);
-      if (blog.value?.Tags?.length) {
-        relatedBlogs.value = await fetchRelatedBlogsByTags(
-          blog.value.Tags,
-          blogslug.value
-        );
-        console.log("Related blogs:", relatedBlogs.value);
-      }
-    }
-  } catch (error) {
-    console.error("Error loading blog post:", error);
-  } finally {
-    isLoading.value = false;
-  }
-});
-
-// Clean up when navigating away from this component
-onBeforeUnmount(() => {
-  // Also reset search when leaving the page
-  resetSearch();
-});
-</script>
-
 <template>
   <div class="blog-detail">
     <section class="page-layout-blog">
@@ -139,7 +55,7 @@ onBeforeUnmount(() => {
               {{ blog.title }}
             </TitleText>
             
-            <!-- Category eyebrow - NEW ADDITION -->
+            <!-- Category eyebrow -->
             <div v-if="blog.Tags && blog.Tags.length > 0" class="blog-category-eyebrow">
               <span>{{ blog.Tags[0] }}</span>
             </div>
@@ -158,16 +74,10 @@ onBeforeUnmount(() => {
                 <Text as="span" size="sm" weight="bold" fontStyle="italic">
                   {{ formatDate(blog.date) }}
                 </Text>
-                <template
-                  v-if="
-                    blog.authors &&
-                    blog.authors.length > 0 &&
-                    blog.authors[0]?.team_id
-                  "
-                >
+                <template v-if="blog.authors && blog.authors.length > 0">
                   by
                   <Text as="span" size="sm" weight="bold" fontStyle="italic">
-                    {{ getAuthorName(blog.authors[0].team_id) }}
+                    {{ getAuthorsDisplayText(blog.authors) }}
                   </Text>
                 </template>
               </Text>
@@ -192,12 +102,7 @@ onBeforeUnmount(() => {
       <!-- Sidebar content -->
       <aside
         class="right-content-blog"
-        v-if="
-          blog &&
-          blog.authors &&
-          blog.authors.length > 0 &&
-          blog.authors[0]?.team_id
-        "
+        v-if="blog && blog.authors && blog.authors.length > 0"
       >
         <div class="share-widget-mobile">
           <ShareWidget
@@ -207,16 +112,17 @@ onBeforeUnmount(() => {
             align="center"
           />
         </div>
-        <!-- Author card -->
-        <AuthorCard
-          :author="blog.authors[0]"
-          :imageUrl="getImageUrl(blog.authors[0]?.team_id)"
-          :name="getAuthorName(blog.authors[0]?.team_id)"
-          :bio="
-            getAuthorName(blog.authors[0]?.team_id) +
-            ' works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research'
-          "
-        />
+        
+        <!-- Author cards (multiple) -->
+        <div v-for="(author, index) in blog.authors" :key="index">
+          <AuthorCard
+            :author="author"
+            :imageUrl="getAuthorImageUrl(author?.team_id)"
+            :name="getAuthorName(author?.team_id)"
+            :bio="getAuthorBio(author?.team_id)"
+          />
+        </div>
+        
         <!-- Sign up widget -->
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -237,3 +143,101 @@ onBeforeUnmount(() => {
   <!--Related Articles section-->
    <RelatedBlogCards :relatedBlogs="relatedBlogs" />
 </template>
+
+<script setup lang="ts">
+definePageMeta({
+  layout: "blog",
+});
+
+import { onMounted, onBeforeUnmount, ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import type { BlogPost } from "@/types/BlogPost";
+import { format } from "date-fns";
+
+const { showSearchResults, setIndexNames, resetSearch } = useSearchState();
+
+const route = useRoute();
+const router = useRouter();
+
+const blogslug = computed(() => route.params.slug as string);
+const blog = ref<BlogPost | null>(null);
+const isLoading = ref(true);
+const relatedBlogs = ref<BlogPost[]>([]);
+
+// Function to get image URL with fallback
+function getAuthorImageUrl(authorData: any, width: number = 600): string {
+  if (!authorData || !authorData.Headshot || !authorData.Headshot.id) {
+    return "/images/exampleImage.png";
+  }
+  return `https://content.thegovlab.com/assets/${authorData.Headshot.id}?width=${width}`;
+}
+
+// Function to get author name
+function getAuthorName(author: any): string {
+  if (!author) return "Unknown Author";
+  return `${author.First_Name || ""} ${author.Last_Name || ""}`.trim();
+}
+
+// Function to get author bio
+function getAuthorBio(author: any): string {
+  if (!author) return "Reboot Democracy contributor";
+  const name = getAuthorName(author);
+  return `${name} works at the Burnes Center for Social Change and writes on Reboot Democracy about how AI impacts public service delivery, lawmaking and research`;
+}
+
+// Function to format multiple authors for display
+function getAuthorsDisplayText(authors: any[]): string {
+  if (!authors || authors.length === 0) return "Unknown Author";
+  
+  return authors
+    .map(author => getAuthorName(author.team_id))
+    .filter(name => name.trim() !== "")
+    .join(", ");
+}
+
+// Function to format date using date-fns (consistent with your PostCard)
+function formatDate(dateValue: Date | string) {
+  if (!dateValue) return "unknown date";
+  try {
+    const date =
+      typeof dateValue === "string"
+        ? new Date(dateValue)
+        : dateValue || new Date();
+    return format(date, "MMMM d, yyyy");
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "invalid date";
+  }
+}
+
+// Reset search results when component is mounted
+onMounted(async () => {
+  // Reset the search first
+  resetSearch();
+
+  setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
+  try {
+    isLoading.value = true;
+    if (blogslug.value) {
+      blog.value = await fetchBlogBySlug(blogslug.value);
+      if (blog.value?.Tags?.length) {
+        relatedBlogs.value = await fetchRelatedBlogsByTags(
+          blog.value.Tags,
+          blogslug.value
+        );
+        console.log("Related blogs:", relatedBlogs.value);
+      }
+    }
+  } catch (error) {
+    console.error("Error loading blog post:", error);
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+// Clean up when navigating away from this component
+onBeforeUnmount(() => {
+  // Also reset search when leaving the page
+  resetSearch();
+});
+</script>
