@@ -25,6 +25,11 @@
   border: 1px solid var(--Color, #000);
   width: 16rem;
   height: 1.75rem;
+  font-family: var(--font-inria);
+}
+
+.search-container input {
+  font-family: var(--font-inria);
 }
 
 .search-icon {
