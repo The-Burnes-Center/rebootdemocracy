@@ -360,14 +360,32 @@ const tabOptions = computed(() => [
 
 const getAuthorName = (post: BlogPost | NewsItem): string => {
   if ("authors" in post && post.authors && post.authors.length > 0) {
+    if (post.authors.length > 1) {
+      const authorNames = post.authors
+        .map(author => {
+          if (author.team_id) {
+            return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
+          }
+          return null;
+        })
+        .filter(Boolean);
+      
+      if (authorNames.length > 0) {
+        if (authorNames.length === 1) return authorNames[0];
+        const lastAuthor = authorNames.pop();
+        return `${authorNames.join(', ')} and ${lastAuthor}`;
+      }
+      return "Reboot Democracy Team";
+    }
+    
     const author = post.authors[0]?.team_id;
     return author
       ? `${author.First_Name} ${author.Last_Name}`
-      : "Unknown Author";
+      : "Reboot Democracy Team";
   } else if ("author" in post && post.author) {
     return post.author;
   }
-  return "Unknown Author";
+  return "Reboot Democracy Team";
 };
 
 const navigateToBlogPost = (post: BlogPost | NewsItem) => {
