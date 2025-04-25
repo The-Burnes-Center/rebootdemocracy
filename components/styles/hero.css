@@ -73,7 +73,7 @@
 }
 
 .hero__second-partner img {
-  padding: 1px;
+  padding-top: 0.5rem;
   width: 113px;
   height: auto;
   object-fit: contain;
