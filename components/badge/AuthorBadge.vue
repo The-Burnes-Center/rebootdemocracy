@@ -8,22 +8,14 @@
       />
     </div>
     <div class="author-badge__content">
-      <Text 
-        as="h3" 
-        size="sm" 
-        weight="bold" 
-        class="author-badge__name"
-      >
-        {{ name }}
-      </Text>
-      <Text 
-        as="p" 
-        size="xs" 
-        weight="normal" 
-        class="author-badge__title"
-      >
-        {{ title }}
-      </Text>
+      <h3 
+          class="author-name"
+        >
+          {{ name }}
+        </h3>
+        <h4 class="author-title">
+          {{ title }}
+        </h4>
     </div>
   </div>
 </template>
