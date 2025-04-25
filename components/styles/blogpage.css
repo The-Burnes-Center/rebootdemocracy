@@ -133,25 +133,42 @@ p a::after {
 
 /* Category eyebrow styling */
 .blog-category-eyebrow {
-  margin: 1rem 0 1.5rem;
+  margin: 0.75rem 0 1rem;
   display: flex;
   align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.blog-category-eyebrow span {
-  background-color: #0d63eb;
-  color: white;
+.category-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0D63EB;
+  background-color: #e6f0ff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
   font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  border-radius: 3px;
-  display: inline-block;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(13, 99, 235, 0.2);
+  text-transform: uppercase;
 }
 
+.category-tag:hover {
+  background-color: #cce0ff;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+  .blog-category-eyebrow {
+    margin: 0.5rem 0 0.75rem;
+  }
+  
+  .category-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
 
 @media (max-width: 1150px) and (min-width: 769px) {
 

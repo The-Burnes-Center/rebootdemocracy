@@ -55,9 +55,16 @@
               {{ blog.title }}
             </TitleText>
             
-            <!-- Category eyebrow -->
+            <!-- Category eyebrow - Now clickable -->
             <div v-if="blog.Tags && blog.Tags.length > 0" class="blog-category-eyebrow">
-              <span>{{ blog.Tags[0] }}</span>
+              <span 
+                v-for="(tag, index) in blog.Tags" 
+                :key="index" 
+                class="category-tag"
+                @click="navigateToCategory(tag)"
+              >
+                {{ tag }}
+              </span>
             </div>
 
             <!-- Excerpt -->
@@ -163,6 +170,14 @@ const blogslug = computed(() => route.params.slug as string);
 const blog = ref<BlogPost | null>(null);
 const isLoading = ref(true);
 const relatedBlogs = ref<BlogPost[]>([]);
+
+// Function to navigate to blogs filtered by category
+function navigateToCategory(category: string) {
+  router.push({
+    path: '/blog',
+    query: { category }
+  });
+}
 
 // Function to get image URL with fallback
 function getAuthorImageUrl(authorData: any, width: number = 600): string {
