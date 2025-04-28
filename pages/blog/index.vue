@@ -261,7 +261,8 @@ useHead({
 4. And in one another
 As researchers we want to understand how best to "do democracy" in practice.
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
-    { property: 'og:image', content: "https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
+    { property: 'og:image', content: "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" 
+ },
     { property: 'twitter:title', content: "RebootDemocracy.AI" },
     { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
 1. Better governance
@@ -270,7 +271,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 4. And in one another
 As researchers we want to understand how best to "do democracy" in practice.
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
-    { property: 'twitter:image', content: "https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
+    { property: 'twitter:image', content: "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" 
+ },
     { property: 'twitter:card', content: "summary_large_image" },
   ],
 });
