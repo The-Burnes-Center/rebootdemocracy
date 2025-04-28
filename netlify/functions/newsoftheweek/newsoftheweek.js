@@ -1,123 +1,120 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
 import pkg from 'jstoxml';
-import * as Directus from '@directus/sdk';
+import { createDirectus, rest } from '@directus/sdk';
 import he from 'he';
 
-exports.handler = async function (event, context) {
+const directus = createDirectus('https://content.thegovlab.com/').with(rest());
 
-  const { toXML } = pkg;
-  const directus = new Directus('https://content.thegovlab.com/');
-  const blogPAW = directus.items("reboot_democracy_weekly_news");
-  const publicData = await blogPAW.readByQuery({
-    filter: {
-      _and: [
-        {
-          status: {
-            _eq: "published"
-          }
-        }
-      ],
-    },
-    sort: '-id',
-    limit: -1,
-    fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
-  });
+export const handler = async function (event, context) {
+  try {
+    const { toXML } = pkg;
 
+    const publicData = await directus.request(
+      rest.items("reboot_democracy_weekly_news").readByQuery({
+        filter: {
+          _and: [
+            {
+              status: {
+                _eq: "published"
+              }
+            }
+          ],
+        },
+        sort: '-id',
+        limit: -1,
+        fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
+      })
+    );
 
-  var channel = [
-    {
-      title:  publicData.data[0].title
-    },
-    {
-      description: publicData.data[0].summary
-    },
-    {
-      link: 'https://rebootdemocracy.ai'
-    },
-    {
-      lastBuildDate: () => (new Date).toUTCString()
-    },
-    {
-      pubDate: () => (new Date).toUTCString()
-    },
-    {
-      language: 'en'
-    },
-    {
-      _name: "atom:link",
-      _attrs: {
-        href: 'https://rebootdemocracy.ai/feed/rss',
-        rel: 'self',
-        type: 'application/rss+xml',
-      }
+    if (!publicData.data || publicData.data.length === 0) {
+      return {
+        statusCode: 404,
+        body: 'No news data found.',
+      };
     }
-  ];
 
-
-  publicData.data[0].items.map( e_items => {
-    var itemcont = {};
-    itemcont["item"] = {};
-    itemcont["item"]["title"] = e_items.reboot_democracy_weekly_news_items_id.title;
-    itemcont["item"]["pubDate"] = e_items.reboot_democracy_weekly_news_items_id.date;
-    itemcont["item"]["author"] = e_items.reboot_democracy_weekly_news_items_id.author + " in " + e_items.reboot_democracy_weekly_news_items_id.publication;
-    itemcont["item"]["link"] =  e_items.reboot_democracy_weekly_news_items_id.url;    
-    itemcont["item"]["description"] = e_items.reboot_democracy_weekly_news_items_id.excerpt;
-    itemcont["item"]["category"] = e_items.reboot_democracy_weekly_news_items_id.category;
-    channel.push(itemcont);
-
-}
-  )
-  const xmlOptions = {
-    header: true,
-    indent: '  ' // Ensures proper indentation
-  };
-
-  const rssFeed = toXML(
-    {
-      _name: 'rss',
-      _attrs: {
-        version: '2.0',
-        ["xmlns:atom"]: 'http://www.w3.org/2005/Atom',
-        ["xmlns:media"]: 'http://search.yahoo.com/mrss/' // Add media namespace
+    // Start building the RSS channel
+    const channel = [
+      {
+        title: publicData.data[0].title
       },
-      _content: {
-        channel: channel,
+      {
+        description: publicData.data[0].summary
       },
-    },
-    xmlOptions
-  );
+      {
+        link: 'https://rebootdemocracy.ai'
+      },
+      {
+        lastBuildDate: new Date().toUTCString()
+      },
+      {
+        pubDate: new Date().toUTCString()
+      },
+      {
+        language: 'en'
+      },
+      {
+        _name: "atom:link",
+        _attrs: {
+          href: 'https://rebootdemocracy.ai/feed/rss',
+          rel: 'self',
+          type: 'application/rss+xml',
+        }
+      }
+    ];
 
-  return {
-    statusCode: 200,
-    body: rssFeed,
-  };
+    // Now loop over the news items and add them as <item> in the RSS
+    publicData.data[0].items.forEach(e_items => {
+      const newsItem = e_items.reboot_democracy_weekly_news_items_id;
 
-  // Helper functions
+      if (newsItem) {
+        const itemcont = {
+          item: {
+            title: newsItem.title,
+            pubDate: newsItem.date,
+            author: `${newsItem.author} in ${newsItem.publication}`,
+            link: newsItem.url,
+            description: newsItem.excerpt,
+            category: newsItem.category,
+          }
+        };
+        channel.push(itemcont);
+      }
+    });
 
-  function addLeadingZero(num) {
-    num = num.toString();
-    while (num.length < 2) num = "0" + num;
-    return num;
-  }
+    const xmlOptions = {
+      header: true,
+      indent: '  ' // Ensures proper indentation
+    };
 
-  function decodeEntities(encodedString) {
-    return he.decode(encodedString || "");
-  }
+    const rssFeed = toXML(
+      {
+        _name: 'rss',
+        _attrs: {
+          version: '2.0',
+          ["xmlns:atom"]: 'http://www.w3.org/2005/Atom',
+          ["xmlns:media"]: 'http://search.yahoo.com/mrss/' // Add media namespace
+        },
+        _content: {
+          channel: channel,
+        },
+      },
+      xmlOptions
+    );
 
-  function buildRFC822Date(dateString) {
-    const dayStrings = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const monthStrings = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8'
+      },
+      body: rssFeed,
+    };
 
-    const timeStamp = Date.parse(dateString);
-    const date = new Date(timeStamp);
-
-    const day = dayStrings[date.getDay()];
-    const dayNumber = addLeadingZero(date.getDate());
-    const month = monthStrings[date.getMonth()];
-    const year = date.getFullYear();
-    const time = `${addLeadingZero(date.getHours())}:${addLeadingZero(date.getMinutes())}:00`;
-    const timezone = date.getTimezoneOffset() === 0 ? "GMT" : "BST";
-
-    return `${day}, ${dayNumber} ${month} ${year} ${time} ${timezone}`;
+  } catch (error) {
+    console.error('Error generating RSS:', error);
+    return {
+      statusCode: 500,
+      body: 'Internal Server Error',
+    };
   }
 };
