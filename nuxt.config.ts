@@ -60,7 +60,7 @@ export default defineNuxtConfig({
         { property: 'twitter:card', content: 'summary_large_image' }
       ],
       link: [
-        { rel: 'shortcut icon', type: 'image/png', href: '/innovateus_favicon.001.png' },
+        { rel: 'shortcut icon', type: 'images/newsheader.png', href: '/images/newsheader.png' },
         {
           rel: 'stylesheet',
           href: 'https://kit.fontawesome.com/59ddbfe387.css',
