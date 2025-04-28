@@ -227,23 +227,26 @@ function formatDate(dateValue: Date | string) {
 
 // Reset search results when component is mounted
 onMounted(async () => {
-  // Reset the search first
   resetSearch();
-
   setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
+  
   try {
     isLoading.value = true;
     if (blogslug.value) {
       blog.value = await fetchBlogBySlug(blogslug.value);
-        if (blog.value) {
+      
+      // Only proceed if we have valid blog data
+      if (blog.value) {
+        // Set metadata after confirming blog data exists
         setMetadata();
-      }
-      if (blog.value?.Tags?.length) {
-        relatedBlogs.value = await fetchRelatedBlogsByTags(
-          blog.value.Tags,
-          blogslug.value
-        );
-        console.log("Related blogs:", relatedBlogs.value);
+        
+        // Then fetch related blogs if needed
+        if (blog.value?.Tags?.length) {
+          relatedBlogs.value = await fetchRelatedBlogsByTags(
+            blog.value.Tags,
+            blogslug.value
+          );
+        }
       }
     }
   } catch (error) {
@@ -253,51 +256,55 @@ onMounted(async () => {
   }
 });
 
+
 function setMetadata() {
   if (!blog.value) return;
   
+  // Convert HTML content to plain text for descriptions
   const htmlToText = document.createElement('div');
   htmlToText.innerHTML = blog.value.content || '';
   const plainTextContent = htmlToText.textContent || '';
+  const description = blog.value.excerpt 
+    ? blog.value.excerpt 
+    : `${plainTextContent.substring(0, 200)}...`;
   
-  const baseAssetUrl = 'https://content.thegovlab.com/assets/'; 
+  const baseAssetUrl = 'https://content.thegovlab.com/assets/';
+  const defaultImageId = '4650f4e2-6cc2-407b-ab01-b74be4838235';
   
+  // Prepare image data
+  const hasImage = blog.value.image && (blog.value.image.id || blog.value.image.filename_disk);
+  const imageUrl = hasImage 
+    ? `${baseAssetUrl}${blog.value.image?.id || blog.value.image?.filename_disk}`
+    : `${baseAssetUrl}${defaultImageId}`;
+  
+  // Prepare metadata array
+  const metaTags = [
+    { name: 'title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
+    { name: 'description', content: description },
+    { property: 'og:title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: `https://rebootdemocracy.ai/blog/${blog.value.slug}` },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: imageUrl },
+    { property: 'twitter:title', content: 'RebootDemocracy.AI' },
+    { property: 'twitter:description', content: description },
+    { property: 'twitter:image', content: imageUrl },
+    { property: 'twitter:card', content: 'summary_large_image' },
+  ];
+  
+  // Only add width/height if they exist
+  if (hasImage && blog.value.image?.width) {
+    metaTags.push({ property: 'og:image:width', content: blog.value.image.width.toString() });
+  }
+  
+  if (hasImage && blog.value.image?.height) {
+    metaTags.push({ property: 'og:image:height', content: blog.value.image.height.toString() });
+  }
+  
+  // Apply metadata
   useHead({
     title: `RebootDemocracy.AI Blog | ${blog.value.title}`,
-    meta: [
-      { name: 'title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
-      { 
-        name: 'description', 
-        content: blog.value.excerpt ? blog.value.excerpt : `${plainTextContent.substring(0, 200)}...`
-      },
-      { property: 'og:title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: `https://rebootdemocracy.ai/blog/${blog.value.slug}` },
-      { 
-        property: 'og:description', 
-        content: blog.value.excerpt ? blog.value.excerpt : `${plainTextContent.substring(0, 200)}...`
-      },
-      { 
-        property: 'og:image', 
-        content: blog.value.image 
-          ? `${baseAssetUrl}${blog.value.image.filename_disk}`
-          : `${baseAssetUrl}4650f4e2-6cc2-407b-ab01-b74be4838235`
-      },
-      blog.value.image ? { property: 'og:image:width', content: blog.value.image.width } : {},
-      blog.value.image ? { property: 'og:image:height', content: blog.value.image.height } : {},
-      { property: 'twitter:title', content: 'RebootDemocracy.AI' },
-      { 
-        property: 'twitter:description', 
-        content: blog.value.excerpt ? blog.value.excerpt : `${plainTextContent.substring(0, 200)}...`
-      },
-      { 
-        property: 'twitter:image', 
-        content: blog.value.image 
-          ? `${baseAssetUrl}${blog.value.image.filename_disk}`
-          : `${baseAssetUrl}4650f4e2-6cc2-407b-ab01-b74be4838235`
-      },
-      { property: 'twitter:card', content: 'summary_large_image' },
-    ],
+    meta: metaTags,
   });
 }
 
