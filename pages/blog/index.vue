@@ -249,33 +249,31 @@ import type { BlogPost, Event, WeeklyNews } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
 
 //meta information
-const fillMeta = () => {
-  useHead({
-    title: "RebootDemocracy.AI",
-    meta: [
-      { name: 'title', content: "RebootDemocracy.AI" },
-      { property: 'og:title', content: "RebootDemocracy.AI" },
-      { property: 'og:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+useHead({
+  title: "RebootDemocracy.AI",
+  meta: [
+    { name: 'title', content: "RebootDemocracy.AI" },
+    { property: 'og:title', content: "RebootDemocracy.AI" },
+    { property: 'og:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
 1. Better governance
 2. Better outcomes
 3. Increased trust in institutions
 4. And in one another
 As researchers we want to understand how best to "do democracy" in practice.
-Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
-      { property: 'og:image', content: "https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3"},
-      { property: 'twitter:title', content: "RebootDemocracy.AI"},
-      { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
+    { property: 'og:image', content: "https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
+    { property: 'twitter:title', content: "RebootDemocracy.AI" },
+    { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
 1. Better governance
 2. Better outcomes
 3. Increased trust in institutions
 4. And in one another
 As researchers we want to understand how best to "do democracy" in practice.
-Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
-      { property: 'twitter:image', content: "https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3"},
-      { property: 'twitter:card', content: "summary_large_image" },
-    ],
-  });
-};
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` },
+    { property: 'twitter:image', content: "https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
+    { property: 'twitter:card', content: "summary_large_image" },
+  ],
+});
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
@@ -677,7 +675,6 @@ const loadInitialData = async () => {
 };
 
 onMounted(() => {
-  fillMeta();
   loadInitialData().then(() => {
     // Check for category query parameter
     const categoryParam = route.query.category as string | undefined;
