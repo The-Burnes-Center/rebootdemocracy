@@ -40,14 +40,24 @@ export default defineNuxtConfig({
       global: true
     }
   ],
-
   app: {
     head: {
       title: 'Reboot Democracy',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge,chrome=1' }
+        { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge,chrome=1' },
+        { name: 'description', content: 'Insights on AI, Governance and Democracy' },
+        { name: 'title', content: 'Reboot Democracy' },
+        { property: 'og:title', content: 'Reboot Democracy' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: 'https://rebootdemocracy.ai' },
+        { property: 'og:description', content: 'Insights on AI, Governance and Democracy' },
+        { property: 'og:image', content: 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235' },
+        { property: 'twitter:title', content: 'RebootDemocracy.AI' },
+        { property: 'twitter:description', content: 'Insights on AI, Governance and Democracy' },
+        { property: 'twitter:image', content: 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235' },
+        { property: 'twitter:card', content: 'summary_large_image' }
       ],
       link: [
         { rel: 'shortcut icon', type: 'image/png', href: '/innovateus_favicon.001.png' },
