@@ -1,5 +1,4 @@
-
-
+<!-- <p>Mailing viewt</p> -->
 <template>
   <div class="mailing-list-section">
     <div class="mailing-list-row">
