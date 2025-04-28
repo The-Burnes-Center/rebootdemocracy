@@ -20,7 +20,6 @@ export default defineComponent({
     const pageslug = ref(route.query);
     const alleventsData = ref<EventItem[]>([]);
     const path = ref(route.fullPath);
-     const fillMeta = () => {
       useHead({
         title: "InnovateUS",
         meta: [
@@ -51,7 +50,6 @@ export default defineComponent({
           { property: "twitter:card", content: "summary_large_image" },
         ],
       });
-    };
     const fetchData = async () => {
       try {
         indexData.value = await fetchIndexData();
@@ -137,7 +135,6 @@ export default defineComponent({
     };
     // Call fetchData when component is mounted
     onMounted(() => {
-      fillMeta();
       fetchData();
     });
     return {
