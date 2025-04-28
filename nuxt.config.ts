@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     '@nuxtjs/algolia'
   ],
   nitro: {
+    preset: 'netlify',
     output: {
       dir: '.output',
       serverDir: '.output/server',
