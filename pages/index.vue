@@ -339,7 +339,7 @@ const editionNumber = computed(() =>
 );
 
 const weeklyNewsUrl = computed(
-  () => `https://rebootdemocracy.ai/newsthatcaughtoureye/${editionNumber.value}`
+  () => `/newsthatcaughtoureye/${editionNumber.value}`
 );
 
 const tabOptions = computed(() => [
@@ -353,7 +353,7 @@ const tabOptions = computed(() => [
   {
     title: "Events",
     name: "events",
-    url: "https://rebootdemocracy.ai/events",
+    url: "/events",
     external: true,
   },
 ]);
