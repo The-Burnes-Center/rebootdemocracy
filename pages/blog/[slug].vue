@@ -235,6 +235,9 @@ onMounted(async () => {
     isLoading.value = true;
     if (blogslug.value) {
       blog.value = await fetchBlogBySlug(blogslug.value);
+        if (blog.value) {
+        setMetadata();
+      }
       if (blog.value?.Tags?.length) {
         relatedBlogs.value = await fetchRelatedBlogsByTags(
           blog.value.Tags,
@@ -249,6 +252,54 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+function setMetadata() {
+  if (!blog.value) return;
+  
+  const htmlToText = document.createElement('div');
+  htmlToText.innerHTML = blog.value.content || '';
+  const plainTextContent = htmlToText.textContent || '';
+  
+  const baseAssetUrl = 'https://content.thegovlab.com/assets/'; 
+  
+  useHead({
+    title: `RebootDemocracy.AI Blog | ${blog.value.title}`,
+    meta: [
+      { name: 'title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
+      { 
+        name: 'description', 
+        content: blog.value.excerpt ? blog.value.excerpt : `${plainTextContent.substring(0, 200)}...`
+      },
+      { property: 'og:title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: `https://rebootdemocracy.ai/blog/${blog.value.slug}` },
+      { 
+        property: 'og:description', 
+        content: blog.value.excerpt ? blog.value.excerpt : `${plainTextContent.substring(0, 200)}...`
+      },
+      { 
+        property: 'og:image', 
+        content: blog.value.image 
+          ? `${baseAssetUrl}${blog.value.image.filename_disk}`
+          : `${baseAssetUrl}4650f4e2-6cc2-407b-ab01-b74be4838235`
+      },
+      blog.value.image ? { property: 'og:image:width', content: blog.value.image.width } : {},
+      blog.value.image ? { property: 'og:image:height', content: blog.value.image.height } : {},
+      { property: 'twitter:title', content: 'RebootDemocracy.AI' },
+      { 
+        property: 'twitter:description', 
+        content: blog.value.excerpt ? blog.value.excerpt : `${plainTextContent.substring(0, 200)}...`
+      },
+      { 
+        property: 'twitter:image', 
+        content: blog.value.image 
+          ? `${baseAssetUrl}${blog.value.image.filename_disk}`
+          : `${baseAssetUrl}4650f4e2-6cc2-407b-ab01-b74be4838235`
+      },
+      { property: 'twitter:card', content: 'summary_large_image' },
+    ],
+  });
+}
 
 // Clean up when navigating away from this component
 onBeforeUnmount(() => {
