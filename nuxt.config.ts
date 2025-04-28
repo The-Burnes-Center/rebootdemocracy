@@ -53,10 +53,10 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://rebootdemocracy.ai' },
         { property: 'og:description', content: 'Insights on AI, Governance and Democracy' },
-        { property: 'og:image', content: 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235' },
+        { property: 'og:image', content: 'https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
         { property: 'twitter:title', content: 'RebootDemocracy.AI' },
         { property: 'twitter:description', content: 'Insights on AI, Governance and Democracy' },
-        { property: 'twitter:image', content: 'https://content.thegovlab.com/assets/4650f4e2-6cc2-407b-ab01-b74be4838235' },
+        { property: 'twitter:image', content: 'https://content.thegovlab.com/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
         { property: 'twitter:card', content: 'summary_large_image' }
       ],
       link: [
