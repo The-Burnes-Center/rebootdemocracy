@@ -27,10 +27,10 @@
       <!-- Right side - Logos -->
       <div class="footer__logos">
         <div class="footer__logo">
-          <img src="/images/burnes-logo-blues-1.png" alt="Burnes Center for Social Change" />
+          <img src="/images/burnes-branding-v4-bunes-center-logo-blue.svg" alt="Burnes Center for Social Change" />
         </div>
         <div class="footer__logo">
-          <img src="/images/the-govlab-logo-white.png" alt="The GovLab" />
+          <img src="/images/the-govlab-logo.svg" alt="The GovLab" />
         </div>
       </div>
     </div>

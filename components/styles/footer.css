@@ -67,14 +67,14 @@
   }
   
   .footer__logo:first-child img {
-    width: 141px;
-    height: 25px;
-    padding: 1px;
+    width: 197px;
+    height: 35px;
+    padding-left: 3rem;
   }
   
   .footer__logo:last-child img {
-    width: 113px;
-    height: 20.55709px;
+    width: 141px;
+    height: 25px;
     padding: 1px;
   }
   
@@ -125,5 +125,9 @@
     
     .footer__logos {
       align-items: flex-start;
+    }
+
+    .footer__logo:first-child img {
+      padding-left: 0rem;
     }
   }
