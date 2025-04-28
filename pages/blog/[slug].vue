@@ -54,12 +54,15 @@
             >
               {{ blog.title }}
             </TitleText>
-            
+
             <!-- Category eyebrow - Now clickable -->
-            <div v-if="blog.Tags && blog.Tags.length > 0" class="blog-category-eyebrow">
-              <span 
-                v-for="(tag, index) in blog.Tags" 
-                :key="index" 
+            <div
+              v-if="blog.Tags && blog.Tags.length > 0"
+              class="blog-category-eyebrow"
+            >
+              <span
+                v-for="(tag, index) in blog.Tags"
+                :key="index"
                 class="category-tag"
                 @click="navigateToCategory(tag)"
               >
@@ -92,7 +95,9 @@
 
             <!-- Audio component -->
             <div class="audio-version" v-if="blog?.audio_version">
-              <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.</em></p>
+              <p dir="ltr">
+                <em>Listen to the AI-generated audio version of this piece.</em>
+              </p>
               <AudioPlayer
                 :audioSrc="`https://content.thegovlab.com/assets/${blog.audio_version.id}`"
               />
@@ -119,7 +124,7 @@
             align="center"
           />
         </div>
-        
+
         <!-- Author cards (multiple) -->
         <div v-for="(author, index) in blog.authors" :key="index">
           <AuthorCard
@@ -129,7 +134,7 @@
             :bio="getAuthorBio(author?.team_id)"
           />
         </div>
-        
+
         <!-- Sign up widget -->
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -148,7 +153,7 @@
     </section>
   </div>
   <!--Related Articles section-->
-   <RelatedBlogCards :relatedBlogs="relatedBlogs" />
+  <RelatedBlogCards :relatedBlogs="relatedBlogs" />
 </template>
 
 <script setup lang="ts">
@@ -167,15 +172,35 @@ const route = useRoute();
 const router = useRouter();
 
 const blogslug = computed(() => route.params.slug as string);
-const blog = ref<BlogPost | null>(null);
+
+const { data: blog, pending, error } = await useAsyncData('blog', async () => {
+  if (!blogslug.value) return null;
+  return await fetchBlogBySlug(blogslug.value);
+});
+
+useHead({
+  title: computed(() => blog.value ? `RebootDemocracy.AI Blog | ${blog.value.title}` : 'RebootDemocracy.AI'),
+  meta: computed(() => blog.value ? [
+    { name: 'description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
+    { property: 'og:title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
+    { property: 'og:description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
+    { property: 'og:url', content: `https://rebootdemocracy.ai/blog/${blog.value.slug}` },
+    { property: 'og:image', content: blog.value.image ? `https://content.thegovlab.com/assets/${blog.value.image.id}` : '/default-image.png' },
+    { property: 'twitter:title', content: blog.value.title },
+    { property: 'twitter:description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
+    { property: 'twitter:image', content: blog.value.image ? `https://content.thegovlab.com/assets/${blog.value.image.id}` : '/default-image.png' },
+    { property: 'twitter:card', content: 'summary_large_image' }
+  ] : [])
+});
+
 const isLoading = ref(true);
 const relatedBlogs = ref<BlogPost[]>([]);
 
 // Function to navigate to blogs filtered by category
 function navigateToCategory(category: string) {
   router.push({
-    path: '/blog',
-    query: { category }
+    path: "/blog",
+    query: { category },
   });
 }
 
@@ -203,10 +228,10 @@ function getAuthorBio(author: any): string {
 // Function to format multiple authors for display
 function getAuthorsDisplayText(authors: any[]): string {
   if (!authors || authors.length === 0) return "Unknown Author";
-  
+
   return authors
-    .map(author => getAuthorName(author.team_id))
-    .filter(name => name.trim() !== "")
+    .map((author) => getAuthorName(author.team_id))
+    .filter((name) => name.trim() !== "")
     .join(", ");
 }
 
@@ -229,24 +254,17 @@ function formatDate(dateValue: Date | string) {
 onMounted(async () => {
   resetSearch();
   setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
-  
+
   try {
     isLoading.value = true;
     if (blogslug.value) {
       blog.value = await fetchBlogBySlug(blogslug.value);
-      
-      // Only proceed if we have valid blog data
-      if (blog.value) {
-        // Set metadata after confirming blog data exists
-        setMetadata();
-        
-        // Then fetch related blogs if needed
-        if (blog.value?.Tags?.length) {
-          relatedBlogs.value = await fetchRelatedBlogsByTags(
-            blog.value.Tags,
-            blogslug.value
-          );
-        }
+
+      if (blog.value?.Tags?.length) {
+        relatedBlogs.value = await fetchRelatedBlogsByTags(
+          blog.value.Tags,
+          blogslug.value
+        );
       }
     }
   } catch (error) {
@@ -255,58 +273,6 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
-
-
-function setMetadata() {
-  if (!blog.value) return;
-  
-  // Convert HTML content to plain text for descriptions
-  const htmlToText = document.createElement('div');
-  htmlToText.innerHTML = blog.value.content || '';
-  const plainTextContent = htmlToText.textContent || '';
-  const description = blog.value.excerpt 
-    ? blog.value.excerpt 
-    : `${plainTextContent.substring(0, 200)}...`;
-  
-  const baseAssetUrl = 'https://content.thegovlab.com/assets/';
-  const defaultImageId = '4650f4e2-6cc2-407b-ab01-b74be4838235';
-  
-  // Prepare image data
-  const hasImage = blog.value.image && (blog.value.image.id || blog.value.image.filename_disk);
-  const imageUrl = hasImage 
-    ? `${baseAssetUrl}${blog.value.image?.id || blog.value.image?.filename_disk}`
-    : `${baseAssetUrl}${defaultImageId}`;
-  
-  // Prepare metadata array
-  const metaTags = [
-    { name: 'title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
-    { name: 'description', content: description },
-    { property: 'og:title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: `https://rebootdemocracy.ai/blog/${blog.value.slug}` },
-    { property: 'og:description', content: description },
-    { property: 'og:image', content: imageUrl },
-    { property: 'twitter:title', content: 'RebootDemocracy.AI' },
-    { property: 'twitter:description', content: description },
-    { property: 'twitter:image', content: imageUrl },
-    { property: 'twitter:card', content: 'summary_large_image' },
-  ];
-  
-  // Only add width/height if they exist
-  if (hasImage && blog.value.image?.width) {
-    metaTags.push({ property: 'og:image:width', content: blog.value.image.width.toString() });
-  }
-  
-  if (hasImage && blog.value.image?.height) {
-    metaTags.push({ property: 'og:image:height', content: blog.value.image.height.toString() });
-  }
-  
-  // Apply metadata
-  useHead({
-    title: `RebootDemocracy.AI Blog | ${blog.value.title}`,
-    meta: metaTags,
-  });
-}
 
 // Clean up when navigating away from this component
 onBeforeUnmount(() => {
