@@ -6,10 +6,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
   
-  modules: [
-    '@nuxt/test-utils/module',
-    '@nuxtjs/algolia'
-  ],
+  modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag'],
+  gtag: {
+    id: 'G-L78LX2HS2N',
+    enabled: true,
+  },
   nitro: {
     preset: 'netlify',
     output: {
