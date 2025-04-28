@@ -351,7 +351,6 @@ onMounted(async () => {
 
 .news-item {
   background-color: #fafafa;
-  padding: 2em;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
