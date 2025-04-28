@@ -39,7 +39,7 @@
                   fill="black"
                 />
               </svg>
-              <Text as="span" size="md" weight="800" marginLeft="sm">Blog</Text>
+              <Text as="span" size="sm" weight="extradarkbold" marginLeft="sm">Blog</Text>
             </button>
 
             <!-- Blog title -->
@@ -185,10 +185,10 @@ useHead({
     { property: 'og:title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
     { property: 'og:description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
     { property: 'og:url', content: `https://rebootdemocracy.ai/blog/${blog.value.slug}` },
-    { property: 'og:image', content: blog.value.image ? `https://content.thegovlab.com/assets/${blog.value.image.id}` : '/default-image.png' },
+    { property: 'og:image', content: getImageUrl(blog.value.image) },
     { property: 'twitter:title', content: blog.value.title },
     { property: 'twitter:description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
-    { property: 'twitter:image', content: blog.value.image ? `https://content.thegovlab.com/assets/${blog.value.image.id}` : '/default-image.png' },
+    { property: 'twitter:image', content: getImageUrl(blog.value.image) }, 
     { property: 'twitter:card', content: 'summary_large_image' }
   ] : [])
 });
