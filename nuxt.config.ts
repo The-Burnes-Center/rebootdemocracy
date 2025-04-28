@@ -13,6 +13,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'netlify',
+    prerender: {
+      crawlLinks: true,
+      failOnError: false,
+    },
     output: {
       dir: '.output',
       serverDir: '.output/server',
