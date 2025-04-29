@@ -8,6 +8,7 @@
 @import "./tab-switch.css";
 @import "./header-menu.css";
 @import "./header-dropdown.css";
+@import "./about-dropdown.css";
 @import "./signup-widget.css";
 @import "./author-badge.css";
 @import "./curator-badge.css";
@@ -18,7 +19,7 @@
 @import "./innovate-us-card.css";
 @import "./blog-collaborators-container.css";
 @import "./footer.css";
-@import "./quote.css";  
+@import "./quote.css";
 @import "./blogpage.css";
 @import "./about.css";
 @import "./homepage.css";
@@ -26,6 +27,7 @@
 @import "./audio-player.css";
 @import "./all-blog-posts-page.css";
 @import "./filter-dropdown.css";
+
 
 :root {
   --font-inter: "Inter", sans-serif;
@@ -69,8 +71,6 @@
     transform: rotate(360deg);
   }
 }
-
-
 
 .no-blogs {
   text-align: center;
