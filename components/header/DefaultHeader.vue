@@ -97,29 +97,22 @@ const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
 
-// Custom handling for menu item clicks
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
-  // Handle team navigation
+  // Handle 'Our Team' anchor navigation
   if (item.name === 'team') {
     event.preventDefault();
-    if (route.path !== '/about') {
-      router.push({ 
-        path: '/about', 
-        hash: '#team-grid' 
-      });
-    } else {
-      const teamSection = document.getElementById('team-grid');
-      if (teamSection) {
-        teamSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
+    router.push({ 
+      path: '/about', 
+      hash: '#team-grid' 
+    });
   }
-  // Handle external links - open in same tab
+  // Handle external links
   else if (item.external && item.to) {
     event.preventDefault();
     window.location.href = item.to;
   }
 };
+
 const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
   // First handle the normal click behavior
   handleMenuClick(item, event);
