@@ -1,16 +1,26 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
-import pkg from 'jstoxml';
-import { createDirectus, rest } from '@directus/sdk';
-import he from 'he';
+const { createDirectus, rest, readItems } = require('@directus/sdk');
+const he = require('he');
+
+// Fix for the jstoxml ESM module issue
+let toXML;
+async function initializeJsToXml() {
+  const jstoxml = await import('jstoxml');
+  toXML = jstoxml.default.toXML || jstoxml.toXML;
+  return toXML;
+}
 
 const directus = createDirectus('https://content.thegovlab.com/').with(rest());
 
-export const handler = async function (event, context) {
+exports.handler = async function (event, context) {
   try {
-    const { toXML } = pkg;
-
+    // Initialize the jstoxml module
+    const toXML = await initializeJsToXml();
+    
+    console.log("Attempting to fetch blog data from Directus...");
+    
     const publicData = await directus.request(
-      rest.items("reboot_democracy_blog").readByQuery({
+      readItems("reboot_democracy_blog", {
         filter: {
           _and: [
             { date: { _lte: "$NOW(-5 hours)" } },
@@ -18,25 +28,46 @@ export const handler = async function (event, context) {
           ],
         },
         limit: -1,
-        sort: '-date',
+        sort: ['-date'], // Changed to array format for sort
         fields: ["*.*", "authors.team_id.*"]
       })
     );
-
-    if (!publicData.data || publicData.data.length === 0) {
+    
+    console.log("Data retrieved, checking structure...");
+    
+    // Handle different response structures in newer SDK versions
+    let blogData;
+    if (publicData.data) {
+      console.log("Data found in publicData.data");
+      blogData = publicData.data;
+    } else if (Array.isArray(publicData)) {
+      console.log("Data found directly in publicData array");
+      blogData = publicData;
+    } else {
+      console.log("Unexpected response structure:", typeof publicData);
+      return {
+        statusCode: 404,
+        body: 'No blog posts found. Unexpected response structure.',
+      };
+    }
+    
+    if (!blogData || blogData.length === 0) {
+      console.log("No blog posts found in response");
       return {
         statusCode: 404,
         body: 'No blog posts found.',
       };
     }
+    
+    console.log(`Found ${blogData.length} blog posts`);
 
     // Base channel info
     const channel = [
       { title: 'Reboot Democracy Blog' },
       { description: 'The Reboot Democracy Blog explores the complex relationship among AI, democracy and governance.' },
       { link: 'https://rebootdemocracy.ai' },
-      { lastBuildDate: new Date().toUTCString() },
-      { pubDate: new Date().toUTCString() },
+      { lastBuildDate: () => new Date().toUTCString() },
+      { pubDate: () => new Date().toUTCString() },
       { language: 'en' },
       {
         _name: "atom:link",
@@ -49,17 +80,22 @@ export const handler = async function (event, context) {
     ];
 
     // Add each blog post
-    publicData.data.forEach((post) => {
+    blogData.forEach((post) => {
       if (post.status === "published") {
         let authorNames = "";
 
         if (post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
           authorNames = "By " + post.authors
-            .map(author => `${author.team_id.First_Name} ${author.team_id.Last_Name}`)
+            .map(author => {
+              if (author.team_id && author.team_id.First_Name && author.team_id.Last_Name) {
+                return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
+              }
+              return "Unknown Author";
+            })
             .join(", ") + "<br/>";
         }
 
-        let descriptionContent = `${authorNames}${decodeEntities(post.content)}`;
+        let descriptionContent = `${authorNames}${decodeEntities(post.content || "")}`;
         let enclosure = null;
         let mediaContent = null;
 
@@ -81,17 +117,17 @@ export const handler = async function (event, context) {
             }
           };
 
-          descriptionContent = `<![CDATA[<img src="${imageUrl}" alt="${post.title}" /><br/>${descriptionContent}]]>`;
+          descriptionContent = `<![CDATA[<img src="${imageUrl}" alt="${post.title || "Blog post"}" /><br/>${descriptionContent}]]>`;
         } else {
           descriptionContent = `<![CDATA[${descriptionContent}]]>`;
         }
 
         const item = {
           item: {
-            title: decodeEntities(post.title),
-            link: `https://rebootdemocracy.ai/blog/${post.slug}`,
-            guid: `https://rebootdemocracy.ai/blog/${post.slug}`,
-            pubDate: buildRFC822Date(post.date),
+            title: decodeEntities(post.title || "Untitled"),
+            link: `https://rebootdemocracy.ai/blog/${post.slug || post.id}`,
+            guid: `https://rebootdemocracy.ai/blog/${post.slug || post.id}`,
+            pubDate: buildRFC822Date(post.date || new Date().toISOString()),
             description: descriptionContent,
           }
         };
@@ -135,7 +171,7 @@ export const handler = async function (event, context) {
     console.error('Error generating RSS:', error);
     return {
       statusCode: 500,
-      body: 'Internal Server Error',
+      body: 'Internal Server Error: ' + error.message + '\n\nStack: ' + error.stack,
     };
   }
 };
