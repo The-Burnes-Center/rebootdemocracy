@@ -185,22 +185,15 @@ const {
 });
 
 const title = computed(() => blog.value?.title || "RebootDemocracy.AI");
-const description = computed(
-  () => blog.value?.excerpt || "Insights on AI, Governance and Democracy"
-);
-const ogImage = computed(() =>
-  blog.value?.image
-    ? getImageUrl(blog.value.image)
-    : "https://content.thegovlab.com/assets/default-og-image.jpg"
-);
-const ogUrl = computed(
-  () => `https://rebootdemocracy.ai/blog/${blogslug.value}`
-);
+const description = computed(() => blog.value?.excerpt || "Insights on AI, Governance and Democracy");
+const ogImage = computed(() => blog.value?.image ? getImageUrl(blog.value.image) : "https://content.thegovlab.com/assets/default-og-image.jpg");
+const ogUrl = computed(() => `https://rebootdemocracy.ai/blog/${blogslug.value}`);
 
 useHead({
-  title,
+  title: title,
   meta: [
     { name: 'description', content: description.value },
+    { name: 'title', content: title.value },
     { property: 'og:title', content: title.value },
     { property: 'og:description', content: description.value },
     { property: 'og:url', content: ogUrl.value },
@@ -211,6 +204,7 @@ useHead({
     { property: 'twitter:card', content: 'summary_large_image' }
   ]
 });
+
 
 const isLoading = ref(true);
 const relatedBlogs = ref<BlogPost[]>([]);
