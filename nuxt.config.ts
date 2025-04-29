@@ -33,6 +33,7 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
+    '/blog/**': { prerender: true }
   },
   css: [
     './components/styles/index.css',
