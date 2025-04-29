@@ -1,5 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia'; 
+import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
+
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -12,17 +14,34 @@ export default defineNuxtConfig({
     enabled: true,
   },
   nitro: {
-    preset: 'netlify',
-    prerender: {
-      crawlLinks: true,
-      failOnError: false,
-    },
-    output: {
-      dir: '.output',
-      serverDir: '.output/server',
-      publicDir: '.output/public'
-    }
+  preset: 'netlify',
+  prerender: {
+    crawlLinks: true,
+    failOnError: false,
+    routes: []
   },
+ 
+  output: {
+    dir: '.output',
+    publicDir: '.output/public',
+    serverDir: '.output/server'
+  }
+},
+
+ hooks: {
+  async 'nitro:config'(nitroConfig) {
+    const dynamicRoutes = await getStaticBlogRoutes();
+
+    console.log('[SSG] Pre-rendering dynamic blog routes:');
+    console.log(dynamicRoutes);
+
+    nitroConfig.prerender = nitroConfig.prerender ?? {};
+    nitroConfig.prerender.routes = [
+      ...(nitroConfig.prerender.routes ?? []),
+      ...dynamicRoutes
+    ];
+  }
+},
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
     applicationId: process.env.ALGOLIA_APP_ID,

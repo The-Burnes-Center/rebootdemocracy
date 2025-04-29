@@ -218,5 +218,29 @@ export async function fetchAllUniqueTags(): Promise<string[]> {
     console.error('Error fetching unique tags:', error);
     return [];
   }
+} 
+
+
+export async function fetchAllSlugs(): Promise<string[]> {
+  const { directus, readItems } = useDirectusClient();
+
+  try {
+    const posts = await directus.request(
+      readItems('reboot_democracy_blog', {
+        fields: ['slug'],
+        filter: {
+          status: { _eq: 'published' },
+          date: { _lte: '$NOW(-5 hours)' },
+        },
+        limit: -1,
+      })
+    );
+
+    return posts.map((post: any) => `/blog/${post.slug}`);
+  } catch (error) {
+    console.error('Failed to fetch slugs for prerendering:', error);
+    return [];
+  }
 }
+
 
