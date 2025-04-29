@@ -39,7 +39,9 @@
                   fill="black"
                 />
               </svg>
-              <Text as="span" size="sm" weight="extradarkbold" marginLeft="sm">Blog</Text>
+              <Text as="span" size="sm" weight="extradarkbold" marginLeft="sm"
+                >Blog</Text
+              >
             </button>
 
             <!-- Blog title -->
@@ -173,24 +175,41 @@ const router = useRouter();
 
 const blogslug = computed(() => route.params.slug as string);
 
-const { data: blog, pending, error } = await useAsyncData('blog', async () => {
+const {
+  data: blog,
+  pending,
+  error,
+} = await useAsyncData("blog", async () => {
   if (!blogslug.value) return null;
   return await fetchBlogBySlug(blogslug.value);
 });
 
+const title = computed(() => blog.value?.title || "RebootDemocracy.AI");
+const description = computed(
+  () => blog.value?.excerpt || "Insights on AI, Governance and Democracy"
+);
+const ogImage = computed(() =>
+  blog.value?.image
+    ? getImageUrl(blog.value.image)
+    : "https://content.thegovlab.com/assets/default-og-image.jpg"
+);
+const ogUrl = computed(
+  () => `https://rebootdemocracy.ai/blog/${blogslug.value}`
+);
+
 useHead({
-  title: computed(() => blog.value ? `RebootDemocracy.AI Blog | ${blog.value.title}` : 'RebootDemocracy.AI'),
-  meta: computed(() => blog.value ? [
-    { name: 'description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
-    { property: 'og:title', content: `RebootDemocracy.AI Blog | ${blog.value.title}` },
-    { property: 'og:description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
-    { property: 'og:url', content: `https://rebootdemocracy.ai/blog/${blog.value.slug}` },
-    { property: 'og:image', content: getImageUrl(blog.value.image) },
-    { property: 'twitter:title', content: blog.value.title },
-    { property: 'twitter:description', content: blog.value.excerpt || 'Reboot Democracy Blog' },
-    { property: 'twitter:image', content: getImageUrl(blog.value.image) }, 
+  title,
+  meta: [
+    { name: 'description', content: description.value },
+    { property: 'og:title', content: title.value },
+    { property: 'og:description', content: description.value },
+    { property: 'og:url', content: ogUrl.value },
+    { property: 'og:image', content: ogImage.value },
+    { property: 'twitter:title', content: title.value },
+    { property: 'twitter:description', content: description.value },
+    { property: 'twitter:image', content: ogImage.value },
     { property: 'twitter:card', content: 'summary_large_image' }
-  ] : [])
+  ]
 });
 
 const isLoading = ref(true);
