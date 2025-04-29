@@ -395,7 +395,14 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .weeklynews-hero h1 {
     font-size: 24px;
-    margin-top: -4rem;
+        margin-top: -7rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        
+  }
+  .weeklynews-details p{
+    margin-left:1rem;
+    margin-right:1rem;
   }
 
   .weeklynews-img {
