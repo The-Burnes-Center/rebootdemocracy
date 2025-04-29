@@ -16,7 +16,7 @@
         <template v-else>
           <div v-if="isLoading" class="loading">Loading content...</div>
 
-          <div class="mobile-category-and-authors">  
+          <div class="mobile-category-and-authors">
             <!-- Categories section with toggle -->
             <div class="section-header" @click="toggleCategoriesVisible">
               <Text
@@ -30,12 +30,21 @@
                 Category
               </Text>
               <div class="toggle-icon">
-                <i :class="isCategoriesVisible ? 'icon-chevron-up' : 'icon-chevron-down'"></i>
+                <i
+                  :class="
+                    isCategoriesVisible
+                      ? 'icon-chevron-up'
+                      : 'icon-chevron-down'
+                  "
+                ></i>
               </div>
             </div>
 
             <!-- Display list of categories with post counts (togglable) -->
-            <div v-if="isTagsLoading && isCategoriesVisible" class="loading-tags">
+            <div
+              v-if="isTagsLoading && isCategoriesVisible"
+              class="loading-tags"
+            >
               Loading categories...
             </div>
             <div v-else-if="isCategoriesVisible" class="category-list">
@@ -43,7 +52,9 @@
                 v-for="tag in tags"
                 :key="tag.id"
                 class="category-item"
-                :class="{ 'category-item--active': selectedCategory === tag.name }"
+                :class="{
+                  'category-item--active': selectedCategory === tag.name,
+                }"
                 @click="selectCategory(tag.name)"
               >
                 <ListCategory :title="tag.name" :number="tag.count" />
@@ -64,12 +75,19 @@
                 Authors
               </Text>
               <div class="toggle-icon">
-                <i :class="isAuthorsVisible ? 'icon-chevron-up' : 'icon-chevron-down'"></i>
+                <i
+                  :class="
+                    isAuthorsVisible ? 'icon-chevron-up' : 'icon-chevron-down'
+                  "
+                ></i>
               </div>
             </div>
 
             <!-- Display list of authors with post counts (togglable) -->
-            <div v-if="isAuthorsLoading && isAuthorsVisible" class="loading-tags">
+            <div
+              v-if="isAuthorsLoading && isAuthorsVisible"
+              class="loading-tags"
+            >
               Loading authors...
             </div>
             <div v-else-if="isAuthorsVisible">
@@ -77,7 +95,9 @@
                 v-for="author in filteredAuthors"
                 :key="author.id"
                 class="author-item"
-                :class="{ 'author-item--active': selectedAuthor === author.name }"
+                :class="{
+                  'author-item--active': selectedAuthor === author.name,
+                }"
                 @click="selectAuthor(author.name)"
               >
                 <ListCategory :title="author.name" :number="author.count" />
@@ -160,64 +180,66 @@
       </article>
 
       <aside class="all-posts-right-content">
-      <div class="desktop-category-and-authors">  
-        <!-- Categories section -->
-        <Text
-          as="h2"
-          fontFamily="inter"
-          size="lg"
-          color="text-primary"
-          weight="bold"
-          align="left"
-        >
-          Category
-        </Text>
-
-        <!-- Display list of categories with post counts -->
-        <div v-if="isTagsLoading" class="loading-tags">
-          Loading categories...
-        </div>
-        <div v-else class="category-list">
-          <div
-            v-for="tag in tags"
-            :key="tag.id"
-            class="category-item"
-            :class="{ 'category-item--active': selectedCategory === tag.name }"
-            @click="selectCategory(tag.name)"
+        <div class="desktop-category-and-authors">
+          <!-- Categories section -->
+          <Text
+            as="h2"
+            fontFamily="inter"
+            size="lg"
+            color="text-primary"
+            weight="bold"
+            align="left"
           >
-            <ListCategory :title="tag.name" :number="tag.count" />
+            Category
+          </Text>
+
+          <!-- Display list of categories with post counts -->
+          <div v-if="isTagsLoading" class="loading-tags">
+            Loading categories...
+          </div>
+          <div v-else class="category-list">
+            <div
+              v-for="tag in tags"
+              :key="tag.id"
+              class="category-item"
+              :class="{
+                'category-item--active': selectedCategory === tag.name,
+              }"
+              @click="selectCategory(tag.name)"
+            >
+              <ListCategory :title="tag.name" :number="tag.count" />
+            </div>
+          </div>
+
+          <!-- Authors section -->
+          <Text
+            as="h2"
+            fontFamily="inter"
+            size="lg"
+            color="text-primary"
+            weight="bold"
+            align="left"
+            class="section-title"
+          >
+            Authors
+          </Text>
+
+          <!-- Display list of authors with post counts -->
+          <div v-if="isAuthorsLoading" class="loading-tags">
+            Loading authors...
+          </div>
+          <div v-else>
+            <div
+              v-for="author in filteredAuthors"
+              :key="author.id"
+              class="author-item"
+              :class="{ 'author-item--active': selectedAuthor === author.name }"
+              @click="selectAuthor(author.name)"
+            >
+              <ListCategory :title="author.name" :number="author.count" />
+            </div>
           </div>
         </div>
-
-        <!-- Authors section -->
-        <Text
-          as="h2"
-          fontFamily="inter"
-          size="lg"
-          color="text-primary"
-          weight="bold"
-          align="left"
-          class="section-title"
-        >
-          Authors
-        </Text>
-
-        <!-- Display list of authors with post counts -->
-        <div v-if="isAuthorsLoading" class="loading-tags">
-          Loading authors...
-        </div>
-        <div v-else>
-          <div
-            v-for="author in filteredAuthors"
-            :key="author.id"
-            class="author-item"
-            :class="{ 'author-item--active': selectedAuthor === author.name }"
-            @click="selectAuthor(author.name)"
-          >
-            <ListCategory :title="author.name" :number="author.count" />
-          </div>
-        </div>
-      </div>
 
         <!-- Event section with loading state -->
         <div v-if="isEventLoading" class="loading">Loading event...</div>
@@ -247,6 +269,47 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event, WeeklyNews } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
+
+//meta information
+useHead({
+  title: "RebootDemocracy.AI",
+  meta: [
+    { name: "title", content: "RebootDemocracy.AI" },
+    { property: "og:title", content: "RebootDemocracy.AI" },
+    {
+      property: "og:description",
+      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to "do democracy" in practice.
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
+    },
+    {
+      property: "og:image",
+      content:
+        "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
+    },
+    { property: "twitter:title", content: "RebootDemocracy.AI" },
+    {
+      property: "twitter:description",
+      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+As researchers we want to understand how best to "do democracy" in practice.
+Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
+    },
+    {
+      property: "twitter:image",
+      content:
+        "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
+    },
+    { property: "twitter:card", content: "summary_large_image" },
+  ],
+});
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
@@ -319,7 +382,7 @@ const filteredAuthors = computed(() =>
 
 // Helper functions for handling both blog posts and news items
 const getPostKey = (post: BlogPost | NewsItem): string => {
-  if ('id' in post) {
+  if ("id" in post) {
     return `blog-${post.id}`;
   } else {
     return `news-${post.url}`;
@@ -327,37 +390,37 @@ const getPostKey = (post: BlogPost | NewsItem): string => {
 };
 
 const getPostTag = (post: BlogPost | NewsItem): string => {
-  if ('Tags' in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
+  if ("Tags" in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
     return post.Tags[0];
-  } else if ('category' in post && post.category) {
+  } else if ("category" in post && post.category) {
     return post.category;
   }
-  return 'Blog';
+  return "Blog";
 };
 
 const getPostTitle = (post: BlogPost | NewsItem): string => {
-  if ('title' in post && post.title) {
+  if ("title" in post && post.title) {
     return post.title;
   }
-  return 'Untitled';
+  return "Untitled";
 };
 
 const getPostExcerpt = (post: BlogPost | NewsItem): string => {
-  if ('excerpt' in post && post.excerpt) {
+  if ("excerpt" in post && post.excerpt) {
     return post.excerpt;
   }
-  return '';
+  return "";
 };
 
 const getPostImage = (post: BlogPost | NewsItem): any => {
-  if ('image' in post && post.image) {
+  if ("image" in post && post.image) {
     return post.image;
   }
   return null;
 };
 
 const getPostDate = (post: BlogPost | NewsItem): Date => {
-  if ('date' in post && post.date) {
+  if ("date" in post && post.date) {
     return new Date(post.date);
   }
   return new Date();
@@ -367,22 +430,22 @@ const getAuthorName = (post: BlogPost | NewsItem): string => {
   if ("authors" in post && post.authors && post.authors.length > 0) {
     if (post.authors.length > 1) {
       const authorNames = post.authors
-        .map(author => {
+        .map((author) => {
           if (author.team_id) {
             return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
           }
           return null;
         })
         .filter(Boolean);
-      
+
       if (authorNames.length > 0) {
         if (authorNames.length === 1) return authorNames[0];
         const lastAuthor = authorNames.pop();
-        return `${authorNames.join(', ')} and ${lastAuthor}`;
+        return `${authorNames.join(", ")} and ${lastAuthor}`;
       }
       return "Reboot Democracy Team";
     }
-    
+
     const author = post.authors[0]?.team_id;
     return author
       ? `${author.First_Name} ${author.Last_Name}`
@@ -395,10 +458,10 @@ const getAuthorName = (post: BlogPost | NewsItem): string => {
 
 // Navigation
 const handlePostClick = (post: BlogPost | NewsItem): void => {
-  if ('slug' in post && post.slug) {
+  if ("slug" in post && post.slug) {
     resetSearch();
     router.push(`/blog/${post.slug}`);
-  } else if ('url' in post && post.url) {
+  } else if ("url" in post && post.url) {
     window.open(post.url, "_blank");
   } else {
     console.error("Cannot navigate: Post has no slug or URL", post);
@@ -422,10 +485,10 @@ const updateFilteredPosts = () => {
   let filtered = allPosts.value;
 
   if (selectedCategory.value) {
-    filtered = filtered.filter(post => {
-      if ('Tags' in post && Array.isArray(post.Tags)) {
+    filtered = filtered.filter((post) => {
+      if ("Tags" in post && Array.isArray(post.Tags)) {
         return post.Tags.includes(selectedCategory.value as string);
-      } else if ('category' in post && post.category) {
+      } else if ("category" in post && post.category) {
         return post.category === selectedCategory.value;
       }
       return false;
@@ -433,7 +496,9 @@ const updateFilteredPosts = () => {
   }
 
   if (selectedAuthor.value) {
-    filtered = filtered.filter(post => getAuthorName(post) === selectedAuthor.value);
+    filtered = filtered.filter(
+      (post) => getAuthorName(post) === selectedAuthor.value
+    );
   }
 
   filteredPosts.value = filtered;
@@ -500,7 +565,7 @@ const fetchAllBlogPosts = async (): Promise<BlogPost[]> => {
 const fetchWeeklyNewsItems = async (): Promise<NewsItem[]> => {
   try {
     const { directus, readItems } = useDirectusClient();
-    
+
     // Fetch all weekly news entries
     const weeklyNewsEntries = await directus.request(
       readItems("reboot_democracy_weekly_news", {
@@ -508,38 +573,44 @@ const fetchWeeklyNewsItems = async (): Promise<NewsItem[]> => {
         sort: ["-id"],
         fields: ["id", "items.reboot_democracy_weekly_news_items_id.*"],
         filter: {
-          status: { _eq: "published" }
-        }
+          status: { _eq: "published" },
+        },
       })
     );
-    
-    if (!weeklyNewsEntries || !Array.isArray(weeklyNewsEntries) || weeklyNewsEntries.length === 0) {
+
+    if (
+      !weeklyNewsEntries ||
+      !Array.isArray(weeklyNewsEntries) ||
+      weeklyNewsEntries.length === 0
+    ) {
       return [];
     }
-    
+
     // Collect all news items from all entries
     const allNewsItems: NewsItem[] = [];
-    
-    weeklyNewsEntries.forEach(newsEntry => {
+
+    weeklyNewsEntries.forEach((newsEntry) => {
       if (newsEntry.items && Array.isArray(newsEntry.items)) {
-        const itemsFromThisEntry = newsEntry.items.map((item: any) => {
-          const newsItem = item.reboot_democracy_weekly_news_items_id;
-          if (!newsItem) return null;
-          
-          return {
-            title: newsItem.title,
-            excerpt: newsItem.excerpt,
-            author: newsItem.author,
-            category: newsItem.category,
-            date: newsItem.date,
-            url: newsItem.url
-          };
-        }).filter(Boolean); // Remove any null items
-        
+        const itemsFromThisEntry = newsEntry.items
+          .map((item: any) => {
+            const newsItem = item.reboot_democracy_weekly_news_items_id;
+            if (!newsItem) return null;
+
+            return {
+              title: newsItem.title,
+              excerpt: newsItem.excerpt,
+              author: newsItem.author,
+              category: newsItem.category,
+              date: newsItem.date,
+              url: newsItem.url,
+            };
+          })
+          .filter(Boolean); // Remove any null items
+
         allNewsItems.push(...itemsFromThisEntry);
       }
     });
-    
+
     return allNewsItems;
   } catch (error) {
     console.error("Error fetching weekly news items:", error);
@@ -554,11 +625,11 @@ const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
   const tagCounts = new Map<string, number>();
 
   posts.forEach((post) => {
-    if ('Tags' in post && Array.isArray(post.Tags)) {
+    if ("Tags" in post && Array.isArray(post.Tags)) {
       post.Tags.forEach((tag) => {
         tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
       });
-    } else if ('category' in post && post.category) {
+    } else if ("category" in post && post.category) {
       tagCounts.set(post.category, (tagCounts.get(post.category) || 0) + 1);
     }
   });
@@ -575,7 +646,7 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
 
   // Only count authors from blog posts, not from weekly news items
   posts.forEach((post) => {
-    if ('authors' in post && post.authors) {
+    if ("authors" in post && post.authors) {
       const authorName = getAuthorName(post);
       if (authorName !== "Unknown Author") {
         authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
@@ -598,7 +669,7 @@ const fetchAllData = async () => {
     // Fetch blogs and news items in parallel
     const [blogPosts, newsItems] = await Promise.all([
       fetchAllBlogPosts(),
-      fetchWeeklyNewsItems()
+      fetchWeeklyNewsItems(),
     ]);
 
     // Combine blog posts and news items
@@ -629,7 +700,7 @@ const loadInitialData = async () => {
 
     // Try to get upcoming event first
     let event = await fetchUpcomingEvent();
-    
+
     if (event) {
       isFutureEvent.value = true;
     } else {
@@ -652,18 +723,21 @@ onMounted(() => {
     // Check for category query parameter
     const categoryParam = route.query.category as string | undefined;
     const sourceParam = route.query.source as string | undefined;
-    
+
     if (categoryParam) {
       // Find the matching category from the loaded tags
       const categoryName = decodeURIComponent(categoryParam);
-      const foundCategory = tags.value.find(tag => 
-        tag.name === categoryName || tag.name.toLowerCase() === categoryName.toLowerCase());
-      
+      const foundCategory = tags.value.find(
+        (tag) =>
+          tag.name === categoryName ||
+          tag.name.toLowerCase() === categoryName.toLowerCase()
+      );
+
       if (foundCategory) {
         selectedCategory.value = foundCategory.name;
-        
+
         // If source=all, we want to include both blogs and news items
-        if (sourceParam === 'all') {
+        if (sourceParam === "all") {
           // We don't need to fetch again as fetchAllData() already did this
           // Just make sure the filtering logic in updateFilteredPosts includes news items
           updateFilteredPosts();
@@ -673,13 +747,14 @@ onMounted(() => {
         }
       }
     }
-    
+
     // Keep your existing author parameter handling
     const authorParam = route.query.author as string | undefined;
     if (authorParam) {
-      const foundAuthor = authors.value.find(author => 
-        author.name.toLowerCase() === authorParam.toLowerCase());
-      
+      const foundAuthor = authors.value.find(
+        (author) => author.name.toLowerCase() === authorParam.toLowerCase()
+      );
+
       if (foundAuthor) {
         selectedAuthor.value = foundAuthor.name;
         updateFilteredPosts();

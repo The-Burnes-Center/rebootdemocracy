@@ -20,6 +20,36 @@ export default defineComponent({
     const pageslug = ref(route.query);
     const alleventsData = ref<EventItem[]>([]);
     const path = ref(route.fullPath);
+      useHead({
+        title: "InnovateUS",
+        meta: [
+          { name: "title", content: "Reboot Democracy Lecture Series" },
+          { property: "og:title", content: "Reboot Democracy Lecture Series" },
+          {
+            property: "og:description",
+            content:
+              "How can we leverage the power of artificial intelligence to reimagine democracy?",
+          },
+          {
+            property: "og:image",
+            content: "https://rebootdemocracy.ai/meta-temp.png",
+          },
+          {
+            property: "twitter:title",
+            content: "Reboot Democracy Lecture Series",
+          },
+          {
+            property: "twitter:description",
+            content:
+              "How can we leverage the power of artificial intelligence to reimagine democracy?",
+          },
+          {
+            property: "twitter:image",
+            content: "https://rebootdemocracy.ai/meta-temp.png",
+          },
+          { property: "twitter:card", content: "summary_large_image" },
+        ],
+      });
     const fetchData = async () => {
       try {
         indexData.value = await fetchIndexData();

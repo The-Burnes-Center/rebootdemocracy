@@ -59,6 +59,7 @@ const fontWeight = {
   semibold: "500",
   bold: "600",
   extrabold: "700",
+  extradarkbold: "800",
 };
 
 // Define the default colors for texts

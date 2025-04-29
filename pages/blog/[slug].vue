@@ -39,7 +39,9 @@
                   fill="black"
                 />
               </svg>
-              <Text as="span" size="md" weight="800" marginLeft="sm">Blog</Text>
+              <Text as="span" size="sm" weight="extradarkbold" marginLeft="sm"
+                >Blog</Text
+              >
             </button>
 
             <!-- Blog title -->
@@ -54,12 +56,15 @@
             >
               {{ blog.title }}
             </TitleText>
-            
+
             <!-- Category eyebrow - Now clickable -->
-            <div v-if="blog.Tags && blog.Tags.length > 0" class="blog-category-eyebrow">
-              <span 
-                v-for="(tag, index) in blog.Tags" 
-                :key="index" 
+            <div
+              v-if="blog.Tags && blog.Tags.length > 0"
+              class="blog-category-eyebrow"
+            >
+              <span
+                v-for="(tag, index) in blog.Tags"
+                :key="index"
                 class="category-tag"
                 @click="navigateToCategory(tag)"
               >
@@ -92,7 +97,9 @@
 
             <!-- Audio component -->
             <div class="audio-version" v-if="blog?.audio_version">
-              <p dir="ltr"><em>Listen to the AI-generated audio version of this piece.</em></p>
+              <p dir="ltr">
+                <em>Listen to the AI-generated audio version of this piece.</em>
+              </p>
               <AudioPlayer
                 :audioSrc="`https://content.thegovlab.com/assets/${blog.audio_version.id}`"
               />
@@ -119,7 +126,7 @@
             align="center"
           />
         </div>
-        
+
         <!-- Author cards (multiple) -->
         <div v-for="(author, index) in blog.authors" :key="index">
           <AuthorCard
@@ -129,7 +136,7 @@
             :bio="getAuthorBio(author?.team_id)"
           />
         </div>
-        
+
         <!-- Sign up widget -->
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -148,7 +155,7 @@
     </section>
   </div>
   <!--Related Articles section-->
-   <RelatedBlogCards :relatedBlogs="relatedBlogs" />
+  <RelatedBlogCards :relatedBlogs="relatedBlogs" />
 </template>
 
 <script setup lang="ts">
@@ -167,15 +174,52 @@ const route = useRoute();
 const router = useRouter();
 
 const blogslug = computed(() => route.params.slug as string);
-const blog = ref<BlogPost | null>(null);
+
+const {
+  data: blog,
+  pending,
+  error,
+} = await useAsyncData("blog", async () => {
+  if (!blogslug.value) return null;
+  return await fetchBlogBySlug(blogslug.value);
+});
+
+const title = computed(() => blog.value?.title || "RebootDemocracy.AI");
+const description = computed(
+  () => blog.value?.excerpt || "Insights on AI, Governance and Democracy"
+);
+const ogImage = computed(() =>
+  blog.value?.image
+    ? getImageUrl(blog.value.image)
+    : "https://content.thegovlab.com/assets/default-og-image.jpg"
+);
+const ogUrl = computed(
+  () => `https://rebootdemocracy.ai/blog/${blogslug.value}`
+);
+
+useHead({
+  title,
+  meta: [
+    { name: 'description', content: description.value },
+    { property: 'og:title', content: title.value },
+    { property: 'og:description', content: description.value },
+    { property: 'og:url', content: ogUrl.value },
+    { property: 'og:image', content: ogImage.value },
+    { property: 'twitter:title', content: title.value },
+    { property: 'twitter:description', content: description.value },
+    { property: 'twitter:image', content: ogImage.value },
+    { property: 'twitter:card', content: 'summary_large_image' }
+  ]
+});
+
 const isLoading = ref(true);
 const relatedBlogs = ref<BlogPost[]>([]);
 
 // Function to navigate to blogs filtered by category
 function navigateToCategory(category: string) {
   router.push({
-    path: '/blog',
-    query: { category }
+    path: "/blog",
+    query: { category },
   });
 }
 
@@ -203,10 +247,10 @@ function getAuthorBio(author: any): string {
 // Function to format multiple authors for display
 function getAuthorsDisplayText(authors: any[]): string {
   if (!authors || authors.length === 0) return "Unknown Author";
-  
+
   return authors
-    .map(author => getAuthorName(author.team_id))
-    .filter(name => name.trim() !== "")
+    .map((author) => getAuthorName(author.team_id))
+    .filter((name) => name.trim() !== "")
     .join(", ");
 }
 
@@ -227,20 +271,19 @@ function formatDate(dateValue: Date | string) {
 
 // Reset search results when component is mounted
 onMounted(async () => {
-  // Reset the search first
   resetSearch();
-
   setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
+
   try {
     isLoading.value = true;
     if (blogslug.value) {
       blog.value = await fetchBlogBySlug(blogslug.value);
+
       if (blog.value?.Tags?.length) {
         relatedBlogs.value = await fetchRelatedBlogsByTags(
           blog.value.Tags,
           blogslug.value
         );
-        console.log("Related blogs:", relatedBlogs.value);
       }
     }
   } catch (error) {
