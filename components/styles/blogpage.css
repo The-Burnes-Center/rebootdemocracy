@@ -37,23 +37,21 @@ p > strong {
 }
 
 p a {
-  color: #0D63EB;
+  color: #0d63eb;
 
-/* link */
-font-family: var(--font-inter);
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: 150%;
-text-decoration-line: underline;
-text-decoration-style: solid;
-text-decoration-skip-ink: none;
-text-decoration-color: rgba(209, 73, 91, 0.25);
-text-decoration-thickness: 50%;
-text-underline-offset: -40%;
+  /* link */
+  font-family: var(--font-inter);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: none;
+  text-decoration-color: rgba(209, 73, 91, 0.25);
+  text-decoration-thickness: 50%;
+  text-underline-offset: -40%;
 }
-
-
 
 .all-posts-page-layout {
   display: grid;
@@ -111,6 +109,17 @@ text-underline-offset: -40%;
   padding-left: 5rem;
 }
 
+.blog-detail .blog-content p img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+}
+.blog-content p em {
+  font-family: var(--font-inter); 
+}
+
+
 .share-widget-mobile {
   display: none;
 }
@@ -144,7 +153,7 @@ text-underline-offset: -40%;
 .category-tag {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #0D63EB;
+  color: #0d63eb;
   background-color: #e6f0ff;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -164,7 +173,7 @@ text-underline-offset: -40%;
   .blog-category-eyebrow {
     margin: 0.5rem 0 0.75rem;
   }
-  
+
   .category-tag {
     font-size: 0.7rem;
     padding: 0.2rem 0.4rem;
@@ -172,17 +181,15 @@ text-underline-offset: -40%;
 }
 
 @media (max-width: 1150px) and (min-width: 769px) {
-
-   .related-posts-section {
+  .related-posts-section {
     justify-content: center;
     align-items: center;
     gap: 4rem;
-
   }
-  
-.related-posts-list {
+
+  .related-posts-list {
     flex-direction: column;
-    gap:10rem;
+    gap: 10rem;
     justify-content: center;
     align-items: center;
   }
@@ -198,22 +205,21 @@ text-underline-offset: -40%;
     justify-content: center;
     align-items: center;
     gap: 6rem;
-    padding:2rem 2rem;
-
+    padding: 2rem 2rem;
   }
 
   .blog-category-eyebrow {
     margin: 0.75rem 0.5rem 1rem;
   }
-  
+
   .blog-category-eyebrow span {
     font-size: 12px;
     padding: 4px 10px;
   }
-  
-.related-posts-list {
+
+  .related-posts-list {
     flex-direction: column;
-    gap:12rem;
+    gap: 12rem;
     justify-content: center;
     align-items: center;
   }

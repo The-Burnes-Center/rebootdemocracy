@@ -86,9 +86,16 @@ const actualTitle = computed(() => {
   if (props.title && props.title !== 'Your post title') {
     return props.title;
   }
-  
-  return document.title || 'Reboot Democracy Article';
+
+  // Safe check: Only access document if it exists
+  if (typeof document !== 'undefined') {
+    return document.title || 'Reboot Democracy Article';
+  }
+
+  // During SSR, fallback to a default title
+  return 'Reboot Democracy Article';
 });
+
 
 const getShareUrl = (platform: string) => {
   const encodedUrl = encodeURIComponent(actualUrl.value);
