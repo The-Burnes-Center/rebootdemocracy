@@ -185,24 +185,37 @@ const {
 });
 
 const title = computed(() => blog.value?.title || "RebootDemocracy.AI");
-const description = computed(() => blog.value?.excerpt || "Insights on AI, Governance and Democracy");
-const ogImage = computed(() => blog.value?.image ? getImageUrl(blog.value.image) : "https://content.thegovlab.com/assets/default-og-image.jpg");
-const ogUrl = computed(() => `https://rebootdemocracy.ai/blog/${blogslug.value}`);
 
-useHead({
-  title: title,
-  meta: [
-    { name: 'description', content: description.value },
-    { name: 'title', content: title.value },
-    { property: 'og:title', content: title.value },
-    { property: 'og:description', content: description.value },
-    { property: 'og:url', content: ogUrl.value },
-    { property: 'og:image', content: ogImage.value },
-    { property: 'twitter:title', content: title.value },
-    { property: 'twitter:description', content: description.value },
-    { property: 'twitter:image', content: ogImage.value },
-    { property: 'twitter:card', content: 'summary_large_image' }
-  ]
+const description = computed(() =>
+  blog.value?.excerpt ||
+  `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to:
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+
+As researchers, we want to understand how best to “do democracy” in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`
+);
+
+const ogImage = computed(() =>
+  blog.value?.image
+    ? getImageUrl(blog.value.image)
+    : "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
+);
+
+const ogUrl = computed(() =>
+  `https://rebootdemocracy.ai/blog/${blogslug.value}`
+);
+
+useSeoMeta({
+  title,
+  description,
+  ogTitle: title,
+  ogDescription: description,
+  ogImage,
+  ogUrl,
+  twitterCard: "summary_large_image",
 });
 
 
