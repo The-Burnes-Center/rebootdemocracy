@@ -1,4 +1,5 @@
-const { createDirectus, rest } = require('@directus/sdk');
+// Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
+const { createDirectus, rest, readItems } = require('@directus/sdk');
 const he = require('he');
 
 // Fix for the jstoxml ESM module issue
@@ -16,26 +17,61 @@ exports.handler = async function (event, context) {
     // Initialize the jstoxml module
     const toXML = await initializeJsToXml();
     
+    console.log("Attempting to fetch data from Directus...");
+    
+    // Try with simplified query first for debugging
     const publicData = await directus.request(
-      rest.items('reboot_democracy_weekly_news').readByQuery({
-        filter: { _and: [{ status: { _eq: "published" } } ] },
+      readItems('reboot_democracy_weekly_news', {
+        // Temporarily remove filter to see if any data exists
+        // filter: { _and: [{ status: { _eq: "published" } } ] },
         limit: -1,
-        sort: '-id',
-        fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
+        sort: ['-id'],
+        fields: ["*"]  // Simplified fields parameter
       })
     );
-
-    if (!publicData.data || publicData.data.length === 0) {
+    
+    console.log("Directus response:", JSON.stringify(publicData));
+    
+    // Check actual response structure
+    if (!publicData || (Array.isArray(publicData) && publicData.length === 0)) {
+      console.log("No data returned from Directus - empty array");
       return {
         statusCode: 404,
-        body: 'No news data found.',
+        body: 'No news data found. Response was empty array.',
       };
     }
-
+    
+    // Handle different response structures in newer SDK versions
+    let newsData;
+    if (publicData.data) {
+      console.log("Data found in publicData.data");
+      newsData = publicData.data;
+    } else if (Array.isArray(publicData)) {
+      console.log("Data found directly in publicData array");
+      newsData = publicData;
+    } else {
+      console.log("Unexpected response structure:", typeof publicData);
+      return {
+        statusCode: 404,
+        body: 'No news data found. Unexpected response structure.',
+      };
+    }
+    
+    if (newsData.length === 0) {
+      console.log("News data array is empty");
+      return {
+        statusCode: 404,
+        body: 'No news data found. Array was empty.',
+      };
+    }
+    
+    console.log(`Found ${newsData.length} items`);
+    console.log("First item sample:", JSON.stringify(newsData[0]).substring(0, 200) + "...");
+    
     // Build the channel metadata
     const channel = [
-      { title: publicData.data[0].title },
-      { description: publicData.data[0].summary },
+      { title: newsData[0].title || "Reboot Democracy Weekly News" },
+      { description: newsData[0].summary || "Weekly news updates" },
       { link: 'https://rebootdemocracy.ai' },
       { lastBuildDate: () => new Date().toUTCString() },
       { pubDate: () => new Date().toUTCString() },
@@ -50,13 +86,13 @@ exports.handler = async function (event, context) {
       }
     ];
 
-    // Add items from the public data
-    publicData.data.forEach(e => {
+    // Add items from the news data
+    newsData.forEach(e => {
       const item = {
         item: {
-          title: e.title,
-          pubDate: e.date,
-          GUID: e.id,
+          title: e.title || "Untitled",
+          pubDate: e.date || new Date().toUTCString(),
+          GUID: e.id || Math.random().toString(36).substring(2, 15),
         }
       };
       channel.push(item);
@@ -93,7 +129,7 @@ exports.handler = async function (event, context) {
     console.error('Error generating RSS:', error);
     return {
       statusCode: 500,
-      body: 'Internal Server Error: ' + error.message,
+      body: 'Internal Server Error: ' + error.message + '\n\nStack: ' + error.stack,
     };
   }
 };
