@@ -1,14 +1,21 @@
-// Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
-import pkg from 'jstoxml';
-import { createDirectus, rest } from '@directus/sdk';
-import he from 'he';
+const { createDirectus, rest } = require('@directus/sdk');
+const he = require('he');
+
+// Fix for the jstoxml ESM module issue
+let toXML;
+async function initializeJsToXml() {
+  const jstoxml = await import('jstoxml');
+  toXML = jstoxml.default.toXML || jstoxml.toXML;
+  return toXML;
+}
 
 const directus = createDirectus('https://content.thegovlab.com/').with(rest());
 
-export const handler = async function (event, context) {
+exports.handler = async function (event, context) {
   try {
-    const { toXML } = pkg;
-
+    // Initialize the jstoxml module
+    const toXML = await initializeJsToXml();
+    
     const publicData = await directus.request(
       rest.items('reboot_democracy_weekly_news').readByQuery({
         filter: { _and: [{ status: { _eq: "published" } } ] },
@@ -82,12 +89,11 @@ export const handler = async function (event, context) {
       },
       body: rssFeed,
     };
-
   } catch (error) {
     console.error('Error generating RSS:', error);
     return {
       statusCode: 500,
-      body: 'Internal Server Error',
+      body: 'Internal Server Error: ' + error.message,
     };
   }
 };
