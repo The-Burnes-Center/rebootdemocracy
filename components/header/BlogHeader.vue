@@ -174,9 +174,9 @@ const menuItems = ref<MenuItem[]>([
         name: "research",
         to: "https://thegovlab.org/beth-simone-noveck.html",
       },
-      { label: "Teachings", name: "teachings", to: "https://innovate-us.org/" },
+      { label: "InnovateUS", name: "teachings", to: "https://innovate-us.org/" },
       {
-        label: "University Teachings",
+        label: "Public Entrepreneur",
         name: "projects",
         to: "https://www.publicentrepreneur.org/",
       },

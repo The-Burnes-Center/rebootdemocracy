@@ -154,8 +154,8 @@ const baseMenuItems = ref<MenuItem[]>([
     name: "work",
     children: [
       { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html" },
-      { label: "Teachings", name:"teachings", to:"https://innovate-us.org/"},
-      { label: "University Teachings", name: "projects", to: "https://www.publicentrepreneur.org/" },
+      { label: "InnovateUS", name:"teachings", to:"https://innovate-us.org/"},
+      { label: "Public Entrepreneur", name: "projects", to: "https://www.publicentrepreneur.org/" },
       { label: "Engagements", name: "partners", to: "/our-engagements" },
       { label: "Research", name: "research", to: "/our-research" },
        { label: "More Resources", name: "resources", to: "/more-resources" },
