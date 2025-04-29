@@ -111,27 +111,16 @@ const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
 
-// Custom handling for menu item clicks
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
-  // Check if it's the "Our Team" item
+  // Handle 'Our Team' anchor navigation
   if (item.name === "team") {
     event.preventDefault();
-
-    // Navigate to About page first if we're not already there
-    if (route.path !== "/about") {
-      router.push({
-        path: "/about",
-        hash: "#team-grid",
-      });
-    } else {
-      // We're already on the About page, just scroll to the team section
-      const teamSection = document.getElementById("team-grid");
-      if (teamSection) {
-        teamSection.scrollIntoView({ behavior: "smooth" });
-      }
-    }
+    router.push({
+      path: "/about",
+      hash: "#team-grid",
+    });
   }
-  // Handle external links - open in same tab
+  // Handle external links
   else if (item.external && item.to) {
     event.preventDefault();
     window.location.href = item.to;
@@ -139,10 +128,8 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
 };
 
 const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
-  // First handle the normal click behavior
   handleMenuClick(item, event);
 
-  // mob handle
   if (isMobile.value) {
     mobileMenuOpen.value = false;
   }
@@ -174,9 +161,13 @@ const menuItems = ref<MenuItem[]>([
         name: "research",
         to: "https://thegovlab.org/beth-simone-noveck.html",
       },
-      { label: "Teachings", name: "teachings", to: "https://innovate-us.org/" },
       {
-        label: "University Teachings",
+        label: "InnovateUS",
+        name: "teachings",
+        to: "https://innovate-us.org/",
+      },
+      {
+        label: "Public Entrepreneur",
         name: "projects",
         to: "https://www.publicentrepreneur.org/",
       },
@@ -187,8 +178,6 @@ const menuItems = ref<MenuItem[]>([
   },
   { label: "Sign up", name: "signup", to: "/signup" },
 ]);
-
-
 
 const populateTopicMenu = (tags: TagItem[]) => {
   const topicMenuItem = menuItems.value.find((item) => item.name === "topic");
@@ -205,9 +194,9 @@ const populateTopicMenu = (tags: TagItem[]) => {
 const fetchAllBlogTags = async (): Promise<TagItem[]> => {
   try {
     const uniqueTags = await fetchAllUniqueTags();
-    return uniqueTags.map(tag => ({ 
-      id: tag, 
-      name: tag 
+    return uniqueTags.map((tag) => ({
+      id: tag,
+      name: tag,
     }));
   } catch (error) {
     console.error("Error fetching blog tags:", error);

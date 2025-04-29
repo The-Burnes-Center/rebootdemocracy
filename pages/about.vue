@@ -63,12 +63,16 @@
 import { ref, onMounted, computed } from 'vue';
 import type { Team } from '@/types/Team';
 import { fetchTeamData } from '~/composables/fetchAboutData';
+import { useRoute } from 'vue-router';
+import { nextTick } from 'vue'; 
 
 const team = ref<Team[]>([]);
 const loading = ref(true);
 const error = ref(false);
 const directusUrl = "https://content.thegovlab.com";
 const DIRECTUS_URL = directusUrl;
+const route = useRoute();
+
 
 // Filter out team members that don't have minimum required information
 const validTeamMembers = computed(() => {
@@ -92,6 +96,18 @@ onMounted(async () => {
     error.value = true;
   } finally {
     loading.value = false;
+  }
+});
+
+watch(loading, async (newLoading) => {
+  if (!newLoading) {
+    if (route.hash === '#team-grid') {
+      await nextTick(); 
+      const teamSection = document.getElementById('team-grid');
+      if (teamSection) {
+        teamSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   }
 });
 </script>

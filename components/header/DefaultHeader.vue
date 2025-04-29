@@ -97,29 +97,22 @@ const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
 
-// Custom handling for menu item clicks
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
-  // Handle team navigation
+  // Handle 'Our Team' anchor navigation
   if (item.name === 'team') {
     event.preventDefault();
-    if (route.path !== '/about') {
-      router.push({ 
-        path: '/about', 
-        hash: '#team-grid' 
-      });
-    } else {
-      const teamSection = document.getElementById('team-grid');
-      if (teamSection) {
-        teamSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
+    router.push({ 
+      path: '/about', 
+      hash: '#team-grid' 
+    });
   }
-  // Handle external links - open in same tab
+  // Handle external links
   else if (item.external && item.to) {
     event.preventDefault();
     window.location.href = item.to;
   }
 };
+
 const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
   // First handle the normal click behavior
   handleMenuClick(item, event);
@@ -154,8 +147,8 @@ const baseMenuItems = ref<MenuItem[]>([
     name: "work",
     children: [
       { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html" },
-      { label: "Teachings", name:"teachings", to:"https://innovate-us.org/"},
-      { label: "University Teachings", name: "projects", to: "https://www.publicentrepreneur.org/" },
+      { label: "InnovateUS", name:"teachings", to:"https://innovate-us.org/"},
+      { label: "Public Entrepreneur", name: "projects", to: "https://www.publicentrepreneur.org/" },
       { label: "Engagements", name: "partners", to: "/our-engagements" },
       { label: "Research", name: "research", to: "/our-research" },
        { label: "More Resources", name: "resources", to: "/more-resources" },

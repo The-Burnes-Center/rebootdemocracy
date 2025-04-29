@@ -1,9 +1,12 @@
+<!-- HeaderMenu.vue (Modified) -->
 <template>
   <section class="menu__section">
     <div
       v-for="(item, index) in items"
       :key="index"
       class="header-menu__item-wrapper"
+      :class="{ 'about-menu-wrapper': item.name === 'about' }"
+      ref="menuItemRefs"
     >
       <NuxtLink
         v-if="!item.children"
@@ -16,7 +19,7 @@
       >
         <span class="header-menu__label">{{ item.label }}</span>
       </NuxtLink>
-      <!--If dropdown has children render headerdropdown-->
+      <!--If dropdown has children render appropriate dropdown-->
       <div v-else class="header-menu__item header-menu__dropdown">
         <span
           class="header-menu__label"
@@ -70,13 +73,30 @@
           }}</span>
         </NuxtLink>
       </div>
+      
+      <!-- Render AboutDropdown directly inside the about menu item wrapper -->
+      <AboutDropdown
+        v-if="
+          !isMobile &&
+          openDropdown === index &&
+          item.name === 'about' &&
+          item.children &&
+          item.children.length
+        "
+        :items="(item.children ?? []) as DropdownItem[]"
+        :isOpen="openDropdown === index"
+        @close="closeDropdown"
+        @item-click="emitItemClick"
+      />
     </div>
   </section>
-  <!-- Only render the dropdown component for desktop -->
+  
+  <!-- Render standard HeaderDropdown for other dropdowns -->
   <HeaderDropdown
     v-if="
       !isMobile &&
       openDropdown !== null &&
+      items[openDropdown]?.name !== 'about' &&
       items[openDropdown]?.children?.length
     "
     :items="(items[openDropdown]?.children ?? []) as DropdownItem[]"
@@ -89,6 +109,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import type { DropdownItem, MenuItem } from "@/types/index.ts";
+import AboutDropdown from "./AboutDropdown.vue";
 
 interface Props {
   items: MenuItem[];
@@ -100,6 +121,7 @@ const emit = defineEmits(["item-click"]);
 
 const openDropdown = ref<number | null>(null);
 const isMobile = ref<boolean>(false);
+const menuItemRefs = ref<HTMLElement[]>([]);
 
 // Check if mobile on mount and when resized
 onMounted(() => {
@@ -124,10 +146,12 @@ function toggleDropdownDesktopMobile(index: number): void {
 function closeDropdown(): void {
   openDropdown.value = null;
 }
+
 function handleOutsideClick(event: MouseEvent): void {
   if (!isMobile.value && openDropdown.value !== null) {
     const menuElement = document.querySelector(".menu__section");
     const dropdownElement = document.querySelector(".header-dropdown__container");
+    const aboutDropdownElement = document.querySelector(".about-dropdown__container");
     
     if (event.target instanceof Element) {
       const clickedOnMenuLabel = event.target.closest('.header-menu__label');
@@ -137,7 +161,8 @@ function handleOutsideClick(event: MouseEvent): void {
     }
     
     const clickedOutside = !(menuElement?.contains(event.target as Node) || 
-                             dropdownElement?.contains(event.target as Node));
+                             dropdownElement?.contains(event.target as Node) ||
+                             aboutDropdownElement?.contains(event.target as Node));
     
     if (clickedOutside) {
       openDropdown.value = null;
@@ -152,3 +177,9 @@ function emitItemClick(item: MenuItem, event: MouseEvent): void {
   openDropdown.value = null;
 }
 </script>
+
+<style scoped>
+.about-menu-wrapper {
+  position: relative;
+}
+</style>
