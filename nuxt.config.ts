@@ -37,6 +37,7 @@ hooks: {
 
     // 1. Check if this build was triggered by a webhook (incoming hook body)
     if (process.env.INCOMING_HOOK_BODY) {
+      console.log('Incoming hook body:', process.env.INCOMING_HOOK_BODY);
       try {
         const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
         itemIdToBuild = hookPayload.id || null;
