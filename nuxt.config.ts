@@ -56,7 +56,7 @@ export default defineNuxtConfig({
         })
       );
 
-      const posts = response;
+      const posts = Array.isArray(response) ? response : response.data;
       for (const post of posts) {
         const route = `/blog/${post.slug}`;
         const filePath = path.resolve('.output/public', 'blog', post.slug, 'index.html');
