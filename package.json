@@ -33,6 +33,10 @@
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^15.11.7",
     "playwright-core": "^1.51.1",
+    "rollup": "^4.40.1",
     "vitest": "^2.1.9"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.40.1"
   }
 }
