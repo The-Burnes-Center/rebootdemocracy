@@ -19,6 +19,7 @@
     "jstoxml": "^7.0.1",
     "node-sass": "^9.0.0",
     "nuxt": "^3.16.1",
+    "nuxt-build-cache": "^0.1.1",
     "nuxt-gtag": "^3.0.2",
     "openai": "^4.57.1",
     "sass": "^1.87.0",
