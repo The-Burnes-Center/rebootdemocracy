@@ -53,7 +53,7 @@ hooks: {
 
     // 2. If the webhook is for a blog item
     if (itemCollection === 'reboot_democracy_blog' && itemIdToBuild) {
-      const directus = createDirectus('https://dev.thegovlab.com').with(rest());
+      const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
       if (itemAction?.includes('delete')) {
         console.log(`[SSG] Skipping route addition: Blog post was deleted (ID: ${itemIdToBuild})`);
