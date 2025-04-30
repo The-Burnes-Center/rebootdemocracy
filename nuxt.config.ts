@@ -76,18 +76,19 @@ hooks: {
           console.error(`[SSG] Error fetching blog with ID ${itemIdToBuild}:`, error);
         }
       }
-    } else {
-      const { getStaticBlogRoutes } = await import('./composables/getStaticBlogRoutes');
-      const dynamicRoutes = await getStaticBlogRoutes();
-
-      console.log('[SSG] Full rebuild: Pre-rendering all dynamic blog routes:');
-      console.log(dynamicRoutes);
-
-      nitroConfig.prerender.routes = [
-        ...nitroConfig.prerender.routes,
-        ...dynamicRoutes
-      ];
     }
+    // else {
+    //   const { getStaticBlogRoutes } = await import('./composables/getStaticBlogRoutes');
+    //   const dynamicRoutes = await getStaticBlogRoutes();
+
+    //   console.log('[SSG] Full rebuild: Pre-rendering all dynamic blog routes:');
+    //   console.log(dynamicRoutes);
+
+    //   nitroConfig.prerender.routes = [
+    //     ...nitroConfig.prerender.routes,
+    //     ...dynamicRoutes
+    //   ];
+    // }
   }
 },
   algolia: {
