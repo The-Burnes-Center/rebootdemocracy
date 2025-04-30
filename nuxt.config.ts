@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
   
-  modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag'],
+  modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag', 'nuxt-build-cache'],
   gtag: {
     id: 'G-L78LX2HS2N',
     enabled: true,
