@@ -1,7 +1,6 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia'; 
 
-
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
@@ -26,7 +25,7 @@ export default defineNuxtConfig({
     serverDir: '.output/server'
   }
 },
-
+// Nitro hooks
 hooks: {
   async 'nitro:config'(nitroConfig) {
     const { createDirectus, rest, readItem } = await import('@directus/sdk');
