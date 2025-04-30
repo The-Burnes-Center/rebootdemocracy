@@ -19,7 +19,6 @@
     "jstoxml": "^7.0.1",
     "node-sass": "^9.0.0",
     "nuxt": "^3.16.1",
-    "nuxt-build-cache": "^0.1.1",
     "nuxt-gtag": "^3.0.2",
     "openai": "^4.57.1",
     "sass": "^1.87.0",
@@ -33,11 +32,6 @@
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^15.11.7",
     "playwright-core": "^1.51.1",
-    "rollup": "^4.40.1",
     "vitest": "^2.1.9"
-  },
-  "optionalDependencies": {
-    "@esbuild/linux-x64": "^0.25.3",
-    "@rollup/rollup-linux-x64-gnu": "^4.40.1"
   }
 }
