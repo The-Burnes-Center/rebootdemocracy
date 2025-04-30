@@ -191,7 +191,13 @@ export default {
         </li>
       </ul>
     </div>
-
+    <div class="news-items" v-if="postData[0].events">
+          <h2 class="group-heading">
+          Upcoming Events
+        </h2>
+       <div class="news-item" v-html="postData[0].events">
+      </div>
+    </div>
     <!-- Grouped News Items by Category -->
     <div class="news-items">
       <div v-for="cat in uniqueCategories" :key="cat">
