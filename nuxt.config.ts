@@ -1,5 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia'; 
+import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
+
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -25,67 +27,19 @@ export default defineNuxtConfig({
     serverDir: '.output/server'
   }
 },
-// Nitro hooks
-hooks: {
+
+ hooks: {
   async 'nitro:config'(nitroConfig) {
-    const { createDirectus, rest, readItem } = await import('@directus/sdk');
+    const dynamicRoutes = await getStaticBlogRoutes();
 
-    let itemIdToBuild: string | null = null;
-    let itemAction: string | null = null;
-    let itemCollection: string | null = null;
-
-    // 1. Check if this build was triggered by a webhook (incoming hook body)
-    if (process.env.INCOMING_HOOK_BODY) {
-      console.log('Incoming hook body:', process.env.INCOMING_HOOK_BODY);
-      try {
-        const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
-        itemIdToBuild = hookPayload.id || null;
-        itemAction = hookPayload.action || null;
-        itemCollection = hookPayload.collection || null;
-      } catch (error) {
-        console.error('Error parsing INCOMING_HOOK_BODY:', error);
-      }
-    }
+    console.log('[SSG] Pre-rendering dynamic blog routes:');
+    console.log(dynamicRoutes);
 
     nitroConfig.prerender = nitroConfig.prerender ?? {};
-    nitroConfig.prerender.routes = nitroConfig.prerender.routes ?? [];
-
-    // 2. If the webhook is for a blog item
-    if (itemCollection === 'reboot_democracy_blog' && itemIdToBuild) {
-      const directus = createDirectus('https://content.thegovlab.com').with(rest());
-
-      if (itemAction?.includes('delete')) {
-        console.log(`[SSG] Skipping route addition: Blog post was deleted (ID: ${itemIdToBuild})`);
-        // Deletion: Do not add the deleted route. Netlify will remove stale files automatically
-      } else {
-        try {
-          const post = await directus.request(
-            readItem('reboot_democracy_blog', itemIdToBuild, {
-              fields: ['slug'],
-            })
-          );
-
-          if (post?.slug) {
-            const route = `/blog/${post.slug}`;
-            nitroConfig.prerender.routes.push(route);
-            console.log(`[SSG] Adding dynamic route for rebuild: ${route}`);
-          } else {
-            console.warn(`[SSG] No slug found for blog with ID ${itemIdToBuild}. Skipping.`);
-          }
-        } catch (error) {
-          console.error(`[SSG] Error fetching blog with ID ${itemIdToBuild}:`, error);
-        }
-      }
-    }
-    else {
-      const { getStaticBlogRoutes } = await import('./composables/getStaticBlogRoutes');
-      const dynamicRoutes = await getStaticBlogRoutes();
-
-      nitroConfig.prerender.routes = [
-        ...nitroConfig.prerender.routes,
-        ...dynamicRoutes  
-      ];
-    }
+    nitroConfig.prerender.routes = [
+      ...(nitroConfig.prerender.routes ?? []),
+      ...dynamicRoutes
+    ];
   }
 },
   algolia: {
