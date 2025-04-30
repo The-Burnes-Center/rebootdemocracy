@@ -1,86 +1,95 @@
 import { defineNuxtConfig } from "nuxt/config";
-import fs from 'fs-extra';
-import path from 'path';
 import '@nuxtjs/algolia'; 
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   ssr: true,
-
+  
   modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag', 'nuxt-build-cache'],
   gtag: {
     id: 'G-L78LX2HS2N',
     enabled: true,
   },
-
   nitro: {
-    preset: 'netlify',
-    prerender: {
-      crawlLinks: true,
-      failOnError: false,
-      routes: []
-    },
-    output: {
-      dir: '.output',
-      publicDir: '.output/public',
-      serverDir: '.output/server'
-    }
+  preset: 'netlify',
+  prerender: {
+    crawlLinks: true,
+    failOnError: false,
+    routes: []
   },
+ 
+  output: {
+    dir: '.output',
+    publicDir: '.output/public',
+    serverDir: '.output/server'
+  }
+},
+// Nitro hooks
+hooks: {
+  async 'nitro:config'(nitroConfig) {
+    const { createDirectus, rest, readItem } = await import('@directus/sdk');
 
-  hooks: {
-    async 'prerender:routes'(ctx) {
-      const { createDirectus, rest, readItems } = await import('@directus/sdk');
+    let itemIdToBuild: string | null = null;
+    let itemAction: string | null = null;
+    let itemCollection: string | null = null;
+
+    // 1. Check if this build was triggered by a webhook (incoming hook body)
+    if (process.env.INCOMING_HOOK_BODY) {
+      console.log('Incoming hook body:', process.env.INCOMING_HOOK_BODY);
+      try {
+        const hookPayload = JSON.parse(process.env.INCOMING_HOOK_BODY);
+        itemIdToBuild = hookPayload.id || null;
+        itemAction = hookPayload.action || null;
+        itemCollection = hookPayload.collection || null;
+      } catch (error) {
+        console.error('Error parsing INCOMING_HOOK_BODY:', error);
+      }
+    }
+
+    nitroConfig.prerender = nitroConfig.prerender ?? {};
+    nitroConfig.prerender.routes = nitroConfig.prerender.routes ?? [];
+
+    // 2. If the webhook is for a blog item
+    if (itemCollection === 'reboot_democracy_blog' && itemIdToBuild) {
       const directus = createDirectus('https://content.thegovlab.com').with(rest());
 
-      let slugToBuild = null;
-      let collection = null;
-      let action = null;
-
-      if (process.env.INCOMING_HOOK_BODY) {
+      if (itemAction?.includes('delete')) {
+        console.log(`[SSG] Skipping route addition: Blog post was deleted (ID: ${itemIdToBuild})`);
+        // Deletion: Do not add the deleted route. Netlify will remove stale files automatically
+      } else {
         try {
-          const payload = JSON.parse(process.env.INCOMING_HOOK_BODY);
-          slugToBuild = payload.slug || null;
-          collection = payload.collection || null;
-          action = payload.action || null;
-        } catch (e) {
-          console.error('Error parsing webhook payload:', e);
+          const post = await directus.request(
+            readItem('reboot_democracy_blog', itemIdToBuild, {
+              fields: ['slug'],
+            })
+          );
+
+          if (post?.slug) {
+            const route = `/blog/${post.slug}`;
+            nitroConfig.prerender.routes.push(route);
+            console.log(`[SSG] Adding dynamic route for rebuild: ${route}`);
+          } else {
+            console.warn(`[SSG] No slug found for blog with ID ${itemIdToBuild}. Skipping.`);
+          }
+        } catch (error) {
+          console.error(`[SSG] Error fetching blog with ID ${itemIdToBuild}:`, error);
         }
       }
+    } else {
+      const { getStaticBlogRoutes } = await import('./composables/getStaticBlogRoutes');
+      const dynamicRoutes = await getStaticBlogRoutes();
 
-      const response = await directus.request(
-        readItems('reboot_democracy_blog', {
-          filter: { status: { _eq: 'published' } },
-          fields: ['slug'],
-          limit: -1
-        })
-      );
+      console.log('[SSG] Full rebuild: Pre-rendering all dynamic blog routes:');
+      console.log(dynamicRoutes);
 
-      const posts = Array.isArray(response) ? response : response.data;
-      for (const post of posts) {
-        const route = `/blog/${post.slug}`;
-        const filePath = path.resolve('.output/public', 'blog', post.slug, 'index.html');
-        const fileExists = await fs.pathExists(filePath);
-
-        if (slugToBuild) {
-          if (post.slug === slugToBuild) {
-            ctx.routes.add(route);
-            console.log(`[Nitro] Re-rendering updated route: ${route}`);
-          } else {
-            console.log(`[Nitro] Skipping route: ${route} (does not match updated slug)`);
-          }
-        } else {
-          if (!fileExists) {
-            ctx.routes.add(route);
-            console.log(`[Nitro] Adding route: ${route}`);
-          } else {
-            console.log(`[Nitro] Skipping existing route: ${route}`);
-          }
-        }
-      }
+      nitroConfig.prerender.routes = [
+        ...nitroConfig.prerender.routes,
+        ...dynamicRoutes
+      ];
     }
-  },
-
+  }
+},
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
     applicationId: process.env.ALGOLIA_APP_ID,
@@ -89,14 +98,13 @@ export default defineNuxtConfig({
       theme: 'satellite',
     },
   },
-
   routeRules: {
     '/': { prerender: true },
     '/blog/**': { prerender: true }
   },
-
-  css: ['./components/styles/index.css'],
-
+  css: [
+    './components/styles/index.css',
+  ],
   components: [
     {
       path: './components',
@@ -104,7 +112,6 @@ export default defineNuxtConfig({
       global: true
     }
   ],
-
   app: {
     head: {
       title: 'Reboot Democracy',
