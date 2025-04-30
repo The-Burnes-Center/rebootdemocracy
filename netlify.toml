@@ -3,6 +3,13 @@ command = "npm run generate"
 publish = ".output/public/"
 functions = "netlify/functions"
 
+
+[[plugins]]
+package = "netlify-plugin-cache"
+  [plugins.inputs]
+  paths = [".output/public"]
+
+
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@directus/sdk", "jstoxml", "he"]
