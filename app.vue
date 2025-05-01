@@ -2,7 +2,7 @@
     <div>
         <NuxtLayout> 
             <NuxtPage />
-            <ChatWidget/>
+            <!-- <ChatWidget/> -->
         </NuxtLayout>
       
     </div>
