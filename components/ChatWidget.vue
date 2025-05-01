@@ -178,7 +178,7 @@ function useSample(q:string) { draft.value = q; send() }
   padding: 20px;
 
   border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  
   font-family: Arial, sans-serif;
 
   /* Remove scroll here, move to .messages */
@@ -232,8 +232,21 @@ function useSample(q:string) { draft.value = q; send() }
   border: 1px solid #ccc;
   background: white;
   width: 30%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+@media (max-width: 768px) {
+
+  .open {
+  width: 100%;
+  max-width: 340px;
+  height: 85%;
+  border: 1px solid #ccc;
+  background: white;
+  bottom:5em;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+}
 
   
   .welcome-message {
