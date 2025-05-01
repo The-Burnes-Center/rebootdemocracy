@@ -375,54 +375,75 @@ const checkIfMobile = () => {
 const { data: preloadedTaggedData } = await useAsyncData(
   "homepage-tagged-data",
   async () => {
-    // Get the most common or important tags
-    const commonTags = preloadedTags.value?.slice(0, 9) || [];
-
-    // Create a map of tag -> preloaded filtered posts
+    // Get all blogs and news items once
+    const [allBlogs, allNewsItems] = await Promise.all([
+      fetchAllBlogPosts(),
+      fetchWeeklyNewsItems(),
+    ]);
+    
+    // Use all available tags
+    const allTags = preloadedTags.value || [];
     const taggedDataMap: TaggedDataMap = {};
-
-    // For each common tag, preload the filtered posts
-    for (const tag of commonTags) {
-      const allBlogs = await fetchAllBlogPosts();
-      const allNewsItems = await fetchWeeklyNewsItems();
-
-      // Filter blog posts by tags
-      const filteredBlogs = allBlogs.filter(
-        (post) => post.Tags && post.Tags.includes(tag)
-      );
-
-      // Filter news items by category
-      const filteredNewsItems = allNewsItems.filter(
-        (newsItem) => newsItem.category === tag
-      );
-
+    
+    // Create a mapping of tags to posts for efficient lookup
+    const tagToBlogsMap: Record<string, BlogPost[]> = {};
+    
+    // Index all blogs by their tags for faster filtering
+    allBlogs.forEach(blog => {
+      if (blog.Tags && Array.isArray(blog.Tags)) {
+        blog.Tags.forEach(tag => {
+          if (!tagToBlogsMap[tag]) {
+            tagToBlogsMap[tag] = [];
+          }
+          tagToBlogsMap[tag].push(blog);
+        });
+      }
+    });
+    
+    // Index all news items by category
+    const categoryToNewsMap: Record<string, NewsItem[]> = {};
+    allNewsItems.forEach(newsItem => {
+      if (newsItem.category) {
+        if (!categoryToNewsMap[newsItem.category]) {
+          categoryToNewsMap[newsItem.category] = [];
+        }
+        categoryToNewsMap[newsItem.category].push(newsItem);
+      }
+    });
+    
+    // Process all tags
+    for (const tag of allTags) {
+      // Get blogs for this tag (already filtered)
+      const filteredBlogs = tagToBlogsMap[tag] || [];
+      
+      // Get news items for this category (already filtered)
+      const filteredNewsItems = categoryToNewsMap[tag] || [];
+      
+      // Convert news items to blog format
       const newsItemsAsBlogs = filteredNewsItems.map(
-        (newsItem) =>
-          ({
-            id: newsItem.id?.toString() || `news-${newsItem.url}`,
-            title: newsItem.title || "Untitled",
-            excerpt: newsItem.excerpt || "",
-            date: newsItem.date || new Date().toISOString(),
-            url: newsItem.url,
-            Tags: newsItem.category ? [newsItem.category] : [],
-          } as unknown as BlogPost)
+        (newsItem) => ({
+          id: newsItem.id?.toString() || `news-${newsItem.url}`,
+          title: newsItem.title || "Untitled",
+          excerpt: newsItem.excerpt || "",
+          date: newsItem.date || new Date().toISOString(),
+          url: newsItem.url,
+          Tags: newsItem.category ? [newsItem.category] : [],
+        } as unknown as BlogPost)
       );
-
-      // Combine filtered blogs and news items
+      
+      // Combine and sort results
       const combinedResults = [...filteredBlogs, ...newsItemsAsBlogs];
-
-      // Sort by date (newest first)
       combinedResults.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
-
+      
+      // Store top results for this tag
       taggedDataMap[tag] = combinedResults.slice(0, 7);
     }
-
+    
     return taggedDataMap;
   }
 );
-
 // Collaborators data structure
 const collaborators = [
   [
@@ -502,9 +523,6 @@ const tabOptions = computed(() => [
     external: true,
   },
 ]);
-
-const getImageUrl = (image: any) =>
-  image?.filename_disk ? `${DIRECTUS_URL}/assets/${image.filename_disk}` : "";
 
 const getAuthorName = (post: BlogPost | NewsItem): string => {
   if ("authors" in post && post.authors && post.authors.length > 0) {
