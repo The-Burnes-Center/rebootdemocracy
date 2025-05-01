@@ -1,11 +1,12 @@
 // composables/fetchEvent.ts
-import { useDirectusClient } from './useDirectusClient';
-import type { EventItem, GeneralEventsSeries } from '../types/Event.ts'
+import { createDirectus, rest, readItems } from '@directus/sdk';
+import type { EventItem, GeneralEventsSeries } from '../types/Event.ts';
 import type { Event } from '../types/Event.ts';
 
+const API_URL = 'https://content.thegovlab.com';
+const directus = createDirectus(API_URL).with(rest());
+
 export async function fetchIndexData() {
-  const { directus, readItems } = useDirectusClient();
-  
   try {
     const response = await directus.request(
       readItems('reboot_democracy', {
@@ -14,7 +15,7 @@ export async function fetchIndexData() {
         fields: ['*.*'],
       })
     );
-    
+
     return response;
   } catch (error) {
     console.error('Error fetching index data:', error);
@@ -23,8 +24,6 @@ export async function fetchIndexData() {
 }
 
 export async function fetchSeriesData(): Promise<GeneralEventsSeries[]> {
-  const { directus, readItems } = useDirectusClient();
-  
   try {
     const response = await directus.request(
       readItems('general_events_series', {
@@ -33,7 +32,7 @@ export async function fetchSeriesData(): Promise<GeneralEventsSeries[]> {
         fields: ['*.*'],
       })
     );
-    
+
     return response as GeneralEventsSeries[];
   } catch (error) {
     console.error('Error fetching series data:', error);
@@ -42,8 +41,6 @@ export async function fetchSeriesData(): Promise<GeneralEventsSeries[]> {
 }
 
 export async function fetchEventsData(): Promise<EventItem[]> {
-  const { directus, readItems } = useDirectusClient();
-  
   try {
     const response = await directus.request(
       readItems('reboot_democracy_resources', {
@@ -63,7 +60,7 @@ export async function fetchEventsData(): Promise<EventItem[]> {
         ],
       })
     );
-    
+
     return (response as Event[]).map((element) => ({
       event_element: element,
       series_name: 'Reboot Democracy Lecture Series',

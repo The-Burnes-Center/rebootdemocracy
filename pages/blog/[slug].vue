@@ -179,9 +179,9 @@ const {
   data: blog,
   pending,
   error,
-} = await useAsyncData("blog", async () => {
-  if (!blogslug.value) return null;
-  return await fetchBlogBySlug(blogslug.value);
+} = await useAsyncData(`blog-${route.params.slug}`, async () => {
+  if (!route.params.slug) return null;
+  return await fetchBlogBySlug(route.params.slug as string);
 });
 
 if (import.meta.server) {
@@ -297,8 +297,7 @@ onMounted(async () => {
   try {
     isLoading.value = true;
     if (blogslug.value) {
-      blog.value = await fetchBlogBySlug(blogslug.value);
-
+    
       if (blog.value?.Tags?.length) {
         relatedBlogs.value = await fetchRelatedBlogsByTags(
           blog.value.Tags,
