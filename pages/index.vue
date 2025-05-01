@@ -376,7 +376,7 @@ const { data: preloadedTaggedData } = await useAsyncData(
   "homepage-tagged-data",
   async () => {
     // Get the most common or important tags
-    const commonTags = preloadedTags.value?.slice(0, 5) || [];
+    const commonTags = preloadedTags.value?.slice(0, 9) || [];
 
     // Create a map of tag -> preloaded filtered posts
     const taggedDataMap: TaggedDataMap = {};
