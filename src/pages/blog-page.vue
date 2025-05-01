@@ -4,6 +4,7 @@ import { Directus } from '@directus/sdk';
 import format from 'date-fns/format';
 import isPast from 'date-fns/isPast';
 import isFuture from 'date-fns/isFuture';
+import isToday from 'date-fns/isToday';
 import _ from "lodash";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -423,6 +424,9 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       FutureDate: function FutureDate(d1) {
         return isFuture(new Date(d1));
       },
+      CurrentDate: function CurrentDate(d1) {
+        return isToday(new Date(d1));
+      },
       inclucesInArray:function (haystack,ele){
       return haystack.some(subArray =>
         Array.isArray(subArray) &&
@@ -603,29 +607,53 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
   <div class="blog-featured-row">
-    <div class="first-blog-post" v-if="latestBlogPost">
+
+
+    <div class="first-blog-post" v-if="latestBlogPost && !CurrentDate(new Date( weeklyNewsitem.date ))">
       <a :href="'/blog/' + latestBlogPost.slug">
-      <div v-lazy-load>
-      <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
-      </div>
-      <h3>{{latestBlogPost.title}}</h3>
-      <p>{{ latestBlogPost.excerpt }}</p>
-       <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
-      <div class="author-list">
-          <p  class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
-            <div v-for="(author,i) in latestBlogPost.authors">
-              <div class="author-item">               
-                <div class="author-details">
-                  <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                    <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
+        <div v-lazy-load>
+        <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
+        </div>
+        <h3>{{latestBlogPost.title}}</h3>
+        <p>{{ latestBlogPost.excerpt }}</p>
+        <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
+        <div class="author-list">
+            <p  class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
+              <div v-for="(author,i) in latestBlogPost.authors">
+                <div class="author-item">               
+                  <div class="author-details">
+                    <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                      <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-        </div>
+              
+          </div>
         </a>  
-        
     </div>
+
+  <div class="first-blog-post" v-if="CurrentDate(new Date( weeklyNewsitem.date ))">
+     
+    <a :href="'/newsthatcaughtoureye/' + weeklyNewsitem.edition">
+
+      <img style="height:300px" src="../assets/newsheader.jpg">
+ 
+        <h3>{{weeklyNewsitem.title}}</h3>
+        <p style="white-space: no-wrap; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical;">{{ weeklyNewsitem.summary }}</p>
+       <p>Published on {{ formatDateOnly(new Date( weeklyNewsitem.date )) }} </p>
+              <div class="author-list">
+                  
+                      <div class="author-item">
+                        <div class="author-details">
+                          <p class="author-name">By {{weeklyNewsitem.author}}</p>
+                        </div>
+                      </div>
+
+                </div>
+        </a>  
+    </div>
+
+
     <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
       <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 3"> 
        <a :href="'/blog/' + blog_item.slug">
@@ -651,7 +679,31 @@ Emboldened by the advent of generative AI, we are excited about the future possi
          </a>
       </div>
 
-      <div class="other-post-row" > 
+      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = " CurrentDate(new Date( weeklyNewsitem.date )) && index == 3"> 
+       <a :href="'/blog/' + blog_item.slug">
+        <div v-lazy-load>
+        <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
+        </div>
+        <div class="other-post-details">
+              <h3>{{blog_item.title}}</h3>
+              <p>{{ blog_item.excerpt }}</p>
+               <p>Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
+              <div class="author-list">
+                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
+                    <div v-for="(author,i) in blog_item.authors">
+                      <div class="author-item">
+                        <div class="author-details">
+                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+         </a>
+      </div>
+
+      <div class="other-post-row" v-show="!CurrentDate(new Date( weeklyNewsitem.date )) "> 
        <a :href="'/newsthatcaughtoureye/' + weeklyNewsitem.edition">
         <div>
         <img src= "../assets/newsheader.jpg">
