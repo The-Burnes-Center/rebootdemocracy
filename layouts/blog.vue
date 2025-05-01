@@ -1,7 +1,7 @@
 <!-- layouts/blog.vue -->
 <template>
   <div>
-    <BlogHeader />
+    <BlogHeader :topicTags="tags" />
     <main>
       <slot />
     </main>
@@ -10,4 +10,7 @@
 </template>
 
 <script setup>
+import { useAsyncData } from '#app';
+import { fetchAllUniqueTagsForSSG } from "../composables/fetchAllUniqueTagsSSG";
+const { data: tags } = await useAsyncData("topic-tags", fetchAllUniqueTagsForSSG);
 </script>
