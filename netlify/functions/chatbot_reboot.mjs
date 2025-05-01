@@ -70,7 +70,7 @@ async function searchWeaviate(className, fields, query) {
       .withClassName(className)
       .withFields(fields)
       .withBm25({ query })
-      .withLimit(8);
+      .withLimit(5);
 
     const bm25Res = await bm25Query.do();
     const bm25Hits = bm25Res?.data?.Get?.[className] ?? [];
