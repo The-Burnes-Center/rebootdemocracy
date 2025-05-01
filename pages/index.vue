@@ -20,8 +20,15 @@
         :class="{ 'search-active': showSearchResults }"
       >
         <!-- Mobile search display -->
-        <div v-if="showSearchResults && isMobile" class="search-container" :class="{ 'mobile-search': isMobile }">
-          <div class="search-results-container" :class="{ 'mobile-container': isMobile }">
+        <div
+          v-if="showSearchResults && isMobile"
+          class="search-container"
+          :class="{ 'mobile-search': isMobile }"
+        >
+          <div
+            class="search-results-container"
+            :class="{ 'mobile-container': isMobile }"
+          >
             <div class="search-results-header">
               <h2>Search Results for "{{ searchQuery }}"</h2>
             </div>
@@ -29,10 +36,15 @@
             <GlobalSearch :searchQuery="searchQuery" />
           </div>
         </div>
-        
+
         <!-- Mobile filter bar -->
         <div
-          v-if="isMobile && !isLoading && selected !== 'All Topics' && !showSearchResults"
+          v-if="
+            isMobile &&
+            !isLoading &&
+            selected !== 'All Topics' &&
+            !showSearchResults
+          "
           class="results-and-filter"
         >
           <div class="results-count">
@@ -50,7 +62,12 @@
             <Button
               variant="secondary"
               size="small"
-              @click="() => { selected = 'All Topics'; handleTagFilter('All Topics') }"
+              @click="
+                () => {
+                  selected = 'All Topics';
+                  handleTagFilter('All Topics');
+                }
+              "
             >
               Clear Filter
             </Button>
@@ -74,7 +91,10 @@
           <template #latest-posts>
             <article class="left-content-blog">
               <!-- Show GlobalSearch when searching on desktop -->
-              <GlobalSearch v-if="showSearchResults && !isMobile" :searchQuery="searchQuery" />
+              <GlobalSearch
+                v-if="showSearchResults && !isMobile"
+                :searchQuery="searchQuery"
+              />
               <!-- Otherwise show regular posts -->
               <template v-else>
                 <!-- Loading state -->
@@ -116,9 +136,12 @@
                 </div>
 
                 <!-- Blog list section -->
-                <div v-if="!isLoading && postData.length > 0" class="blog-list">
+                <div
+                  v-if="!isLoading && displayPosts.length > 0"
+                  class="blog-list"
+                >
                   <PostCard
-                    v-for="(post, index) in postData"
+                    v-for="(post, index) in displayPosts"
                     :key="post.id"
                     :tag="post.Tags?.[0] || 'Blog'"
                     :titleText="post.title"
@@ -242,30 +265,163 @@ const DIRECTUS_URL = "https://content.thegovlab.com";
 const DEFAULT_EDITION = "51";
 const router = useRouter();
 
+interface TaggedDataMap {
+  [key: string]: BlogPost[];
+}
+
 // State
 const { showSearchResults, resetSearch, searchQuery } = useSearchState();
-const postData = ref<BlogPost[]>([]);
-const isLoading = ref(true);
 const activeTab = ref(0);
-const latestEvent = ref<Event | null>(null);
-const isEventLoading = ref(true);
-const latestWeeklyNews = ref<WeeklyNews | null>(null);
 const dataFetchError = ref<string | null>(null);
-const featuredBlog = ref<BlogPost | null>(null);
-const allBlogsLoaded = ref(false);
-const isFutureEvent = ref(true);
 const blogsInitialized = ref(false);
 const tagOptions = ref<string[]>(["All Topics"]);
+const displayPosts = ref<BlogPost[]>([]);
 const selected = ref<string>("All Topics");
 const isMobile = ref(false);
+const isLoadingState = ref(false);
+const blogsFetched = ref(false);
+
+// Use async data for initial fetch
+const { data: blogList } = await useAsyncData("homepage-blogs", () =>
+  fetchBlogData()
+);
+
+const { data: preloadedTags } = await useAsyncData(
+  "homepage-tags",
+  fetchAllUniqueTags
+);
+tagOptions.value = ["All Topics", ...(preloadedTags.value || [])];
+
+const { data: featuredPost } = await useAsyncData(
+  "homepage-featured",
+  fetchFeaturedBlog
+);
+if (blogList.value) {
+  if (featuredPost.value) {
+    const rest = blogList.value.filter((p) => p.id !== featuredPost.value?.id);
+    displayPosts.value = [featuredPost.value, ...rest];
+  } else {
+    displayPosts.value = blogList.value;
+  }
+}
+watch(
+  [blogList, featuredPost],
+  ([blogs, featured]) => {
+    if (blogs) {
+      const rest = featured
+        ? blogs.filter((p) => p.id !== featured?.id)
+        : blogs;
+      displayPosts.value = featured ? [featured, ...rest] : blogs;
+      blogsFetched.value = true;
+    }
+  },
+  { immediate: true }
+);
+
+// Create a local copy of featured blog for mutations
+const featuredBlog = ref<BlogPost | null>(null);
+watch(
+  featuredPost,
+  (newFeatured) => {
+    featuredBlog.value = newFeatured || null;
+  },
+  { immediate: true }
+);
+
+const isFeaturedPost = (post: BlogPost | NewsItem) =>
+  featuredBlog.value?.id === post.id;
+
+// Computed properties based on our mutable state
+const isLoading = computed(
+  () => isLoadingState.value || !displayPosts.value.length
+);
+const allBlogsLoaded = computed(
+  () => blogsFetched.value && displayPosts.value.length > 0
+);
+
+// Event data
+const { data: homepageEventData, pending: isEventLoading } = await useAsyncData(
+  "homepage-event",
+  async () => {
+    const upcoming = await fetchUpcomingEvent();
+    return upcoming || (await fetchLatestPastEvent());
+  }
+);
+const latestEvent = computed(() => homepageEventData.value);
+const isFutureEvent = computed(() => {
+  const event = latestEvent.value;
+  return event ? new Date(event.date) > new Date() : true;
+});
+
+// Weekly news data
+const { data: latestWeeklyNews } = await useAsyncData(
+  "weekly-news",
+  fetchLatestWeeklyNews
+);
+
+const editionNumber = computed(() =>
+  latestWeeklyNews.value?.edition
+    ? String(latestWeeklyNews.value.edition).replace(/\D/g, "")
+    : "51"
+);
+const weeklyNewsUrl = computed(
+  () => `/newsthatcaughtoureye/${editionNumber.value}`
+);
 
 const checkIfMobile = () => {
   isMobile.value = window.innerWidth < 1050;
 };
 
-const isFeaturedPost = (post: BlogPost | NewsItem): boolean => {
-  return featuredBlog.value !== null && post.id === featuredBlog.value.id;
-};
+const { data: preloadedTaggedData } = await useAsyncData(
+  "homepage-tagged-data",
+  async () => {
+    // Get the most common or important tags
+    const commonTags = preloadedTags.value?.slice(0, 5) || [];
+
+    // Create a map of tag -> preloaded filtered posts
+    const taggedDataMap: TaggedDataMap = {};
+
+    // For each common tag, preload the filtered posts
+    for (const tag of commonTags) {
+      const allBlogs = await fetchAllBlogPosts();
+      const allNewsItems = await fetchWeeklyNewsItems();
+
+      // Filter blog posts by tags
+      const filteredBlogs = allBlogs.filter(
+        (post) => post.Tags && post.Tags.includes(tag)
+      );
+
+      // Filter news items by category
+      const filteredNewsItems = allNewsItems.filter(
+        (newsItem) => newsItem.category === tag
+      );
+
+      const newsItemsAsBlogs = filteredNewsItems.map(
+        (newsItem) =>
+          ({
+            id: newsItem.id?.toString() || `news-${newsItem.url}`,
+            title: newsItem.title || "Untitled",
+            excerpt: newsItem.excerpt || "",
+            date: newsItem.date || new Date().toISOString(),
+            url: newsItem.url,
+            Tags: newsItem.category ? [newsItem.category] : [],
+          } as unknown as BlogPost)
+      );
+
+      // Combine filtered blogs and news items
+      const combinedResults = [...filteredBlogs, ...newsItemsAsBlogs];
+
+      // Sort by date (newest first)
+      combinedResults.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+
+      taggedDataMap[tag] = combinedResults.slice(0, 7);
+    }
+
+    return taggedDataMap;
+  }
+);
 
 // Collaborators data structure
 const collaborators = [
@@ -331,17 +487,6 @@ const collaborators = [
   ],
 ];
 
-// Computed
-const editionNumber = computed(() =>
-  latestWeeklyNews.value?.edition
-    ? String(latestWeeklyNews.value.edition).replace(/\D/g, "")
-    : DEFAULT_EDITION
-);
-
-const weeklyNewsUrl = computed(
-  () => `/newsthatcaughtoureye/${editionNumber.value}`
-);
-
 const tabOptions = computed(() => [
   { title: "Latest Posts", name: "latest-posts" },
   {
@@ -358,26 +503,29 @@ const tabOptions = computed(() => [
   },
 ]);
 
+const getImageUrl = (image: any) =>
+  image?.filename_disk ? `${DIRECTUS_URL}/assets/${image.filename_disk}` : "";
+
 const getAuthorName = (post: BlogPost | NewsItem): string => {
   if ("authors" in post && post.authors && post.authors.length > 0) {
     if (post.authors.length > 1) {
       const authorNames = post.authors
-        .map(author => {
+        .map((author) => {
           if (author.team_id) {
             return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
           }
           return null;
         })
         .filter(Boolean);
-      
+
       if (authorNames.length > 0) {
-        if (authorNames.length === 1) return authorNames[0];
+        if (authorNames.length === 1) return authorNames[0] || "Unknown Author";
         const lastAuthor = authorNames.pop();
-        return `${authorNames.join(', ')} and ${lastAuthor}`;
+        return `${authorNames.join(", ")} and ${lastAuthor}`;
       }
       return "Reboot Democracy Team";
     }
-    
+
     const author = post.authors[0]?.team_id;
     return author
       ? `${author.First_Name} ${author.Last_Name}`
@@ -427,7 +575,7 @@ const loadBlogData = async (force = false) => {
   if (blogsInitialized.value && !force) return;
 
   try {
-    isLoading.value = true;
+    isLoadingState.value = true;
 
     // Get featured blog and all blogs
     const [featured, allBlogs] = await Promise.all([
@@ -442,113 +590,106 @@ const loadBlogData = async (force = false) => {
       ? allBlogs.filter((blog) => blog.id !== featured.id)
       : allBlogs;
 
-    postData.value = featured ? [featured, ...remainingBlogs] : remainingBlogs;
-    allBlogsLoaded.value = true;
+    displayPosts.value = featured
+      ? [featured, ...remainingBlogs]
+      : remainingBlogs;
+    blogsFetched.value = true;
     blogsInitialized.value = true;
   } catch (error) {
     console.error("Failed to load blogs:", error);
     dataFetchError.value = "Failed to load blog posts. Please try again later.";
-    postData.value = [];
+    displayPosts.value = [];
   } finally {
-    isLoading.value = false;
-  }
-};
-
-const loadEventData = async () => {
-  try {
-    isEventLoading.value = true;
-
-    // Try to get upcoming event first
-    let event = await fetchUpcomingEvent();
-
-    if (event) {
-      isFutureEvent.value = true;
-    } else {
-      // If no upcoming event, get the latest past event
-      event = await fetchLatestPastEvent();
-      isFutureEvent.value = false;
-    }
-
-    latestEvent.value = event;
-  } catch (error) {
-    console.error("Failed to load event:", error);
-  } finally {
-    isEventLoading.value = false;
+    isLoadingState.value = false;
   }
 };
 
 const handleTagFilter = async (selectedTag: string) => {
   selected.value = selectedTag;
-  isLoading.value = true;
+  isLoadingState.value = true;
 
-  if (selectedTag === "All Topics") {
-    await loadBlogData(true);
-  } else {
-    // Fetch both blog posts and news items
-    const [allBlogs, allNewsItems] = await Promise.all([
-      fetchAllBlogPosts(),
-      fetchWeeklyNewsItems(),
-    ]);
+  try {
+    if (selectedTag === "All Topics") {
+      // Use original already-loaded blog data
+      if (featuredPost.value) {
+        const rest =
+          blogList.value?.filter((p) => p.id !== featuredPost.value?.id) || [];
+        displayPosts.value = [featuredPost.value, ...rest];
+      } else {
+        displayPosts.value = blogList.value || [];
+      }
+      blogsFetched.value = true;
+      blogsInitialized.value = true;
+    }
+    // Use preloaded tag data if available
+    else if (
+      preloadedTaggedData.value &&
+      preloadedTaggedData.value[selectedTag]
+    ) {
+      displayPosts.value = preloadedTaggedData.value[selectedTag];
+    }
+    // Fall back to API calls for non-preloaded tags
+    else {
+      // Your existing code for tag filtering - no changes here
+      const [allBlogs, allNewsItems] = await Promise.all([
+        fetchAllBlogPosts(),
+        fetchWeeklyNewsItems(),
+      ]);
 
-    // Filter blog posts by tags
-    const filteredBlogs = allBlogs.filter(
-      (post) => post.Tags && post.Tags.includes(selectedTag)
-    );
+      // Filter blog posts by tags
+      const filteredBlogs = allBlogs.filter(
+        (post) => post.Tags && post.Tags.includes(selectedTag)
+      );
 
-    // Filter news items by category
-    const filteredNewsItems = allNewsItems.filter(
-      (newsItem) => newsItem.category === selectedTag
-    );
+      // Filter news items by category
+      const filteredNewsItems = allNewsItems.filter(
+        (newsItem) => newsItem.category === selectedTag
+      );
 
-    const newsItemsAsBlogs = filteredNewsItems.map(
-      (newsItem) =>
-        ({
-          id: newsItem.id?.toString() || `news-${newsItem.url}`,
-          title: newsItem.title || "Untitled",
-          excerpt: newsItem.excerpt || "",
-          date: newsItem.date || new Date().toISOString(),
-          url: newsItem.url,
-          Tags: newsItem.category ? [newsItem.category] : [],
-        } as unknown as BlogPost)
-    );
+      const newsItemsAsBlogs = filteredNewsItems.map(
+        (newsItem) =>
+          ({
+            id: newsItem.id?.toString() || `news-${newsItem.url}`,
+            title: newsItem.title || "Untitled",
+            excerpt: newsItem.excerpt || "",
+            date: newsItem.date || new Date().toISOString(),
+            url: newsItem.url,
+            Tags: newsItem.category ? [newsItem.category] : [],
+          } as unknown as BlogPost)
+      );
 
-    // Combine filtered blogs and news items
-    const combinedResults = [...filteredBlogs, ...newsItemsAsBlogs];
+      // Combine filtered blogs and news items
+      const combinedResults = [...filteredBlogs, ...newsItemsAsBlogs];
 
-    // Sort by date (newest first)
-    combinedResults.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+      // Sort by date (newest first)
+      combinedResults.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
 
-    // Check if featured blog has the selected tag
-    const featured = await fetchFeaturedBlog();
+      // Check if featured blog has the selected tag
+      const featured = await fetchFeaturedBlog();
 
-    const displayBlogs =
-      featured && featured.Tags?.includes(selectedTag)
-        ? [featured, ...combinedResults.slice(0, 6)]
-        : combinedResults.slice(0, 7);
+      const blogs =
+        featured && featured.Tags?.includes(selectedTag)
+          ? [featured, ...combinedResults.slice(0, 6)]
+          : combinedResults.slice(0, 7);
 
-    postData.value = displayBlogs;
+      displayPosts.value = blogs;
+    }
+  } catch (error) {
+    console.error("Error filtering by tag:", error);
+    displayPosts.value = [];
+  } finally {
+    isLoadingState.value = false;
   }
-
-  isLoading.value = false;
 };
 
 const loadInitialData = async () => {
   try {
     resetSearch();
-
-    // Load weekly news and blog data in parallel
-    await Promise.all([
-      (async () => {
-        latestWeeklyNews.value = await fetchLatestWeeklyNews();
-      })(),
-      (async () => {
-        if (activeTab.value === 0) {
-          await loadBlogData();
-        }
-      })(),
-    ]);
+    if (activeTab.value === 0 && !blogsInitialized.value) {
+      await loadBlogData();
+    }
   } catch (error) {
     console.error("Error loading initial data:", error);
     dataFetchError.value = "Failed to load content. Please try again later.";
@@ -561,15 +702,16 @@ onMounted(async () => {
   window.addEventListener("resize", checkIfMobile);
   resetSearch();
 
-  // Load data in parallel
-  await Promise.all([loadInitialData(), loadEventData()]);
-
-  try {
-    // Fetch unique tags and add to options
-    const uniqueTags = await fetchAllUniqueTags();
-    tagOptions.value = ["All Topics", ...uniqueTags];
-  } catch (error) {
-    console.error("Error fetching tags:", error);
+  if (!blogsFetched.value && displayPosts.value.length === 0) {
+    await loadBlogData();
+  }
+  if (tagOptions.value.length <= 1) {
+    try {
+      const uniqueTags = await fetchAllUniqueTags();
+      tagOptions.value = ["All Topics", ...uniqueTags];
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
   }
 });
 
@@ -595,4 +737,3 @@ onBeforeRouteLeave((to, from, next) => {
   next();
 });
 </script>
-

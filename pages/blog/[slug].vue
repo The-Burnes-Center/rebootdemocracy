@@ -119,10 +119,10 @@
         v-if="blog && blog.authors && blog.authors.length > 0"
       >
         <div class="share-widget-mobile">
-          <ShareWidget
-            url="https://rebootdemocracy.ai/blog/your-post-slug"
-            title="Your post title"
-            description="A brief description of your content"
+         <ShareWidget
+            :url="`https://rebootdemocracy.ai/blog/${blogslug.value}`"
+            :title="blog?.title || 'RebootDemocracy.AI Blog'"
+            :description="blog?.excerpt || 'A blog post from RebootDemocracy.AI'"
             align="center"
           />
         </div>
@@ -176,13 +176,32 @@ const router = useRouter();
 const blogslug = computed(() => route.params.slug as string);
 
 const {
-  data: blog,
+  data: blogData,
   pending,
   error,
 } = await useAsyncData(`blog-${route.params.slug}`, async () => {
-  if (!route.params.slug) return null;
-  return await fetchBlogBySlug(route.params.slug as string);
+  if (!route.params.slug) return { blog: null, relatedBlogs: [] };
+  
+  // Get main blog post
+  const blogPost = await fetchBlogBySlug(route.params.slug as string);
+  
+  // Get related blogs in the same server request
+let relatedPostsList: BlogPost[] = [];
+  if (blogPost?.Tags?.length) {
+    relatedPostsList = await fetchRelatedBlogsByTags(
+      blogPost.Tags,
+      route.params.slug as string
+    );
+  }
+  
+  return { 
+    blog: blogPost, 
+    relatedBlogs: relatedPostsList 
+  };
 });
+
+const blog = computed(() => blogData.value?.blog || null);
+const relatedBlogs = computed(() => blogData.value?.relatedBlogs || []);
 
 if (import.meta.server) {
   useSeoMeta({
@@ -233,7 +252,6 @@ As researchers, we want to understand how best to “do democracy” in practice
 
 
 const isLoading = ref(true);
-const relatedBlogs = ref<BlogPost[]>([]);
 
 // Function to navigate to blogs filtered by category
 function navigateToCategory(category: string) {
@@ -293,23 +311,7 @@ function formatDate(dateValue: Date | string) {
 onMounted(async () => {
   resetSearch();
   setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
-
-  try {
-    isLoading.value = true;
-    if (blogslug.value) {
-    
-      if (blog.value?.Tags?.length) {
-        relatedBlogs.value = await fetchRelatedBlogsByTags(
-          blog.value.Tags,
-          blogslug.value
-        );
-      }
-    }
-  } catch (error) {
-    console.error("Error loading blog post:", error);
-  } finally {
-    isLoading.value = false;
-  }
+  isLoading.value = false;
 });
 
 // Clean up when navigating away from this component
