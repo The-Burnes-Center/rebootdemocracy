@@ -90,7 +90,7 @@ async function searchWeaviate(className, fields, query) {
       .withClassName(className)
       .withFields(fields)
       .withNearText({ concepts: [query] })
-      .withLimit(10);
+      .withLimit(5);
 
     const vecRes = await nearTextQuery.do();
     const vecHits = vecRes?.data?.Get?.[className] ?? [];
