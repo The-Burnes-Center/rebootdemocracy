@@ -110,27 +110,43 @@ async function send () {
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ message: draft.value, conversation: convo })
     })
-    if (!res.ok) throw new Error(res.statusText)
+    if (!res.ok) {
+      // Try to read the error body for more info
+      let errorText = ''
+      try {
+        errorText = await res.text()
+      } catch (e) {
+        errorText = '(Could not read error body)'
+      }
+      console.error('Fetch failed:', {
+        status: res.status,
+        statusText: res.statusText,
+        errorBody: errorText
+      })
+      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`)
+    }
     console.log(res);
     // 3. streaming loop (unchanged)
     const reader  = res.body!.getReader()
-    
     const decoder = new TextDecoder()
     while (true) {
-  const { value, done } = await reader.read()
-  if (done) break
-  for (const raw of decoder.decode(value).split('\n\n')) {
-    if (!raw.startsWith('data: ')) continue
-    const chunk = raw.slice(6).trim()
-    if (!chunk || chunk === '[DONE]') continue
-    const payload = JSON.parse(chunk)
-    if (payload.content) bot.text += payload.content
-    if (payload.sourceDocuments) bot.sources = payload.sourceDocuments
-  }
-}
+      const { value, done } = await reader.read()
+      if (done) break
+      for (const raw of decoder.decode(value).split('\n\n')) {
+        if (!raw.startsWith('data: ')) continue
+        const chunk = raw.slice(6).trim()
+        if (!chunk || chunk === '[DONE]') continue
+        const payload = JSON.parse(chunk)
+        if (payload.content) bot.text += payload.content
+        if (payload.sourceDocuments) bot.sources = payload.sourceDocuments
+      }
+    }
   } catch (err) {
-    console.error(err)
-    bot.text = 'Sorry, something went wrong.'
+    // Print as much info as possible
+    console.error('ChatWidget send() error:', err)
+    if (err instanceof Error && err.stack) {
+      console.error('Stack trace:', err.stack)
+    }
   } finally {
     draft.value = ''
     busy.value  = false
