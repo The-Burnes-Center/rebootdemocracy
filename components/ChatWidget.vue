@@ -206,16 +206,16 @@ function useSample(q:string) { draft.value = q; send() }
 
 /* FAB button always visible */
 .fab {
-  position: fixed;
-  right: 40px;
-  bottom: 40px;
-  z-index: 201;
-  width: 60px;
-  height: 60px;
+  position: absolute;
+    top: 20px;
+    /* bottom: 40px; */
+    z-index: 201;
+    width: 40px;
+    height: 40px;
   border-radius: 50%;
   background: #007bff;
   color: white;
-  font-size: 2em;
+  font-size: 1.5em;
   border: none;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   cursor: pointer;
@@ -223,6 +223,7 @@ function useSample(q:string) { draft.value = q; send() }
   align-items: center;
   justify-content: center;
 }
+
 
 /* Hide the chat window and background when not open */
 .open {
@@ -291,7 +292,7 @@ function useSample(q:string) { draft.value = q; send() }
   }
   
   .bot-message {
-    background-color: #f0f0f0;
+    /* background-color: #f0f0f0; */
     padding: 10px;
     border-radius: 10px;
     max-width: 90%;
@@ -300,15 +301,16 @@ function useSample(q:string) { draft.value = q; send() }
 
   .prompt-button
   {
-    background: none;
-    border: 1px solid #007bff;
+    background: #f0f0f0;
+    /* border: 1px solid #007bff; */
     color: #007bff;
     padding: 10px;
     text-align: left;
     cursor: pointer;
     border-radius: 5px;
-    margin:5px;
+    margin:10px;
     transition: background-color .3s, color .3s;
+    font-weight: 700;
   }
   
   .bot-message :deep(p) {

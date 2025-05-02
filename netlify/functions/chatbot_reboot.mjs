@@ -126,12 +126,11 @@ export async function searchContent(query) {
     // 2. Take up to 5, prioritizing exact matches
     let topChunks = [];
     if (exactMatches.length > 0) {
-      topChunks = exactMatches;
+      // Sort exact matches by distance/certainty
+      topChunks = exactMatches.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
     } else {
       // If no exact matches, use top 5 by distance/certainty
-      topChunks = allResults
-        .sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
-        
+      topChunks = allResults.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
     }
 
     return topChunks;
