@@ -397,11 +397,12 @@ async fetchBlog(loadMore = false) {
         meta: 'total_count',  
         limit: this.postsPerPage,
         page: this.currentPage,
-        filter: {
-          status: {
-            _eq: "published",
-          },
-        },
+      filter: {
+        _and: [
+          { date: { _lte: '$NOW(-5 hours)' } }, 
+          { status: { _eq: "published" } },
+        ]
+      },
         fields: [
           '*.*',
           'authors.team_id.*',
