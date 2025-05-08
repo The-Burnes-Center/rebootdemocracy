@@ -548,10 +548,18 @@ async fetchBlog(loadMore = false) {
   <div class="allposts-section">
     <div
       class="allposts-post-row"
-      v-for="(blog_item, index) in blogDataSearch"
+      
       :key="index"
     >
-      <a :href="'/blog/' + blog_item.slug">
+      <a :href="'/blog/' + blog_item.slug" v-for="(blog_item, index) in blogDataSearch">
+              <div v-lazy-load>
+        <img
+          v-if="blog_item.image"
+          class="all-posts-page-list-img"
+          :data-src="directus._url + 'assets/' + blog_item.image.id + '?width=800'"
+          alt="blog-item-img"
+        />
+        </div>
         <div class="allposts-post-details">
           <h3>{{ blog_item.title }}</h3>
           <p class="post-date">
@@ -581,14 +589,7 @@ async fetchBlog(loadMore = false) {
             </div>
           </div>
         </div>
-        <div v-lazy-load>
-        <img
-          v-if="blog_item.image"
-          class="all-posts-page-list-img"
-          :data-src="directus._url + 'assets/' + blog_item.image.id + '?width=800'"
-          alt="blog-item-img"
-        />
-        </div>
+
       </a>
     </div>
   </div>
