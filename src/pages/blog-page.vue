@@ -690,7 +690,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="allposts-post-row">
     <a :href="'/blog/' + blog_item.slug"  v-for="(blog_item, index) in blogData.slice().reverse()" v-show="index < 16">
       <div v-lazy-load>
-        <img v-if="!blog_item.image" class="blog-list-img" src= "../assets/newsheader.jpg">
+        <img v-if="!blog_item.image" class="blog-list-img" src= "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg">
         <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url+'assets/'+ blog_item.image.id">
         
         
