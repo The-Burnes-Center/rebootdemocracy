@@ -766,47 +766,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
 </div>
 
-
-<!-- Filtered Posts Section -->
-<h2 v-if="searchResultsFlag && searchTermDisplay != ''" class="search-term">Searching for <i>{{searchTermDisplay}}</i></h2>
-<div v-if="searchResultsFlag || searchTerm == ''">
-  <div v-if="!searchResultsFlag && searchTermDisplay == ''">
-    <div class="allposts-section">
-      <div v-for="tag_item in filteredTagDataWithoutNews" :key="tag_item" class="all-posts-row">
-        <div class="blog-section-header">
-          <h2>{{ tag_item }}</h2>
-        </div>
-        <div class="tag-posts-row-container">
-          <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" class="tag-posts-row">
-            <div v-if="includesString(blog_item?.Tags, tag_item)">
-              <a :href="'/blog/' + blog_item.slug">
-              <div v-lazy-load>
-                <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url + 'assets/' + blog_item.image.id">
-              </div>
-                <div class="allposts-post-details">
-                  <h3>{{blog_item.title}}</h3>
-                  <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
-                  <div class="author-list">
-                    <p class="author-name">{{blog_item.authors.length > 0 ? 'By' : ''}}</p>
-                    <div v-for="(author, i) in blog_item.authors" :key="i">
-                      <div class="author-item">
-                        <div class="author-details">
-                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Search section -->
     <div  v-if="searchResultsFlag   && searchTermDisplay != ''" class="allposts-section">
       <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch"> 
