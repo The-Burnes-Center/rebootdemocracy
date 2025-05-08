@@ -101,15 +101,12 @@ export default {
     // this.debounceSearch = _.debounce(this.searchBlog, 500);
     
   },
- mounted()
-
-  { 
-    this.fetchWeeklyNews();   
-    this.fetchBlog();
-      this.fetchFeatured();
+mounted() {
+  this.fetchCombinedData();
   this.fillMeta();
-   register();
-  },
+  register();
+},
+
   
   methods: {
      renderMarkdown (text) {
@@ -134,6 +131,53 @@ export default {
          //   }
          // });
        },
+       fetchCombinedData() {
+  self = this;
+  const nowOffset = self.getDirectusNowOffset(); // "$NOW(-4 hours)" or "$NOW(-5 hours)"
+
+  Promise.all([
+    this.directus.items('reboot_democracy_blog').readByQuery({
+      meta: 'total_count',
+      limit: -1,
+      filter: {
+        _and: [
+          { date: { _lte: nowOffset } },
+          { status: { _eq: 'published' } }
+        ]
+      },
+      fields: [
+        '*.*',
+        'authors.team_id.*',
+        'authors.team_id.Headshot.*'
+      ],
+      sort: ["date"]
+    }),
+    this.directus.items('reboot_democracy_weekly_news').readByQuery({
+      meta: 'total_count',
+      limit: -1,
+      fields: [
+        '*.*'
+      ],
+      sort: ["date"]
+    })
+  ])
+  .then(([blogResult, weeklyNewsResult]) => {
+    const blogData = blogResult.data || [];
+    const weeklyNewsData = weeklyNewsResult.data || [];
+
+    // Combine both arrays and sort chronologically by date (descending)
+    const combinedData = [...blogData, ...weeklyNewsData].sort((a, b) => 
+      new Date(a.date) - new Date(b.date)
+    );
+
+    self.blogData = combinedData;
+  })
+  .catch((error) => {
+    console.error('Error fetching combined data:', error);
+    self.blogData = [];
+  });
+},
+
       async searchBlog() {
       const self = this;
       this.searchloader = true;
@@ -646,17 +690,26 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="allposts-post-row">
     <a :href="'/blog/' + blog_item.slug"  v-for="(blog_item, index) in blogData.slice().reverse()" v-show="index < 16">
       <div v-lazy-load>
+        <img v-if="!blog_item.image" class="blog-list-img" src= "../assets/newsheader.jpg">
         <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url+'assets/'+ blog_item.image.id">
+        
+        
       </div>
       <div class="allposts-post-details">
         <h3>{{blog_item.title}}</h3>
         <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }}</p>
-        <div class="author-list">
+        <div v-if="!blog_item.authors" class="author-list">
+       <p class="author-name">By {{blog_item.author}}</p>
+
+        </div>
+ 
+
+        <div v-if="blog_item.authors" class="author-list">
           <p class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
           <div v-for="(author,i) in blog_item.authors">
             <div class="author-item">
               <div class="author-details">
-                <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
+                <p  class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
                 <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
               </div>
             </div>
