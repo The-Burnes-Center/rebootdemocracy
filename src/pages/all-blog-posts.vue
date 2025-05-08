@@ -548,10 +548,10 @@ async fetchBlog(loadMore = false) {
   <div class="allposts-section">
     <div
       class="allposts-post-row"
-      v-for="(blog_item, index) in blogDataSearch"
+      
       :key="index"
     >
-      <a :href="'/blog/' + blog_item.slug">
+      <a :href="'/blog/' + blog_item.slug" v-for="(blog_item, index) in blogDataSearch">
         <div class="allposts-post-details">
           <h3>{{ blog_item.title }}</h3>
           <p class="post-date">
