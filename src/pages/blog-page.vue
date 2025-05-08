@@ -671,10 +671,10 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 
 <!-- Search section -->
     <div  v-if="searchResultsFlag   && searchTermDisplay != ''" class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch"> 
+      <div class="allposts-post-row"> 
           <!-- <div v-if="blog_item?.Tags === null"> -->
-       <a :href="'/blog/' + blog_item.slug">
-                 <div v-lazy-load>
+       <a :href="'/blog/' + blog_item.slug"  v-for="(blog_item, index) in blogDataSearch">
+      <div v-lazy-load>
          <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
           </div>
         <div class="allposts-post-details">
