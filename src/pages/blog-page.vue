@@ -33,10 +33,12 @@ export default {
   },
   data() {
     return {
+      model: 0,    
      searchResultsFlag: 0,
       searchResults: [],
       searchTerm: "",
       searchTermDisplay:"",
+      featuredData: [],
       debounceSearch:'',
       searchloader:false,
       loadAPI: false,
@@ -104,7 +106,7 @@ export default {
   { 
     this.fetchWeeklyNews();   
     this.fetchBlog();
-  
+      this.fetchFeatured();
   this.fillMeta();
    register();
   },
@@ -350,6 +352,35 @@ export default {
       this.pschatContent = '';
       this.searchBlog();
     },
+    fetchFeatured: function fetchFeatured() {
+      self = this;
+
+
+      this.directus
+      .items('reboot_democracy_blog')
+      .readByQuery({
+          filter: {
+            status: {
+              _eq: 'published',
+            },
+          },
+         meta: 'total_count',
+         limit: 6,
+         sort:["-date"],
+         fields: [
+          '*.*',          
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*'
+       ],
+       
+      })
+      .then((item) => {
+      self.featuredData =  item.data;
+
+      self.preloadImages();
+      });
+    },
+    
     fillMeta()
     {
      useHead({
@@ -592,158 +623,29 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     
           <vue-final-modal  v-if="showmodal" @before-close="closeModal" v-model="showmodal" classes="modal-container" content-class="modal-comp">
 <ModalComp :modalData="modalData" @close="closeModal" />    </vue-final-modal>
-<div class="blog-page-hero">
-    <h1>Rebooting Democracy in the Age of AI</h1>
-    <p>Insights on Tech and Governance from Beth Simone Noveck</p>   
-    <div class="search-bar-section"> 
+
+
+<div class="hero blog-home">
+     <h1 class="title">Rebooting Democracy in the Age of AI</h1>
+     <p class="eyebrow blue">Insights on Tech and Governance from Beth Simone Noveck</p> 
+      <div class="search-bar-section"> 
       <input class="search-bar" ref="searchInputRef" v-model="searchTerm" @keyup.enter="handleSearch" type="text" role="search" aria-label="Search" placeholder="Search" />
       <span @click="searchTerm = ''; resetSearch();" class="search-bar-cancel-btn material-symbols-outlined">cancel</span>
       <span @click="resetSearch()" class="search-bar-btn material-symbols-outlined">search</span>
     </div>
     <div v-if="searchloader" class="loader-blog"></div>
-  </div>
 
-<!-- Featured Blog Section -->
-
-<div class="blog-featured" v-if="!searchResultsFlag && searchTermDisplay == ''"> 
-  <div class="blog-featured-row">
-
-
-    <div class="first-blog-post" v-if="latestBlogPost && !CurrentDate(new Date( weeklyNewsitem.date ))">
-      <a :href="'/blog/' + latestBlogPost.slug">
-        <div v-lazy-load>
-        <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
-        </div>
-        <h3>{{latestBlogPost.title}}</h3>
-        <p>{{ latestBlogPost.excerpt }}</p>
-        <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
-        <div class="author-list">
-            <p  class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
-              <div v-for="(author,i) in latestBlogPost.authors">
-                <div class="author-item">               
-                  <div class="author-details">
-                    <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                      <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
-                  </div>
-                </div>
-              </div>
-              
-          </div>
-        </a>  
-    </div>
-
-  <div class="first-blog-post" v-if="CurrentDate(new Date( weeklyNewsitem.date ))">
-     
-    <a :href="'/newsthatcaughtoureye/' + weeklyNewsitem.edition">
-
-      <img style="height:300px" src="../assets/newsheader.jpg">
- 
-        <h3>{{weeklyNewsitem.title}}</h3>
-        <p style="white-space: no-wrap; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical;">{{ weeklyNewsitem.summary }}</p>
-       <p>Published on {{ formatDateOnly(new Date( weeklyNewsitem.date )) }} </p>
-              <div class="author-list">
-                  
-                      <div class="author-item">
-                        <div class="author-details">
-                          <p class="author-name">By {{weeklyNewsitem.author}}</p>
-                        </div>
-                      </div>
-
-                </div>
-        </a>  
-    </div>
-
-
-    <div class="other-blog-posts" v-if="!searchResultsFlag  || searchTerm == ''">
-      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = "index > 0 && index < 3"> 
-       <a :href="'/blog/' + blog_item.slug">
-        <div v-lazy-load>
-        <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
-        </div>
-        <div class="other-post-details">
-              <h3>{{blog_item.title}}</h3>
-              <p>{{ blog_item.excerpt }}</p>
-               <p>Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
-              <div class="author-list">
-                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
-                    <div v-for="(author,i) in blog_item.authors">
-                      <div class="author-item">
-                        <div class="author-details">
-                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-            </div>
-         </a>
-      </div>
-
-      <div class="other-post-row" v-for="(blog_item,index) in blogData.slice().reverse()"  v-show = " CurrentDate(new Date( weeklyNewsitem.date )) && index == 3"> 
-       <a :href="'/blog/' + blog_item.slug">
-        <div v-lazy-load>
-        <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
-        </div>
-        <div class="other-post-details">
-              <h3>{{blog_item.title}}</h3>
-              <p>{{ blog_item.excerpt }}</p>
-               <p>Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
-              <div class="author-list">
-                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
-                    <div v-for="(author,i) in blog_item.authors">
-                      <div class="author-item">
-                        <div class="author-details">
-                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-            </div>
-         </a>
-      </div>
-
-      <div class="other-post-row" v-show="!CurrentDate(new Date( weeklyNewsitem.date )) "> 
-       <a :href="'/newsthatcaughtoureye/' + weeklyNewsitem.edition">
-        <div>
-        <img src= "../assets/newsheader.jpg">
-        </div>
-        <div class="other-post-details">
-              <h3>{{weeklyNewsitem.title}}</h3>
-              <p>{{ weeklyNewsitem.summary }}</p>
-               <p v-if="weeklyNewsitem.date">Published on {{ formatDateOnly(new Date( weeklyNewsitem.date )) }} </p>
-              <div class="author-list">
-                  
-                      <div class="author-item">
-                        <div class="author-details">
-                          <p class="author-name">By {{weeklyNewsitem.author}}</p>
-                        </div>
-                      </div>
-
-                  </div>
-            </div>
-         </a>
-      </div>
-
-
-    </div>
-  </div>
 </div>
 
-<div class="read-more-post" v-if="!searchResultsFlag && searchTermDisplay == ''">
-<a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
-</div>
+
+
 
 <!-- Latest Posts -->
 
-<div class="blog-section-header" v-if="!searchResultsFlag && searchTermDisplay == ''">
-  <h2>Latest Posts </h2>
-</div>
-
 <div v-if="!searchResultsFlag && searchTermDisplay == ''"  class="allposts-section">
-  <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch.slice().reverse()" v-show="index >= 4 && index < 16">
-    <a :href="'/blog/' + blog_item.slug">
-          <div v-lazy-load>
+  <div class="allposts-post-row">
+    <a :href="'/blog/' + blog_item.slug"  v-for="(blog_item, index) in blogData.slice().reverse()" v-show="index < 16">
+      <div v-lazy-load>
         <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url+'assets/'+ blog_item.image.id">
       </div>
       <div class="allposts-post-details">
@@ -766,46 +668,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
 </div>
 
-
-<!-- Filtered Posts Section -->
-<h2 v-if="searchResultsFlag && searchTermDisplay != ''" class="search-term">Searching for <i>{{searchTermDisplay}}</i></h2>
-<div v-if="searchResultsFlag || searchTerm == ''">
-  <div v-if="!searchResultsFlag && searchTermDisplay == ''">
-    <div class="allposts-section">
-      <div v-for="tag_item in filteredTagDataWithoutNews" :key="tag_item" class="all-posts-row">
-        <div class="blog-section-header">
-          <h2>{{ tag_item }}</h2>
-        </div>
-        <div class="tag-posts-row-container">
-          <div v-for="(blog_item, index) in blogDataSearch.slice().reverse()" :key="index" class="tag-posts-row">
-            <div v-if="includesString(blog_item?.Tags, tag_item)">
-              <a :href="'/blog/' + blog_item.slug">
-              <div v-lazy-load>
-                <img v-if="blog_item.image" class="blog-list-img" :data-src="this.directus._url + 'assets/' + blog_item.image.id">
-              </div>
-                <div class="allposts-post-details">
-                  <h3>{{blog_item.title}}</h3>
-                  <p class="post-date">Published on {{ formatDateOnly(new Date(blog_item.date)) }}</p>
-                  <div class="author-list">
-                    <p class="author-name">{{blog_item.authors.length > 0 ? 'By' : ''}}</p>
-                    <div v-for="(author, i) in blog_item.authors" :key="i">
-                      <div class="author-item">
-                        <div class="author-details">
-                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Search section -->
     <div  v-if="searchResultsFlag   && searchTermDisplay != ''" class="allposts-section">
