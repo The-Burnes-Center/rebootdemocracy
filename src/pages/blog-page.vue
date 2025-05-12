@@ -722,7 +722,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <!-- Latest Posts -->
 
 <div v-if="!searchResultsFlag && searchTermDisplay == ''"  class="allposts-section">
-  <div class="allposts-post-row" v-for="(blog_item, index) in blogData.slice().reverse()" v-show="index < 16">
+  <div class="allposts-post-row" v-for="(blog_item, index) in blogData.slice().reverse()" v-show="index < 15">
    <a :href="blog_item.slug ? ('/blog/' + blog_item.slug) : '/newsthatcaughtoureye/' + blog_item.edition">
 
       <div v-lazy-load>

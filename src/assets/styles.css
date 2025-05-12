@@ -1024,7 +1024,7 @@ line-height: normal;
 letter-spacing: -1.6px;
 }
 .allposts-section{
-  justify-content: left;
+  justify-content: center;
   align-items: left;
   max-width: none;
 margin-left: auto;
