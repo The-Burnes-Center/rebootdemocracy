@@ -398,9 +398,10 @@ async fetchBlog(loadMore = false) {
         limit: this.postsPerPage,
         page: this.currentPage,
         filter: {
-          status: {
-            _eq: "published",
-          },
+          _and: [
+            { date: { _lte: '$NOW(-5 hours)' } }, 
+            { status: { _eq: "published" } },
+          ]
         },
         fields: [
           '*.*',
