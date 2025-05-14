@@ -14,7 +14,7 @@
 
         <!-- Otherwise show regular posts content -->
         <template v-else>
-          <div v-if="isLoading" class="loading">Loading content...</div>
+          <div v-if="isPostsLoading" class="loading">Loading content...</div>
 
           <div class="mobile-category-and-authors">
             <!-- Categories section with toggle -->
@@ -137,7 +137,10 @@
           </div>
 
           <!-- Display filtered blogs when loaded -->
-          <div v-if="!isLoading && displayedPosts.length > 0" class="blog-list">
+          <div
+            v-if="!isPostsLoading && displayedPosts.length > 0"
+            class="blog-list"
+          >
             <PostCard
               v-for="(post, index) in displayedPosts"
               :key="getPostKey(post)"
@@ -155,7 +158,7 @@
           </div>
 
           <!-- No blogs found message -->
-          <div v-else-if="!isLoading" class="no-blogs">
+          <div v-else-if="!isPostsLoading" class="no-blogs">
             <span v-if="selectedCategory">
               No posts found in category "{{ selectedCategory }}"
             </span>
@@ -166,7 +169,7 @@
           </div>
 
           <!-- Show More button appears when there are more posts to load -->
-          <div v-if="!isLoading && hasMorePosts" class="btn-mid">
+          <div v-if="!isPostsLoading && hasMorePosts" class="btn-mid">
             <Button
               variant="primary"
               width="140px"
@@ -265,9 +268,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
-import type { BlogPost, Event, WeeklyNews } from "@/types/index.ts";
+import type { BlogPost, Event } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
 
 //meta information
@@ -319,11 +322,14 @@ const route = useRoute();
 
 // State management
 const { showSearchResults, resetSearch } = useSearchState();
-const isFutureEvent = ref(true);
 
 // Toggle state for mobile category/authors
-const isCategoriesVisible = ref(false); // Initially collapsed on mobile
-const isAuthorsVisible = ref(false); // Initially collapsed on mobile
+const isCategoriesVisible = ref(false);
+const isAuthorsVisible = ref(false);
+const isMobile = ref(false);
+const selectedCategory = ref<string | null>(null);
+const selectedAuthor = ref<string | null>(null);
+const currentPage = ref(1);
 
 // Toggle functions
 const toggleCategoriesVisible = () => {
@@ -333,24 +339,6 @@ const toggleCategoriesVisible = () => {
 const toggleAuthorsVisible = () => {
   isAuthorsVisible.value = !isAuthorsVisible.value;
 };
-
-// Data state
-const allPosts = ref<(BlogPost | NewsItem)[]>([]);
-const filteredPosts = ref<(BlogPost | NewsItem)[]>([]);
-const displayedPosts = ref<(BlogPost | NewsItem)[]>([]);
-const tags = ref<Category[]>([]);
-const authors = ref<Author[]>([]);
-const latestEvent = ref<Event | null>(null);
-
-// UI state
-const isLoading = ref(true);
-const isTagsLoading = ref(true);
-const isAuthorsLoading = ref(true);
-const isEventLoading = ref(true);
-const dataFetchError = ref<string | null>(null);
-const selectedCategory = ref<string | null>(null);
-const selectedAuthor = ref<string | null>(null);
-const currentPage = ref(1);
 
 // Interfaces
 interface Category {
@@ -365,19 +353,201 @@ interface Author {
   count: number;
 }
 
-const handleEventClick = (event: Event | null) => {
-  if (event?.link) {
-    window.open(event.link, "_blank");
+const getAuthorName = (post: BlogPost | NewsItem): string => {
+  if ("authors" in post && post.authors && post.authors.length > 0) {
+    if (post.authors.length > 1) {
+      const authorNames = post.authors
+        .map((author) => {
+          if (author.team_id) {
+            return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (authorNames.length > 0) {
+        if (authorNames.length === 1) return authorNames[0];
+        const lastAuthor = authorNames.pop();
+        return `${authorNames.join(", ")} and ${lastAuthor}`;
+      }
+      return "Reboot Democracy Team";
+    }
+
+    const author = post.authors[0]?.team_id;
+    return author
+      ? `${author.First_Name} ${author.Last_Name}`
+      : "Reboot Democracy Team";
+  } else if ("author" in post && post.author) {
+    return post.author;
   }
+  return "Reboot Democracy Team";
 };
 
-// Computed properties
-const hasMorePosts = computed(
-  () => displayedPosts.value.length < filteredPosts.value.length
+// Data processing functions
+const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
+  if (!posts || posts.length === 0) return [];
+
+  const tagCounts = new Map<string, number>();
+
+  posts.forEach((post) => {
+    if ("Tags" in post && Array.isArray(post.Tags)) {
+      post.Tags.forEach((tag) => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      });
+    } else if ("category" in post && post.category) {
+      tagCounts.set(post.category, (tagCounts.get(post.category) || 0) + 1);
+    }
+  });
+
+  return Array.from(tagCounts.entries())
+    .map(([name, count]) => ({ id: name, name, count }))
+    .sort((a, b) => b.count - a.count);
+};
+
+const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
+  if (!posts || posts.length === 0) return [];
+
+  const authorCounts = new Map<string, number>();
+
+  // Only count authors from blog posts, not from weekly news items
+  posts.forEach((post) => {
+    if ("authors" in post && post.authors) {
+      const authorName = getAuthorName(post);
+      if (authorName !== "Unknown Author") {
+        authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+      }
+    }
+  });
+
+  return Array.from(authorCounts.entries())
+    .map(([name, count]) => ({ id: name, name, count }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+};
+
+// Async Data Fetching - Server Side
+const { data: allPostsData, pending: isPostsLoading } = await useAsyncData(
+  "all-blog-posts",
+  async () => {
+    try {
+      // Fetch blogs and news in parallel
+      const [blogPosts, newsItems] = await Promise.all([
+        fetchAllBlogPosts(),
+        fetchWeeklyNewsItems(),
+      ]);
+
+      // Combine blog posts and news items
+      const allPosts = [...blogPosts, ...newsItems];
+
+      // Sort combined results by date (newest first)
+      return allPosts.sort(
+        (a, b) =>
+          new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+      );
+    } catch (error) {
+      console.error("Error fetching all posts:", error);
+      return [];
+    }
+  }
 );
+
+// Prefetch tags data
+const { data: tagsData, pending: isTagsLoading } = await useAsyncData(
+  "all-blog-tags",
+  async () => {
+    try {
+      return extractTagsWithCounts(allPostsData.value || []);
+    } catch (error) {
+      console.error("Error processing tags:", error);
+      return [];
+    }
+  },
+  {
+    watch: [allPostsData],
+  }
+);
+
+// Prefetch authors data
+const { data: authorsData, pending: isAuthorsLoading } = await useAsyncData(
+  "all-blog-authors",
+  async () => {
+    try {
+      return extractAuthorsWithCounts(allPostsData.value || []);
+    } catch (error) {
+      console.error("Error processing authors:", error);
+      return [];
+    }
+  },
+  {
+    watch: [allPostsData],
+  }
+);
+
+// Prefetch event data
+const { data: eventData, pending: isEventLoading } = await useAsyncData(
+  "all-blog-event",
+  async () => {
+    try {
+      // Try to get upcoming event first
+      let event = await fetchUpcomingEvent();
+      let isFutureEvent = true;
+
+      if (!event) {
+        // If no upcoming event, get the latest past event
+        event = await fetchLatestPastEvent();
+        isFutureEvent = false;
+      }
+
+      return { event, isFutureEvent };
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      return { event: null, isFutureEvent: false };
+    }
+  }
+);
+
+// Computed properties from prefetched data
+const allPosts = computed(() => allPostsData.value || []);
+const tags = computed(() => tagsData.value || []);
+const authors = computed(() => authorsData.value || []);
+const latestEvent = computed(() => eventData.value?.event || null);
+const isFutureEvent = computed(() => eventData.value?.isFutureEvent || false);
 
 const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)
+);
+
+// Filtered posts based on selected category/author
+const filteredPosts = computed(() => {
+  let filtered = allPosts.value;
+
+  if (selectedCategory.value) {
+    filtered = filtered.filter((post) => {
+      if ("Tags" in post && Array.isArray(post.Tags)) {
+        return post.Tags.includes(selectedCategory.value as string);
+      } else if ("category" in post && post.category) {
+        return post.category === selectedCategory.value;
+      }
+      return false;
+    });
+  }
+
+  if (selectedAuthor.value) {
+    filtered = filtered.filter(
+      (post) => getAuthorName(post) === selectedAuthor.value
+    );
+  }
+
+  return filtered;
+});
+
+// Displayed posts (paginated)
+const displayedPosts = computed(() => {
+  const endIndex = currentPage.value * POSTS_PER_PAGE;
+  return filteredPosts.value.slice(0, endIndex);
+});
+
+const hasMorePosts = computed(
+  () => displayedPosts.value.length < filteredPosts.value.length
 );
 
 // Helper functions for handling both blog posts and news items
@@ -426,37 +596,8 @@ const getPostDate = (post: BlogPost | NewsItem): Date => {
   return new Date();
 };
 
-const getAuthorName = (post: BlogPost | NewsItem): string => {
-  if ("authors" in post && post.authors && post.authors.length > 0) {
-    if (post.authors.length > 1) {
-      const authorNames = post.authors
-        .map((author) => {
-          if (author.team_id) {
-            return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
-          }
-          return null;
-        })
-        .filter(Boolean);
 
-      if (authorNames.length > 0) {
-        if (authorNames.length === 1) return authorNames[0];
-        const lastAuthor = authorNames.pop();
-        return `${authorNames.join(", ")} and ${lastAuthor}`;
-      }
-      return "Reboot Democracy Team";
-    }
-
-    const author = post.authors[0]?.team_id;
-    return author
-      ? `${author.First_Name} ${author.Last_Name}`
-      : "Reboot Democracy Team";
-  } else if ("author" in post && post.author) {
-    return post.author;
-  }
-  return "Reboot Democracy Team";
-};
-
-// Navigation
+// Navigation and event handlers
 const handlePostClick = (post: BlogPost | NewsItem): void => {
   if ("slug" in post && post.slug) {
     resetSearch();
@@ -468,299 +609,74 @@ const handlePostClick = (post: BlogPost | NewsItem): void => {
   }
 };
 
+const handleEventClick = (event: Event | null) => {
+  if (event?.link) {
+    window.open(event.link, "_blank");
+  }
+};
+
 // Pagination
 const loadMorePosts = () => {
   if (!hasMorePosts.value) return;
-
   currentPage.value++;
-  const startIndex = (currentPage.value - 1) * POSTS_PER_PAGE;
-  const endIndex = startIndex + POSTS_PER_PAGE;
-
-  const newPosts = filteredPosts.value.slice(startIndex, endIndex);
-  displayedPosts.value = [...displayedPosts.value, ...newPosts];
 };
 
 // Filter management
-const updateFilteredPosts = () => {
-  let filtered = allPosts.value;
-
-  if (selectedCategory.value) {
-    filtered = filtered.filter((post) => {
-      if ("Tags" in post && Array.isArray(post.Tags)) {
-        return post.Tags.includes(selectedCategory.value as string);
-      } else if ("category" in post && post.category) {
-        return post.category === selectedCategory.value;
-      }
-      return false;
-    });
-  }
-
-  if (selectedAuthor.value) {
-    filtered = filtered.filter(
-      (post) => getAuthorName(post) === selectedAuthor.value
-    );
-  }
-
-  filteredPosts.value = filtered;
-  currentPage.value = 1;
-  displayedPosts.value = filteredPosts.value.slice(0, POSTS_PER_PAGE);
-};
-
 const selectCategory = (category: string) => {
   selectedAuthor.value = null;
   selectedCategory.value = category;
-  updateFilteredPosts();
+  currentPage.value = 1;
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const selectAuthor = (author: string) => {
   selectedCategory.value = null;
   selectedAuthor.value = author;
-  updateFilteredPosts();
+  currentPage.value = 1;
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const clearFilters = () => {
   selectedCategory.value = null;
   selectedAuthor.value = null;
-  filteredPosts.value = allPosts.value;
   currentPage.value = 1;
-  displayedPosts.value = allPosts.value.slice(0, POSTS_PER_PAGE);
 };
 
-// Data fetching
-const fetchAllBlogPosts = async (): Promise<BlogPost[]> => {
-  try {
-    const { directus, readItems } = useDirectusClient();
-
-    const filter = {
-      _and: [
-        { status: { _eq: "published" } },
-        { date: { _lte: "$NOW(-5 hours)" } },
-      ],
-    };
-
-    const response = await directus.request(
-      readItems("reboot_democracy_blog", {
-        limit: -1,
-        sort: ["-date"],
-        fields: [
-          "*.*",
-          "authors.team_id.*",
-          "authors.team_id.Headshot.*",
-          "image.*",
-        ],
-        filter,
-      })
-    );
-
-    return response as BlogPost[];
-  } catch (error) {
-    console.error("Error fetching all blog posts:", error);
-    return [];
-  }
+// Helper function for responsive design
+const checkIfMobile = () => {
+  isMobile.value = window.innerWidth < 1050;
 };
 
-// Fetch weekly news items
-const fetchWeeklyNewsItems = async (): Promise<NewsItem[]> => {
-  try {
-    const { directus, readItems } = useDirectusClient();
-
-    // Fetch all weekly news entries
-    const weeklyNewsEntries = await directus.request(
-      readItems("reboot_democracy_weekly_news", {
-        limit: -1,
-        sort: ["-id"],
-        fields: ["id", "items.reboot_democracy_weekly_news_items_id.*"],
-        filter: {
-          status: { _eq: "published" },
-        },
-      })
-    );
-
-    if (
-      !weeklyNewsEntries ||
-      !Array.isArray(weeklyNewsEntries) ||
-      weeklyNewsEntries.length === 0
-    ) {
-      return [];
-    }
-
-    // Collect all news items from all entries
-    const allNewsItems: NewsItem[] = [];
-
-    weeklyNewsEntries.forEach((newsEntry) => {
-      if (newsEntry.items && Array.isArray(newsEntry.items)) {
-        const itemsFromThisEntry = newsEntry.items
-          .map((item: any) => {
-            const newsItem = item.reboot_democracy_weekly_news_items_id;
-            if (!newsItem) return null;
-
-            return {
-              title: newsItem.title,
-              excerpt: newsItem.excerpt,
-              author: newsItem.author,
-              category: newsItem.category,
-              date: newsItem.date,
-              url: newsItem.url,
-            };
-          })
-          .filter(Boolean); // Remove any null items
-
-        allNewsItems.push(...itemsFromThisEntry);
-      }
-    });
-
-    return allNewsItems;
-  } catch (error) {
-    console.error("Error fetching weekly news items:", error);
-    return [];
-  }
-};
-
-// Data processing
-const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
-  if (!posts || posts.length === 0) return [];
-
-  const tagCounts = new Map<string, number>();
-
-  posts.forEach((post) => {
-    if ("Tags" in post && Array.isArray(post.Tags)) {
-      post.Tags.forEach((tag) => {
-        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
-      });
-    } else if ("category" in post && post.category) {
-      tagCounts.set(post.category, (tagCounts.get(post.category) || 0) + 1);
-    }
-  });
-
-  return Array.from(tagCounts.entries())
-    .map(([name, count]) => ({ id: name, name, count }))
-    .sort((a, b) => b.count - a.count);
-};
-
-const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
-  if (!posts || posts.length === 0) return [];
-
-  const authorCounts = new Map<string, number>();
-
-  // Only count authors from blog posts, not from weekly news items
-  posts.forEach((post) => {
-    if ("authors" in post && post.authors) {
-      const authorName = getAuthorName(post);
-      if (authorName !== "Unknown Author") {
-        authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
-      }
-    }
-  });
-
-  return Array.from(authorCounts.entries())
-    .map(([name, count]) => ({ id: name, name, count }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-};
-
-// Main data loading
-const fetchAllData = async () => {
-  try {
-    isLoading.value = true;
-    isTagsLoading.value = true;
-    isAuthorsLoading.value = true;
-
-    // Fetch blogs and news items in parallel
-    const [blogPosts, newsItems] = await Promise.all([
-      fetchAllBlogPosts(),
-      fetchWeeklyNewsItems(),
-    ]);
-
-    // Combine blog posts and news items
-    allPosts.value = [...blogPosts, ...newsItems];
-    filteredPosts.value = allPosts.value;
-    displayedPosts.value = allPosts.value.slice(0, POSTS_PER_PAGE);
-
-    // Extract tags and authors
-    tags.value = extractTagsWithCounts(allPosts.value);
-    authors.value = extractAuthorsWithCounts(allPosts.value);
-
-    return { posts: allPosts.value, tags: tags.value, authors: authors.value };
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return { posts: [], tags: [], authors: [] };
-  } finally {
-    isLoading.value = false;
-    isTagsLoading.value = false;
-    isAuthorsLoading.value = false;
-  }
-};
-
-const loadInitialData = async () => {
-  resetSearch();
-
-  try {
-    isEventLoading.value = true;
-
-    // Try to get upcoming event first
-    let event = await fetchUpcomingEvent();
-
-    if (event) {
-      isFutureEvent.value = true;
-    } else {
-      // If no upcoming event, get the latest past event
-      event = await fetchLatestPastEvent();
-      isFutureEvent.value = false;
-    }
-    latestEvent.value = event;
-    await fetchAllData();
-  } catch (error) {
-    console.error("Error loading initial data:", error);
-    dataFetchError.value = "Failed to load content. Please try again later.";
-  } finally {
-    isEventLoading.value = false;
-  }
-};
-
+// Lifecycle hooks
 onMounted(() => {
-  loadInitialData().then(() => {
-    // Check for category query parameter
-    const categoryParam = route.query.category as string | undefined;
-    const sourceParam = route.query.source as string | undefined;
+  checkIfMobile();
+  window.addEventListener("resize", checkIfMobile);
 
-    if (categoryParam) {
-      // Find the matching category from the loaded tags
-      const categoryName = decodeURIComponent(categoryParam);
-      const foundCategory = tags.value.find(
-        (tag) =>
-          tag.name === categoryName ||
-          tag.name.toLowerCase() === categoryName.toLowerCase()
-      );
+  // Process URL parameters for filtering
+  const categoryParam = route.query.category as string | undefined;
+  if (categoryParam) {
+    const categoryName = decodeURIComponent(categoryParam);
+    const foundCategory = tags.value.find(
+      (tag) =>
+        tag.name === categoryName ||
+        tag.name.toLowerCase() === categoryName.toLowerCase()
+    );
 
-      if (foundCategory) {
-        selectedCategory.value = foundCategory.name;
-
-        // If source=all, we want to include both blogs and news items
-        if (sourceParam === "all") {
-          // We don't need to fetch again as fetchAllData() already did this
-          // Just make sure the filtering logic in updateFilteredPosts includes news items
-          updateFilteredPosts();
-        } else {
-          // Regular filtering (current behavior)
-          updateFilteredPosts();
-        }
-      }
+    if (foundCategory) {
+      selectedCategory.value = foundCategory.name;
     }
+  }
 
-    // Keep your existing author parameter handling
-    const authorParam = route.query.author as string | undefined;
-    if (authorParam) {
-      const foundAuthor = authors.value.find(
-        (author) => author.name.toLowerCase() === authorParam.toLowerCase()
-      );
+  const authorParam = route.query.author as string | undefined;
+  if (authorParam) {
+    const foundAuthor = authors.value.find(
+      (author) => author.name.toLowerCase() === authorParam.toLowerCase()
+    );
 
-      if (foundAuthor) {
-        selectedAuthor.value = foundAuthor.name;
-        updateFilteredPosts();
-      }
+    if (foundAuthor) {
+      selectedAuthor.value = foundAuthor.name;
     }
-  });
+  }
 });
 
 onBeforeRouteLeave((to, from, next) => {
@@ -768,8 +684,7 @@ onBeforeRouteLeave((to, from, next) => {
   next();
 });
 
-// Watch for filter changes
-watch([selectedCategory, selectedAuthor], () => {
-  updateFilteredPosts();
+onUnmounted(() => {
+  window.removeEventListener("resize", checkIfMobile);
 });
 </script>

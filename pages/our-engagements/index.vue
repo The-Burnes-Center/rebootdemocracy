@@ -4,7 +4,6 @@ import { format, isPast, isFuture } from "date-fns";
 import { useRoute } from "vue-router";
 import type { IndexData, ResourceItem } from "../../types/index.ts";
 
-
 // State management
 const route = useRoute();
 const articleData = ref<ResourceItem[]>([]);
@@ -45,19 +44,18 @@ const fetchIndex = async () => {
         fields: ["id", "engagement_title", "engagement_description"],
       })
     );
-    
+
     const responseData = response as IndexData;
-    
+
     if (responseData && responseData.id) {
       if (responseData.engagement_title) {
         indexData.value.engagement_title = responseData.engagement_title;
       }
       if (responseData.engagement_description) {
-        indexData.value.engagement_description = responseData.engagement_description;
+        indexData.value.engagement_description =
+          responseData.engagement_description;
       }
     }
-    
-    console.log("Index data used:", indexData.value);
   } catch (error) {
     console.error("Error fetching index data:", error);
   }
@@ -97,7 +95,6 @@ const fetchArticle = async () => {
     // Check if we got any data
     if (response && Array.isArray(response)) {
       articleData.value = response as ResourceItem[];
-      console.log("Article data processed:", articleData.value);
     }
   } catch (error) {
     console.error("Error fetching article data:", error);
@@ -129,7 +126,6 @@ onMounted(() => {
 </script>
 
 <template>
-
   <div class="resource-page our-engagements-page">
     <div v-if="isLoading" class="loading">
       <div class="loader"></div>
@@ -212,16 +208,15 @@ onMounted(() => {
     </template>
   </div>
   <Mailing />
-
 </template>
 
-<style >
+<style>
 /* Import fonts */
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 /* CSS Variables */
 :root {
- --peach-action: rgba(247, 158, 130, 1);
+  --peach-action: rgba(247, 158, 130, 1);
   --peach-light: rgba(255, 233, 229, 1);
   --peach-text: rgba(214, 53, 18, 1);
 }
