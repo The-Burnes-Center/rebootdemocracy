@@ -4,7 +4,7 @@ export function fetchPostData(slug) {
       .readByQuery({
         meta: "total_count",
         limit: -1,
-        fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"],
+        fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*,items.reboot_democracy_weekly_news_items_id.related_links.*, items.reboot_democracy_weekly_news_items_id.related_links.reboot_weekly_news_related_news_id.*"],
         filter: {
           _and: [
             {

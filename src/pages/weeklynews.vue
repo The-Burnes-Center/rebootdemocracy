@@ -222,6 +222,15 @@ export default {
           <a :href="item.reboot_democracy_weekly_news_items_id.url" class="read-article" target="_blank">
             Read article
           </a>
+
+          <div v-if="item.reboot_democracy_weekly_news_items_id.related_links" class="weekly-news-related-articles">
+            <p><b>Related Articles:</b></p>
+            <ul>
+              <li v-for="related_item in item.reboot_democracy_weekly_news_items_id.related_links">
+                <a  :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

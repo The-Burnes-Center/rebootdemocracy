@@ -640,6 +640,10 @@ a.btn:hover{
   grid-area: search;
 }
 
+.weekly-news-related-articles{
+
+  padding: 1rem 0;
+}
 .weeklynews-hero {
   width: 100%; /* This will make sure the header extends full width */
   display: flex;
