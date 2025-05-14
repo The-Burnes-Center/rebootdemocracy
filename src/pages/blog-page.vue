@@ -653,26 +653,26 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="blog-featured-row">
 
 
-    <div class="first-blog-post" v-if="latestBlogPost && !CurrentDate(new Date( weeklyNewsitem.date ))">
-      <a  :href="latestBlogPost.slug ? ('/blog/' + latestBlogPost.slug) : '/newsthatcaughtoureye/' + latestBlogPost.edition">
+    <div class="first-blog-post">
+      <a  :href="blogData[0].slug ? ('/blog/' + blogData[0].slug) : '/newsthatcaughtoureye/' + blogData[0].edition">
         <div v-lazy-load>
-        <img  v-if="latestBlogPost.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
-         <img v-if="!latestBlogPost.image" class="blog-list-img" :data-src="'/newsheader.jpg'">
+        <img  v-if="blogData[0].image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blogData.slice().reverse()[0].image.id+'?width=800'">
+         <img v-if="!blogData[0].image" class="blog-list-img" :data-src="'/newsheader.jpg'">
         </div>
-        <h3>{{latestBlogPost.title}}</h3>
-        <p v-if="latestBlogPost.excerpt ">{{ latestBlogPost.excerpt }}</p>
-        <p v-if="latestBlogPost.summary ">{{ latestBlogPost.summary }}</p>
-        <p>Published on {{ formatDateOnly(new Date( latestBlogPost.date)) }} </p>
-                <div v-if="!latestBlogPost.authors" class="author-list">
-                  <p class="author-name">{{blog_item.author}}</p>
+        <h3>{{blogData[0].title}}</h3>
+        <p v-if="blogData[0].excerpt ">{{ blogData[0].excerpt }}</p>
+        <p v-if="blogData[0].summary ">{{ blogData[0].summary }}</p>
+        <p>Published on {{ formatDateOnly(new Date( blogData[0].date)) }} </p>
+                <div v-if="!blogData[0].authors" class="author-list">
+                  <p class="author-name">{{blogData[0].author}}</p>
                 </div>
-        <div v-if="latestBlogPost.authors"  class="author-list">
-            <p class="author-name">{{latestBlogPost.authors.length>0?'By':''}}</p>
-              <div v-for="(author,i) in latestBlogPost.authors">
+        <div v-if="blogData[0].authors"  class="author-list">
+            <p class="author-name">{{blogData[0].authors.length>0?'By':''}}</p>
+              <div v-for="(author,i) in blogData[0].authors">
                 <div class="author-item">               
                   <div class="author-details">
                     <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                      <p class="author-name" v-if="latestBlogPost.authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
+                      <p class="author-name" v-if="blogData[0].authors.length > 1 && i < blogData.slice().reverse()[0].authors.length - 1">and</p>
                   </div>
                 </div>
               </div>
