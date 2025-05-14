@@ -130,6 +130,11 @@ mounted() {
     this.directus.items('reboot_democracy_weekly_news').readByQuery({
       meta: 'total_count',
       limit: -1,
+        filter: {
+        _and: [
+          { date: { _lte: nowOffset } },
+        ]
+      },
       fields: [
         '*.*'
       ],
