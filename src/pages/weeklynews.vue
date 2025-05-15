@@ -158,10 +158,12 @@ export default {
     <header-comp></header-comp>
 
     <div class="weeklynews-hero">
-      <img  class="weeklynews-img" src= "../assets/newsheader.jpg" />
+          <img v-if="!postData[0].image.id" class="weeklynews-img" src= "../assets/newsheader.jpg" />
+          <img v-if="postData[0].image.id"  class="weeklynews-img" :src= "'https://content.thegovlab.com/assets/'+ postData[0].image.id" />
+        
       <div class="weeklynews-details">
         <h1>{{postData[0].title}}</h1>
-         <p>Published on by {{postData[0].author}} on {{ formatDateOnly(new Date(postData[0].date)) }} </p>
+         <p>Published by {{postData[0].author}} on {{ formatDateOnly(new Date(postData[0].date)) }} </p>
       </div>
     </div>
     <!-- Table of Contents -->
