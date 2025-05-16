@@ -426,31 +426,27 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
     .sort((a, b) => a.name.localeCompare(b.name));
 };
 
-// Async Data Fetching - Server Side
-const { data: allPostsData, pending: isPostsLoading } = await useAsyncData(
-  "all-blog-posts",
+const { data: allPostsData } = await useAsyncData(
+  'all-blog-posts',
   async () => {
-    try {
-      // Fetch blogs and news in parallel
-      const [blogPosts, newsItems] = await Promise.all([
-        fetchAllBlogPosts(),
-        fetchWeeklyNewsItems(),
-      ]);
+    const [blogPosts, newsItems] = await Promise.all([
+      fetchAllBlogPosts(),      // newest-first from Directus
+      fetchWeeklyNewsItems()
+    ])
 
-      // Combine blog posts and news items
-      const allPosts = [...blogPosts, ...newsItems];
+    const sortDesc   = (a:any, b:any) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
 
-      // Sort combined results by date (newest first)
-      return allPosts.sort(
-        (a, b) =>
-          new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
-      );
-    } catch (error) {
-      console.error("Error fetching all posts:", error);
-      return [];
-    }
-  }
-);
+    const newsSorted = [...newsItems].sort(sortDesc)
+
+    // final array: every blog → every news
+    return [...blogPosts, ...newsSorted]
+  },
+  { server: true }   // optional: don’t re-fetch in browser
+)
+
+
+
 
 // Prefetch tags data
 const { data: tagsData, pending: isTagsLoading } = await useAsyncData(
