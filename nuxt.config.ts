@@ -33,7 +33,6 @@ export default defineNuxtConfig({
   async 'nitro:config'(nitroConfig) {
      const blogRoutes = await getStaticBlogRoutes();
      const categoryRoutes = await getStaticCategoryRoutes();
-     console.log(categoryRoutes);
 
     nitroConfig.prerender = nitroConfig.prerender ?? {};
     nitroConfig.prerender.routes = [

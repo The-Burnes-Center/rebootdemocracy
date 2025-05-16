@@ -313,6 +313,7 @@ watch(
         : blogs;
       displayPosts.value = featured ? [featured, ...rest] : blogs;
       blogsFetched.value = true;
+      blogsInitialized.value = true 
     }
   },
   { immediate: true }
@@ -574,8 +575,8 @@ const handleEventClick = (event: Event | null) => {
 const handleTabChange = (index: number, name: string) => {
   activeTab.value = index;
   if (name === "latest-posts") {
-    resetSearch();
-    loadBlogData();
+   resetSearch()
+    if (!blogsInitialized.value) loadBlogData()
   }
 };
 
