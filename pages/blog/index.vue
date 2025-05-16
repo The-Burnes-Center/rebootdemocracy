@@ -273,6 +273,8 @@ import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
 
+const props = defineProps<{ initialCategory?: string }>();
+
 //meta information
 useHead({
   title: "RebootDemocracy.AI",
@@ -596,7 +598,6 @@ const getPostDate = (post: BlogPost | NewsItem): Date => {
   return new Date();
 };
 
-
 // Navigation and event handlers
 const handlePostClick = (post: BlogPost | NewsItem): void => {
   if ("slug" in post && post.slug) {
@@ -652,20 +653,16 @@ onMounted(() => {
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
 
-  // Process URL parameters for filtering
-  const categoryParam = route.query.category as string | undefined;
-  if (categoryParam) {
-    const categoryName = decodeURIComponent(categoryParam);
-    const foundCategory = tags.value.find(
-      (tag) =>
-        tag.name === categoryName ||
-        tag.name.toLowerCase() === categoryName.toLowerCase()
-    );
+  // Prefer path param; fall back to ?category= for legacy links
+const categoryParam = props.initialCategory ?? (route.query.category as string | undefined)
+if (categoryParam) {
+  const categoryName = decodeURIComponent(categoryParam)
+  const found = tags.value.find(
+    (t) => t.name.toLowerCase() === categoryName.toLowerCase()
+  )
+  if (found) selectedCategory.value = found.name
+}
 
-    if (foundCategory) {
-      selectedCategory.value = foundCategory.name;
-    }
-  }
 
   const authorParam = route.query.author as string | undefined;
   if (authorParam) {

@@ -131,11 +131,12 @@ const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
 };
 
 const menuItems = computed<MenuItem[]>(() => {
-  const topicChildren = (props.topicTags || []).map(tag => ({
-    label: tag,
-    name: `topic-${tag.toLowerCase().replace(/\s+/g, "-")}`,
-    to: `/blog?category=${encodeURIComponent(tag)}`,
-  }));
+  const topicChildren: MenuItem[] = (props.topicTags ?? []).map(tag => ({
+  label: tag,
+  name:  `topic-${tag.toLowerCase().replace(/\s+/g,'-')}`,
+  to:    `/blog/category/${encodeURIComponent(tag)}`
+}))
+
 
   return [
     { label: "Topic", name: "topic", children: topicChildren },

@@ -1,6 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia'; 
 import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
+import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 
 
 export default defineNuxtConfig({
@@ -30,15 +31,15 @@ export default defineNuxtConfig({
 
  hooks: {
   async 'nitro:config'(nitroConfig) {
-    const dynamicRoutes = await getStaticBlogRoutes();
-
-    console.log('[SSG] Pre-rendering dynamic blog routes:');
-    console.log(dynamicRoutes);
+     const blogRoutes = await getStaticBlogRoutes();
+     const categoryRoutes = await getStaticCategoryRoutes();
+     console.log(categoryRoutes);
 
     nitroConfig.prerender = nitroConfig.prerender ?? {};
     nitroConfig.prerender.routes = [
       ...(nitroConfig.prerender.routes ?? []),
-      ...dynamicRoutes
+      ...blogRoutes,
+      ...categoryRoutes
     ];
   }
 },
