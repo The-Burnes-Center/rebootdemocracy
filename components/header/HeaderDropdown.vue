@@ -6,7 +6,7 @@
         :key="idx"
         :to="item.to"
         class="header-dropdown__item"
-        :target="item.external ? '_blank' : 'self'"
+        :target="item.external ? '_blank' : '_self'"
         @click="handleItemClick"
       >
         <span class="header-dropdown__itemLabel">{{ item.label }}</span>
