@@ -7,6 +7,8 @@
         :to="item.to"
         class="header-dropdown__item"
         :target="item.external ? '_blank' : '_self'"
+        @click="handleItemClick(item, $event)"
+
       >
         <span class="header-dropdown__itemLabel">{{ item.label }}</span>
       </NuxtLink>
@@ -28,6 +30,10 @@ defineProps<{
   openDropdown: number | null;
 }>();
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'item-click']);
+function handleItemClick(item: DropdownItem, event: MouseEvent) {
+   emit('close');
+  emit('item-click', item, event);
+}
 
 </script>

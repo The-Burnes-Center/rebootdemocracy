@@ -103,14 +103,15 @@
     :openDropdown="openDropdown"
     :index="openDropdown"
     @close="closeDropdown"
+    @item-click="emitItemClick"
   />
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, watch} from 'vue';
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import type { DropdownItem, MenuItem } from "@/types/index.ts";
 import AboutDropdown from "./AboutDropdown.vue";
-import{ useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 
 interface Props {
   items: MenuItem[];
@@ -152,19 +153,25 @@ function closeDropdown(): void {
 function handleOutsideClick(event: MouseEvent): void {
   if (!isMobile.value && openDropdown.value !== null) {
     const menuElement = document.querySelector(".menu__section");
-    const dropdownElement = document.querySelector(".header-dropdown__container");
-    const aboutDropdownElement = document.querySelector(".about-dropdown__container");
+    const dropdownElement = document.querySelector(
+      ".header-dropdown__container"
+    );
+    const aboutDropdownElement = document.querySelector(
+      ".about-dropdown__container"
+    );
 
     if (event.target instanceof Element) {
-      const clickedOnMenuLabel = event.target.closest('.header-menu__label');
+      const clickedOnMenuLabel = event.target.closest(".header-menu__label");
       if (clickedOnMenuLabel) {
         return;
       }
     }
 
-    const clickedOutside = !(menuElement?.contains(event.target as Node) ||
-                             dropdownElement?.contains(event.target as Node) ||
-                             aboutDropdownElement?.contains(event.target as Node));
+    const clickedOutside = !(
+      menuElement?.contains(event.target as Node) ||
+      dropdownElement?.contains(event.target as Node) ||
+      aboutDropdownElement?.contains(event.target as Node)
+    );
 
     if (clickedOutside) {
       openDropdown.value = null;
@@ -174,13 +181,13 @@ function handleOutsideClick(event: MouseEvent): void {
 
 // Emit click event to parent to close mobile menu
 function emitItemClick(item: MenuItem, event: MouseEvent): void {
-  emit('item-click', item, event);
+  emit("item-click", item, event);
   // Close dropdown after clicking an item
   openDropdown.value = null;
 }
 watch(route, () => {
-  openDropdown.value = null
-})
+  openDropdown.value = null;
+});
 </script>
 
 <style scoped>
