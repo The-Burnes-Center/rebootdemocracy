@@ -560,7 +560,7 @@ const navigateToBlogPost = (post: BlogPost | NewsItem) => {
     resetSearch();
     router.push(`/blog/${post.slug}`);
   } else if ("url" in post && post.url) {
-    window.open(post.url, "_blank");
+     window.location.href = post.url
   } else {
     console.error("Cannot navigate: Item has no slug or URL", post);
   }
@@ -568,7 +568,7 @@ const navigateToBlogPost = (post: BlogPost | NewsItem) => {
 
 const handleEventClick = (event: Event | null) => {
   if (event?.link) {
-    window.open(event.link, "_blank");
+     window.location.href = event.link
   }
 };
 
