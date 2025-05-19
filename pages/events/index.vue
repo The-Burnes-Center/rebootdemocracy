@@ -21,7 +21,6 @@ export default defineComponent({
     const alleventsData = ref<EventItem[]>([]);
     const path = ref(route.fullPath);
       useHead({
-        title: "InnovateUS",
         meta: [
           { name: "title", content: "Reboot Democracy Lecture Series" },
           { property: "og:title", content: "Reboot Democracy Lecture Series" },
