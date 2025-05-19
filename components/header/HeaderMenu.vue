@@ -73,7 +73,7 @@
           }}</span>
         </NuxtLink>
       </div>
-      
+
       <!-- Render AboutDropdown directly inside the about menu item wrapper -->
       <AboutDropdown
         v-if="
@@ -90,7 +90,7 @@
       />
     </div>
   </section>
-  
+
   <!-- Render standard HeaderDropdown for other dropdowns -->
   <HeaderDropdown
     v-if="
@@ -107,9 +107,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch} from 'vue';
 import type { DropdownItem, MenuItem } from "@/types/index.ts";
 import AboutDropdown from "./AboutDropdown.vue";
+import{ useRoute } from "vue-router";
 
 interface Props {
   items: MenuItem[];
@@ -122,6 +123,7 @@ const emit = defineEmits(["item-click"]);
 const openDropdown = ref<number | null>(null);
 const isMobile = ref<boolean>(false);
 const menuItemRefs = ref<HTMLElement[]>([]);
+const route = useRoute();
 
 // Check if mobile on mount and when resized
 onMounted(() => {
@@ -152,18 +154,18 @@ function handleOutsideClick(event: MouseEvent): void {
     const menuElement = document.querySelector(".menu__section");
     const dropdownElement = document.querySelector(".header-dropdown__container");
     const aboutDropdownElement = document.querySelector(".about-dropdown__container");
-    
+
     if (event.target instanceof Element) {
       const clickedOnMenuLabel = event.target.closest('.header-menu__label');
       if (clickedOnMenuLabel) {
         return;
       }
     }
-    
-    const clickedOutside = !(menuElement?.contains(event.target as Node) || 
+
+    const clickedOutside = !(menuElement?.contains(event.target as Node) ||
                              dropdownElement?.contains(event.target as Node) ||
                              aboutDropdownElement?.contains(event.target as Node));
-    
+
     if (clickedOutside) {
       openDropdown.value = null;
     }
@@ -176,6 +178,9 @@ function emitItemClick(item: MenuItem, event: MouseEvent): void {
   // Close dropdown after clicking an item
   openDropdown.value = null;
 }
+watch(route, () => {
+  openDropdown.value = null
+})
 </script>
 
 <style scoped>
