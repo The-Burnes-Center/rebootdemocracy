@@ -111,18 +111,16 @@ const toggleMobileMenu = (): void => {
 };
 
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
-  if (item.name === "team") {
-    event.preventDefault();
-    router.push({
-      path: "/about",
-      hash: "#team-grid",
-    });
+  event.preventDefault();
+  
+  if (item.name === 'team') {
+    router.push({ path: '/about', hash: '#team-grid' });
   } else if (item.external && item.to) {
-    event.preventDefault();
     window.location.href = item.to;
+  } else if (item.to) {
+    router.push(item.to);
   }
 };
-
 const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
   handleMenuClick(item, event);
   if (isMobile.value) {
@@ -131,12 +129,11 @@ const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
 };
 
 const menuItems = computed<MenuItem[]>(() => {
-  const topicChildren: MenuItem[] = (props.topicTags ?? []).map(tag => ({
-  label: tag,
-  name:  `topic-${tag.toLowerCase().replace(/\s+/g,'-')}`,
-  to:    `/blog/category/${encodeURIComponent(tag)}`
-}))
-
+  const topicChildren: MenuItem[] = (props.topicTags ?? []).map((tag) => ({
+    label: tag,
+    name: `topic-${tag.toLowerCase().replace(/\s+/g, "-")}`,
+    to: `/blog/category/${encodeURIComponent(tag)}`,
+  }));
 
   return [
     { label: "Topic", name: "topic", children: topicChildren },
@@ -152,17 +149,17 @@ const menuItems = computed<MenuItem[]>(() => {
       ],
     },
     {
-      label: "Our Work",
-      name: "work",
-      children: [
-        { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html" },
-        { label: "InnovateUS", name: "teachings", to: "https://innovate-us.org/" },
-        { label: "Public Entrepreneur", name: "projects", to: "https://www.publicentrepreneur.org/" },
-        { label: "Engagements", name: "partners", to: "/our-engagements" },
-        { label: "Research", name: "research", to: "/our-research" },
-        { label: "More Resources", name: "resources", to: "/more-resources" },
-      ],
-    },
+  label: "Our Work",
+  name: "work",
+  children: [
+    { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html", external: true },
+    { label: "InnovateUS", name: "teachings", to: "https://innovate-us.org/", external: true },
+    { label: "Public Entrepreneur", name: "projects", to: "https://www.publicentrepreneur.org/", external: true },
+    { label: "Engagements", name: "partners", to: "/our-engagements" },
+    { label: "Research", name: "research", to: "/our-research" },
+    { label: "More Resources", name: "resources", to: "/more-resources" },
+  ],
+},
     { label: "Sign up", name: "signup", to: "/signup" },
   ];
 });

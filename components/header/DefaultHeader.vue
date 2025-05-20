@@ -14,23 +14,54 @@
 
     <!-- Mobile menu toggle -->
     <div class="mobile-menu-toggle" @click="toggleMobileMenu" v-if="isMobile">
-      <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M3 6H21M3 12H21M3 18H21" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      <svg
+        v-if="!mobileMenuOpen"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <path
+          d="M3 6H21M3 12H21M3 18H21"
+          stroke="black"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
-      <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M5 5L19 19M5 19L19 5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <svg
+        v-else
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <path
+          d="M5 5L19 19M5 19L19 5"
+          stroke="black"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </div>
 
-      <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
-        <HeaderMenu
-          :items="menuItems"
-          :class="{ 'mobile-menu': isMobile }"
-          @item-click="handleMenuItemClick"
-        />
-      </nav>
+    <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
+      <HeaderMenu
+        :items="menuItems"
+        :class="{ 'mobile-menu': isMobile }"
+        @item-click="handleMenuItemClick"
+      />
+    </nav>
 
-    <Button class="btn-header" variant="secondary" height="36px" @click="onClick">
+    <Button
+      class="btn-header"
+      variant="secondary"
+      height="36px"
+      @click="onClick"
+    >
       Sign up for updates
     </Button>
   </header>
@@ -39,7 +70,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import type { MenuItem } from "@/types/index.ts";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 interface Props {
   topicTags: string[];
@@ -56,12 +87,14 @@ const toggleMobileMenu = (): void => {
 };
 
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
+  event.preventDefault();
+  
   if (item.name === 'team') {
-    event.preventDefault();
     router.push({ path: '/about', hash: '#team-grid' });
   } else if (item.external && item.to) {
-    event.preventDefault();
     window.location.href = item.to;
+  } else if (item.to) {
+    router.push(item.to);
   }
 };
 
@@ -71,11 +104,11 @@ const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
 };
 
 const baseMenuItems = computed<MenuItem[]>(() => {
- const topicChildren: MenuItem[] = (props.topicTags ?? []).map(tag => ({
-  label: tag,
-  name:  `topic-${tag.toLowerCase().replace(/\s+/g,'-')}`,
-  to:    `/blog/category/${encodeURIComponent(tag)}`
-}))
+  const topicChildren: MenuItem[] = (props.topicTags ?? []).map((tag) => ({
+    label: tag,
+    name: `topic-${tag.toLowerCase().replace(/\s+/g, "-")}`,
+    to: `/blog/category/${encodeURIComponent(tag)}`,
+  }));
 
   return [
     { label: "Topic", name: "topic", children: topicChildren },
@@ -94,9 +127,24 @@ const baseMenuItems = computed<MenuItem[]>(() => {
       label: "Our Work",
       name: "work",
       children: [
-        { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html" },
-        { label: "InnovateUS", name: "teachings", to: "https://innovate-us.org/" },
-        { label: "Public Entrepreneur", name: "projects", to: "https://www.publicentrepreneur.org/" },
+        {
+          label: "About Beth Noveck",
+          name: "research",
+          to: "https://thegovlab.org/beth-simone-noveck.html",
+          external: true,
+        },
+        {
+          label: "InnovateUS",
+          name: "teachings",
+          to: "https://innovate-us.org/",
+          external: true,
+        },
+        {
+          label: "Public Entrepreneur",
+          name: "projects",
+          to: "https://www.publicentrepreneur.org/",
+          external: true,
+        },
         { label: "Engagements", name: "partners", to: "/our-engagements" },
         { label: "Research", name: "research", to: "/our-research" },
         { label: "More Resources", name: "resources", to: "/more-resources" },
