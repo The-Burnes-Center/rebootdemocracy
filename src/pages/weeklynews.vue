@@ -29,7 +29,7 @@ export default {
       slug: this.$route.params.name,
       modalData: [],
       showmodal: false,
-      directus: new Directus("https://content.thegovlab.com/"),
+      directus: new Directus("https://directus.theburnescenter.org/"),
       path: this.$route.fullPath,
     };
   },
@@ -159,7 +159,7 @@ export default {
 
     <div class="weeklynews-hero">
           <img v-if="!postData[0].image.id" class="weeklynews-img" src= "../assets/newsheader.jpg" />
-          <img v-if="postData[0].image.id"  class="weeklynews-img" :src= "'https://content.thegovlab.com/assets/'+ postData[0].image.id" />
+          <img v-if="postData[0].image.id"  class="weeklynews-img" :src= "'https://directus.theburnescenter.org/assets/'+ postData[0].image.id" />
         
       <div class="weeklynews-details">
         <h1>{{postData[0].title}}</h1>

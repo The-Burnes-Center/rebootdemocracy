@@ -34,7 +34,7 @@ export default {
       slug: this.$route.params.name,
       modalData: [],
       showmodal: false,
-      directus: new Directus("https://content.thegovlab.com/"),
+      directus: new Directus("https://directus.theburnescenter.org/"),
       path: this.$route.fullPath,
 
           // this.debounceSearch = _.debounce(this.searchBlog, 500);
