@@ -1,167 +1,109 @@
-<script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import { useRoute, useHead, useAsyncData } from "#imports";
 import { format, isPast, isFuture } from "date-fns";
-import { useRoute } from "vue-router";
-import type { Event, EventItem, GeneralEventsSeries } from "../../types/Event";
-export default defineComponent({
-  setup() {
-    const route = useRoute();
-    const iniLoad = ref(0);
-    const showingFullText = ref(true);
-    const accordionContent = ref("");
-    const indexData = ref<any[]>([]);
-    const eventsData = ref<EventItem[]>([]);
-    const InnovateUSData = ref<any[]>([]);
-    const selectedStatus = ref<GeneralEventsSeries | undefined>(undefined);
-    const eventTitle = ref("");
-    const eventDescription = ref("");
-    const eventFullDescription = ref("");
-    const seriesData = ref<GeneralEventsSeries[]>([]);
-    const pageslug = ref(route.query);
-    const alleventsData = ref<EventItem[]>([]);
-    const path = ref(route.fullPath);
-      useHead({
-        meta: [
-          { name: "title", content: "Reboot Democracy Lecture Series" },
-          { property: "og:title", content: "Reboot Democracy Lecture Series" },
-          {
-            property: "og:description",
-            content:
-              "How can we leverage the power of artificial intelligence to reimagine democracy?",
-          },
-          {
-            property: "og:image",
-            content: "https://rebootdemocracy.ai/meta-temp.png",
-          },
-          {
-            property: "twitter:title",
-            content: "Reboot Democracy Lecture Series",
-          },
-          {
-            property: "twitter:description",
-            content:
-              "How can we leverage the power of artificial intelligence to reimagine democracy?",
-          },
-          {
-            property: "twitter:image",
-            content: "https://rebootdemocracy.ai/meta-temp.png",
-          },
-          { property: "twitter:card", content: "summary_large_image" },
-        ],
-      });
-    const fetchData = async () => {
-      try {
-        indexData.value = await fetchIndexData();
-        const events = await fetchEventsData();
-        eventsData.value = events;
-        // Sort events by date
-        eventsData.value.sort(
-          (b, a) =>
-            new Date(b.event_element.date).getTime() -
-            new Date(a.event_element.date).getTime()
-        );
-        // Filter events by series - with safe property access
-        const tempData = eventsData.value.filter((e) => {
-          // Make sure the event has event_series and it's not empty
-          if (
-            !e.event_element.event_series ||
-            e.event_element.event_series.length === 0
-          ) {
-            return false;
-          }
-          // Make sure event_series[0] has general_events_series_id
-          const firstSeries = e.event_element.event_series[0];
-          if (!firstSeries.general_events_series_id) {
-            return false;
-          }
-          // Check the title
-          return (
-            firstSeries.general_events_series_id.title ===
-            "Reboot Democracy Lecture Series"
-          );
-        });
-        alleventsData.value = tempData;
-        alleventsData.value.sort(
-          (b, a) =>
-            new Date(b.event_element.date).getTime() -
-            new Date(a.event_element.date).getTime()
-        );
-        const seriesResult = await fetchSeriesData();
-        seriesData.value = seriesResult;
-        if (seriesData.value && seriesData.value.length > 1) {
-          eventTitle.value = seriesData.value[1].title || "";
-          eventDescription.value = seriesData.value[1].description || "";
-          eventFullDescription.value =
-            seriesData.value[1].full_description || "";
-          formattedBody();
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const formattedBody = () => {
-      if (showingFullText.value) {
-        accordionContent.value = eventFullDescription.value;
-      } else {
-        if (eventFullDescription.value) {
-          const lines = eventFullDescription.value.split("\n");
-          const truncatedLines = lines.slice(0, 2);
-          accordionContent.value = truncatedLines.join("\n");
-        }
-      }
-    };
-    const scrollMeTo = (refName: string) => {
-      const element = document.querySelector(
-        `[ref="${refName}"]`
-      ) as HTMLElement;
-      if (element) {
-        const top = element.offsetTop - 80;
-        window.scrollTo(0, top);
-      }
-    };
-    // Helper formatting functions
-    const formatDateTime = (d1: Date): string => {
-      return format(d1, "MMMM d, yyyy, h:mm aa");
-    };
-    const formatDateOnly = (d1: Date): string => {
-      return format(d1, "MMMM d, yyyy");
-    };
-    const isPastDate = (d1: Date): boolean => {
-      return isPast(d1);
-    };
-    const isFutureDate = (d1: Date): boolean => {
-      return isFuture(new Date(d1));
-    };
-    // Call fetchData when component is mounted
-    onMounted(() => {
-      fetchData();
-    });
-    return {
-      iniLoad,
-      showingFullText,
-      accordionContent,
-      indexData,
-      eventsData,
-      InnovateUSData,
-      selectedStatus,
-      eventTitle,
-      eventDescription,
-      eventFullDescription,
-      seriesData,
-      pageslug,
-      alleventsData,
-      path,
-      formatDateTime,
-      formatDateOnly,
-      isPastDate,
-      isFutureDate,
-      formattedBody,
-      scrollMeTo,
-      getImageUrl,
-    };
-  },
+import {
+  fetchIndexData,
+  fetchEventsData,
+  fetchSeriesData,
+} from "@/composables/fetchEvent";
+import type { EventItem, GeneralEventsSeries } from "@/types/Event";
+
+const route = useRoute();
+const iniLoad = ref(0);
+const showingFullText = ref(true);
+
+
+useHead({
+  meta: [
+    { name: "title", content: "Reboot Democracy Lecture Series" },
+    { property: "og:title", content: "Reboot Democracy Lecture Series" },
+    {
+      property: "og:description",
+      content:
+        "How can we leverage the power of artificial intelligence to reimagine democracy?",
+    },
+    {
+      property: "og:image",
+      content: "https://rebootdemocracy.ai/meta-temp.png",
+    },
+    { property: "twitter:title", content: "Reboot Democracy Lecture Series" },
+    {
+      property: "twitter:description",
+      content:
+        "How can we leverage the power of artificial intelligence to reimagine democracy?",
+    },
+    {
+      property: "twitter:image",
+      content: "https://rebootdemocracy.ai/meta-temp.png",
+    },
+    { property: "twitter:card", content: "summary_large_image" },
+  ],
 });
+
+const { data: indexData } = await useAsyncData("reboot-index", fetchIndexData);
+const { data: allEventsRaw } = await useAsyncData(
+  "reboot-events",
+  fetchEventsData
+);
+const { data: seriesData } = await useAsyncData(
+  "reboot-series",
+  fetchSeriesData
+);
+
+const eventsData = ref(allEventsRaw.value || []);
+eventsData.value.sort(
+  (a, b) =>
+    new Date(a.event_element.date).getTime() -
+    new Date(b.event_element.date).getTime()
+);
+
+const alleventsData = computed(() =>
+  eventsData.value.filter((e) => {
+    const firstSeries =
+      e.event_element.event_series?.[0]?.general_events_series_id;
+    return firstSeries?.title === "Reboot Democracy Lecture Series";
+  })
+);
+
+const seriesInfo = computed(() =>
+  (seriesData.value || []).find(
+    (s) => s.title === "Reboot Democracy Lecture Series"
+  )
+);
+
+const eventTitle = computed(() => seriesInfo.value?.title || "");
+const eventDescription = computed(() => seriesInfo.value?.description || "");
+const eventFullDescription = computed(
+  () => seriesInfo.value?.full_description || ""
+);
+
+const accordionContent = computed(() => {
+  if (showingFullText.value) return eventFullDescription.value;
+  const lines = eventFullDescription.value?.split("\n") || [];
+  return lines.slice(0, 2).join("\n");
+});
+
+const pageslug = ref(route.query);
+const path = ref(route.fullPath);
+
+const scrollMeTo = (refName: string) => {
+  if (process.client) {
+    const element = document.querySelector(`[ref="${refName}"]`) as HTMLElement;
+    if (element) {
+      const top = element.offsetTop - 80;
+      window.scrollTo(0, top);
+    }
+  }
+};
+
+const formatDateTime = (d1: Date): string =>
+  format(d1, "MMMM d, yyyy, h:mm aa");
+const formatDateOnly = (d1: Date): string => format(d1, "MMMM d, yyyy");
+const isPastDate = (d1: Date): boolean => isPast(d1);
+const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 </script>
+
 <template>
   <div class="events-page">
     <div class="events-hero">
@@ -350,7 +292,7 @@ export default defineComponent({
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
- :root {
+:root {
   font-size: 16px;
   --yellow-action: rgba(255, 180, 70, 1);
   --blue-text: rgba(0, 120, 156, 1);
