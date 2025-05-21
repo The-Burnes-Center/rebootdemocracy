@@ -1,16 +1,27 @@
+<!-- HeaderDropdown.vue (Fixed version) -->
 <template>
   <div class="header-dropdown__container" v-if="openDropdown === index">
     <div class="header-dropdown__inner">
-      <NuxtLink
-        v-for="(item, idx) in items"
-        :key="idx"
-        :to="item.to"
-        class="header-dropdown__item"
-        :target="item.external ? '_blank' : 'self'"
-        @click="handleItemClick"
-      >
-        <span class="header-dropdown__itemLabel">{{ item.label }}</span>
-      </NuxtLink>
+      <template v-for="(item, idx) in items" :key="idx">
+        <!-- Use regular anchor tags with full URLs for external links -->
+        <a 
+          v-if="item.external && item.to" 
+          :href="item.to"
+          class="header-dropdown__item"
+        >
+          <span class="header-dropdown__itemLabel">{{ item.label }}</span>
+        </a>
+        
+        <!-- Use NuxtLink for internal routes -->
+        <NuxtLink 
+          v-else
+          :to="item.to || ''"
+          class="header-dropdown__item"
+          @click="handleInternalClick(item, $event)"
+        >
+          <span class="header-dropdown__itemLabel">{{ item.label }}</span>
+        </NuxtLink>
+      </template>
     </div>
   </div>
 </template>
@@ -29,10 +40,11 @@ defineProps<{
   openDropdown: number | null;
 }>();
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'item-click']);
 
-function handleItemClick() {
+function handleInternalClick(item: DropdownItem, event: MouseEvent) {
   emit('close');
+  emit('item-click', item, event);
 }
-
 </script>
+

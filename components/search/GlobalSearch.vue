@@ -194,7 +194,7 @@ function getItemTag(item: SearchResultItem): string {
 
 function handleItemClick(item: SearchResultItem): void {
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    openInNewTab(item.item?.url);
+    openInSameTab(item.item?.url);
   } else {
     navigateToBlogPost(item);
   }
@@ -208,11 +208,13 @@ function navigateToBlogPost(item: SearchResultItem) {
   }
 }
 
-function openInNewTab(url: string | undefined) {
+
+function openInSameTab(url: string | undefined) {
   if (url) {
-    window.open(url, "_blank");
+    window.location.href = url;
   }
 }
+
 
 function truncateText(text: string, maxLength: number): string {
   return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";

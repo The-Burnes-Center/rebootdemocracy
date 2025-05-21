@@ -1,6 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia'; 
 import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
+import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 
 
 export default defineNuxtConfig({
@@ -8,7 +9,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
   
-  modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag', 'nuxt-build-cache'],
+  modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag', 'nuxt-build-cache', 'nuxt-lazy-hydrate'],
   gtag: {
     id: 'G-L78LX2HS2N',
     enabled: true,
@@ -30,15 +31,14 @@ export default defineNuxtConfig({
 
  hooks: {
   async 'nitro:config'(nitroConfig) {
-    const dynamicRoutes = await getStaticBlogRoutes();
-
-    console.log('[SSG] Pre-rendering dynamic blog routes:');
-    console.log(dynamicRoutes);
+     const blogRoutes = await getStaticBlogRoutes();
+     const categoryRoutes = await getStaticCategoryRoutes();
 
     nitroConfig.prerender = nitroConfig.prerender ?? {};
     nitroConfig.prerender.routes = [
       ...(nitroConfig.prerender.routes ?? []),
-      ...dynamicRoutes
+      ...blogRoutes,
+      ...categoryRoutes
     ];
   }
 },
@@ -52,6 +52,7 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
+    '/blog': { prerender: true },
     '/blog/**': { prerender: true }
   },
   css: [

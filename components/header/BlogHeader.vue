@@ -59,6 +59,7 @@
         />
       </svg>
     </div>
+ 
     <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
       <HeaderMenu
         :items="menuItems"
@@ -66,6 +67,8 @@
         @item-click="handleMenuItemClick"
       />
     </nav>
+
+
     <div class="search-container" v-if="!isMobile">
       <ais-instant-search
         :index-name="indexName"
@@ -78,9 +81,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import type { BlogPost, MenuItem } from "@/types/index.ts";
+import type { MenuItem } from "@/types/index.ts";
 
 import {
   AisInstantSearch,
@@ -89,10 +92,11 @@ import {
 } from "vue-instantsearch/vue3/es";
 import useSearchState from "../../composables/useSearchState.js";
 
-interface TagItem {
-  id: string;
-  name: string;
+interface Props {
+  topicTags: string[];
 }
+
+const props = defineProps<Props>();
 
 const router = useRouter();
 const route = useRoute();
@@ -102,118 +106,74 @@ const { updateSearchQuery, setIndexName, getAlgoliaClient } = useSearchState();
 const algoliaClient = getAlgoliaClient();
 setIndexName(indexName);
 
-// State for mobile menu
-const mobileMenuOpen = ref<boolean>(false);
-const isMobile = ref<boolean>(false);
+const mobileMenuOpen = ref(false);
+const isMobile = ref(false);
 
-// Toggle mobile menu
 const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
 
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
-  // Handle 'Our Team' anchor navigation
-  if (item.name === "team") {
-    event.preventDefault();
-    router.push({
-      path: "/about",
-      hash: "#team-grid",
-    });
-  }
-  // Handle external links
-  else if (item.external && item.to) {
-    event.preventDefault();
+  event.preventDefault();
+  
+  if (item.name === 'team') {
+    router.push({ path: '/about', hash: '#team-grid' });
+  } else if (item.external && item.to) {
     window.location.href = item.to;
+  } else if (item.to) {
+    router.push(item.to);
   }
 };
-
 const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
   handleMenuClick(item, event);
-
   if (isMobile.value) {
     mobileMenuOpen.value = false;
   }
 };
 
-const menuItems = ref<MenuItem[]>([
-  {
-    label: "Topic",
-    name: "topic",
-    children: [],
-  },
-  { label: "Home", name: "home", to: "/" },
-  { label: "Blog", name: "blog", to: "/blog" },
-  { label: "Events", name: "events", to: "/events" },
-  {
-    label: "About",
-    name: "about",
-    children: [
-      { label: "About Us", name: "about", to: "/about" },
-      { label: "Our Team", name: "team", to: "/about#team-grid" },
-    ],
-  },
-  {
-    label: "Our Work",
-    name: "work",
-    children: [
-      {
-        label: "About Beth Noveck",
-        name: "research",
-        to: "https://thegovlab.org/beth-simone-noveck.html",
-      },
-      {
-        label: "InnovateUS",
-        name: "teachings",
-        to: "https://innovate-us.org/",
-      },
-      {
-        label: "Public Entrepreneur",
-        name: "projects",
-        to: "https://www.publicentrepreneur.org/",
-      },
-      { label: "Engagements", name: "partners", to: "/our-engagements" },
-      { label: "Research", name: "research", to: "/our-research" },
-      { label: "More Resources", name: "resources", to: "/more-resources" },
-    ],
-  },
-  { label: "Sign up", name: "signup", to: "/signup" },
-]);
+const menuItems = computed<MenuItem[]>(() => {
+  const topicChildren: MenuItem[] = (props.topicTags ?? []).map((tag) => ({
+    label: tag,
+    name: `topic-${tag.toLowerCase().replace(/\s+/g, "-")}`,
+    to: `/blog/category/${encodeURIComponent(tag)}`,
+  }));
 
-const populateTopicMenu = (tags: TagItem[]) => {
-  const topicMenuItem = menuItems.value.find((item) => item.name === "topic");
+  return [
+    { label: "Topic", name: "topic", children: topicChildren },
+    { label: "Home", name: "home", to: "/" },
+    { label: "Blog", name: "blog", to: "/blog" },
+    { label: "Events", name: "events", to: "/events" },
+    {
+      label: "About",
+      name: "about",
+      children: [
+        { label: "About Us", name: "about", to: "/about" },
+        { label: "Our Team", name: "team", to: "/about#team-grid" },
+      ],
+    },
+    {
+  label: "Our Work",
+  name: "work",
+  children: [
+    { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html", external: true },
+    { label: "InnovateUS", name: "teachings", to: "https://innovate-us.org/", external: true },
+    { label: "Public Entrepreneur", name: "projects", to: "https://www.publicentrepreneur.org/", external: true },
+    { label: "Engagements", name: "partners", to: "/our-engagements" },
+    { label: "Research", name: "research", to: "/our-research" },
+    { label: "More Resources", name: "resources", to: "/more-resources" },
+  ],
+},
+    { label: "Sign up", name: "signup", to: "/signup" },
+  ];
+});
 
-  if (topicMenuItem && topicMenuItem.children) {
-    topicMenuItem.children = tags.map((tag) => ({
-      label: tag.name,
-      name: `topic-${tag.name.toLowerCase().replace(/\s+/g, "-")}`,
-      to: `/blog?category=${encodeURIComponent(tag.name)}`,
-    }));
-  }
-};
-
-const fetchAllBlogTags = async (): Promise<TagItem[]> => {
-  try {
-    const uniqueTags = await fetchAllUniqueTags();
-    return uniqueTags.map((tag) => ({
-      id: tag,
-      name: tag,
-    }));
-  } catch (error) {
-    console.error("Error fetching blog tags:", error);
-    return [];
-  }
-};
-
-// Check if we're on mobile
 const checkIfMobile = (): void => {
   isMobile.value = window.innerWidth < 1050;
-  // If we switch to desktop view, make sure menu is closed
   if (!isMobile.value) {
     mobileMenuOpen.value = false;
   }
 };
 
-// Handle search input changes
 const handleSearchInput = (event: InputEvent): void => {
   const query = (event.target as HTMLInputElement)?.value;
   updateSearchQuery(query);
@@ -223,20 +183,12 @@ const handleSearchReset = () => {
   updateSearchQuery("");
 };
 
-// Add resize event listener on mount
-onMounted(async (): Promise<void> => {
+onMounted(() => {
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
-  try {
-    const tags = await fetchAllBlogTags();
-    populateTopicMenu(tags);
-  } catch (error) {
-    console.error("Error loading blog tags for menu:", error);
-  }
 });
 
-// Remove event listener on unmount
-onUnmounted(async (): Promise<void> => {
+onUnmounted(() => {
   window.removeEventListener("resize", checkIfMobile);
 });
 </script>

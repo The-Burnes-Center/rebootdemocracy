@@ -89,17 +89,8 @@ function handleTabClick(tab: TabItem, index: number) {
   emit("tab-changed", index, tab.name);
 
   if (tab.url) {
-    // Open the URL
     if (tab.external) {
-      window.open(tab.url, "_blank");
-
-      // Reset to the first tab (Latest Posts) after a short delay
-      setTimeout(() => {
-        activeTab.value = 0;
-        nextTick(() => {
-          emit("tab-changed", 0, props.tabs[0].name);
-        });
-      }, 200);
+      window.location.href = tab.url;
     } else {
       router.push(tab.url);
     }
