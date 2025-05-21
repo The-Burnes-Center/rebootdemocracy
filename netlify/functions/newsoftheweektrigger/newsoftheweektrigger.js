@@ -63,6 +63,9 @@ exports.handler = async function (event, context) {
     itemcont["item"]["description"] = {
       _cdata: decodeEntities(e.events || '')
     };    
+    itemcont["item"]["description"] = {
+      _cdata: decodeEntities(e.announcements || '')
+    };    
     itemcont["item"]["pubDate"] = e.date;
     itemcont["item"]["GUID"] = e.id;
     channel.push(itemcont);
