@@ -93,44 +93,51 @@
       </div>
 
       <!-- AboutDropdown component for desktop -->
-      <AboutDropdown
-        v-if="
-          !isMobile &&
-          openDropdown === index &&
-          item.name === 'about' &&
-          item.children &&
-          item.children.length
-        "
-        :items="(item.children ?? []) as DropdownItem[]"
-        :isOpen="openDropdown === index"
-        @close="closeDropdown"
-        @item-click="emitItemClick"
-      />
+     <NuxtLazyHydrate
+          v-if="
+            !isMobile &&
+            openDropdown === index &&
+            item.name === 'about' &&
+            item.children &&
+            item.children.length
+          "
+          :on-interaction="['click', 'hover']"
+        >
+          <AboutDropdown
+            :items="(item.children ?? []) as DropdownItem[]"
+            :isOpen="openDropdown === index"
+            @close="closeDropdown"
+            @item-click="emitItemClick"
+          />
+        </NuxtLazyHydrate>
     </div>
   </section>
 
-  <!-- HeaderDropdown component for other dropdowns -->
-  <HeaderDropdown
-    v-if="
-      !isMobile &&
-      openDropdown !== null &&
-      items[openDropdown]?.name !== 'about' &&
-      items[openDropdown]?.children?.length
-    "
-    :items="(items[openDropdown]?.children ?? []) as DropdownItem[]"
-    :openDropdown="openDropdown"
-    :index="openDropdown"
-    @close="closeDropdown"
-    @item-click="emitItemClick"
-  />
-</template>
+      <NuxtLazyHydrate
+            v-if="
+              !isMobile &&
+              openDropdown !== null &&
+              items[openDropdown]?.name !== 'about' &&
+              items[openDropdown]?.children?.length
+            "
+            :on-interaction="['click', 'hover']"
+          >
+            <HeaderDropdown
+              :items="(items[openDropdown]?.children ?? []) as DropdownItem[]"
+              :openDropdown="openDropdown"
+              :index="openDropdown"
+              @close="closeDropdown"
+              @item-click="emitItemClick"
+            />
+          </NuxtLazyHydrate>
+    </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import type { DropdownItem, MenuItem } from "@/types/index.ts";
-import AboutDropdown from "./AboutDropdown.vue";
 import { useRoute } from "vue-router";
-
+const AboutDropdown = defineAsyncComponent(() => import('./AboutDropdown.vue'))
+const HeaderDropdown = defineAsyncComponent(() => import('./HeaderDropdown.vue'))
 interface Props {
   items: MenuItem[];
   initialTab?: number | null;
