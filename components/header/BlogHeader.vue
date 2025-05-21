@@ -61,13 +61,11 @@
     </div>
  
     <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
-    <NuxtLazyHydrate :on-interaction="['click', 'hover']">
       <HeaderMenu
         :items="menuItems"
         :class="{ 'mobile-menu': isMobile }"
         @item-click="handleMenuItemClick"
       />
-    </NuxtLazyHydrate>
     </nav>
 
 
