@@ -168,7 +168,7 @@ export default {
 
       try {
         // Fetch the bot's response
-        const response = await fetch('/.netlify/functions/pschat', {
+        const response = await fetch('/.netlify/functions/chatbot_reboot', {
           method: 'POST',
           body: JSON.stringify({ message: messageContent, conversation: messages.value }),
           headers: { 'Content-Type': 'application/json' },

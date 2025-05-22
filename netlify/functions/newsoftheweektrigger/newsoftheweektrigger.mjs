@@ -3,7 +3,7 @@ import pkg from 'jstoxml';
 import { Directus } from '@directus/sdk';
 import he from 'he';
 
-exports.handler = async function (event, context) {
+export async function handler (event, context) {
 
   const { toXML } = pkg;
   const directus = new Directus('https://directus.theburnescenter.org/');
@@ -14,12 +14,12 @@ exports.handler = async function (event, context) {
         {
           status: {
             _eq: "published"
-          }
+          },
         }
       ],
     },
-    sort: '-id',
     limit: -1,
+    sort: '-id',
     fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"]
   });
 
@@ -54,19 +54,20 @@ exports.handler = async function (event, context) {
   ];
 
 
-  publicData.data[0].items.map( e_items => {
+
+  publicData.data.map(e =>{
+    
     var itemcont = {};
     itemcont["item"] = {};
-    itemcont["item"]["title"] = e_items.reboot_democracy_weekly_news_items_id.title;
-    itemcont["item"]["pubDate"] = e_items.reboot_democracy_weekly_news_items_id.date;
-    itemcont["item"]["author"] = e_items.reboot_democracy_weekly_news_items_id.author + " in " + e_items.reboot_democracy_weekly_news_items_id.publication;
-    itemcont["item"]["link"] =  e_items.reboot_democracy_weekly_news_items_id.url;    
-    itemcont["item"]["description"] = e_items.reboot_democracy_weekly_news_items_id.excerpt;
-    itemcont["item"]["category"] = e_items.reboot_democracy_weekly_news_items_id.category;
+    itemcont["item"]["title"] = e.title;
+    itemcont["item"]["description"] = {
+      _cdata: decodeEntities(e.events || '')
+    };    
+    itemcont["item"]["pubDate"] = e.date;
+    itemcont["item"]["GUID"] = e.id;
     channel.push(itemcont);
-
-}
-  )
+  
+  })
   const xmlOptions = {
     header: true,
     indent: '  ' // Ensures proper indentation

@@ -1,19 +1,21 @@
 [build]
   command = "vite build"
-  functions = "netlify/functions"
   publish = "dist"
 
+[functions]               # <-- moved here
+  directory    = "netlify/functions"
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to   = "/index.html"
   status = 200
 
 [[redirects]]
   from = "/newsoftheweek/feed/rss"
-  to = "/.netlify/functions/newsoftheweek"
+  to   = "/.netlify/functions/newsoftheweek"
   status = 200
-  force = true
+  force  = true
 
 [[headers]]
   for = "/*"
@@ -21,8 +23,5 @@
   Access-Control-Allow-Origin = "*"
 
 [dev]
-  # Replace '3000' with the port your Vue.js app is running on
   targetPort = 3000
-  # This is the port Netlify Dev will use
-  port = 3001
-  # Other configurations...
+  port       = 3001

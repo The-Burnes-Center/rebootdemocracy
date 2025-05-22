@@ -48,7 +48,7 @@ export default defineConfig({
     })
   ],
   server: {
-    host: '0.0.0.0',
+    // host: '0.0.0.0',
     // hmr: {
     //   host: 'localhost', // you could make this an ENV var
     //   port: '3005',

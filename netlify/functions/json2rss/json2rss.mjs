@@ -3,7 +3,7 @@ import pkg from 'jstoxml';
 import { Directus } from '@directus/sdk';
 import he from 'he';
 
-exports.handler = async function (event, context) {
+export async function handler (event, context) {
 
   const { toXML } = pkg;
   const directus = new Directus('https://directus.theburnescenter.org/');
