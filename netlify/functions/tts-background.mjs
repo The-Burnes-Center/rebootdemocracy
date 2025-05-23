@@ -3,7 +3,8 @@ import FormData from 'form-data';
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 
-// Configuration variables
+
+// Configuration variables at top
 const DIRECTUS_URL = process.env.DIRECTUS_URL
 const DIRECTUS_AUTH_TOKEN = process.env.DIRECTUS_AUTH_TOKEN
 
