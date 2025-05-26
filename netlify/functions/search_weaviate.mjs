@@ -3,7 +3,7 @@ import { OpenAI } from "openai";
 
 const weaviateClient = weaviate.client({
   scheme: process.env.VITE_WEAVIATE_HTTP_SCHEME || 'https',
-  host: process.env.VITE_WEAVIATE_HOST || 'your-weaviate-cluster-url.weaviate.network',
+  host: process.env.VITE_WEAVIATE_HOST_ORIGINAL || 'your-weaviate-cluster-url.weaviate.network',
   apiKey: new weaviate.ApiKey(process.env.VITE_WEAVIATE_APIKEY),
   headers: { 'X-OpenAI-Api-Key': process.env.VITE_OPENAI_API_KEY }
 });
