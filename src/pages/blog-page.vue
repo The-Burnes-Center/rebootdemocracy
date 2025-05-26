@@ -196,7 +196,7 @@ mounted() {
         // Start all searches in parallel
        
         // const psChatPromise = this.performPsChatSearch(searchTermClean);
-        //  const directusPromise = this.performDirectusSearch(searchTermClean);
+         const directusPromise = this.performDirectusSearch(searchTermClean);
         const weaviatePromise = this.performWeaviateSearch(searchTermClean);
         
         
@@ -212,20 +212,14 @@ mounted() {
         //   });
 
         // Handle Directus and Weaviate search results
-        // try {
-        //   const [directusData, weaviateSlugs] = await Promise.all([
-        //     directusPromise,
-        //     weaviatePromise,
-        //   ]);
-
-          try {
-          const [weaviateSlugs] = await Promise.all([
-            // directusPromise,
+        try {
+          const [directusData, weaviateSlugs] = await Promise.all([
+            directusPromise,
             weaviatePromise,
           ]);
 
           // Process the search results and update blogDataSearch
-          await this.processSearchResults(weaviateSlugs);
+          await this.processSearchResults(directusData, weaviateSlugs);
         } catch (error) {
           console.error('Error during searches:', error);
           self.blogDataSearch = [];
@@ -346,7 +340,7 @@ mounted() {
     },
 
     // New helper method to process search results
-    async processSearchResults( weaviateSlugs) {
+    async processSearchResults(directusData, weaviateSlugs) {
       const self = this;
       const directusSlugMap = new Map(directusData.map((post) => [post.slug, post]));
       let overlappingPosts = [];
