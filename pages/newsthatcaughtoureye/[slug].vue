@@ -86,13 +86,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { format, isPast } from 'date-fns';
-import { useDirectusClient } from '@/composables/useDirectusClient';
+import { format } from 'date-fns';
+import { useHead } from '@unhead/vue';
+import { createDirectus, rest, readItems } from '@directus/sdk';
 
-
-// Define interfaces for type safety
+// Interfaces
 interface WeeklyNewsItem {
   id: string;
   title: string;
@@ -127,147 +127,95 @@ interface WeeklyNewsPost {
   image?: ImageItem;
 }
 
-// Setup route and state
+// Directus
+const directus = createDirectus("https://content.thegovlab.com").with(rest());
 const route = useRoute();
 const router = useRouter();
-const { directus, readItems } = useDirectusClient();
 const slug = computed(() => route.params.slug as string);
 
-// State
-const postData = ref<WeeklyNewsPost[]>([]);
-const isLoading = ref(true);
-const error = ref<string | null>(null);
-
-// Computed properties
-const uniqueCategories = computed(() => {
-  if (!postData.value.length || !postData.value[0].items) return [];
-  
-  const cats = postData.value[0].items.map(
-    item => item.reboot_democracy_weekly_news_items_id.category || "News that caught our eye"
+// Fetch post data with useAsyncData
+const {
+  data: postData,
+  pending: isLoading,
+  error
+} = await useAsyncData(`weekly-news-${slug.value}`, async () => {
+  const response = await directus.request(
+    readItems("reboot_democracy_weekly_news", {
+      meta: "total_count",
+      limit: -1,
+      fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"],
+      filter: {
+        _and: [
+          { edition: { _eq: slug.value } },
+          { status: { _eq: "published" } }
+        ]
+      }
+    })
   );
-  
-  return [...new Set(cats)];
-});
+  return response as WeeklyNewsPost[];
+}, { server: true });
 
-// Helper functions
-const formatDateOnly = (date: Date): string => {
-  return format(date, "MMMM d, yyyy");
-};
+// Meta
+if (postData.value && postData.value.length > 0) {
+  const post = postData.value[0];
+  const summaryText = post.summary.replace(/<[^>]+>/g, '').slice(0, 200);
+  const imageUrl = post.image
+    ? `${directus.url}/assets/${post.image.id}`
+    : `${directus.url}/assets/4650f4e2-6cc2-407b-ab01-b74be4838235}`;
+  const imageWidth = post.image?.width?.toString() || '';
+  const imageHeight = post.image?.height?.toString() || '';
 
-const fetchPostData = async (edition: string): Promise<{ data: WeeklyNewsPost[] }> => {
-  try {
-    const response = await directus.request(
-      readItems("reboot_democracy_weekly_news", {
-        meta: "total_count",
-        limit: -1,
-        fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"],
-        filter: {
-          _and: [
-            {
-              edition: {
-                _eq: edition,
-              },
-            },
-            {
-              status: {
-                _eq: "published",
-              },
-            }
-          ],
-        },
-      })
-    );
-    
-    return { data: response as WeeklyNewsPost[] };
-  } catch (err) {
-    console.error("Error fetching post data:", err);
-    throw err;
-  }
-};
-
-// Meta tags setup
-const fillMeta = () => {
-  if (!postData.value || !postData.value[0]) return;
-  
-  // Create plain text version of summary
-  const htmlToText = document.createElement('div');
-  htmlToText.innerHTML = postData.value[0].summary;
-  
-  const imageUrl = postData.value[0].image
-    ? `${directus.url}/assets/${postData.value[0].image.id}`
-    : `${directus.url}/assets/4650f4e2-6cc2-407b-ab01-b74be4838235`;
-    
-  const imageWidth = postData.value[0].image?.width?.toString() || '';
-  const imageHeight = postData.value[0].image?.height?.toString() || '';
-  
   useHead({
-    title: `RebootDemocracy.AI Blog | ${postData.value[0].title}`,
+    title: `RebootDemocracy.AI Blog | ${post.title}`,
     meta: [
-      { name: 'title', content: `RebootDemocracy.AI Blog | ${postData.value[0].title}` },
-      { name: 'description', content: postData.value[0].summary || htmlToText.textContent?.substring(0, 200) + '...' },
-      { property: 'og:title', content: `RebootDemocracy.AI Blog | ${postData.value[0].title}` },
+      { name: 'title', content: `RebootDemocracy.AI Blog | ${post.title}` },
+      { name: 'description', content: post.summary || summaryText + '...' },
+      { property: 'og:title', content: `RebootDemocracy.AI Blog | ${post.title}` },
       { property: 'og:type', content: "website" },
-      { property: 'og:url', content: `https://rebootdemocracy.ai/newsthatcaughtoureye/${postData.value[0].edition}` },
-      { property: 'og:description', content: postData.value[0].summary || htmlToText.textContent?.substring(0, 200) + '...' },
-      { property: 'og:image', content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg" },
+      { property: 'og:url', content: `https://rebootdemocracy.ai/newsthatcaughtoureye/${post.edition}` },
+      { property: 'og:description', content: post.summary || summaryText + '...' },
+      { property: 'og:image', content: imageUrl },
       { property: 'og:image:width', content: imageWidth },
       { property: 'og:image:height', content: imageHeight },
       { property: 'twitter:title', content: "RebootDemocracy.AI" },
-      { property: 'twitter:description', content: postData.value[0].summary || htmlToText.textContent?.substring(0, 200) + '...' },
-      { property: 'twitter:image', content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg" },
-      { property: 'twitter:card', content: "summary_large_image" },
-    ],
+      { property: 'twitter:description', content: post.summary || summaryText + '...' },
+      { property: 'twitter:image', content: imageUrl },
+      { property: 'twitter:card', content: "summary_large_image" }
+    ]
   });
-};
-
-const fillMetaDefault = () => {
+} else {
   useHead({
     title: "RebootDemocracy.AI",
     meta: [
       { name: 'title', content: "RebootDemocracy.AI" },
       { property: 'og:title', content: "RebootDemocracy.AI" },
-      { property: 'og:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. ...` },
+      { property: 'og:description', content: "We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy..." },
       { property: 'og:image', content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg" },
       { property: 'og:type', content: "website" },
       { property: 'og:url', content: "https://rebootdemocracy.ai" },
       { property: 'twitter:title', content: "RebootDemocracy.AI" },
-      { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. ...` },
+      { property: 'twitter:description', content: "We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy..." },
       { property: 'twitter:image', content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg" },
-      { property: 'twitter:card', content: "summary_large_image" },
-    ],
+      { property: 'twitter:card', content: "summary_large_image" }
+    ]
   });
+}
+
+// Format date
+const formatDateOnly = (date: Date): string => {
+  return format(date, "MMMM d, yyyy");
 };
 
-// Fetch data on mount
-onMounted(async () => {
-  try {
-    isLoading.value = true;
-    
-    if (!slug.value) {
-      error.value = "No edition specified";
-      fillMetaDefault();
-      return;
-    }
-    
-    const response = await fetchPostData(slug.value);
-    postData.value = response.data;
-    
-    if (postData.value.length === 0) {
-      error.value = "Edition not found";
-      fillMetaDefault();
-      return;
-    }
-    
-    fillMeta();
-  } catch (err) {
-    console.error("Error loading post data:", err);
-    error.value = "Failed to load content. Please try again later.";
-    fillMetaDefault();
-  } finally {
-    isLoading.value = false;
-  }
+// Unique categories
+const uniqueCategories = computed(() => {
+  if (!postData.value?.length || !postData.value[0].items) return [];
+  const cats = postData.value[0].items.map(
+    item => item.reboot_democracy_weekly_news_items_id.category || "News that caught our eye"
+  );
+  return [...new Set(cats)];
 });
 </script>
+
 
 <style>
 
