@@ -76,10 +76,10 @@ export default {
            try {
         const response = await fetchBlogData.call(this, this.slug);
           self.postData = response.data;
-          if (self.postData.length === 0) {
-            window.location.href = "/";
-          }
-          console.log(self.postData);
+          // if (self.postData.length === 0) {
+          //   window.location.href = "/";
+          // }
+          console.log("self.postData",self.postData);
           self.postData.length>0 ? this.fillMeta() :  this.fillMetaDefault()
       } catch (error) {
         // Handle the error

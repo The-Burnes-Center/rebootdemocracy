@@ -1,3 +1,4 @@
+// ... existing imports ...
 import weaviate from 'weaviate-ts-client';
 import { OpenAI } from "openai";
 
@@ -12,123 +13,103 @@ const openaiClient = new OpenAI({
   apiKey: process.env.VITE_OPENAI_API_KEY,
 });
 
-async function getBlogSlugsByEmbedding(query) {
-  const searchFields = `
-    title
-    uncompressedContent
-    shortSummary
-    fullSummary
-    _additional { id distance certainty }
-    inDocument {
-      ... on RagDocument {
-        url
-      }
-    }
-  `;
+const weeklyNewsItemFields = `
+  directusId
+  objectId
+  title
+  summary
+  author
+  date
+  edition
+  itemTitle
+  itemDescription
+  itemAuthor
+  itemCategory
+  itemDate
+  itemPublication
+  itemUrl
+  itemImage
+  _additional { id distance certainty }
+`;
 
+const blogPostChunkFields = `
+  directusId
+  objectId
+  title
+  excerpt
+  content
+  tags
+  authors
+  date
+  slug
+  fullUrl
+  part
+  audioFilename
+  imageFilename
+  imageId
+  _additional { id distance certainty }
+`;
+
+// ... existing code ...
+
+async function searchWeaviate(className, fields, query) {
+  // 1️⃣ Attempt fast keyword search (BM25)
   try {
-    // Perform a nearText search in Weaviate with a where clause
+    const bm25Query = weaviateClient.graphql
+      .get()
+      .withClassName(className)
+      .withFields(fields)
+      .withBm25({ query })
+      .withLimit(20);
+
+    const bm25Res = await bm25Query.do();
+    const bm25Hits = bm25Res?.data?.Get?.[className] ?? [];
+    if (bm25Hits.length > 0) {
+      return bm25Hits;
+    }
+  } catch (bm25Err) {
+    console.warn(`BM25 search failed for ${className}:`, bm25Err);
+  }
+
+  // 2️⃣ Fallback to semantic vector search
+  try {
     const nearTextQuery = weaviateClient.graphql
       .get()
-      .withClassName("RagDocumentChunk")
-      .withFields(searchFields)
+      .withClassName(className)
+      .withFields(fields)
       .withNearText({
         concepts: [query],
-        // Optional: adjust parameters like certainty or distance
         distance: 0.8,
-        
       })
-      .withWhere({
-        path: ["inDocument", "RagDocument", "url"],
-        operator: "Like",
-        valueString: "https://rebootdemocracy.ai/blog%",
-      })
-      .withLimit(20); // Increase limit if needed
+      .withLimit(20);
 
-      
-
-    const nearTextResults = await nearTextQuery.do();
-    console.log(nearTextResults);
-    if (
-      nearTextResults.data.Get.RagDocumentChunk &&
-      nearTextResults.data.Get.RagDocumentChunk.length > 0
-    ) {
-      // Extract slugs from the results
-      const slugs = nearTextResults.data.Get.RagDocumentChunk
-        .map((chunk) => {
-          const url = chunk.inDocument[0]?.url;
-          if (url && url.startsWith("https://rebootdemocracy.ai/blog/")) {
-            // Extract the slug from the URL
-            return url.replace("https://rebootdemocracy.ai/blog/", "").replace(/\/$/, "");
-          }
-          return null;
-        })
-        .filter((slug) => slug !== null);
-
-      // Remove duplicate slugs
-      const uniqueSlugs = [...new Set(slugs)];
-
-      return uniqueSlugs;
-    }
-
-    console.log("No results found with nearText, falling back to basic search");
-
-    // If nearText fails, perform a basic textual search with the same where clause
-    const basicQuery = weaviateClient.graphql
-      .get()
-      .withClassName("RagDocumentChunk")
-      .withFields(searchFields)
-      .withWhere({
-        path: ["inDocument", "RagDocument", "url"],
-        operator: "Like",
-        valueString: "https://rebootdemocracy.ai/blog%",
-      })
-      .withLimit(20); // Increase limit if needed
-
-    const basicResults = await basicQuery.do();
-
-    if (
-      basicResults.data.Get.RagDocumentChunk &&
-      basicResults.data.Get.RagDocumentChunk.length > 0
-    ) {
-      // Filter results client-side based on the query
-      const filteredChunks = basicResults.data.Get.RagDocumentChunk.filter((chunk) =>
-        chunk.uncompressedContent
-          ?.toLowerCase()
-          .includes(query.toLowerCase())
-      );
-
-      // Extract slugs from the filtered results
-      const slugs = filteredChunks
-        .map((chunk) => {
-          const url = chunk.inDocument[0]?.url;
-          if (url && url.startsWith("https://rebootdemocracy.ai/blog/")) {
-            // Extract the slug from the URL
-            return url.replace("https://rebootdemocracy.ai/blog/", "").replace(/\/$/, "");
-          }
-          return null;
-        })
-        .filter((slug) => slug !== null);
-
-      // Remove duplicate slugs
-      const uniqueSlugs = [...new Set(slugs)];
-
-      return uniqueSlugs;
-    }
-
-    // Return an empty array if no results are found
-    return [];
-  } catch (err) {
-    console.error("Error in getBlogSlugsByEmbedding:", err);
-    if (err.response && err.response.errors) {
-      console.error(
-        "GraphQL Errors:",
-        JSON.stringify(err.response.errors, null, 2)
-      );
-    }
-    // Return an empty array instead of throwing an error
+    const vecRes = await nearTextQuery.do();
+    return vecRes?.data?.Get?.[className] ?? [];
+  } catch (vecErr) {
+    console.error(`nearText search failed for ${className}:`, vecErr);
     return [];
   }
+}
+
+// ... existing code ...
+
+async function getCombinedResults(query) {
+  // Search both classes in parallel
+  const [weeklyNewsResults, blogPostResults] = await Promise.all([
+    searchWeaviate('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
+    searchWeaviate('RebootBlogPostChunk', blogPostChunkFields, query)
+  ]);
+
+    // Combine and deduplicate by a unique key (e.g., objectId or directusId)
+    const allResults = [
+      ...weeklyNewsResults.map(item => ({ ...item, _type: 'weeklyNews' })),
+      ...blogPostResults.map(item => ({ ...item, _type: 'blogPost' }))
+    ];
+  
+    // Optionally deduplicate if needed
+    // const uniqueResults = Array.from(new Map(allResults.map(item => [item.objectId, item])).values());
+    console.log(allResults);
+    return allResults;
 }
 
 export async function handler(event, context) {
@@ -142,16 +123,11 @@ export async function handler(event, context) {
     return { statusCode: 400, body: 'Bad Request: Missing "query" parameter' };
   }
 
-  
   try {
-    // console.log('Received query:', query);
-
-    const slugs = await getBlogSlugsByEmbedding(query);
-    console.log(slugs)
-
+    const results = await getCombinedResults(query);
     return {
       statusCode: 200,
-      body: JSON.stringify({ slugs }),
+      body: JSON.stringify({ results }),
     };
   } catch (error) {
     console.error('Error processing query:', error);

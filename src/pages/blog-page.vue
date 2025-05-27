@@ -86,6 +86,26 @@ export default {
     }
     return null;
   },
+  dedupedSearchResults() {
+    const seenSlugs = new Set();
+    const seenDirectusIds = new Set();
+    return this.searchResults.filter(item => {
+      if (item._type === 'blogPost') {
+        if (item.slug && !seenSlugs.has(item.slug)) {
+          seenSlugs.add(item.slug);
+          return true;
+        }
+        return false;
+      } else if (item._type === 'weeklyNews') {
+        if (item.directusId && !seenDirectusIds.has(item.directusId)) {
+          seenDirectusIds.add(item.directusId);
+          return true;
+        }
+        return false;
+      }
+      return true;
+    });
+  },
   filteredTagDataWithoutNews() {
     return this.filteredTagData.filter(tag => tag !== "News that caught our eye");
   }
@@ -106,6 +126,7 @@ mounted() {
 },
   
   methods: {
+    
     fetchCombinedData() {
   self = this;
   const nowOffset = self.getDirectusNowOffset(); // "$NOW(-4 hours)" or "$NOW(-5 hours)"
@@ -116,7 +137,7 @@ mounted() {
       limit: -1,
       filter: {
         _and: [
-          { date: { _lte: nowOffset } },
+          // { date: { _lte: nowOffset } },
           { status: { _eq: 'published' } }
         ]
       },
@@ -143,7 +164,7 @@ mounted() {
   ])
   .then(([blogResult, weeklyNewsResult]) => {
     const blogData = blogResult.data || [];
-    console.log(blogData);
+    console.log("blogData",blogData);
     const weeklyNewsData = weeklyNewsResult.data || [];
 
     // Combine both arrays and sort chronologically by date (descending)
@@ -181,57 +202,29 @@ mounted() {
          //   }
          // });
        },
-      async searchBlog() {
-      const self = this;
-      this.searchloader = true;
-
-      if (this.searchTerm.trim().length > 0) {
-        this.searchResultsFlag = 1;
-        const searchTermClean = this.searchTerm.trim();
-
-        // Clear previous search results
-        this.pschatContent = '';
-        this.blogDataSearch = [];
-
-        // Start all searches in parallel
-       
-        // const psChatPromise = this.performPsChatSearch(searchTermClean);
-         const directusPromise = this.performDirectusSearch(searchTermClean);
-        const weaviatePromise = this.performWeaviateSearch(searchTermClean);
-        
-        
-
-        // Handle PSChat search result as it comes in
-        // psChatPromise
-        //   .then((content) => {
-        //     this.pschatContent = content;
-        //   })
-        //   .catch((error) => {
-        //     console.error('Error during PSChat search:', error);
-        //     this.pschatContent = 'Sorry, an error occurred during PSChat search.';
-        //   });
-
-        // Handle Directus and Weaviate search results
-        try {
-          const [directusData, weaviateSlugs] = await Promise.all([
-            directusPromise,
-            weaviatePromise,
-          ]);
-
-          // Process the search results and update blogDataSearch
-          await this.processSearchResults(directusData, weaviateSlugs);
-        } catch (error) {
-          console.error('Error during searches:', error);
-          self.blogDataSearch = [];
-        } finally {
-          self.searchloader = false;
-        }
-      } else {
-        this.searchResultsFlag = 0;
-        this.blogDataSearch = this.blogData; // Populate with all blog posts
+       async searchBlog() {
+    this.searchloader = true;
+    if (this.searchTerm.trim().length > 0) {
+      try {
+        const response = await fetch('/.netlify/functions/search_weaviate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: this.searchTerm.trim() }),
+        });
+        if (!response.ok) throw new Error('Weaviate search failed');
+        const { results } = await response.json();
+        this.searchResults = results;
+      } catch (error) {
+        console.error('Error during Weaviate search:', error);
+        this.searchResults = [];
+      } finally {
         this.searchloader = false;
       }
-    },
+    } else {
+      this.searchResults = [];
+      this.searchloader = false;
+    }
+  },
 
     // New helper method to handle PSChat search
     async performPsChatSearch(searchTermClean) {
@@ -762,35 +755,50 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 </div>
 
 <!-- Search section -->
-    <div  v-if="searchResultsFlag   && searchTermDisplay != ''" class="allposts-section">
-      <div class="allposts-post-row" v-for="(blog_item, index) in blogDataSearch"> 
-          <!-- <div v-if="blog_item?.Tags === null"> -->
-       <a :href="'/blog/' + blog_item.slug">
-                 <div v-lazy-load>
-         <img v-if="blog_item.image" class="blog-list-img" :data-src= "this.directus._url+'assets/'+ blog_item.image.id">
-          </div>
-        <div class="allposts-post-details">
-          <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
-          <h3>{{blog_item.title}}</h3>
-           <div v-if="!blog_item.authors" class="author-list">
-          <p class="author-name">{{blog_item.author}}</p>
-          </div>
-              <div v-if="blog_item.authors" class="author-list">
-                   <p  class="author-name">{{blog_item.authors.length>0?'By':''}}</p>
-                    <div v-for="(author,i) in blog_item.authors">
-                      <div class="author-item">
-                        <div class="author-details">
-                          <p class="author-name">{{author.team_id.First_Name}} {{author.team_id.Last_Name}}</p>
-                          <p class="author-name" v-if="blog_item.authors.length > 1 && i < blog_item.authors.length - 1">and</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-            </div>
-         </a>
+<!-- <div v-if="searchResults.length > 0 && searchTerm" class="allposts-section"> -->
+  <div v-if="dedupedSearchResults.length > 0 && searchTerm" class="allposts-section">
+  <div class="allposts-post-row"  v-for="(item, index) in dedupedSearchResults" :key="item.objectId || item.directusId">
+    <a :href="item._type === 'blogPost'
+                ? (item.fullUrl || ('/blog/' + item.slug))
+                : (item.itemUrl || ('/newsthatcaughtoureye/' + item.edition))" >
+      <div v-lazy-load>
+        <img v-if="item._type === 'weeklyNews'"
+             class="blog-list-img"
+             data-src="/newsheader.jpg">
+        <img v-else-if="item.imageFilename"
+             class="blog-list-img"
+             :data-src="directus._url + 'assets/' + item.imageFilename">
+        <img v-else
+             class="blog-list-img"
+             data-src="/newsheader.jpg">
       </div>
-      <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
-    </div>
+      <div class="allposts-post-details" style="max-width:320px">
+        <h3>{{ item._type === 'weeklyNews' ? item.itemTitle : item.title }}</h3>
+        <p class="post-date">
+          Published on {{ formatDateOnly(new Date(item.date || item.itemDate)) }}
+        </p>
+        <!-- <p v-if="item._type === 'weeklyNews'">{{ item.itemDescription }}</p>
+        <p v-else-if="item.excerpt">{{ item.excerpt }}</p>
+        <p v-else-if="item.summary">{{ item.summary }}</p> -->
+        <div v-if="item._type === 'blogPost' && item.authors" class="author-list">
+  <p class="author-name">
+    {{ Array.isArray(item.authors) ? item.authors.join(', ') : item.authors }}
+  </p>
+</div>
+        <div v-else-if="item._type === 'weeklyNews' && item.itemAuthor" class="author-list">
+          <p class="author-name">{{ item.itemAuthor }}</p>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+</div>
+<div class="read-more-post"  v-if="dedupedSearchResults.length > 0 && searchTerm" >
+<a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>
+</div>
+
+<!-- </div> -->
 
 
 
