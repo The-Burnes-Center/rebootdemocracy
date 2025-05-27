@@ -652,7 +652,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="blog-featured-row">
 
     <div class="first-blog-post">
-{{blogData.slice().reverse()[0].slug}}
+
 <a :href="(blogData.length > 0 && blogData.slice().reverse()[0].slug) ? ('/blog/' + blogData.slice().reverse()[0].slug) : (blogData.length > 0 && blogData.slice().reverse()[0].edition ? '/newsthatcaughtoureye/' + blogData.slice().reverse()[0].edition : '#')">
 
 
