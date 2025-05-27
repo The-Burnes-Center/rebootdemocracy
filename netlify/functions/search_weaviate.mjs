@@ -4,7 +4,7 @@ import { OpenAI } from "openai";
 
 const weaviateClient = weaviate.client({
   scheme: process.env.VITE_WEAVIATE_HTTP_SCHEME || 'https',
-  host: process.env.VITE_WEAVIATE_HOST_ORIGINAL || 'your-weaviate-cluster-url.weaviate.network',
+  host: process.env.VITE_WEAVIATE_HOST || 'your-weaviate-cluster-url.weaviate.network',
   apiKey: new weaviate.ApiKey(process.env.VITE_WEAVIATE_APIKEY),
   headers: { 'X-OpenAI-Api-Key': process.env.VITE_OPENAI_API_KEY }
 });
@@ -52,8 +52,76 @@ const blogPostChunkFields = `
 
 // ... existing code ...
 
-async function searchWeaviate(className, fields, query) {
-  // 1️⃣ Attempt fast keyword search (BM25)
+// async function searchWeaviate(className, fields, query) {
+//   // 1️⃣ Attempt fast keyword search (BM25)
+//   try {
+//     const bm25Query = weaviateClient.graphql
+//       .get()
+//       .withClassName(className)
+//       .withFields(fields)
+//       .withBm25({ query })
+//       .withLimit(20);
+
+//     const bm25Res = await bm25Query.do();
+//     const bm25Hits = bm25Res?.data?.Get?.[className] ?? [];
+//     if (bm25Hits.length > 0) {
+//       return bm25Hits;
+//     }
+//   } catch (bm25Err) {
+//     console.warn(`BM25 search failed for ${className}:`, bm25Err);
+//   }
+
+//   // 2️⃣ Fallback to semantic vector search
+//   try {
+//     const nearTextQuery = weaviateClient.graphql
+//       .get()
+//       .withClassName(className)
+//       .withFields(fields)
+//       .withNearText({
+//         concepts: [query],
+//         distance: 0.8,
+//       })
+//       .withLimit(20);
+
+//     const vecRes = await nearTextQuery.do();
+//     return vecRes?.data?.Get?.[className] ?? [];
+//   } catch (vecErr) {
+//     console.error(`nearText search failed for ${className}:`, vecErr);
+//     return [];
+//   }
+// }
+
+// ... existing code ...
+
+async function getCombinedResults(query) {
+  // Run both BM25 searches in parallel
+  const [bm25WeeklyNews, bm25BlogPosts] = await Promise.all([
+    searchWeaviateBM25('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
+    searchWeaviateBM25('RebootBlogPostChunk', blogPostChunkFields, query)
+  ]);
+
+  // If either BM25 has results, use only BM25 results (no nearText)
+  if (bm25WeeklyNews.length > 0 || bm25BlogPosts.length > 0) {
+    return [
+      ...bm25WeeklyNews.map(item => ({ ...item, _type: 'weeklyNews' })),
+      ...bm25BlogPosts.map(item => ({ ...item, _type: 'blogPost' }))
+    ];
+  }
+
+  // If both BM25 are empty, run nearText for both
+  const [nearTextWeeklyNews, nearTextBlogPosts] = await Promise.all([
+    searchWeaviateNearText('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
+    searchWeaviateNearText('RebootBlogPostChunk', blogPostChunkFields, query)
+  ]);
+
+  return [
+    ...nearTextWeeklyNews.map(item => ({ ...item, _type: 'weeklyNews' })),
+    ...nearTextBlogPosts.map(item => ({ ...item, _type: 'blogPost' }))
+  ];
+}
+
+// Helper for BM25 search
+async function searchWeaviateBM25(className, fields, query) {
   try {
     const bm25Query = weaviateClient.graphql
       .get()
@@ -63,15 +131,15 @@ async function searchWeaviate(className, fields, query) {
       .withLimit(20);
 
     const bm25Res = await bm25Query.do();
-    const bm25Hits = bm25Res?.data?.Get?.[className] ?? [];
-    if (bm25Hits.length > 0) {
-      return bm25Hits;
-    }
+    return bm25Res?.data?.Get?.[className] ?? [];
   } catch (bm25Err) {
     console.warn(`BM25 search failed for ${className}:`, bm25Err);
+    return [];
   }
+}
 
-  // 2️⃣ Fallback to semantic vector search
+// Helper for nearText search
+async function searchWeaviateNearText(className, fields, query) {
   try {
     const nearTextQuery = weaviateClient.graphql
       .get()
@@ -89,27 +157,6 @@ async function searchWeaviate(className, fields, query) {
     console.error(`nearText search failed for ${className}:`, vecErr);
     return [];
   }
-}
-
-// ... existing code ...
-
-async function getCombinedResults(query) {
-  // Search both classes in parallel
-  const [weeklyNewsResults, blogPostResults] = await Promise.all([
-    searchWeaviate('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
-    searchWeaviate('RebootBlogPostChunk', blogPostChunkFields, query)
-  ]);
-
-    // Combine and deduplicate by a unique key (e.g., objectId or directusId)
-    const allResults = [
-      ...weeklyNewsResults.map(item => ({ ...item, _type: 'weeklyNews' })),
-      ...blogPostResults.map(item => ({ ...item, _type: 'blogPost' }))
-    ];
-  
-    // Optionally deduplicate if needed
-    // const uniqueResults = Array.from(new Map(allResults.map(item => [item.objectId, item])).values());
-    console.log(allResults);
-    return allResults;
 }
 
 export async function handler(event, context) {

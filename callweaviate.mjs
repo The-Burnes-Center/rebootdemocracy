@@ -41,8 +41,8 @@ const wv = weaviate.client({
 
 /**************** Fields *******************************/
 const BLOG_FIELDS = `title authors directusId fullUrl content _additional { id distance }`;
-//const NEWS_FIELDS = `title directusId itemDescription _additional { id distance }`;
-const NEWS_FIELDS = "";
+const NEWS_FIELDS = `title directusId itemDescription _additional { id distance }`;
+// const NEWS_FIELDS = "";
 
 /**************** Helper to run a BM25 query ****************/
 async function bm25Hits(className, fields) {
