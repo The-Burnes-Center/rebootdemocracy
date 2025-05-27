@@ -100,24 +100,41 @@ async function getCombinedResults(query) {
     searchWeaviateBM25('RebootBlogPostChunk', blogPostChunkFields, query)
   ]);
 
-  // If either BM25 has results, use only BM25 results (no nearText)
-  if (bm25WeeklyNews.length > 0 || bm25BlogPosts.length > 0) {
-    return [
-      ...bm25WeeklyNews.map(item => ({ ...item, _type: 'weeklyNews' })),
-      ...bm25BlogPosts.map(item => ({ ...item, _type: 'blogPost' }))
-    ];
+  // Prepare promises for nearText only if BM25 returned no results
+  const nearTextPromises = [];
+  if (bm25WeeklyNews.length === 0) {
+    nearTextPromises.push(
+      searchWeaviateNearText('RebootWeeklyNewsItem', weeklyNewsItemFields, query)
+    );
+  } else {
+    nearTextPromises.push(Promise.resolve([]));
+  }
+  if (bm25BlogPosts.length === 0) {
+    nearTextPromises.push(
+      searchWeaviateNearText('RebootBlogPostChunk', blogPostChunkFields, query)
+    );
+  } else {
+    nearTextPromises.push(Promise.resolve([]));
   }
 
-  // If both BM25 are empty, run nearText for both
-  const [nearTextWeeklyNews, nearTextBlogPosts] = await Promise.all([
-    searchWeaviateNearText('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
-    searchWeaviateNearText('RebootBlogPostChunk', blogPostChunkFields, query)
-  ]);
+  const [nearTextWeeklyNews, nearTextBlogPosts] = await Promise.all(nearTextPromises);
 
-  return [
-    ...nearTextWeeklyNews.map(item => ({ ...item, _type: 'weeklyNews' })),
-    ...nearTextBlogPosts.map(item => ({ ...item, _type: 'blogPost' }))
-  ];
+  // Use BM25 results if present, otherwise use nearText results
+  const weeklyNewsResults = bm25WeeklyNews.length > 0 ? bm25WeeklyNews : nearTextWeeklyNews;
+  const blogPostResults = bm25BlogPosts.length > 0 ? bm25BlogPosts : nearTextBlogPosts;
+
+  // Tag results
+  const blogPosts = blogPostResults.map(item => ({ ...item, _type: 'blogPost' }));
+  const weeklyNews = weeklyNewsResults.map(item => ({ ...item, _type: 'weeklyNews' }));
+
+  // Optionally sort each group by date descending
+  // blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // weeklyNews.sort((a, b) => new Date(b.date || b.itemDate) - new Date(a.date || a.itemDate));
+
+  // Blog posts first, then weekly news
+  const allResults = [...blogPosts, ...weeklyNews];
+
+  return allResults;
 }
 
 // Helper for BM25 search
@@ -128,7 +145,7 @@ async function searchWeaviateBM25(className, fields, query) {
       .withClassName(className)
       .withFields(fields)
       .withBm25({ query })
-      .withLimit(20);
+      .withLimit(5);
 
     const bm25Res = await bm25Query.do();
     return bm25Res?.data?.Get?.[className] ?? [];
@@ -149,7 +166,7 @@ async function searchWeaviateNearText(className, fields, query) {
         concepts: [query],
         distance: 0.8,
       })
-      .withLimit(20);
+      .withLimit(5);
 
     const vecRes = await nearTextQuery.do();
     return vecRes?.data?.Get?.[className] ?? [];
