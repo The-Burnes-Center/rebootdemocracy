@@ -1,46 +1,24 @@
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { format, isPast, isFuture } from "date-fns";
-import { useRoute } from "vue-router";
-import type { IndexData, ResourceItem } from "../../types/index.ts";
+import { createDirectus, readItems, rest } from "@directus/sdk";
+import type { IndexData, ResourceItem } from "@/types/index"; // update path if needed
 
-// State management
-const route = useRoute();
-const articleData = ref<ResourceItem[]>([]);
-const indexData = ref<IndexData>({});
+const DIRECTUS_URL = "https://content.thegovlab.com";
+const directus = createDirectus(DIRECTUS_URL).with(rest());
+
 const selectedType = ref("All");
-const path = ref(route.fullPath);
-const isLoading = ref(true);
-const dataFetchError = ref<string | null>(null);
-
-// Import Directus client
-const { directus, readItems } = useDirectusClient();
-
-// Helper formatting functions
-const formatDateTime = (d1: Date | string): string => {
-  return format(new Date(d1), "MMMM d, yyyy, h:mm aa");
-};
-
-const formatDateOnly = (d1: Date | string): string => {
-  return format(new Date(d1), "MMMM d, yyyy");
-};
-
-const isPastDate = (d1: Date | string): boolean => {
-  return isPast(new Date(d1));
-};
-
-const isFutureDate = (d1: Date | string): boolean => {
-  return isFuture(new Date(d1));
-};
-
-// Reference for the scroller div
 const resourceScroller = ref<HTMLElement | null>(null);
 
-// Fetch index data from Directus
-const fetchIndex = async () => {
-  try {
-    // Add explicit type for the response
-    const response = (await directus.request(
+const formatDateTime = (d: Date | string) => format(new Date(d), "MMMM d, yyyy, h:mm aa");
+const formatDateOnly = (d: Date | string) => format(new Date(d), "MMMM d, yyyy");
+const isPastDate = (d: Date | string) => isPast(new Date(d));
+const isFutureDate = (d: Date | string) => isFuture(new Date(d));
+
+const { data: indexData, pending: isIndexLoading } = await useAsyncData(
+  "research-index-data",
+  async () => {
+    const res = await directus.request(
       readItems("reboot_democracy", {
         meta: "total_count",
         limit: 1,
@@ -51,27 +29,16 @@ const fetchIndex = async () => {
           "research_questions_content",
         ],
       })
-    )) as IndexData;
+    );
+    return Array.isArray(res) ? res[0] : res;
+  },
+  { server: true }
+);
 
-    // Directly assign the response to indexData
-    if (response) {
-      indexData.value = { ...response };
-    }
-  } catch (error) {
-    console.error("Error fetching index data:", error);
-  }
-};
-
-// Fetch article data from Directus
-const fetchArticle = async () => {
-  try {
-    const filter = {
-      type: {
-        _eq: "Case Study",
-      },
-    };
-
-    const response = await directus.request(
+const { data: articleData, pending: isArticleLoading } = await useAsyncData(
+  "research-articles-data",
+  async () => {
+    const res = await directus.request(
       readItems("reboot_democracy_resources", {
         meta: "total_count",
         limit: -1,
@@ -79,69 +46,41 @@ const fetchArticle = async () => {
         fields: [
           "id",
           "case_study_type",
-          "thumbnail.id",
           "thumbnail.filename_disk",
           "title",
           "description",
           "link",
         ],
-        filter,
+        filter: {
+          type: { _eq: "Case Study" },
+        },
       })
     );
+    return res as ResourceItem[];
+  },
+  { server: true }
+);
 
-    // Check if we got any data
-    if (response && Array.isArray(response)) {
-      articleData.value = response as ResourceItem[];
-    }
-  } catch (error) {
-    console.error("Error fetching article data:", error);
-    articleData.value = [];
-  }
-};
-
-// Scroll to top function
 const scrollTop = () => {
-  if (resourceScroller.value) {
-    resourceScroller.value.scrollTop = 0;
-  }
+  if (resourceScroller.value) resourceScroller.value.scrollTop = 0;
 };
-
-// Load all data
-const loadAllData = async () => {
-  isLoading.value = true;
-  dataFetchError.value = null;
-
-  try {
-    await fetchIndex();
-    await fetchArticle();
-  } catch (error) {
-    console.error("Error loading all data:", error);
-    dataFetchError.value = "Failed to load content. Please try again later.";
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Lifecycle management
-onMounted(() => {
-  loadAllData();
-});
 </script>
+
 
 <template>
   <!-- Header Component -->
   <HeaderComponent />
   <div class="resource-page our-research-page">
-    <div v-if="isLoading" class="loading">
+    <div v-if="isIndexLoading || isArticleLoading" class="loading">
       <div class="loader"></div>
       <p>Loading content...</p>
     </div>
     <template v-else>
       <div class="resource-description">
-        <h1>{{ indexData.research_title }}</h1>
+        <h1>{{ indexData?.research_title }}</h1>
         <p
           class="our-work-description"
-          v-html="indexData.research_description"
+          v-html="indexData?.research_description"
         ></p>
         <div class="resource-menu">
           <ul>
@@ -204,7 +143,7 @@ onMounted(() => {
       </div>
       <div class="resource-scroll-section">
         <div class="resource-scroller" ref="resourceScroller">
-          <div v-if="articleData.length === 0" class="no-content">
+          <div v-if="articleData?.length === 0" class="no-content">
             <p>No case studies found.</p>
           </div>
           <template v-else v-for="item in articleData" :key="item.id">
@@ -219,7 +158,8 @@ onMounted(() => {
                 <div class="resource-item-img">
                   <img
                     v-if="item.thumbnail"
-                    :src="getImageUrl(item.thumbnail)"
+                    :src="getImageUrl(item.thumbnail, 648)"
+
                     alt="Case study thumbnail"
                   />
                 </div>
@@ -243,11 +183,11 @@ onMounted(() => {
   <div id="research" class="research-questions">
     <div class="research-questions-description">
       <h2>Research Questions</h2>
-      <div v-html="indexData.research_questions_description"></div>
+      <div v-html="indexData?.research_questions_description"></div>
     </div>
     <div
       class="research-questions-content"
-      v-html="indexData.research_questions_content"
+      v-html="indexData?.research_questions_content"
     ></div>
   </div>
   <Mailing />
@@ -255,7 +195,6 @@ onMounted(() => {
 </template>
 
 <style>
-
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 /* CSS Variables */
@@ -514,9 +453,9 @@ onMounted(() => {
   width: 50%;
 }
 
-.research-questions-description p{
-    line-height: 1.5;
-    font-family: "Red Hat Text", sans-serif;
+.research-questions-description p {
+  line-height: 1.5;
+  font-family: "Red Hat Text", sans-serif;
 }
 
 .research-questions-content {
@@ -534,7 +473,6 @@ onMounted(() => {
   padding: 2rem 4rem;
   line-height: 2;
 }
-
 
 /* Featured Items Styles */
 .featured-items {
