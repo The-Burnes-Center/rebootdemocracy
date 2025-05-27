@@ -66,48 +66,35 @@ import { fetchTeamData } from '~/composables/fetchAboutData';
 import { useRoute } from 'vue-router';
 import { nextTick } from 'vue'; 
 
-const team = ref<Team[]>([]);
-const loading = ref(true);
-const error = ref(false);
-const directusUrl = "https://content.thegovlab.com";
-const DIRECTUS_URL = directusUrl;
+const { data: teamData, pending, error } = await useAsyncData('team-data', fetchTeamData, {
+  server: true, 
+});
+
+const loading = computed(() => pending.value);
+const team = computed(() => teamData.value || []);
+
 const route = useRoute();
 
 
 // Filter out team members that don't have minimum required information
-const validTeamMembers = computed(() => {
-  return team.value.filter(member => {
-    // Must have first and last name
+const validTeamMembers = computed(() =>
+  team.value.filter((member) => {
     const hasName = member.First_Name && member.Last_Name;
-    
-    // Must have either a headshot or a bio link
-    const hasHeadshot = member.Headshot && member.Headshot.id;
-    const hasBio = member.Link_to_bio && member.Link_to_bio.trim().length > 0;
-    
+    const hasHeadshot = member.Headshot?.id;
+    const hasBio = member.Link_to_bio?.trim().length > 0;
     return hasName && (hasHeadshot || hasBio);
-  });
-});
+  })
+);
 
-onMounted(async () => {
-  try {
-    team.value = await fetchTeamData();
-  } catch (err) {
-    console.error('Failed to load team data:', err);
-    error.value = true;
-  } finally {
-    loading.value = false;
-  }
-});
-
-watch(loading, async (newLoading) => {
-  if (!newLoading) {
-    if (route.hash === '#team-grid') {
-      await nextTick(); 
-      const teamSection = document.getElementById('team-grid');
-      if (teamSection) {
-        teamSection.scrollIntoView({ behavior: 'smooth' });
-      }
+//smooth scroll
+watch(pending, async (isLoading) => {
+  if (!isLoading && route.hash === '#team-grid') {
+    await nextTick();
+    const el = document.getElementById('team-grid');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   }
 });
+
 </script>
