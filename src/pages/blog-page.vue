@@ -536,7 +536,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           limit: -1,
           filter: {
             _and: [
-            { date: { _lte: nowOffset } },
+            // { date: { _lte: nowOffset } },
               { status: { _eq: 'published' } }
             ]
           },
