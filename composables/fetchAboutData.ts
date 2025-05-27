@@ -1,9 +1,11 @@
-import type { Team } from '@/types/Team.ts';
-import { useDirectusClient } from './useDirectusClient.js';
+// server/services/fetchAllTeamMembers.ts
+import { createDirectus, rest, readItems } from '@directus/sdk';
+import type { Team } from '@/types/Team';
+
+const API_URL = 'https://content.thegovlab.com';
+const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchTeamData(): Promise<Team[]> {
-  const { directus, readItems } = useDirectusClient();
-  
   try {
     const response = await directus.request(
       readItems('Reboot_Democracy_team', {
@@ -15,11 +17,10 @@ export async function fetchTeamData(): Promise<Team[]> {
           'Last_Name',
           'Title',
           'Link_to_bio',
-          { Headshot: ['id', 'filename_disk'] }
+          { Headshot: ['id', 'filename_disk'] },
         ],
       })
     );
-    
     return response as Team[];
   } catch (error) {
     console.error('Error fetching team data:', error);

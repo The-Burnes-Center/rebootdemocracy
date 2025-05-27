@@ -3,144 +3,80 @@ import { ref, onMounted } from "vue";
 import { format, isPast, isFuture } from "date-fns";
 import { useRoute } from "vue-router";
 import type { IndexData, ResourceItem } from "../../types/index.ts";
+import { createDirectus, readItems, rest } from "@directus/sdk";
 
+// Constants
+const DIRECTUS_URL = "https://content.thegovlab.com";
+const directus = createDirectus(DIRECTUS_URL).with(rest());
 
 // State management
 const route = useRoute();
-const articleData = ref<ResourceItem[]>([]);
-const indexData = ref<IndexData>({});
-const selectedType = ref("All");
-const path = ref(route.fullPath);
-const isLoading = ref(true);
-const dataFetchError = ref<string | null>(null);
-
-// Import Directus client
-const { directus, readItems } = useDirectusClient();
 
 // Helper formatting functions
-const formatDateTime = (d1: Date | string): string => {
-  return format(new Date(d1), "MMMM d, yyyy, h:mm aa");
-};
+const formatDateTime = (d: Date | string) => format(new Date(d), 'MMMM d, yyyy, h:mm aa')
+const formatDateOnly = (d: Date | string) => format(new Date(d), 'MMMM d, yyyy')
+const isPastDate = (d: Date | string) => isPast(new Date(d))
+const isFutureDate = (d: Date | string) => isFuture(new Date(d))
 
-const formatDateOnly = (d1: Date | string): string => {
-  return format(new Date(d1), "MMMM d, yyyy");
-};
-
-const isPastDate = (d1: Date | string): boolean => {
-  return isPast(new Date(d1));
-};
-
-const isFutureDate = (d1: Date | string): boolean => {
-  return isFuture(new Date(d1));
-};
-
-// Fetch index data from Directus - using hardcoded values if needed
-const fetchIndex = async () => {
-  try {
-    // We'll try to fetch, but we already have default values
+const { data: indexData, pending: isIndexLoading, error: indexError } = await useAsyncData(
+  'engagement-index',
+  async () => {
     const response = await directus.request(
-      readItems("reboot_democracy", {
-        meta: "total_count",
+      readItems('reboot_democracy', {
+        meta: 'total_count',
         limit: 1,
-        fields: ["id", "engagement_title", "engagement_description"],
+        fields: ['id', 'engagement_title', 'engagement_description']
       })
-    );
-    
-    const responseData = response as IndexData;
-    
-    if (responseData && responseData.id) {
-      if (responseData.engagement_title) {
-        indexData.value.engagement_title = responseData.engagement_title;
-      }
-      if (responseData.engagement_description) {
-        indexData.value.engagement_description = responseData.engagement_description;
-      }
-    }
-    
-    console.log("Index data used:", indexData.value);
-  } catch (error) {
-    console.error("Error fetching index data:", error);
-  }
-};
+    )
+    return Array.isArray(response) ? response[0] : response
+  },
+  { server: true }
+)
+
 // Fetch article data from Directus
-const fetchArticle = async () => {
-  try {
-    const filter = {
-      _or: [
-        {
-          type: {
-            _eq: "Engagement",
-          },
-        },
-      ],
-    };
-
+const { data: articleData, pending: isArticleLoading, error: articleError } = await useAsyncData(
+  'engagement-articles',
+  async () => {
+    const filter = { type: { _eq: 'Engagement' } }
     const response = await directus.request(
-      readItems("reboot_democracy_resources", {
-        meta: "total_count",
+      readItems('reboot_democracy_resources', {
+        meta: 'total_count',
         limit: -1,
-        sort: ["-id"],
+        sort: ['-id'],
         fields: [
-          "id",
-          "type",
-          "thumbnail.id",
-          "stage",
-          "partner",
-          "title",
-          "description",
-          "link",
+          'id',
+          'type',
+          'thumbnail.id',
+          'stage',
+          'partner',
+          'title',
+          'description',
+          'link'
         ],
-        filter,
+        filter
       })
-    );
+    )
+    return response as ResourceItem[]
+  },
+  { server: true }
+)
 
-    // Check if we got any data
-    if (response && Array.isArray(response)) {
-      articleData.value = response as ResourceItem[];
-      console.log("Article data processed:", articleData.value);
-    }
-  } catch (error) {
-    console.error("Error fetching article data:", error);
-    articleData.value = [];
-  }
-};
+const selectedType = ref('All')
 
-// Load all data
-const loadAllData = async () => {
-  isLoading.value = true;
-  dataFetchError.value = null;
-
-  try {
-    // Execute requests, but don't worry too much if index data fails
-    await fetchIndex();
-    await fetchArticle();
-  } catch (error) {
-    console.error("Error loading all data:", error);
-    dataFetchError.value = "Failed to load content. Please try again later.";
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Lifecycle management
-onMounted(() => {
-  loadAllData();
-});
 </script>
 
 <template>
-
   <div class="resource-page our-engagements-page">
-    <div v-if="isLoading" class="loading">
+    <div v-if="isIndexLoading || isArticleLoading" class="loading"> 
       <div class="loader"></div>
       <p>Loading content...</p>
     </div>
     <template v-else>
       <div class="resource-description">
-        <h1>{{ indexData.engagement_title }}</h1>
+        <h1>{{ indexData?.engagement_title }}</h1>
         <p
           class="our-work-description"
-          v-html="indexData.engagement_description"
+          v-html="indexData?.engagement_description"
         ></p>
         <div class="resource-menu">
           <ul>
@@ -155,10 +91,10 @@ onMounted(() => {
       </div>
       <div class="resource-scroll-section">
         <div class="resource-scroller">
-          <div v-if="articleData.length === 0" class="no-content">
+          <div v-if="articleData?.length === 0" class="no-content">
             <p>No engagements found.</p>
           </div>
-          <template v-else v-for="item in articleData" :key="item.id">
+          <template v-else v-for="item in articleData || []" :key="item.id">
             <div
               class="featured-items"
               v-show="item.type == selectedType || selectedType == 'All'"
@@ -167,20 +103,12 @@ onMounted(() => {
                 <div class="resource-item-img">
                   <img
                     v-if="item.thumbnail && item.thumbnail.id"
-                    :src="
-                      directus.url +
-                      'assets/' +
-                      item.thumbnail.id +
-                      '?width=648'
-                    "
+                    :src="`${DIRECTUS_URL}/assets/${item.thumbnail.id}?width=648`"
                     alt="Engagement thumbnail"
                   />
                   <img
                     v-else
-                    :src="
-                      directus.url +
-                      'assets/a23c4d59-eb04-4d2a-ab9b-74136043954c?quality=80'
-                    "
+                    :src="`${DIRECTUS_URL}/assets/a23c4d59-eb04-4d2a-ab9b-74136043954c?quality=80`"
                     alt="Default thumbnail"
                   />
                 </div>
@@ -212,16 +140,15 @@ onMounted(() => {
     </template>
   </div>
   <Mailing />
-
 </template>
 
-<style >
+<style>
 /* Import fonts */
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 /* CSS Variables */
 :root {
- --peach-action: rgba(247, 158, 130, 1);
+  --peach-action: rgba(247, 158, 130, 1);
   --peach-light: rgba(255, 233, 229, 1);
   --peach-text: rgba(214, 53, 18, 1);
 }

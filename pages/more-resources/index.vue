@@ -1,107 +1,56 @@
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { format, isPast, isFuture } from "date-fns";
 import MailingListComponent from "../../components/mailing/Mailing.vue";
+import { createDirectus, rest, readItems } from "@directus/sdk";
 
-import { useDirectusClient } from '../../composables/useDirectusClient';
-import { useRoute } from 'vue-router';
+// Directus client setup
+const DIRECTUS_URL = "https://content.thegovlab.com";
+const directus = createDirectus(DIRECTUS_URL).with(rest());
 
-// Import your image utility function
-import { getImageUrl } from '../../composables/useImageUrl'
+// Formatting utilities
+const formatDateTime = (d: Date | string) =>
+  format(new Date(d), "MMMM d, yyyy, h:mm aa");
+const formatDateOnly = (d: Date | string) =>
+  format(new Date(d), "MMMM d, yyyy");
+const isPastDate = (d: Date | string) => isPast(new Date(d));
+const isFutureDate = (d: Date | string) => isFuture(new Date(d));
 
-// Define interfaces for type safety
-interface IndexData {
-  more_resources_title?: string;
-  more_resources_description?: string;
-  [key: string]: any;
-}
-
-interface Thumbnail {
-  id: string;
-  filename_disk?: string;
-  [key: string]: any;
-}
-
-interface TeamMember {
-  [key: string]: any;
-}
-
-interface Author {
-  team_id?: TeamMember;
-  [key: string]: any;
-}
-
-interface ResourceItem {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  link: string;
-  thumbnail?: Thumbnail;
-  authors?: Author[];
-  [key: string]: any;
-}
-
-// State management
-const route = useRoute();
-const articleData = ref<ResourceItem[]>([]);
-const indexData = ref<IndexData>({});
+// UI state
 const selectedType = ref("All");
-const path = ref(route.fullPath);
-const isLoading = ref(true);
-const dataFetchError = ref<string | null>(null);
 const resourceScroller = ref<HTMLElement | null>(null);
-
-// Import Directus client using the composable
-const { directus, readItems } = useDirectusClient();
-
-// Helper formatting functions
-const formatDateTime = (d1: Date | string): string => {
-  return format(new Date(d1), "MMMM d, yyyy, h:mm aa");
-};
-
-const formatDateOnly = (d1: Date | string): string => {
-  return format(new Date(d1), "MMMM d, yyyy");
-};
-
-const isPastDate = (d1: Date | string): boolean => {
-  return isPast(new Date(d1));
-};
-
-const isFutureDate = (d1: Date | string): boolean => {
-  return isFuture(new Date(d1));
-};
-
-// Scroll to top function
 const scrollTop = () => {
-  if (resourceScroller.value) {
-    resourceScroller.value.scrollTop = 0;
-  }
+  if (resourceScroller.value) resourceScroller.value.scrollTop = 0;
 };
 
-// Fetch index data from Directus
-const fetchIndex = async () => {
-  try {
+// Async fetch for index page metadata
+const {
+  data: indexData,
+  pending: isIndexLoading,
+  error: indexError,
+} = await useAsyncData(
+  "writing-index",
+  async () => {
     const response = await directus.request(
       readItems("reboot_democracy", {
         meta: "total_count",
-        limit: -1,
-        fields: ["*.*"],
+        limit: 1,
+        fields: ["more_resources_title", "more_resources_description"],
       })
     );
+    return Array.isArray(response) ? response[0] : response;
+  },
+  { server: true }
+);
 
-    if (response) {
-      indexData.value = response;
-    }
-  } catch (error) {
-    console.error("Error fetching index data:", error);
-    dataFetchError.value = "Failed to load content. Please try again later.";
-  }
-};
-
-// Fetch article data from Directus
-const fetchArticle = async () => {
-  try {
+// Async fetch for articles
+const {
+  data: articleData,
+  pending: isArticleLoading,
+  error: articleError,
+} = await useAsyncData(
+  "writing-articles",
+  async () => {
     const response = await directus.request(
       readItems("reboot_democracy_resources", {
         meta: "total_count",
@@ -109,59 +58,20 @@ const fetchArticle = async () => {
         sort: ["-id"],
         fields: ["*.*", "thumbnail.*", "authors.team_id.*"],
         filter: {
-          _or: [
-            {
-              type: {
-                _eq: "Resources",
-              },
-            },
-            {
-              type: {
-                _eq: "Video",
-              },
-            },
-            {
-              type: {
-                _eq: "Podcast",
-              },
-            },
-          ],
+          type: { _in: ["Resources", "Video", "Podcast"] },
         },
       })
     );
+    return response;
+  },
+  { server: true }
+  );
 
-    if (response && Array.isArray(response)) {
-      articleData.value = response as ResourceItem[];
-    }
-  } catch (error) {
-    console.error("Error fetching article data:", error);
-    articleData.value = [];
-  }
-};
-
-// Load all data
-const loadAllData = async () => {
-  isLoading.value = true;
-  dataFetchError.value = null;
-  try {
-    await fetchIndex();
-    await fetchArticle();
-  } catch (error) {
-    console.error("Error loading all data:", error);
-    dataFetchError.value = "Failed to load content. Please try again later.";
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Lifecycle management
-onMounted(() => {
-  loadAllData();
-});
+const isLoading = computed(() => isIndexLoading.value || isArticleLoading.value);
+const dataFetchError = computed(() => indexError.value || articleError.value);
 </script>
 
 <template>
-
   <div class="resource-page our-writing-page">
     <div v-if="isLoading" class="loading">
       <div class="loader"></div>
@@ -172,33 +82,45 @@ onMounted(() => {
     </div>
     <template v-else>
       <div class="resource-description">
-        <h1>{{ indexData.more_resources_title }}</h1>
+        <h1>{{ indexData?.more_resources_title }}</h1>
         <div
           class="our-work-description"
-          v-html="indexData.more_resources_description || ''"
+          v-html="indexData?.more_resources_description || ''"
         ></div>
         <div class="resource-menu">
           <ul>
             <li
-              @click="selectedType = 'All'; scrollTop();"
+              @click="
+                selectedType = 'All';
+                scrollTop();
+              "
               :class="{ isActive: selectedType == 'All' }"
             >
               All Resources
             </li>
             <li
-              @click="selectedType = 'Resources'; scrollTop();"
+              @click="
+                selectedType = 'Resources';
+                scrollTop();
+              "
               :class="{ isActive: selectedType == 'Resources' }"
             >
               Process Docs and Worksheets
             </li>
             <li
-              @click="selectedType = 'Podcast'; scrollTop();"
+              @click="
+                selectedType = 'Podcast';
+                scrollTop();
+              "
               :class="{ isActive: selectedType == 'Podcast' }"
             >
               Podcast
             </li>
             <li
-              @click="selectedType = 'Video'; scrollTop();"
+              @click="
+                selectedType = 'Video';
+                scrollTop();
+              "
               :class="{ isActive: selectedType == 'Video' }"
             >
               Video
@@ -208,11 +130,11 @@ onMounted(() => {
       </div>
       <div class="resource-scroll-section">
         <div class="resource-scroller" ref="resourceScroller">
-          <div v-if="articleData.length === 0" class="no-content">
+          <div v-if="articleData?.length === 0" class="no-content">
             <p>No resources found.</p>
           </div>
-          <div 
-            v-for="item in articleData" 
+          <div
+            v-for="item in articleData"
             :key="item.id"
             class="featured-items"
             v-show="item.type === selectedType || selectedType === 'All'"
@@ -223,13 +145,15 @@ onMounted(() => {
                   v-if="item.thumbnail"
                   :src="getImageUrl(item.thumbnail)"
                   :alt="item.title || 'Resource thumbnail'"
-                  @error="e => e.target.src = '/images/exampleImage.png'"
                 />
               </div>
               <h5 class="eyebrow peach">{{ item.type }}</h5>
               <h4>{{ item.title }}</h4>
               <p>{{ item.description }}</p>
-              <a class="btn btn-small btn-secondary" :href="item.link" target="_blank"
+              <a
+                class="btn btn-small btn-secondary"
+                :href="item.link"
+                target="_blank"
                 >Details <i class="fa-regular fa-arrow-right"></i
               ></a>
             </div>
@@ -242,17 +166,16 @@ onMounted(() => {
   <MailingListComponent />
 </template>
 
-<style >
+<style>
 /* Import fonts */
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 /* CSS Variables */
 :root {
---blue-action: #65d0f0;
+  --blue-action: #65d0f0;
   --peach-action: rgba(247, 158, 130, 1);
   --peach-light: rgba(255, 233, 229, 1);
   --peach-text: rgba(214, 53, 18, 1);
-  
 }
 
 /* Typography Styles */
@@ -546,15 +469,15 @@ onMounted(() => {
     font-size: 30px;
     font-family: "Space Mono", monospace;
   }
-  
+
   .resource-page {
     flex-wrap: wrap;
   }
-  
+
   .resource-description {
     width: 100%;
   }
-  
+
   .resource-scroll-section {
     display: flex;
     flex-direction: row;
@@ -562,28 +485,28 @@ onMounted(() => {
     padding: 0;
     align-self: flex-end;
   }
-  
+
   .resource-scroller {
     max-height: 1000px;
   }
-  
+
   .resource-image {
     width: 10%;
     height: 1000px;
     align-self: flex-start;
     margin-left: 0;
   }
-  
+
   .resource-item-img img {
     height: 112px;
   }
-  
+
   .featured-items {
     width: 75vw;
     min-height: max-content;
     overflow: unset;
   }
-  
+
   .featured-item-text {
     width: 100%;
     margin: 0;

@@ -1,12 +1,14 @@
-
 // blogService.ts
-import type { BlogPost } from '@/types/BlogPost';
-import { useDirectusClient } from './useDirectusClient.js';
+import { createDirectus, rest, readItems } from '@directus/sdk';
+import type { BlogPost, Event } from '@/types/index.ts';
+import { fetchWeeklyNewsItems } from './fetchWeeklyNews';
+
+const API_URL = 'https://content.thegovlab.com';
+const directus = createDirectus(API_URL).with(rest());
+
 export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
-  const { directus, readItems } = useDirectusClient();
-  
   try {
-    const filter = slug 
+    const filter = slug
       ? {
           _and: [
             { slug: { _eq: slug } },
@@ -20,12 +22,12 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
             { date: { _lte: '$NOW(-5 hours)' } }
           ]
         };
-      
+
     const response = await directus.request(
       readItems('reboot_democracy_blog', {
         limit: 7,
         meta: 'total_count',
-        sort: ['-date'], 
+        sort: ['-date'],
         fields: [
           '*.*',
           'authors.team_id.*',
@@ -35,7 +37,7 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
         filter
       })
     );
-    
+
     return response as BlogPost[];
   } catch (error) {
     console.error('Error fetching blog data:', error);
@@ -43,117 +45,107 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
   }
 }
 
-export async function fetchAllBlogPosts (): Promise<BlogPost[]> {
+export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
   try {
-    const { directus, readItems } = useDirectusClient();
-
     const filter = {
       _and: [
-        { status: { _eq: "published" } },
-        { date: { _lte: "$NOW(-5 hours)" } },
-      ],
+        { status: { _eq: 'published' } },
+        { date: { _lte: '$NOW(-5 hours)' } }
+      ]
     };
 
     const response = await directus.request(
-      readItems("reboot_democracy_blog", {
+      readItems('reboot_democracy_blog', {
         limit: -1,
-        sort: ["-date"],
+        sort: ['-date'],
         fields: [
-          "*.*",
-          "authors.team_id.*",
-          "authors.team_id.Headshot.*",
-          "image.*",
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
         ],
-        filter,
+        filter
       })
     );
 
     return response as BlogPost[];
   } catch (error) {
-    console.error("Error fetching all blog posts:", error);
+    console.error('Error fetching all blog posts:', error);
     return [];
   }
-};
+}
 
-  export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
-    const { directus, readItems } = useDirectusClient();
+export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
+  try {
+    const filter = {
+      _and: [
+        { featuredBlog: { _eq: true } },
+        { status: { _eq: 'published' } },
+        { date: { _lte: '$NOW(-5 hours)' } }
+      ]
+    };
 
-    try {
-      const filter = {
-        _and: [
-          { featuredBlog: { _eq: true } },
-          { status: { _eq: 'published' } },
-          { date: { _lte: '$NOW(-5 hours)' } }  // <- Make sure date isn't in future
-        ]
-      };
+    const response = await directus.request(
+      readItems('reboot_democracy_blog', {
+        limit: 1,
+        sort: ['-date'],
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
+        ],
+        filter
+      })
+    );
 
-      const response = await directus.request(
-        readItems('reboot_democracy_blog', {
-          limit: 1,
-          sort: ['-date'],
-          fields: [
-            '*.*',
-            'authors.team_id.*',
-            'authors.team_id.Headshot.*',
-            'image.*'
-          ],
-          filter
-        })
-      );
-
-      const blogs = response as BlogPost[];
-
-      return blogs.length ? blogs[0] : null;
-    } catch (error) {
-      console.error('Error fetching featured blog:', error);
-      return null;
-    }
+    const blogs = response as BlogPost[];
+    return blogs.length ? blogs[0] : null;
+  } catch (error) {
+    console.error('Error fetching featured blog:', error);
+    return null;
   }
+}
 
-  export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
-    const { directus, readItems } = useDirectusClient();
-    
-    try {
-      const filter = {
-        _and: [
-          { slug: { _eq: slug } },
-          { status: { _eq: 'published' } },
-          { date: { _lte: '$NOW(-5 hours)' } }
-        ]
-      };
-      
-      const response = await directus.request(
-        readItems('reboot_democracy_blog', {
-          limit: 1,
-          fields: [
-            '*.*',
-            'authors.team_id.*',
-            'authors.team_id.Headshot.*',
-            'image.*'
-          ],
-          filter
-        })
-      );
-      
-      const blogs = response as BlogPost[];
-      
-      return blogs.length ? blogs[0] : null;
-    } catch (error) {
-      console.error(`Error fetching blog with slug ${slug}:`, error);
-      return null;
-    }
+export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
+  try {
+    const filter = {
+      _and: [
+        { slug: { _eq: slug } },
+        { status: { _eq: 'published' } },
+        { date: { _lte: '$NOW(-5 hours)' } }
+      ]
+    };
+
+    const response = await directus.request(
+      readItems('reboot_democracy_blog', {
+        limit: 1,
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
+        ],
+        filter
+      })
+    );
+
+    const blogs = response as BlogPost[];
+    return blogs.length ? blogs[0] : null;
+  } catch (error) {
+    console.error(`Error fetching blog with slug ${slug}:`, error);
+    return null;
   }
+}
 
- export async function fetchRelatedBlogsByTags(tags: string[], excludeSlug: string): Promise<BlogPost[]> {
-  const { directus, readItems } = useDirectusClient();
-
+export async function fetchRelatedBlogsByTags(tags: string[], excludeSlug: string): Promise<BlogPost[]> {
   if (!tags?.length) return [];
 
   try {
     const response = await directus.request(
       readItems('reboot_democracy_blog', {
-        sort: ['-date'], 
-        limit: 10, 
+        sort: ['-date'],
+        limit: 10,
         fields: [
           '*.*',
           'authors.team_id.*',
@@ -162,40 +154,26 @@ export async function fetchAllBlogPosts (): Promise<BlogPost[]> {
         ],
         filter: {
           _and: [
-            {
-              Tags: {
-                _in: tags
-              }
-            },
-            {
-              slug: {
-                _neq: excludeSlug
-              }
-            },
-            {
-              status: { _eq: 'published' }
-            },
-            {
-              date: { _lte: '$NOW' } 
-            }
+            { Tags: { _in: tags } },
+            { slug: { _neq: excludeSlug } },
+            { status: { _eq: 'published' } },
+            { date: { _lte: '$NOW' } }
           ]
         }
       })
     );
 
-    return (response as BlogPost[]).slice(0, 3); // Only top 3
+    return (response as BlogPost[]).slice(0, 3);
   } catch (error) {
     console.error('Error fetching related blogs:', error);
     return [];
   }
 }
 
-
 export async function fetchAllUniqueTags(): Promise<string[]> {
   try {
     const blogPosts = await fetchAllBlogPosts();
     const weeklyNewsItems = await fetchWeeklyNewsItems();
-    
     const uniqueTags = new Set<string>();
 
     blogPosts.forEach((post) => {
@@ -206,7 +184,6 @@ export async function fetchAllUniqueTags(): Promise<string[]> {
       }
     });
 
-     // Add categories from news items as tags
     weeklyNewsItems.forEach((newsItem) => {
       if (newsItem.category) {
         uniqueTags.add(newsItem.category);
@@ -218,21 +195,18 @@ export async function fetchAllUniqueTags(): Promise<string[]> {
     console.error('Error fetching unique tags:', error);
     return [];
   }
-} 
-
+}
 
 export async function fetchAllSlugs(): Promise<string[]> {
-  const { directus, readItems } = useDirectusClient();
-
   try {
     const posts = await directus.request(
       readItems('reboot_democracy_blog', {
         fields: ['slug'],
         filter: {
           status: { _eq: 'published' },
-          date: { _lte: '$NOW(-5 hours)' },
+          date: { _lte: '$NOW(-5 hours)' }
         },
-        limit: -1,
+        limit: -1
       })
     );
 
@@ -242,5 +216,3 @@ export async function fetchAllSlugs(): Promise<string[]> {
     return [];
   }
 }
-
-

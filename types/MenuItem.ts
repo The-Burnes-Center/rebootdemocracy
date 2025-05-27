@@ -3,6 +3,8 @@ export interface DropdownItem {
   name: string;
   to?: string;
   external?: boolean;
+  children?: MenuItem[];
+  category?: string;
 }
 
 export interface MenuItem extends DropdownItem {

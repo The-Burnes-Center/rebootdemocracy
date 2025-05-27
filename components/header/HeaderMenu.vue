@@ -1,4 +1,3 @@
-<!-- HeaderMenu.vue (Modified) -->
 <template>
   <section class="menu__section">
     <div
@@ -8,18 +7,29 @@
       :class="{ 'about-menu-wrapper': item.name === 'about' }"
       ref="menuItemRefs"
     >
-      <NuxtLink
-        v-if="!item.children"
-        :to="item.to"
-        class="header-menu__item"
-        v-bind="
-          item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}
-        "
-        @click="emitItemClick(item, $event)"
-      >
-        <span class="header-menu__label">{{ item.label }}</span>
-      </NuxtLink>
-      <!--If dropdown has children render appropriate dropdown-->
+      <!-- For items without children -->
+      <template v-if="!item.children">
+        <!-- External links use regular anchor tags -->
+        <a 
+          v-if="item.external && item.to"
+          :href="item.to"
+          class="header-menu__item"
+        >
+          <span class="header-menu__label">{{ item.label }}</span>
+        </a>
+        
+        <!-- Internal links use NuxtLink -->
+        <NuxtLink
+          v-else
+          :to="item.to || ''"
+          class="header-menu__item"
+          @click="emitItemClick(item, $event)"
+        >
+          <span class="header-menu__label">{{ item.label }}</span>
+        </NuxtLink>
+      </template>
+
+      <!-- Dropdown logic for items with children -->
       <div v-else class="header-menu__item header-menu__dropdown">
         <span
           class="header-menu__label"
@@ -50,7 +60,7 @@
         </span>
       </div>
 
-      <!-- Render dropdown inline for mobile -->
+      <!-- Mobile dropdown for items with children -->
       <div
         v-if="
           isMobile &&
@@ -60,57 +70,74 @@
         "
         class="header-dropdown__mobile"
       >
-        <NuxtLink
-          v-for="(childItem, childIdx) in item.children"
-          :key="childIdx"
-          :to="childItem.to"
-          class="header-dropdown__item-mobile"
-          v-bind="{}"
-          @click="emitItemClick(childItem, $event)"
-        >
-          <span class="header-dropdown__itemLabel-mobile">{{
-            childItem.label
-          }}</span>
-        </NuxtLink>
+        <template v-for="(childItem, childIdx) in item.children" :key="childIdx">
+          <!-- External links use regular anchor tags -->
+          <a 
+            v-if="childItem.external && childItem.to"
+            :href="childItem.to"
+            class="header-dropdown__item-mobile"
+          >
+            <span class="header-dropdown__itemLabel-mobile">{{ childItem.label }}</span>
+          </a>
+          
+          <!-- Internal links use NuxtLink -->
+          <NuxtLink
+            v-else
+            :to="childItem.to || ''"
+            class="header-dropdown__item-mobile"
+            @click="emitItemClick(childItem, $event)"
+          >
+            <span class="header-dropdown__itemLabel-mobile">{{ childItem.label }}</span>
+          </NuxtLink>
+        </template>
       </div>
-      
-      <!-- Render AboutDropdown directly inside the about menu item wrapper -->
-      <AboutDropdown
-        v-if="
-          !isMobile &&
-          openDropdown === index &&
-          item.name === 'about' &&
-          item.children &&
-          item.children.length
-        "
-        :items="(item.children ?? []) as DropdownItem[]"
-        :isOpen="openDropdown === index"
-        @close="closeDropdown"
-        @item-click="emitItemClick"
-      />
+
+      <!-- AboutDropdown component for desktop -->
+     <NuxtLazyHydrate
+          v-if="
+            !isMobile &&
+            openDropdown === index &&
+            item.name === 'about' &&
+            item.children &&
+            item.children.length
+          "
+          :on-interaction="['click', 'hover']"
+        >
+          <AboutDropdown
+            :items="(item.children ?? []) as DropdownItem[]"
+            :isOpen="openDropdown === index"
+            @close="closeDropdown"
+            @item-click="emitItemClick"
+          />
+        </NuxtLazyHydrate>
     </div>
   </section>
-  
-  <!-- Render standard HeaderDropdown for other dropdowns -->
-  <HeaderDropdown
-    v-if="
-      !isMobile &&
-      openDropdown !== null &&
-      items[openDropdown]?.name !== 'about' &&
-      items[openDropdown]?.children?.length
-    "
-    :items="(items[openDropdown]?.children ?? []) as DropdownItem[]"
-    :openDropdown="openDropdown"
-    :index="openDropdown"
-    @close="closeDropdown"
-  />
-</template>
+
+      <NuxtLazyHydrate
+            v-if="
+              !isMobile &&
+              openDropdown !== null &&
+              items[openDropdown]?.name !== 'about' &&
+              items[openDropdown]?.children?.length
+            "
+            :on-interaction="['click', 'hover']"
+          >
+            <HeaderDropdown
+              :items="(items[openDropdown]?.children ?? []) as DropdownItem[]"
+              :openDropdown="openDropdown"
+              :index="openDropdown"
+              @close="closeDropdown"
+              @item-click="emitItemClick"
+            />
+          </NuxtLazyHydrate>
+    </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import type { DropdownItem, MenuItem } from "@/types/index.ts";
-import AboutDropdown from "./AboutDropdown.vue";
-
+import { useRoute } from "vue-router";
+const AboutDropdown = defineAsyncComponent(() => import('./AboutDropdown.vue'))
+const HeaderDropdown = defineAsyncComponent(() => import('./HeaderDropdown.vue'))
 interface Props {
   items: MenuItem[];
   initialTab?: number | null;
@@ -122,6 +149,7 @@ const emit = defineEmits(["item-click"]);
 const openDropdown = ref<number | null>(null);
 const isMobile = ref<boolean>(false);
 const menuItemRefs = ref<HTMLElement[]>([]);
+const route = useRoute();
 
 // Check if mobile on mount and when resized
 onMounted(() => {
@@ -150,20 +178,26 @@ function closeDropdown(): void {
 function handleOutsideClick(event: MouseEvent): void {
   if (!isMobile.value && openDropdown.value !== null) {
     const menuElement = document.querySelector(".menu__section");
-    const dropdownElement = document.querySelector(".header-dropdown__container");
-    const aboutDropdownElement = document.querySelector(".about-dropdown__container");
-    
+    const dropdownElement = document.querySelector(
+      ".header-dropdown__container"
+    );
+    const aboutDropdownElement = document.querySelector(
+      ".about-dropdown__container"
+    );
+
     if (event.target instanceof Element) {
-      const clickedOnMenuLabel = event.target.closest('.header-menu__label');
+      const clickedOnMenuLabel = event.target.closest(".header-menu__label");
       if (clickedOnMenuLabel) {
         return;
       }
     }
-    
-    const clickedOutside = !(menuElement?.contains(event.target as Node) || 
-                             dropdownElement?.contains(event.target as Node) ||
-                             aboutDropdownElement?.contains(event.target as Node));
-    
+
+    const clickedOutside = !(
+      menuElement?.contains(event.target as Node) ||
+      dropdownElement?.contains(event.target as Node) ||
+      aboutDropdownElement?.contains(event.target as Node)
+    );
+
     if (clickedOutside) {
       openDropdown.value = null;
     }
@@ -172,10 +206,14 @@ function handleOutsideClick(event: MouseEvent): void {
 
 // Emit click event to parent to close mobile menu
 function emitItemClick(item: MenuItem, event: MouseEvent): void {
-  emit('item-click', item, event);
+  emit("item-click", item, event);
   // Close dropdown after clicking an item
   openDropdown.value = null;
 }
+
+watch(route, () => {
+  openDropdown.value = null;
+});
 </script>
 
 <style scoped>
