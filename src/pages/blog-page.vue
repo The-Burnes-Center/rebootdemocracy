@@ -137,7 +137,7 @@ mounted() {
       limit: -1,
       filter: {
         _and: [
-          // {  _lte: nowOffset } },
+          { date: { _lte: nowOffset } },
           { status: { _eq: 'published' } }
         ]
       },
@@ -146,7 +146,7 @@ mounted() {
         'authors.team_id.*',
         'authors.team_id.Headshot.*'
       ],
-      sort: ["date2"]
+      sort: ["date"]
     }),
     this.directus.items('reboot_democracy_weekly_news').readByQuery({
       meta: 'total_count',
@@ -164,12 +164,12 @@ mounted() {
   ])
   .then(([blogResult, weeklyNewsResult]) => {
     const blogData = blogResult.data || [];
-    console.log("blogData",blogData);
+    console.log(blogData);
     const weeklyNewsData = weeklyNewsResult.data || [];
 
     // Combine both arrays and sort chronologically by date (descending)
     const combinedData = [...blogData, ...weeklyNewsData].sort((a, b) => 
-      new Date(a.date2) - new Date(b.date2)
+      new Date(a.date) - new Date(b.date)
     );
 
     self.blogData = combinedData;
@@ -269,7 +269,7 @@ mounted() {
           limit: -1,
           filter: {
             _and: [
-              { date2: { _lte: '$NOW(-5 hours)' } },
+              { date: { _lte: '$NOW(-5 hours)' } },
               { status: { _eq: 'published' } },
               {
                 _or: [
@@ -348,7 +348,7 @@ mounted() {
         const weaviateOnlyResult = await self.directus.items('reboot_democracy_blog').readByQuery({
           limit: -1,
           filter: {
-            _and: [{ date2: { _lte: '$NOW(-5 hours)' } }, { status: { _eq: 'published' } }],
+            _and: [{ date: { _lte: '$NOW(-5 hours)' } }, { status: { _eq: 'published' } }],
             _or: slugFilters,
           },
           fields: ['*.*', 'authors.team_id.*', 'authors.team_id.Headshot.*'],
@@ -536,7 +536,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           limit: -1,
           filter: {
             _and: [
-            // { date2: { _lte: nowOffset } },
+            { date: { _lte: nowOffset } },
               { status: { _eq: 'published' } }
             ]
           },
@@ -545,7 +545,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
             'authors.team_id.*',
             'authors.team_id.Headshot.*'
           ],
-          sort: ["date2"]
+          sort: ["date"]
         })
       .then((item) => {
       self.blogData =  item.data;
@@ -567,11 +567,11 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       });
     },
 
-      fetchNews: function fetchNews() {
+      fetchWeeklyNews: function fetchWeeklyNews() {
       self = this;
 
       this.directus
-      .items('reboot_democracy__news')
+      .items('reboot_democracy_weekly_news')
       .readByQuery({
          meta: 'total_count',
          limit: 1,
@@ -582,7 +582,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
        
       })
       .then((item) => {
-      self.Newsitem =  item.data[0];
+      self.weeklyNewsitem =  item.data[0];
       });
     },
 
@@ -652,7 +652,6 @@ Emboldened by the advent of generative AI, we are excited about the future possi
   <div class="blog-featured-row">
 
     <div class="first-blog-post">
-
 <a :href="(blogData.length > 0 && blogData.slice().reverse()[0].slug) ? ('/blog/' + blogData.slice().reverse()[0].slug) : (blogData.length > 0 && blogData.slice().reverse()[0].edition ? '/newsthatcaughtoureye/' + blogData.slice().reverse()[0].edition : '#')">
 
 
@@ -663,7 +662,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
         <h3>{{blogData.slice().reverse()[0].title}}</h3>
         <p v-if="blogData.slice().reverse()[0].excerpt ">{{ blogData.slice().reverse()[0].excerpt }}</p>
         <p v-if="blogData.slice().reverse()[0].summary ">{{ blogData.slice().reverse()[0].summary }}</p>
-        <p>Published on {{ formatDateOnly(new Date( blogData.slice().reverse()[0].date2)) }} </p>
+        <p>Published on {{ formatDateOnly(new Date( blogData.slice().reverse()[0].date)) }} </p>
                 <div v-if="!blogData.slice().reverse()[0].authors" class="author-list">
                   <p class="author-name">{{blogData.slice().reverse()[0].author}}</p>
                 </div>
@@ -694,7 +693,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
               <h3>{{blog_item.title}}</h3>
               <p v-if="blog_item.excerpt ">{{ blog_item.excerpt }}</p>
               <p v-if="blog_item.summary ">{{ blog_item.summary }}</p>
-               <p>Published on {{ formatDateOnly(new Date( blog_item.date2)) }} </p>
+               <p>Published on {{ formatDateOnly(new Date( blog_item.date)) }} </p>
                 <div v-if="!blog_item.authors" class="author-list">
                   <p class="author-name">{{blog_item.author}}</p>
                 </div>
@@ -733,7 +732,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       </div>
       <div class="allposts-post-details">
         <h3>{{blog_item.title}}</h3>
-        <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date2)) }}</p>
+        <p class="post-date">Published on {{ formatDateOnly(new Date( blog_item.date)) }}</p>
         <div v-if="!blog_item.authors" class="author-list">
           <p class="author-name">{{blog_item.author}}</p>
           </div>
@@ -762,7 +761,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
                 ? (item.fullUrl || ('/blog/' + item.slug))
                 : (item.itemUrl || ('/newsthatcaughtoureye/' + item.edition))" >
       <div v-lazy-load>
-        <img v-if="item._type === 'News'"
+        <img v-if="item._type === 'weeklyNews'"
              class="blog-list-img"
              data-src="/newsheader.jpg">
         <img v-else-if="item.imageFilename"
@@ -773,11 +772,11 @@ Emboldened by the advent of generative AI, we are excited about the future possi
              data-src="/newsheader.jpg">
       </div>
       <div class="allposts-post-details" style="max-width:320px">
-        <h3>{{ item._type === 'News' ? item.itemTitle : item.title }}</h3>
+        <h3>{{ item._type === 'weeklyNews' ? item.itemTitle : item.title }}</h3>
         <p class="post-date">
-          Published on {{ formatDateOnly(new Date(item.date2 || item.itemDate)) }}
+          Published on {{ formatDateOnly(new Date(item.date || item.itemDate)) }}
         </p>
-        <!-- <p v-if="item._type === 'News'">{{ item.itemDescription }}</p>
+        <!-- <p v-if="item._type === 'weeklyNews'">{{ item.itemDescription }}</p>
         <p v-else-if="item.excerpt">{{ item.excerpt }}</p>
         <p v-else-if="item.summary">{{ item.summary }}</p> -->
         <div v-if="item._type === 'blogPost' && item.authors" class="author-list">
@@ -785,7 +784,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
     {{ Array.isArray(item.authors) ? item.authors.join(', ') : item.authors }}
   </p>
 </div>
-        <div v-else-if="item._type === 'News' && item.itemAuthor" class="author-list">
+        <div v-else-if="item._type === 'weeklyNews' && item.itemAuthor" class="author-list">
           <p class="author-name">{{ item.itemAuthor }}</p>
         </div>
       </div>

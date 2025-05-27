@@ -25,7 +25,7 @@ export function fetchBlogData(slug) {
                 _eq: "published",
               },
             },
-            { date2: { _lte: nowOffset } },
+            { date: { _lte: nowOffset } },
           ],
         },
       });

@@ -79,7 +79,7 @@ export default {
           // if (self.postData.length === 0) {
           //   window.location.href = "/";
           // }
-          console.log("self.postData",self.postData);
+          console.log(self.postData);
           self.postData.length>0 ? this.fillMeta() :  this.fillMetaDefault()
       } catch (error) {
         // Handle the error
