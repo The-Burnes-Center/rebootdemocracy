@@ -1,9 +1,11 @@
-// Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
+
+
+  // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
 import pkg from 'jstoxml';
 import { Directus } from '@directus/sdk';
 import he from 'he';
 
-export async function handler (event, context) {
+exports.handler = async function (event, context) {
 
   const { toXML } = pkg;
   const directus = new Directus('https://directus.theburnescenter.org/');
@@ -62,6 +64,9 @@ export async function handler (event, context) {
     itemcont["item"]["title"] = e.title;
     itemcont["item"]["description"] = {
       _cdata: decodeEntities(e.events || '')
+    };    
+    itemcont["item"]["source"] = {
+      _cdata: decodeEntities(e.announcements || '')
     };    
     itemcont["item"]["pubDate"] = e.date;
     itemcont["item"]["GUID"] = e.id;
