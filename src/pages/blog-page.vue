@@ -773,7 +773,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       </div>
       <div class="allposts-post-details" style="max-width:320px">
         <h3>{{ item._type === 'weeklyNews' ? item.itemTitle : item.title }}</h3>
-        <p class="post-date">
+        <p class="post-date" v-if="item.date || item.itemDate">
           Published on {{ formatDateOnly(new Date(item.date || item.itemDate)) }}
         </p>
         <!-- <p v-if="item._type === 'weeklyNews'">{{ item.itemDescription }}</p>

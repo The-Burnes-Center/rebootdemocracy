@@ -126,7 +126,7 @@ async function getCombinedResults(query) {
   // Tag results
   const blogPosts = blogPostResults.map(item => ({ ...item, _type: 'blogPost' }));
   const weeklyNews = weeklyNewsResults.map(item => ({ ...item, _type: 'weeklyNews' }));
-
+console.log(weeklyNews);
   // Optionally sort each group by date descending
   // blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
   // weeklyNews.sort((a, b) => new Date(b.date || b.itemDate) - new Date(a.date || a.itemDate));
