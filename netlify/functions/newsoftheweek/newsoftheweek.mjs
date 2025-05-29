@@ -58,7 +58,7 @@ export async function handler (event, context) {
     var itemcont = {};
     itemcont["item"] = {};
     itemcont["item"]["title"] = e_items.reboot_democracy_weekly_news_items_id.title;
-    itemcont["item"]["pubDate"] = e_items.reboot_democracy_weekly_news_items_id.date;
+    itemcont["item"]["pubDate"] = buildRFC822Date(e_items.reboot_democracy_weekly_news_items_id.date).split(' ').slice(0, 4).join(' ');
     itemcont["item"]["author"] = e_items.reboot_democracy_weekly_news_items_id.author + " in " + e_items.reboot_democracy_weekly_news_items_id.publication;
     itemcont["item"]["link"] =  e_items.reboot_democracy_weekly_news_items_id.url;    
     itemcont["item"]["description"] = e_items.reboot_democracy_weekly_news_items_id.excerpt;
