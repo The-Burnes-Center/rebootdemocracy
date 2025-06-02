@@ -145,7 +145,7 @@ async function searchWeaviateBM25(className, fields, query) {
       .withClassName(className)
       .withFields(fields)
       .withBm25({ query })
-      .withLimit(5);
+      // .withLimit(5);
 
     const bm25Res = await bm25Query.do();
     return bm25Res?.data?.Get?.[className] ?? [];
@@ -166,7 +166,7 @@ async function searchWeaviateNearText(className, fields, query) {
         concepts: [query],
         distance: 0.8,
       })
-      .withLimit(5);
+      // .withLimit(5);
 
     const vecRes = await nearTextQuery.do();
     return vecRes?.data?.Get?.[className] ?? [];

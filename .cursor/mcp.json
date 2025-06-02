@@ -1,0 +1,14 @@
+{
+    "mcpServers": {
+        "directus": {
+            "command": "npx",
+            "args": ["@directus/content-mcp@latest"],
+            "env": {
+                "DIRECTUS_URL": "https://directus.theburnescenter.org",
+                "DIRECTUS_TOKEN": "A4z-ew_eQ1gCYAzJk0oQZl6-npLVYhI1"
+            
+        }
+    }
+}
+  }
+
