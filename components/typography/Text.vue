@@ -103,7 +103,7 @@ const lineHeights = {
   relaxed: "1.75", // 28px
   loose: "2", // 32px
   "extra-loose": "2.4", // 40px
-  "super-loose": "2.8125" // 45px
+  "super-loose": "2.8125", // 45px
 } as const;
 
 const marginSizes = {

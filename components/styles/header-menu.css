@@ -7,21 +7,25 @@
 }
 
 .header-menu__label {
-  color: #1e1e1e;
+  color: #003366;
   font-family: var(--font-inter);
   font-size: 1rem;
-  --color-icon: #1e1e1e;
+  --color-icon: #003366;
   font-style: normal;
   font-weight: 700;
   line-height: 125%;
   cursor: pointer;
 }
+.header-menu__label:hover {
+  color: #315895;
+  --color-icon: #315895;
+}
 
 .topic-label {
-  background-color: black;
+  background-color: #003366;
   color: white;
   padding: 0.5rem 0.75rem;
-  border-radius: 2px;
+  border-radius: 3px;
   --color-icon: white;
 }
 
@@ -37,8 +41,8 @@
 }
 
 .active {
-  color: #0d63eb;
-  --color-icon: #0d63eb;
+  color: #315895;
+  --color-icon: #315895;
 }
 
 .dropdown-icon.active {

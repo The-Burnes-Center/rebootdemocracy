@@ -1,39 +1,38 @@
 .hero__container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 24px 20px;
-  height: 20vh;
+  padding: 3rem 0;
+  
   box-sizing: border-box;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+  background: url("/images/hero-background.png") no-repeat center center;
   position: relative;
-  background-color: #fff;
   z-index: 10;
 }
 
 .hero__content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-left: 5.1rem;
-  padding-bottom:1rem;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
 }
 
 .search-content {
-  padding-bottom:2.5rem;
-  margin-right: 5rem;
-  margin-left: 2rem;
+  padding-top:1rem;
+
 }
 
 .custom-searchbox input {
   width: 350px;
   max-width: 100%;
-  border-radius: 6px;
-  border: 1px solid #ccc;
   font-size: 1rem;
-  padding-right:2.5rem;
+  padding-right: 2.5rem;
   font-family: var(--font-inria);
 }
 
@@ -43,28 +42,12 @@
 }
 
 .hero__title {
-  width: 438px;
-  height: 30px;
-  font-family: var(--font-inria);
-  font-size: 24px;
-  font-weight: 300;
-  line-height: 30px;
-  color: #000000;
-  margin: 0;
-  letter-spacing:normal;
+  color: #FFFFFF !important;
 }
 
 .hero__subtitle {
-  width: 685px;
-  height: 15px;
-  font-family: var(--font-inria);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 15px;
-  color: #000000;
-  margin: 0;
+  color: #FFFFFF !important;
 }
-
 
 .hero__first-partner img {
   padding: 1px;
@@ -86,7 +69,7 @@
     flex-direction: column;
     align-items: center;
     gap: 16px;
-    padding:1rem;
+    padding: 1rem;
   }
   .hero__content {
     margin-left: 0;
@@ -94,10 +77,10 @@
   }
   .search-content {
     display: block;
-    padding-bottom:1rem;
+    padding-bottom: 1rem;
     margin-right: 0;
     margin-left: 2rem;
-}
+  }
 
   .hero__title {
     width: 100%;
