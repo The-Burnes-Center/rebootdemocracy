@@ -259,6 +259,7 @@
 import { ref, onMounted, computed, watch, nextTick, onUnmounted } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event, NewsItem, WeeklyNews } from "@/types/index.ts";
+import { fetchAllUniqueTags } from "~/composables/fetchBlogData";
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
