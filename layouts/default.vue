@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="layout">
     <DefaultHeader :topicTags="tags" />
-    <main>
+     <main class="main-content">
       <slot />
     </main>
     <Footer />
@@ -9,7 +9,23 @@
 </template>
 
 <script setup>
-import { useAsyncData } from '#app';
+import { useAsyncData } from "#app";
 import { fetchAllUniqueTagsForSSG } from "../composables/fetchAllUniqueTagsSSG";
-const { data: tags } = await useAsyncData("topic-tags", fetchAllUniqueTagsForSSG);
+const { data: tags } = await useAsyncData(
+  "topic-tags",
+  fetchAllUniqueTagsForSSG
+);
 </script>
+
+<style scoped>
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+}
+
+</style>

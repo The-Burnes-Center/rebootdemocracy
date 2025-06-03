@@ -1,0 +1,50 @@
+.featured-card {
+  overflow: hidden;
+}
+
+.featured-card__image {
+  width: 100%;
+  height: 14rem;
+  object-fit: cover;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+/* Add this for consistent text clamping */
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clamp-6 {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.featured-card__body {
+  padding: 1.25rem 1.5rem;
+}
+
+.textclass{
+  color: #003366 !important;
+}
+
+.featured-card p > strong {
+  color: rgb(92, 105, 171);
+  font-weight: 700;
+  font-size: 0.875rem;
+}

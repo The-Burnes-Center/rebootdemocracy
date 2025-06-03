@@ -216,3 +216,44 @@ export async function fetchAllSlugs(): Promise<string[]> {
     return [];
   }
 }
+
+export async function fetchLatestCombinedPosts(): Promise<(BlogPost | NewsItem)[]> {
+  try {
+    // Step 1: Fetch latest blog posts
+    const blogPosts = await directus.request(
+      readItems('reboot_democracy_blog', {
+        limit: 3,
+        sort: ['-date'],
+        filter: {
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _lte: '$NOW(-5 hours)' } }
+          ]
+        },
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
+        ]
+      })
+    );
+
+    // Step 2: Fetch all weekly news items
+    const newsItems = await fetchWeeklyNewsItems();
+
+    // Step 3: Merge, sort, and limit to top 3
+    const allItems = [...(blogPosts as BlogPost[]), ...newsItems];
+
+    allItems.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return allItems.slice(0, 3);
+  } catch (error) {
+    console.error('Error fetching combined latest posts:', error);
+    return [];
+  }
+}

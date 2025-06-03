@@ -3,7 +3,7 @@
     <Text fontFamily="inria" size="4xl" weight="normal" class="section-heading" lineHeight="extra-loose">
       Related Articles
     </Text>
-    <div class="related-posts-list">
+    <div class="related-posts-list grid-layout">
       <template v-for="(post, index) in relatedBlogs" :key="post.id">
         <!-- Mobile Version -->
         <Card

@@ -1,256 +1,164 @@
 <template>
   <div class="home-page">
+    <!-- HERO SECTION -->
     <Hero
       title="Rebooting Democracy in the Age of AI"
       subtitle="Insights on AI, Governance and Democracy"
     />
 
-    <div class="curator-badge-overlay">
-      <!-- <CuratorBadge
-        name="Beth Simone Noveck"
-        title="Director at Burnes Center and the Govlab"
-        imageUrl="/images/Beth_Simone_Noveck.png"
-        moreText="More incredible things Beth done in in her"
-      /> -->
-    </div>
-
-    <section class="page-layout">
-      <article
-        class="left-content"
-        :class="{ 'search-active': showSearchResults }"
-      >
-        <!-- Mobile search display -->
-        <div
-          v-if="showSearchResults && isMobile"
-          class="search-container"
-          :class="{ 'mobile-search': isMobile }"
-        >
-          <div
-            class="search-results-container"
-            :class="{ 'mobile-container': isMobile }"
-          >
-            <div class="search-results-header">
-              <h2>Search Results for "{{ searchQuery }}"</h2>
-            </div>
-            <!-- Pass the searchQuery prop to GlobalSearch -->
-            <GlobalSearch :searchQuery="searchQuery" />
-          </div>
-        </div>
-
-        <!-- Mobile filter bar -->
-        <div
-          v-if="
-            isMobile &&
-            !isLoading &&
-            selected !== 'All Topics' &&
-            !showSearchResults
+    <!-- FEATURE + POSTCARDS ROW -->
+    <section class="home-featured-row">
+      <!-- WRAPPER AROUND FEATURED + POSTCARDS -->
+      <div class="home-featured-wrapper">
+        <!-- FEATURED BLOG -->
+        <FeatureCard
+          v-if="featuredBlog"
+          class="featured-column"
+          :imageUrl="
+            featuredBlog.image?.id ? getImageUrl(featuredBlog.image) : ''
           "
-          class="results-and-filter"
-        >
-          <div class="results-count">
-            <Text
-              as="span"
-              fontFamily="inter"
-              size="base"
-              color="text-primary"
-              weight="medium"
-            >
-              Showing blogs filtered by "{{ selected }}"
-            </Text>
-          </div>
-          <div class="filter-actions">
-            <Button
-              variant="secondary"
-              size="small"
-              @click="
-                () => {
-                  selected = 'All Topics';
-                  handleTagFilter('All Topics');
-                }
-              "
-            >
-              Clear Filter
-            </Button>
-          </div>
-        </div>
+          :tag="featuredBlog.Tags?.[0]"
+          :title="featuredBlog.title"
+          :description="featuredBlog.excerpt"
+          :date="featuredBlog.date"
+          :author="getAuthorName(featuredBlog)"
+          @click="navigateToBlogPost(featuredBlog)"
+        />
 
-        <!-- Hide TabSwitch when showing search results on mobile -->
-        <TabSwitch
-          v-if="!(showSearchResults && isMobile)"
-          :tabs="tabOptions"
-          :tagOptions="tagOptions"
-          @tab-changed="handleTabChange"
-          @tag-filter="
-            (tag) => {
-              selected = tag;
-              handleTagFilter(tag);
-            }
-          "
-        >
-          <!-- Latest Posts Tab -->
-          <template #latest-posts>
-            <article class="left-content-blog">
-              <!-- Show GlobalSearch when searching on desktop -->
-              <GlobalSearch
-                v-if="showSearchResults && !isMobile"
-                :searchQuery="searchQuery"
-              />
-              <!-- Otherwise show regular posts -->
-              <template v-else>
-                <!-- Loading state -->
-                <div v-if="isLoading" class="loading">
-                  <div class="loading-spinner"></div>
-                  <div>Loading blogs...</div>
-                </div>
-
-                <!-- Filter indicator - This appears when a tag filter is active -->
-                <div
-                  v-if="!isLoading && selected !== 'All Topics' && !isMobile"
-                  class="results-and-filter"
-                >
-                  <div class="results-count">
-                    <Text
-                      as="span"
-                      fontFamily="inter"
-                      size="base"
-                      color="text-primary"
-                      weight="medium"
-                    >
-                      Showing blogs filtered by "{{ selected }}"
-                    </Text>
-                  </div>
-                  <div class="filter-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      @click="
-                        () => {
-                          selected = 'All Topics';
-                          handleTagFilter('All Topics');
-                        }
-                      "
-                    >
-                      Clear Filter
-                    </Button>
-                  </div>
-                </div>
-
-                <!-- Blog list section -->
-                <div
-                  v-if="!isLoading && displayPosts.length > 0"
-                  class="blog-list"
-                >
-                  <PostCard
-                    v-for="(post, index) in displayPosts"
-                    :key="post.id"
-                    :tag="post.Tags?.[0] || 'Blog'"
-                    :titleText="post.title"
-                    :author="getAuthorName(post)"
-                    :excerpt="post.excerpt || ''"
-                    :imageUrl="getImageUrl(post.image)"
-                    :date="new Date(post.date)"
-                    :tagIndex="index % 5"
-                    :isFeatured="isFeaturedPost(post)"
-                    variant="default"
-                    :hoverable="true"
-                    @click="navigateToBlogPost(post)"
-                  />
-                </div>
-
-                <!-- No blogs found message -->
-                <div v-else-if="!isLoading" class="no-blogs">
-                  No blog posts found.
-                </div>
-
-                <!-- View all button -->
-                <div
-                  class="btn-mid"
-                  v-if="allBlogsLoaded && !showSearchResults"
-                >
-                  <Button
-                    variant="primary"
-                    width="123px"
-                    height="36px"
-                    @click="navigateToAllPosts"
-                  >
-                    View All
-                  </Button>
-                </div>
-              </template>
-            </article>
-          </template>
-        </TabSwitch>
-      </article>
-
-      <!-- Sidebar -->
-      <aside class="right-content">
-        <!-- Blog collaborators container -->
-        <div class="blog-collaborators-container">
-          <Text
-            as="h3"
-            fontFamily="inter"
-            size="lg"
-            color="text-primary"
-            weight="bold"
-            align="center"
-          >
-            Our Contributors
-          </Text>
-
-          <!-- Collaborators rows -->
-          <div
-            v-for="(rowData, rowIndex) in collaborators"
-            :key="rowIndex"
-            class="collaborators-row"
-          >
-            <AuthorBadge
-              v-for="author in rowData"
-              :key="author.name"
-              :name="author.name"
-              :title="author.title"
-              :imageUrl="author.imageUrl"
-            />
-          </div>
-        </div>
-
-        <Text
-          as="a"
-          href="/about#team-grid"
-          size="sm"
-          fontFamily="inria"
-          align="center"
-          weight="extrabold"
-          lineHeight="normal"
-          color="link-primary"
-        >
-          Meet Our Team
-        </Text>
-
-        <div v-if="isEventLoading" class="loading">Loading event...</div>
-        <div v-if="latestEvent" class="upcoming-card-container">
-          <UpcomingCard
-            :title="latestEvent.title"
-            :excerpt="latestEvent.description"
-            :imageUrl="getImageUrl(latestEvent.thumbnail)"
-            :onClick="() => handleEventClick(latestEvent)"
-            :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
-            :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
+        <!-- 3 LATEST BLOGS OR NEWS ITEMS -->
+        <div class="postcards-column">
+          <PostCard
+            v-for="(item, index) in latestCombinedPosts?.slice(0, 3)"
+            :key="index"
+            :tag="Array.isArray(item.Tags) ? item.Tags[0] : item.category"
+            :titleText="item.title"
+            :excerpt="'excerpt' in item ? item.excerpt : ''"
+            :imageUrl="
+              item.image ? getImageUrl(item.image) : '/images/exampleImage.png'
+            "
+            :author="getAuthorName(item)"
+            :date="item.date"
+            :isFeatured="false"
+            :hoverable="true"
+            @click="navigateToBlogPost(item)"
           />
         </div>
+      </div>
 
-        <SignUpButtonWidget
-          title="Sign Up for updates"
-          placeholder="Enter your email"
-          buttonLabel="Sign Up"
-          backgroundColor="#F9F9F9"
-        />
+      <!-- Blog Collaborators Heading -->
+     <div class="curator-and-button">
+       <Text
+        as="h3"
+        size="4xl"
+        weight="bold"
+        fontFamily="inria"
+        lineHeight="extra-loose"
+        class="textclass new-blog-collab"
+      >
+        Blog Collaborators
+      </Text>
+      <button class="meet-our-team-button">Meet Our Team →</button>
+     </div>
 
-        <InnovateUsCard
-          description="InnovateUS provides no-cost, at-your-own pace, and live learning. on data, digital, innovation, and AI skills for public service professionals like you."
-          buttonLabel="Learn more"
-          learnMoreUrl="https://innovate-us.org/"
-        />
-      </aside>
+      <!-- Blog Collaborators Flex -->
+      <div class="blog-collaborators-wrapper">
+  <div class="collaborators-flex-grid">
+    <CuratorBadge
+      name="Beth Simone Noveck"
+      title="Director at Burnes Center and the Govlab"
+      imageUrl="/images/Beth_Simone_Noveck.png"
+      moreText="More incredible things Beth done in in her"
+    />
+  </div>
+
+ <div class="collaborators-fixed-grid">
+  <div class="collaborators-row" v-for="(row, rowIndex) in collaborators" :key="rowIndex">
+    <AuthorBadge
+      v-for="author in row"
+      :key="author.name"
+      :name="author.name"
+      :title="author.title"
+      :imageUrl="author.imageUrl"
+    />
+  </div>
+</div>
+
+      </div>
+
+      <!-- Blog Posts + Filters Section -->
+<TabSwitch
+  :tabs="tabOptions"
+  :tagOptions="tagOptions"
+  :selectedTag="selected"
+  @tab-changed="handleTabChange"
+  @tag-filter="handleTagFilter"
+>
+ <template #latest-posts>
+  <div v-if="!isLoading && displayPosts.length > 0" class="blog-card-grid grid-layout">
+    <div
+      v-for="(post, index) in displayPosts.slice(0, 20)"
+      :key="post.id"
+      class="custom-card"
+      @click="navigateToBlogPost(post)"
+    >
+      <!-- Image -->
+      <div v-if="post.image?.id" class="card-image">
+        <img :src="getImageUrl(post.image)" :alt="post.title" />
+      </div>
+
+      <!-- Content -->
+      <div class="card-content">
+        <Text
+          as="h3"
+          size="xl"
+          weight="bold"
+          fontFamily="inria"
+          lineHeight="relaxed"
+          class="card-title"
+        >
+          {{ post.title }}
+        </Text>
+
+        <Text
+          as="p"
+          size="base"
+          color="text-primary"
+          lineHeight="normal"
+          class="card-description"
+        >
+          {{ post.excerpt }}
+        </Text>
+
+        <Text
+          as="p"
+          size="xs"
+          fontStyle="italic"
+          class="card-meta"
+          v-if="post.date && post.authors?.[0]?.team_id"
+        >
+          Published on
+          <Text as="span" size="xs" weight="bold" fontStyle="italic">
+            {{ formatDate(post.date) }}
+          </Text>
+          by
+          <Text as="span" size="xs" weight="bold" fontStyle="italic">
+            {{
+              post.authors[0]?.team_id
+                ? `${post.authors[0].team_id.First_Name} ${post.authors[0].team_id.Last_Name}`
+                : "Unknown Author"
+            }}
+          </Text>
+        </Text>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+
+</TabSwitch>
+
+
     </section>
   </div>
 </template>
@@ -260,6 +168,19 @@ import { ref, onMounted, computed, watch, nextTick, onUnmounted } from "vue";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event, NewsItem, WeeklyNews } from "@/types/index.ts";
 import { fetchAllUniqueTags } from "~/composables/fetchBlogData";
+import FeatureCard from "~/components/card/FeatureCard.vue";
+
+import { format } from "date-fns";
+
+function formatDate(dateValue: Date | string) {
+  if (!dateValue) return "unknown date";
+  try {
+    const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
+    return format(date, "MMMM d, yyyy");
+  } catch {
+    return "invalid date";
+  }
+}
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";
@@ -314,10 +235,14 @@ watch(
         : blogs;
       displayPosts.value = featured ? [featured, ...rest] : blogs;
       blogsFetched.value = true;
-      blogsInitialized.value = true 
+      blogsInitialized.value = true;
     }
   },
   { immediate: true }
+);
+
+const { data: latestCombinedPosts } = await useAsyncData("latest-3-posts", () =>
+  fetchLatestCombinedPosts()
 );
 
 // Create a local copy of featured blog for mutations
@@ -382,18 +307,18 @@ const { data: preloadedTaggedData } = await useAsyncData(
       fetchAllBlogPosts(),
       fetchWeeklyNewsItems(),
     ]);
-    
+
     // Use all available tags
     const allTags = preloadedTags.value || [];
     const taggedDataMap: TaggedDataMap = {};
-    
+
     // Create a mapping of tags to posts for efficient lookup
     const tagToBlogsMap: Record<string, BlogPost[]> = {};
-    
+
     // Index all blogs by their tags for faster filtering
-    allBlogs.forEach(blog => {
+    allBlogs.forEach((blog) => {
       if (blog.Tags && Array.isArray(blog.Tags)) {
-        blog.Tags.forEach(tag => {
+        blog.Tags.forEach((tag) => {
           if (!tagToBlogsMap[tag]) {
             tagToBlogsMap[tag] = [];
           }
@@ -401,10 +326,10 @@ const { data: preloadedTaggedData } = await useAsyncData(
         });
       }
     });
-    
+
     // Index all news items by category
     const categoryToNewsMap: Record<string, NewsItem[]> = {};
-    allNewsItems.forEach(newsItem => {
+    allNewsItems.forEach((newsItem) => {
       if (newsItem.category) {
         if (!categoryToNewsMap[newsItem.category]) {
           categoryToNewsMap[newsItem.category] = [];
@@ -412,42 +337,44 @@ const { data: preloadedTaggedData } = await useAsyncData(
         categoryToNewsMap[newsItem.category].push(newsItem);
       }
     });
-    
+
     // Process all tags
     for (const tag of allTags) {
       // Get blogs for this tag (already filtered)
       const filteredBlogs = tagToBlogsMap[tag] || [];
-      
+
       // Get news items for this category (already filtered)
       const filteredNewsItems = categoryToNewsMap[tag] || [];
-      
+
       // Convert news items to blog format
       const newsItemsAsBlogs = filteredNewsItems.map(
-        (newsItem) => ({
-          id: newsItem.id?.toString() || `news-${newsItem.url}`,
-          title: newsItem.title || "Untitled",
-          excerpt: newsItem.excerpt || "",
-          date: newsItem.date || new Date().toISOString(),
-          url: newsItem.url,
-          Tags: newsItem.category ? [newsItem.category] : [],
-        } as unknown as BlogPost)
+        (newsItem) =>
+          ({
+            id: newsItem.id?.toString() || `news-${newsItem.url}`,
+            title: newsItem.title || "Untitled",
+            excerpt: newsItem.excerpt || "",
+            date: newsItem.date || new Date().toISOString(),
+            url: newsItem.url,
+            Tags: newsItem.category ? [newsItem.category] : [],
+          } as unknown as BlogPost)
       );
-      
+
       // Combine and sort results
       const combinedResults = [...filteredBlogs, ...newsItemsAsBlogs];
       combinedResults.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
-      
+
       // Store top results for this tag
       taggedDataMap[tag] = combinedResults.slice(0, 7);
     }
-    
+
     return taggedDataMap;
   }
 );
 // Collaborators data structure
 const collaborators = [
+  // Row 1 - 5 authors
   [
     {
       name: "Audrey Tang",
@@ -459,20 +386,11 @@ const collaborators = [
       title: "Fellow at Burnes Center",
       imageUrl: "/images/Dane_Gambrell.png",
     },
-  ],
-  [
     {
       name: "Tiago C. Peixoto",
       title: "Senior Public Sector Specialist",
       imageUrl: "/images/Tiago_C_Peixoto.png",
     },
-    {
-      name: "Autumn Sloboda",
-      title: "Fellow at Burnes Center",
-      imageUrl: "/images/Autumn_Sloboda.png",
-    },
-  ],
-  [
     {
       name: "Giulio Quaggiotto",
       title: "Head of UNDP's Strategic Innovation unit",
@@ -484,6 +402,7 @@ const collaborators = [
       imageUrl: "/images/Jacob_Kemp.png",
     },
   ],
+  // Row 2 - 4 authors
   [
     {
       name: "Seth Harris",
@@ -495,8 +414,6 @@ const collaborators = [
       title: "Fellow at Burnes Center",
       imageUrl: "/images/Hannah_Hetzer.png",
     },
-  ],
-  [
     {
       name: "Bonnie McGilpin",
       title: "Fellow at Burnes Center",
@@ -509,6 +426,7 @@ const collaborators = [
     },
   ],
 ];
+
 
 const tabOptions = computed(() => [
   { title: "Latest Posts", name: "latest-posts" },
@@ -561,7 +479,7 @@ const navigateToBlogPost = (post: BlogPost | NewsItem) => {
     resetSearch();
     router.push(`/blog/${post.slug}`);
   } else if ("url" in post && post.url) {
-     window.location.href = post.url
+    window.location.href = post.url;
   } else {
     console.error("Cannot navigate: Item has no slug or URL", post);
   }
@@ -569,15 +487,15 @@ const navigateToBlogPost = (post: BlogPost | NewsItem) => {
 
 const handleEventClick = (event: Event | null) => {
   if (event?.link) {
-     window.location.href = event.link
+    window.location.href = event.link;
   }
 };
 
 const handleTabChange = (index: number, name: string) => {
   activeTab.value = index;
   if (name === "latest-posts") {
-   resetSearch()
-    if (!blogsInitialized.value) loadBlogData()
+    resetSearch();
+    if (!blogsInitialized.value) loadBlogData();
   }
 };
 

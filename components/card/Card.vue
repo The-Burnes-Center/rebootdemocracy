@@ -17,8 +17,8 @@
 
 <script lang="ts" setup>
 interface CardProps {
-  variant?: 'default' | 'outline' | 'flat';
-  size?: 'small' | 'medium' | 'large' | 'extra-large' | 'normal';
+  variant?: 'default' | 'outline' | 'flat' | 'featured';
+  size?: 'small' | 'semimedium' | 'medium' | 'large' | 'extra-large' | 'normal';
   hoverable?: boolean;
 }
 

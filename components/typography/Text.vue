@@ -101,6 +101,7 @@ const lineHeights = {
   tight: "1.25", // 20px
   normal: "1.5", // 24px
   relaxed: "1.75", // 28px
+  extraRelaxed: "1.875", // 30px
   loose: "2", // 32px
   "extra-loose": "2.4", // 40px
   "super-loose": "2.8125", // 45px
