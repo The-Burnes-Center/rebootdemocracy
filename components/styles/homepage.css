@@ -224,33 +224,6 @@
   color: #003366 !important;
 }
 
-.meet-our-team-button {
-  background: #003366;
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.meet-our-team-button:hover {
-  background: #002244;
-}
-
-
-.collaborators-flex-grid {
-  margin-bottom: 2rem;
-}
-
-.collaborators-fixed-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 .collaborators-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
