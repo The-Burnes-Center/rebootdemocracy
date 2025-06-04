@@ -1,6 +1,6 @@
 // blogService.ts
 import { createDirectus, rest, readItems } from '@directus/sdk';
-import type { BlogPost, Event } from '@/types/index.ts';
+import type { BlogPost, Event, NewsItem } from '@/types/index.ts';
 import { fetchWeeklyNewsItems } from './fetchWeeklyNews';
 
 const API_URL = 'https://content.thegovlab.com';
@@ -75,37 +75,37 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
   }
 }
 
-export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
-  try {
-    const filter = {
-      _and: [
-        { featuredBlog: { _eq: true } },
-        { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW(-5 hours)' } }
-      ]
-    };
+// export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
+//   try {
+//     const filter = {
+//       _and: [
+//         { featuredBlog: { _eq: true } },
+//         { status: { _eq: 'published' } },
+//         { date: { _lte: '$NOW(-5 hours)' } }
+//       ]
+//     };
 
-    const response = await directus.request(
-      readItems('reboot_democracy_blog', {
-        limit: 1,
-        sort: ['-date'],
-        fields: [
-          '*.*',
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*',
-          'image.*'
-        ],
-        filter
-      })
-    );
+//     const response = await directus.request(
+//       readItems('reboot_democracy_blog', {
+//         limit: 1,
+//         sort: ['-date'],
+//         fields: [
+//           '*.*',
+//           'authors.team_id.*',
+//           'authors.team_id.Headshot.*',
+//           'image.*'
+//         ],
+//         filter
+//       })
+//     );
 
-    const blogs = response as BlogPost[];
-    return blogs.length ? blogs[0] : null;
-  } catch (error) {
-    console.error('Error fetching featured blog:', error);
-    return null;
-  }
-}
+//     const blogs = response as BlogPost[];
+//     return blogs.length ? blogs[0] : null;
+//   } catch (error) {
+//     console.error('Error fetching featured blog:', error);
+//     return null;
+//   }
+// }
 
 export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
   try {
@@ -219,10 +219,9 @@ export async function fetchAllSlugs(): Promise<string[]> {
 
 export async function fetchLatestCombinedPosts(): Promise<(BlogPost | NewsItem)[]> {
   try {
-    // Step 1: Fetch latest blog posts
     const blogPosts = await directus.request(
       readItems('reboot_democracy_blog', {
-        limit: 3,
+        limit: 5, 
         sort: ['-date'],
         filter: {
           _and: [
@@ -242,13 +241,35 @@ export async function fetchLatestCombinedPosts(): Promise<(BlogPost | NewsItem)[
     // Step 2: Fetch all weekly news items
     const newsItems = await fetchWeeklyNewsItems();
 
-    // Step 3: Merge, sort, and limit to top 3
-    const allItems = [...(blogPosts as BlogPost[]), ...newsItems];
+    // Step 3: Add type identifier to distinguish between blog posts and news items
+    const blogPostsWithType = (blogPosts as BlogPost[]).map(post => ({
+      ...post,
+      _type: 'blog' as const
+    }));
 
+    const newsItemsWithType = newsItems.map(item => ({
+      ...item,
+      _type: 'news' as const
+    }));
+
+    // Step 4: Merge all items
+    const allItems = [...blogPostsWithType, ...newsItemsWithType];
+
+    // Step 5: Sort with weekly news priority
     allItems.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+      
+      // If dates are different, sort by date (newest first)
+      if (dateA !== dateB) {
+        return dateB - dateA;
+      }
+      
+      // If dates are the same, prioritize weekly news
+      if (a._type === 'news' && b._type === 'blog') return -1;
+      if (a._type === 'blog' && b._type === 'news') return 1;
+      
+      return 0;
     });
 
     return allItems.slice(0, 3);
