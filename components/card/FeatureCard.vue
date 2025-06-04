@@ -36,10 +36,10 @@
         
         <Text
           as="p"
-          size="lg"
-          weight="semibold"
+          size="base"
+          weight="medium"
           fontFamily="inter"
-          class="featured-card__description clamp-4"
+          class="featured-card__description clamp-5"
         >
           {{ description }}
         </Text>

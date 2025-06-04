@@ -16,10 +16,7 @@
   line-height: 125%;
   cursor: pointer;
 }
-.header-menu__label:hover {
-  color: #315895;
-  --color-icon: #315895;
-}
+
 
 .topic-label {
   background-color: #003366;
@@ -29,20 +26,11 @@
   --color-icon: white;
 }
 
-.topic-label.active {
-  color: white;
-  --color-icon: white;
-}
 
 .dropdown-icon {
   margin-left: 6px;
   transform: rotate(0deg);
   transition: transform 0.3s ease;
-}
-
-.active {
-  color: #315895;
-  --color-icon: #315895;
 }
 
 .dropdown-icon.active {

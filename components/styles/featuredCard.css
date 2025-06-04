@@ -122,12 +122,6 @@
   background-clip: text;
 }
 
-.featured-card__description {
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.7;
-}
-
 /* Footer section */
 .featured-card__footer {
   display: flex;
@@ -202,6 +196,14 @@
 .clamp-4 {
   display: -webkit-box;
   -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clamp-5 {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -86,6 +86,9 @@
       </div>
 
       <!-- Blog Posts + Filters Section -->
+<!-- Replace your TabSwitch section with this updated version -->
+
+<!-- Blog Posts + Filters Section -->
 <TabSwitch
   :tabs="tabOptions"
   :tagOptions="tagOptions"
@@ -93,71 +96,80 @@
   @tab-changed="handleTabChange"
   @tag-filter="handleTagFilter"
 >
- <template #latest-posts>
-  <div v-if="!isLoading && displayPosts.length > 0" class="blog-card-grid grid-layout">
-    <div
-      v-for="(post, index) in displayPosts.slice(0, 20)"
-      :key="post.id"
-      class="custom-card"
-      @click="navigateToBlogPost(post)"
-    >
-      <!-- Image -->
-      <div v-if="post.image?.id" class="card-image">
-        <img :src="getImageUrl(post.image)" :alt="post.title" />
+  <template #latest-posts>
+    <div v-if="!isLoading && displayPosts.length > 0" class="blog-posts-section">
+      <div class="blog-card-grid grid-layout">
+        <div
+          v-for="(post, index) in displayPosts.slice(0, 20)"
+          :key="post.id"
+          class="custom-card"
+          @click="navigateToBlogPost(post)"
+        >
+          <!-- Image -->
+          <div v-if="post.image?.id" class="card-image">
+            <img :src="getImageUrl(post.image)" :alt="post.title" />
+          </div>
+
+          <!-- Content -->
+          <div class="card-content">
+            <Text
+              as="h3"
+              size="xl"
+              weight="bold"
+              fontFamily="inria"
+              lineHeight="relaxed"
+              class="card-title"
+            >
+              {{ post.title }}
+            </Text>
+
+            <Text
+              as="p"
+              size="base"
+              weight="medium"
+              color="text-primary"
+              lineHeight="normal"
+              class="card-description"
+            >
+              {{ post.excerpt }}
+            </Text>
+
+            <Text
+              as="p"
+              size="xs"
+              fontStyle="italic"
+              class="card-meta"
+              v-if="post.date && post.authors?.[0]?.team_id"
+            >
+              Published on
+              <Text as="span" size="xs" weight="bold" fontStyle="italic">
+                {{ formatDate(post.date) }}
+              </Text>
+              by
+              <Text as="span" size="xs" weight="bold" fontStyle="italic">
+                {{
+                  post.authors[0]?.team_id
+                    ? `${post.authors[0].team_id.First_Name} ${post.authors[0].team_id.Last_Name}`
+                    : "Unknown Author"
+                }}
+              </Text>
+            </Text>
+          </div>
+        </div>
       </div>
-
-      <!-- Content -->
-      <div class="card-content">
-        <Text
-          as="h3"
-          size="xl"
-          weight="bold"
-          fontFamily="inria"
-          lineHeight="relaxed"
-          class="card-title"
-        >
-          {{ post.title }}
-        </Text>
-
-        <Text
-          as="p"
-          size="base"
-          color="text-primary"
-          lineHeight="normal"
-          class="card-description"
-        >
-          {{ post.excerpt }}
-        </Text>
-
-        <Text
-          as="p"
-          size="xs"
-          fontStyle="italic"
-          class="card-meta"
-          v-if="post.date && post.authors?.[0]?.team_id"
-        >
-          Published on
-          <Text as="span" size="xs" weight="bold" fontStyle="italic">
-            {{ formatDate(post.date) }}
-          </Text>
-          by
-          <Text as="span" size="xs" weight="bold" fontStyle="italic">
-            {{
-              post.authors[0]?.team_id
-                ? `${post.authors[0].team_id.First_Name} ${post.authors[0].team_id.Last_Name}`
-                : "Unknown Author"
-            }}
-          </Text>
-        </Text>
+      
+      <!-- View All Button -->
+      <div class="view-all-container">
+        <button class="view-all-button" @click="navigateToAllPosts">
+          View All Posts
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
-  </div>
-</template>
-
-
-
+  </template>
 </TabSwitch>
-
 
     </section>
   </div>
