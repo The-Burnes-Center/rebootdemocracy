@@ -141,20 +141,23 @@
             v-if="!isPostsLoading && displayedPosts.length > 0"
             class="blog-list"
           >
-            <PostCard
-              v-for="(post, index) in displayedPosts"
-              :key="getPostKey(post)"
-              :tag="getPostTag(post)"
-              :titleText="getPostTitle(post)"
-              :author="getAuthorName(post)"
-              :excerpt="getPostExcerpt(post)"
-              :imageUrl="getImageUrl(getPostImage(post))"
-              :date="getPostDate(post)"
-              :tagIndex="index % 5"
-              variant="default"
-              :hoverable="true"
-              @click="handlePostClick(post)"
-            />
+            <div class="blogcard-grid-wrapper">
+              <BlogCard
+                v-for="post in displayedPosts"
+                :key="getPostKey(post)"
+                :title="getPostTitle(post)"
+                :excerpt="getPostExcerpt(post)"
+                :imageUrl="
+                  'image' in post && post.image?.id
+                    ? getImageUrl(post.image)
+                    : '/images/exampleImage.png'
+                "
+                :tag="getPostTag(post)"
+                :author="getAuthorName(post)"
+                :date="getPostDate(post)"
+                @click="handlePostClick(post)"
+              />
+            </div>
           </div>
 
           <!-- No blogs found message -->
@@ -171,7 +174,7 @@
           <!-- Show More button appears when there are more posts to load -->
           <div v-if="!isPostsLoading && hasMorePosts" class="btn-mid">
             <Button
-              variant="primary"
+              variant="secondary"
               width="140px"
               height="36px"
               @click="loadMorePosts"
@@ -317,8 +320,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 });
 
 // Constants
-const DIRECTUS_URL = "https://content.thegovlab.com";
-const POSTS_PER_PAGE = 7;
+const DIRECTUS_URL = "https://directus.theburnescenter.org";
+const POSTS_PER_PAGE = 15;
 const router = useRouter();
 const route = useRoute();
 
@@ -426,27 +429,24 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
     .sort((a, b) => a.name.localeCompare(b.name));
 };
 
-const { data: allPostsData } = await useAsyncData(
-  'all-blog-posts',
+const { data: allPostsData, pending: isPostsLoading} = await useAsyncData(
+  "all-blog-posts",
   async () => {
     const [blogPosts, newsItems] = await Promise.all([
-      fetchAllBlogPosts(),      // newest-first from Directus
-      fetchWeeklyNewsItems()
-    ])
+      fetchAllBlogPosts(), // newest-first from Directus
+      fetchWeeklyNewsItems(),
+    ]);
 
-    const sortDesc   = (a:any, b:any) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+    const sortDesc = (a: any, b: any) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime();
 
-    const newsSorted = [...newsItems].sort(sortDesc)
+    const newsSorted = [...newsItems].sort(sortDesc);
 
     // final array: every blog → every news
-    return [...blogPosts, ...newsSorted]
+    return [...blogPosts, ...newsSorted];
   },
-  { server: true }   // optional: don’t re-fetch in browser
-)
-
-
-
+  { server: true } // optional: don’t re-fetch in browser
+);
 
 // Prefetch tags data
 const { data: tagsData, pending: isTagsLoading } = await useAsyncData(
@@ -600,7 +600,7 @@ const handlePostClick = (post: BlogPost | NewsItem): void => {
     resetSearch();
     router.push(`/blog/${post.slug}`);
   } else if ("url" in post && post.url) {
-        window.location.href = post.url
+    window.location.href = post.url;
   } else {
     console.error("Cannot navigate: Post has no slug or URL", post);
   }
@@ -608,7 +608,7 @@ const handlePostClick = (post: BlogPost | NewsItem): void => {
 
 const handleEventClick = (event: Event | null) => {
   if (event?.link) {
-     window.location.href = event.link
+    window.location.href = event.link;
   }
 };
 
@@ -650,15 +650,15 @@ onMounted(() => {
   window.addEventListener("resize", checkIfMobile);
 
   // Prefer path param; fall back to ?category= for legacy links
-const categoryParam = props.initialCategory ?? (route.query.category as string | undefined)
-if (categoryParam) {
-  const categoryName = decodeURIComponent(categoryParam)
-  const found = tags.value.find(
-    (t) => t.name.toLowerCase() === categoryName.toLowerCase()
-  )
-  if (found) selectedCategory.value = found.name
-}
-
+  const categoryParam =
+    props.initialCategory ?? (route.query.category as string | undefined);
+  if (categoryParam) {
+    const categoryName = decodeURIComponent(categoryParam);
+    const found = tags.value.find(
+      (t) => t.name.toLowerCase() === categoryName.toLowerCase()
+    );
+    if (found) selectedCategory.value = found.name;
+  }
 
   const authorParam = route.query.author as string | undefined;
   if (authorParam) {

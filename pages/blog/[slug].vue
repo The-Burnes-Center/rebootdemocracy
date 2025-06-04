@@ -101,7 +101,7 @@
                 <em>Listen to the AI-generated audio version of this piece.</em>
               </p>
               <AudioPlayer
-                :audioSrc="`https://content.thegovlab.com/assets/${blog.audio_version.id}`"
+                :audioSrc="`https://directus.theburnescenter.org/assets/${blog.audio_version.id}`"
               />
             </div>
 
@@ -119,10 +119,12 @@
         v-if="blog && blog.authors && blog.authors.length > 0"
       >
         <div class="share-widget-mobile">
-         <ShareWidget
+          <ShareWidget
             :url="`https://rebootdemocracy.ai/blog/${blogslug.value}`"
             :title="blog?.title || 'RebootDemocracy.AI Blog'"
-            :description="blog?.excerpt || 'A blog post from RebootDemocracy.AI'"
+            :description="
+              blog?.excerpt || 'A blog post from RebootDemocracy.AI'
+            "
             align="center"
           />
         </div>
@@ -181,22 +183,22 @@ const {
   error,
 } = await useAsyncData(`blog-${route.params.slug}`, async () => {
   if (!route.params.slug) return { blog: null, relatedBlogs: [] };
-  
+
   // Get main blog post
   const blogPost = await fetchBlogBySlug(route.params.slug as string);
-  
+
   // Get related blogs in the same server request
-let relatedPostsList: BlogPost[] = [];
+  let relatedPostsList: BlogPost[] = [];
   if (blogPost?.Tags?.length) {
     relatedPostsList = await fetchRelatedBlogsByTags(
       blogPost.Tags,
       route.params.slug as string
     );
   }
-  
-  return { 
-    blog: blogPost, 
-    relatedBlogs: relatedPostsList 
+
+  return {
+    blog: blogPost,
+    relatedBlogs: relatedPostsList,
   };
 });
 
@@ -211,12 +213,12 @@ if (import.meta.server) {
     ogTitle: "RebootDemocracy.AI",
     ogDescription:
       "RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.",
-    ogImage: "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+    ogImage:
+      "https://directus.theburnescenter.org/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
     ogUrl: `https://rebootdemocracy.ai/blog/${route.params.slug}`,
     twitterCard: "summary_large_image",
   });
 }
-
 
 useSeoMeta({
   title: () => blog.value?.title || "RebootDemocracy.AI",
@@ -244,12 +246,10 @@ As researchers, we want to understand how best to “do democracy” in practice
   ogImage: () =>
     blog.value?.image
       ? getImageUrl(blog.value.image)
-      : "https://content.thegovlab.com/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
-  ogUrl: () =>
-    `https://rebootdemocracy.ai/blog/${route.params.slug}`,
+      : "https://directus.theburnescenter.org/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+  ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
   twitterCard: "summary_large_image",
 });
-
 
 const isLoading = ref(true);
 
@@ -266,7 +266,7 @@ function getAuthorImageUrl(authorData: any, width: number = 600): string {
   if (!authorData || !authorData.Headshot || !authorData.Headshot.id) {
     return "/images/exampleImage.png";
   }
-  return `https://content.thegovlab.com/assets/${authorData.Headshot.id}?width=${width}`;
+  return `https://directus.theburnescenter.org/assets/${authorData.Headshot.id}?width=${width}`;
 }
 
 // Function to get author name

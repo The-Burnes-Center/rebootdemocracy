@@ -7,8 +7,8 @@
     />
 
     <section class="home-featured-row" v-if="showSearchResults">
-  <GlobalSearch />
-</section>
+      <GlobalSearch />
+    </section>
 
     <!-- FEATURE + POSTCARDS ROW -->
     <section class="home-featured-row" v-else>
@@ -73,9 +73,7 @@
           class="base__button base__button--secondary"
           @click="router.push('/about#team-grid')"
         >
-          <span class="base__btn-slot">
-          Meet Our Team →
-          </span> 
+          <span class="base__btn-slot"> Meet Our Team → </span>
         </button>
       </div>
 
@@ -129,9 +127,13 @@
               >
                 <!-- Image -->
                 <div class="card-image">
-                  <img 
-                    :src="'image' in post && post.image?.id ? getImageUrl(post.image) : '/images/exampleImage.png'" 
-                    :alt="post.title" 
+                  <img
+                    :src="
+                      'image' in post && post.image?.id
+                        ? getImageUrl(post.image)
+                        : '/images/exampleImage.png'
+                    "
+                    :alt="post.title"
                   />
                 </div>
                 <!-- Content -->
@@ -189,7 +191,10 @@
 
             <!-- View All Button -->
             <div class="view-all-container">
-              <button class="base__button base__button--secondary" @click="navigateToAllPosts">
+              <button
+                class="base__button base__button--secondary"
+                @click="navigateToAllPosts"
+              >
                 <span class="base__btn-slot">
                   View All Posts
                   <svg
@@ -198,7 +203,11 @@
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    style="display: inline-block; vertical-align: middle; margin-left: 8px;"
+                    style="
+                      display: inline-block;
+                      vertical-align: middle;
+                      margin-left: 8px;
+                    "
                   >
                     <path
                       d="M5 12H19M19 12L12 5M19 12L12 19"
@@ -231,9 +240,8 @@ import { format } from "date-fns";
 const router = useRouter();
 const { resetSearch, showSearchResults, searchQuery } = useSearchState();
 
-
 // Constants
-const DIRECTUS_URL = "https://content.thegovlab.com";
+const DIRECTUS_URL = "https://directus.theburnescenter.org";
 
 // State
 const selectedTag = ref<string>("All Topics");

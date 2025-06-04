@@ -4,14 +4,16 @@ import { format, isPast, isFuture } from "date-fns";
 import { createDirectus, readItems, rest } from "@directus/sdk";
 import type { IndexData, ResourceItem } from "@/types/index"; // update path if needed
 
-const DIRECTUS_URL = "https://content.thegovlab.com";
+const DIRECTUS_URL = "https://directus.theburnescenter.org";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
 
 const selectedType = ref("All");
 const resourceScroller = ref<HTMLElement | null>(null);
 
-const formatDateTime = (d: Date | string) => format(new Date(d), "MMMM d, yyyy, h:mm aa");
-const formatDateOnly = (d: Date | string) => format(new Date(d), "MMMM d, yyyy");
+const formatDateTime = (d: Date | string) =>
+  format(new Date(d), "MMMM d, yyyy, h:mm aa");
+const formatDateOnly = (d: Date | string) =>
+  format(new Date(d), "MMMM d, yyyy");
 const isPastDate = (d: Date | string) => isPast(new Date(d));
 const isFutureDate = (d: Date | string) => isFuture(new Date(d));
 
@@ -65,7 +67,6 @@ const scrollTop = () => {
   if (resourceScroller.value) resourceScroller.value.scrollTop = 0;
 };
 </script>
-
 
 <template>
   <!-- Header Component -->
@@ -159,7 +160,6 @@ const scrollTop = () => {
                   <img
                     v-if="item.thumbnail"
                     :src="getImageUrl(item.thumbnail, 648)"
-
                     alt="Case study thumbnail"
                   />
                 </div>

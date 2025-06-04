@@ -5,7 +5,7 @@ import MailingListComponent from "../../components/mailing/Mailing.vue";
 import { createDirectus, rest, readItems } from "@directus/sdk";
 
 // Directus client setup
-const DIRECTUS_URL = "https://content.thegovlab.com";
+const DIRECTUS_URL = "https://directus.theburnescenter.org";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
 
 // Formatting utilities
@@ -65,9 +65,11 @@ const {
     return response;
   },
   { server: true }
-  );
+);
 
-const isLoading = computed(() => isIndexLoading.value || isArticleLoading.value);
+const isLoading = computed(
+  () => isIndexLoading.value || isArticleLoading.value
+);
 const dataFetchError = computed(() => indexError.value || articleError.value);
 </script>
 

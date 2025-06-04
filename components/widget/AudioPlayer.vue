@@ -10,20 +10,24 @@
         alt="Play/Pause Button"
       />
     </button>
-   
+
     <div class="audio-player__controls">
-      <div class="audio-player__time current-time">{{ formatTime(currentTime) }}</div>
-     
+      <div class="audio-player__time current-time">
+        {{ formatTime(currentTime) }}
+      </div>
+
       <div class="audio-player__progress-container" @click="seek">
         <div
           class="audio-player__progress-bar"
           :style="{ width: `${progressPercentage}%` }"
         ></div>
       </div>
-     
-      <div class="audio-player__time total-time">{{ formatTime(duration) }}</div>
+
+      <div class="audio-player__time total-time">
+        {{ formatTime(duration) }}
+      </div>
     </div>
-   
+
     <button
       class="audio-player__volume-button"
       @click="toggleMute"
@@ -34,7 +38,7 @@
         alt="Volume Button"
       />
     </button>
-   
+
     <!-- Hidden audio element -->
     <audio
       ref="audioElement"
@@ -47,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from "vue";
 
 interface AudioPlayerProps {
   audioSrc: string;
@@ -55,21 +59,24 @@ interface AudioPlayerProps {
 }
 
 const props = withDefaults(defineProps<AudioPlayerProps>(), {
-  audioSrc: '',
-  autoplay: false
+  audioSrc: "",
+  autoplay: false,
 });
 
 // Make sure we have a valid audio URL that works with the player
 const validAudioSrc = computed(() => {
-  if (!props.audioSrc) return '';
- 
+  if (!props.audioSrc) return "";
+
   // If URL already has https:// prefix, use it as is
-  if (props.audioSrc.startsWith('http')) {
+  if (props.audioSrc.startsWith("http")) {
     return props.audioSrc;
   }
- 
+
   // Otherwise, ensure it has the proper Directus base URL
-  return `https://content.thegovlab.com/assets/${props.audioSrc.replace(/^\//, '')}`;
+  return `https://directus.theburnescenter.org/assets/${props.audioSrc.replace(
+    /^\//,
+    ""
+  )}`;
 });
 
 // Refs
@@ -88,31 +95,31 @@ const progressPercentage = computed(() => {
 // Event handlers
 const togglePlay = () => {
   if (!audioElement.value) return;
- 
+
   if (isPlaying.value) {
     audioElement.value.pause();
   } else {
     audioElement.value.play();
   }
- 
+
   isPlaying.value = !isPlaying.value;
 };
 
 const toggleMute = () => {
   if (!audioElement.value) return;
- 
+
   audioElement.value.muted = !audioElement.value.muted;
   isMuted.value = audioElement.value.muted;
 };
 
 const seek = (event: MouseEvent) => {
   if (!audioElement.value) return;
- 
+
   const progressContainer = event.currentTarget as HTMLElement;
   const rect = progressContainer.getBoundingClientRect();
   const offsetX = event.clientX - rect.left;
   const clickPositionPercentage = (offsetX / rect.width) * 100;
- 
+
   const seekTime = (clickPositionPercentage / 100) * duration.value;
   audioElement.value.currentTime = seekTime;
   currentTime.value = seekTime;
@@ -135,36 +142,42 @@ const onEnded = () => {
 
 // Format time to MM:SS
 const formatTime = (timeInSeconds: number): string => {
-  if (isNaN(timeInSeconds) || timeInSeconds === Infinity) return '00:00';
- 
+  if (isNaN(timeInSeconds) || timeInSeconds === Infinity) return "00:00";
+
   const minutes = Math.floor(timeInSeconds / 60);
   const seconds = Math.floor(timeInSeconds % 60);
- 
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+  return `${minutes.toString().padStart(2, "0")}:${seconds
+    .toString()
+    .padStart(2, "0")}`;
 };
 
 // Lifecycle hooks
 onMounted(() => {
   if (process.client && props.autoplay && audioElement.value) {
-    audioElement.value.play()
+    audioElement.value
+      .play()
       .then(() => {
         isPlaying.value = true;
       })
       .catch((error) => {
-        console.error('Autoplay failed:', error);
+        console.error("Autoplay failed:", error);
       });
   }
 });
 
 // Watch for src changes
-watch(() => props.audioSrc, (newSrc) => {
-  if (newSrc && audioElement.value) {
-    // Reset the player
-    currentTime.value = 0;
-    isPlaying.value = false;
-   
-    // Load the new audio
-    audioElement.value.load();
+watch(
+  () => props.audioSrc,
+  (newSrc) => {
+    if (newSrc && audioElement.value) {
+      // Reset the player
+      currentTime.value = 0;
+      isPlaying.value = false;
+
+      // Load the new audio
+      audioElement.value.load();
+    }
   }
-});
+);
 </script>

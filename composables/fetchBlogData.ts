@@ -3,7 +3,7 @@ import { createDirectus, rest, readItems } from '@directus/sdk';
 import type { BlogPost, Event, NewsItem } from '@/types/index.ts';
 import { fetchWeeklyNewsItems } from './fetchWeeklyNews';
 
-const API_URL = 'https://content.thegovlab.com';
+const API_URL = 'https://directus.theburnescenter.org';
 const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {

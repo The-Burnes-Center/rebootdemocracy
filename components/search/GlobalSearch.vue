@@ -62,10 +62,12 @@ type SearchResultItem = {
   Tags?: string[];
   author?: string;
   authors?: any[];
-  image?: string | {
-    id?: string;
-    filename_disk?: string;
-  };
+  image?:
+    | string
+    | {
+        id?: string;
+        filename_disk?: string;
+      };
   _sourceIndex?: string;
   date?: string | null;
   edition?: string;
@@ -107,10 +109,9 @@ const mergedResults = computed(() => {
     if (!dateStr) return false;
 
     const itemDate = new Date(dateStr);
-    return itemDate < today; 
+    return itemDate < today;
   });
 });
-
 
 const newsResults = computed(() =>
   typedSearchResults.value.filter(
@@ -128,7 +129,7 @@ const showLoadMore = computed(
     typedSearchResults.value.length < totalResults.value
 );
 
-const directusUrl = "https://content.thegovlab.com";
+const directusUrl = "https://directus.theburnescenter.org";
 
 // Unified handlers for all item types
 function getItemTitle(item: SearchResultItem): string {
@@ -165,7 +166,7 @@ function getItemAuthor(item: SearchResultItem): string {
 
 function getItemImageUrl(item: SearchResultItem): string {
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    return "/images/exampleImage.png"; 
+    return "/images/exampleImage.png";
   }
 
   if (typeof item.image === "object" && item.image?.filename_disk) {
@@ -174,7 +175,6 @@ function getItemImageUrl(item: SearchResultItem): string {
 
   return "/images/exampleImage.png";
 }
-
 
 function getItemDate(item: SearchResultItem): Date | undefined {
   const dateString =
@@ -208,13 +208,11 @@ function navigateToBlogPost(item: SearchResultItem) {
   }
 }
 
-
 function openInSameTab(url: string | undefined) {
   if (url) {
     window.location.href = url;
   }
 }
-
 
 function truncateText(text: string, maxLength: number): string {
   return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";

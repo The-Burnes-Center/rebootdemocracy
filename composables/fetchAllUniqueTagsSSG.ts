@@ -1,7 +1,7 @@
 // server/utils/fetchAllUniqueTagsForSSG.ts
 import { createDirectus, rest, readItems } from '@directus/sdk';
 
-const API_URL = 'https://content.thegovlab.com';
+const API_URL = 'https://directus.theburnescenter.org';
 
 export async function fetchAllUniqueTagsForSSG(): Promise<string[]> {
   try {

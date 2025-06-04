@@ -2,7 +2,7 @@
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import type { NewsItem, WeeklyNews } from '@/types/index.ts';
 
-const API_URL = 'https://content.thegovlab.com';
+const API_URL = 'https://directus.theburnescenter.org';
 const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {

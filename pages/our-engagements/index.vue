@@ -6,68 +6,77 @@ import type { IndexData, ResourceItem } from "../../types/index.ts";
 import { createDirectus, readItems, rest } from "@directus/sdk";
 
 // Constants
-const DIRECTUS_URL = "https://content.thegovlab.com";
+const DIRECTUS_URL = "https://directus.theburnescenter.org";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
 
 // State management
 const route = useRoute();
 
 // Helper formatting functions
-const formatDateTime = (d: Date | string) => format(new Date(d), 'MMMM d, yyyy, h:mm aa')
-const formatDateOnly = (d: Date | string) => format(new Date(d), 'MMMM d, yyyy')
-const isPastDate = (d: Date | string) => isPast(new Date(d))
-const isFutureDate = (d: Date | string) => isFuture(new Date(d))
+const formatDateTime = (d: Date | string) =>
+  format(new Date(d), "MMMM d, yyyy, h:mm aa");
+const formatDateOnly = (d: Date | string) =>
+  format(new Date(d), "MMMM d, yyyy");
+const isPastDate = (d: Date | string) => isPast(new Date(d));
+const isFutureDate = (d: Date | string) => isFuture(new Date(d));
 
-const { data: indexData, pending: isIndexLoading, error: indexError } = await useAsyncData(
-  'engagement-index',
+const {
+  data: indexData,
+  pending: isIndexLoading,
+  error: indexError,
+} = await useAsyncData(
+  "engagement-index",
   async () => {
     const response = await directus.request(
-      readItems('reboot_democracy', {
-        meta: 'total_count',
+      readItems("reboot_democracy", {
+        meta: "total_count",
         limit: 1,
-        fields: ['id', 'engagement_title', 'engagement_description']
+        fields: ["id", "engagement_title", "engagement_description"],
       })
-    )
-    return Array.isArray(response) ? response[0] : response
+    );
+    return Array.isArray(response) ? response[0] : response;
   },
   { server: true }
-)
+);
 
 // Fetch article data from Directus
-const { data: articleData, pending: isArticleLoading, error: articleError } = await useAsyncData(
-  'engagement-articles',
+const {
+  data: articleData,
+  pending: isArticleLoading,
+  error: articleError,
+} = await useAsyncData(
+  "engagement-articles",
   async () => {
-    const filter = { type: { _eq: 'Engagement' } }
+    const filter = { type: { _eq: "Engagement" } };
     const response = await directus.request(
-      readItems('reboot_democracy_resources', {
-        meta: 'total_count',
+      readItems("reboot_democracy_resources", {
+        meta: "total_count",
         limit: -1,
-        sort: ['-id'],
+        sort: ["-id"],
         fields: [
-          'id',
-          'type',
-          'thumbnail.id',
-          'stage',
-          'partner',
-          'title',
-          'description',
-          'link'
+          "id",
+          "type",
+          "thumbnail.id",
+          "stage",
+          "partner",
+          "title",
+          "description",
+          "link",
         ],
-        filter
+        filter,
       })
-    )
-    return response as ResourceItem[]
+    );
+    return response as ResourceItem[];
   },
   { server: true }
-)
+);
 
-const selectedType = ref('All')
-
+const selectedType = ref("All");
 </script>
 
 <template>
   <div class="resource-page our-engagements-page">
-    <div v-if="isIndexLoading || isArticleLoading" class="loading"> 
+    <div v-if="isIndexLoading || isArticleLoading" class="loading">
       <div class="loader"></div>
       <p>Loading content...</p>
     </div>

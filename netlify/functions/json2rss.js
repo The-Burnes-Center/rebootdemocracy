@@ -10,7 +10,7 @@ async function initializeJsToXml() {
   return toXML;
 }
 
-const directus = createDirectus('https://content.thegovlab.com/').with(rest());
+const directus = createDirectus('https://directus.theburnescenter.org/').with(rest());
 
 exports.handler = async function (event, context) {
   try {
@@ -100,7 +100,7 @@ exports.handler = async function (event, context) {
         let mediaContent = null;
 
         if (post.image && post.image.id) {
-          const imageUrl = `https://content.thegovlab.com/assets/${post.image.id}?width=400&quality=70&format=jpg`;
+          const imageUrl = `https://directus.theburnescenter.org/assets/${post.image.id}?width=400&quality=70&format=jpg`;
 
           enclosure = {
             _attrs: {

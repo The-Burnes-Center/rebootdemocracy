@@ -1,7 +1,5 @@
 <template>
   <div>
-
-
     <div v-if="isLoading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Loading content...</p>
@@ -9,7 +7,9 @@
 
     <div v-else-if="error" class="error-container">
       <p>{{ error }}</p>
-      <Button variant="primary" @click="router.push('/')">Return to Home</Button>
+      <Button variant="primary" @click="router.push('/')"
+        >Return to Home</Button
+      >
     </div>
 
     <template v-else-if="postData && postData.length > 0">
@@ -18,15 +18,16 @@
         <div class="weeklynews-details">
           <h1>{{ postData[0].title }}</h1>
           <p>
-            Published by {{ postData[0].author }} on 
+            Published by {{ postData[0].author }} on
             {{ formatDateOnly(new Date(postData[0].date)) }}
           </p>
         </div>
       </div>
-      
+
       <!-- Table of Contents -->
       <div class="toc">
-        <p class="excerpt">{{ postData[0].summary }}</p><br>
+        <p class="excerpt">{{ postData[0].summary }}</p>
+        <br />
         <p><strong>In the news this week</strong></p>
         <ul>
           <li v-for="cat in uniqueCategories" :key="cat">
@@ -35,17 +36,27 @@
             </a>
             <span class="toc-description">
               {{
-                cat === 'AI and Elections' ? 'Free, fair and frequent' :
-                cat === 'Governing AI' ? 'Setting the rules for a fast-moving technology.' :
-                cat === 'AI for Governance' ? 'Smarter public institutions through machine intelligence.' :
-                cat === 'AI and Public Engagement' ? 'Bolstering participation' :
-                cat === 'AI and Problem Solving' ? 'Research, applications, technical breakthroughs' :
-                cat === 'AI Infrastructure' ? 'Computing resources, data systems and energy use' :
-                cat === 'AI and International Relations (IR)' ? "Global cooperation—or competition—over AI's future" :
-                cat === 'AI and Education' ? 'Preparing people for an AI-driven world' :
-                cat === 'AI and Public Safety' ? 'Law enforcement, disaster prevention and preparedness' :
-                cat === 'AI and Labor' ? 'Worker rights, safety and opportunity' :
-                'News that caught our eye'
+                cat === "AI and Elections"
+                  ? "Free, fair and frequent"
+                  : cat === "Governing AI"
+                  ? "Setting the rules for a fast-moving technology."
+                  : cat === "AI for Governance"
+                  ? "Smarter public institutions through machine intelligence."
+                  : cat === "AI and Public Engagement"
+                  ? "Bolstering participation"
+                  : cat === "AI and Problem Solving"
+                  ? "Research, applications, technical breakthroughs"
+                  : cat === "AI Infrastructure"
+                  ? "Computing resources, data systems and energy use"
+                  : cat === "AI and International Relations (IR)"
+                  ? "Global cooperation—or competition—over AI's future"
+                  : cat === "AI and Education"
+                  ? "Preparing people for an AI-driven world"
+                  : cat === "AI and Public Safety"
+                  ? "Law enforcement, disaster prevention and preparedness"
+                  : cat === "AI and Labor"
+                  ? "Worker rights, safety and opportunity"
+                  : "News that caught our eye"
               }}
             </span>
           </li>
@@ -58,39 +69,63 @@
           <h2 :id="cat.toLowerCase().replace(/\s+/g, '')" class="group-heading">
             {{ cat }}
           </h2>
-          <div v-for="item in postData[0].items.filter(item => (item.reboot_democracy_weekly_news_items_id.category || 'News that caught our eye') === cat)"
-              :key="item.reboot_democracy_weekly_news_items_id.id"
-              class="news-item">
+          <div
+            v-for="item in postData[0].items.filter(
+              (item) =>
+                (item.reboot_democracy_weekly_news_items_id.category ||
+                  'News that caught our eye') === cat
+            )"
+            :key="item.reboot_democracy_weekly_news_items_id.id"
+            class="news-item"
+          >
             <p class="category-badge">
-              <span>{{ item.reboot_democracy_weekly_news_items_id.category || 'News that caught our eye' }}</span>
+              <span>{{
+                item.reboot_democracy_weekly_news_items_id.category ||
+                "News that caught our eye"
+              }}</span>
             </p>
-            <h4 class="item-title"><strong>{{ item.reboot_democracy_weekly_news_items_id.title }}</strong></h4>
+            <h4 class="item-title">
+              <strong>{{
+                item.reboot_democracy_weekly_news_items_id.title
+              }}</strong>
+            </h4>
             <div class="item-meta">
-              <p><em>
-                {{ item.reboot_democracy_weekly_news_items_id.author }} on 
-                {{ formatDateOnly(new Date(item.reboot_democracy_weekly_news_items_id.date)) }} in 
-                {{ item.reboot_democracy_weekly_news_items_id.publication }}
-              </em></p>
+              <p>
+                <em>
+                  {{ item.reboot_democracy_weekly_news_items_id.author }} on
+                  {{
+                    formatDateOnly(
+                      new Date(item.reboot_democracy_weekly_news_items_id.date)
+                    )
+                  }}
+                  in
+                  {{ item.reboot_democracy_weekly_news_items_id.publication }}
+                </em>
+              </p>
             </div>
-            <p class="item-excerpt">{{ item.reboot_democracy_weekly_news_items_id.excerpt }}</p>
-            <a :href="item.reboot_democracy_weekly_news_items_id.url" class="read-article" target="_blank">
+            <p class="item-excerpt">
+              {{ item.reboot_democracy_weekly_news_items_id.excerpt }}
+            </p>
+            <a
+              :href="item.reboot_democracy_weekly_news_items_id.url"
+              class="read-article"
+              target="_blank"
+            >
               Read article
             </a>
           </div>
         </div>
       </div>
     </template>
-
-
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { format } from 'date-fns';
-import { useHead } from '@unhead/vue';
-import { createDirectus, rest, readItems } from '@directus/sdk';
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { format } from "date-fns";
+import { useHead } from "@unhead/vue";
+import { createDirectus, rest, readItems } from "@directus/sdk";
 
 // Interfaces
 interface WeeklyNewsItem {
@@ -128,7 +163,9 @@ interface WeeklyNewsPost {
 }
 
 // Directus
-const directus = createDirectus("https://content.thegovlab.com").with(rest());
+const directus = createDirectus("https://directus.theburnescenter.org").with(
+  rest()
+);
 const route = useRoute();
 const router = useRouter();
 const slug = computed(() => route.params.slug as string);
@@ -137,67 +174,97 @@ const slug = computed(() => route.params.slug as string);
 const {
   data: postData,
   pending: isLoading,
-  error
-} = await useAsyncData(`weekly-news-${slug.value}`, async () => {
-  const response = await directus.request(
-    readItems("reboot_democracy_weekly_news", {
-      meta: "total_count",
-      limit: -1,
-      fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"],
-      filter: {
-        _and: [
-          { edition: { _eq: slug.value } },
-          { status: { _eq: "published" } }
-        ]
-      }
-    })
-  );
-  return response as WeeklyNewsPost[];
-}, { server: true });
+  error,
+} = await useAsyncData(
+  `weekly-news-${slug.value}`,
+  async () => {
+    const response = await directus.request(
+      readItems("reboot_democracy_weekly_news", {
+        meta: "total_count",
+        limit: -1,
+        fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"],
+        filter: {
+          _and: [
+            { edition: { _eq: slug.value } },
+            { status: { _eq: "published" } },
+          ],
+        },
+      })
+    );
+    return response as WeeklyNewsPost[];
+  },
+  { server: true }
+);
 
 // Meta
 if (postData.value && postData.value.length > 0) {
   const post = postData.value[0];
-  const summaryText = post.summary.replace(/<[^>]+>/g, '').slice(0, 200);
+  const summaryText = post.summary.replace(/<[^>]+>/g, "").slice(0, 200);
   const imageUrl = post.image
     ? `${directus.url}/assets/${post.image.id}`
     : `${directus.url}/assets/4650f4e2-6cc2-407b-ab01-b74be4838235}`;
-  const imageWidth = post.image?.width?.toString() || '';
-  const imageHeight = post.image?.height?.toString() || '';
+  const imageWidth = post.image?.width?.toString() || "";
+  const imageHeight = post.image?.height?.toString() || "";
 
   useHead({
     title: `RebootDemocracy.AI Blog | ${post.title}`,
     meta: [
-      { name: 'title', content: `RebootDemocracy.AI Blog | ${post.title}` },
-      { name: 'description', content: post.summary || summaryText + '...' },
-      { property: 'og:title', content: `RebootDemocracy.AI Blog | ${post.title}` },
-      { property: 'og:type', content: "website" },
-      { property: 'og:url', content: `https://rebootdemocracy.ai/newsthatcaughtoureye/${post.edition}` },
-      { property: 'og:description', content: post.summary || summaryText + '...' },
-      { property: 'og:image', content: imageUrl },
-      { property: 'og:image:width', content: imageWidth },
-      { property: 'og:image:height', content: imageHeight },
-      { property: 'twitter:title', content: "RebootDemocracy.AI" },
-      { property: 'twitter:description', content: post.summary || summaryText + '...' },
-      { property: 'twitter:image', content: imageUrl },
-      { property: 'twitter:card', content: "summary_large_image" }
-    ]
+      { name: "title", content: `RebootDemocracy.AI Blog | ${post.title}` },
+      { name: "description", content: post.summary || summaryText + "..." },
+      {
+        property: "og:title",
+        content: `RebootDemocracy.AI Blog | ${post.title}`,
+      },
+      { property: "og:type", content: "website" },
+      {
+        property: "og:url",
+        content: `https://rebootdemocracy.ai/newsthatcaughtoureye/${post.edition}`,
+      },
+      {
+        property: "og:description",
+        content: post.summary || summaryText + "...",
+      },
+      { property: "og:image", content: imageUrl },
+      { property: "og:image:width", content: imageWidth },
+      { property: "og:image:height", content: imageHeight },
+      { property: "twitter:title", content: "RebootDemocracy.AI" },
+      {
+        property: "twitter:description",
+        content: post.summary || summaryText + "...",
+      },
+      { property: "twitter:image", content: imageUrl },
+      { property: "twitter:card", content: "summary_large_image" },
+    ],
   });
 } else {
   useHead({
     title: "RebootDemocracy.AI",
     meta: [
-      { name: 'title', content: "RebootDemocracy.AI" },
-      { property: 'og:title', content: "RebootDemocracy.AI" },
-      { property: 'og:description', content: "We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy..." },
-      { property: 'og:image', content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg" },
-      { property: 'og:type', content: "website" },
-      { property: 'og:url', content: "https://rebootdemocracy.ai" },
-      { property: 'twitter:title', content: "RebootDemocracy.AI" },
-      { property: 'twitter:description', content: "We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy..." },
-      { property: 'twitter:image', content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg" },
-      { property: 'twitter:card', content: "summary_large_image" }
-    ]
+      { name: "title", content: "RebootDemocracy.AI" },
+      { property: "og:title", content: "RebootDemocracy.AI" },
+      {
+        property: "og:description",
+        content:
+          "We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy...",
+      },
+      {
+        property: "og:image",
+        content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://rebootdemocracy.ai" },
+      { property: "twitter:title", content: "RebootDemocracy.AI" },
+      {
+        property: "twitter:description",
+        content:
+          "We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy...",
+      },
+      {
+        property: "twitter:image",
+        content: "https://rebootdemocracy.ai/assets/newsheader.40a0340b.jpg",
+      },
+      { property: "twitter:card", content: "summary_large_image" },
+    ],
   });
 }
 
@@ -210,15 +277,15 @@ const formatDateOnly = (date: Date): string => {
 const uniqueCategories = computed(() => {
   if (!postData.value?.length || !postData.value[0].items) return [];
   const cats = postData.value[0].items.map(
-    item => item.reboot_democracy_weekly_news_items_id.category || "News that caught our eye"
+    (item) =>
+      item.reboot_democracy_weekly_news_items_id.category ||
+      "News that caught our eye"
   );
   return [...new Set(cats)];
 });
 </script>
 
-
 <style>
-
 .weeklynews-hero {
   width: 100%;
   display: flex;
@@ -258,12 +325,12 @@ const uniqueCategories = computed(() => {
 }
 
 .toc li {
-  color: #0D63EB;
+  color: #0d63eb;
   margin-bottom: 0.5em;
 }
 
 .toc a {
-  color: #0D63EB;
+  color: #0d63eb;
   text-decoration: none;
   font-family: var(--font-inria);
 }
@@ -286,8 +353,8 @@ const uniqueCategories = computed(() => {
 
 /* Group Heading */
 .group-heading {
-  color: #0D63EB;
-  border-bottom: 1px solid #0D63EB;
+  color: #0d63eb;
+  border-bottom: 1px solid #0d63eb;
   padding-bottom: 5px;
   font-family: var(--font-inria);
 }
@@ -306,14 +373,14 @@ const uniqueCategories = computed(() => {
 }
 
 .category-badge span {
-  background-color: #519E8A;
+  background-color: #519e8a;
   color: #ffffff;
   font-size: 10px;
   padding: 0.5em;
 }
 
 .item-title {
-  color: #0D63EB;
+  color: #0d63eb;
   font-family: var(--font-inter);
 }
 
@@ -323,12 +390,12 @@ const uniqueCategories = computed(() => {
 }
 
 .item-excerpt {
-   font-family: var(--font-inter);
-   line-height: 32px;
+  font-family: var(--font-inter);
+  line-height: 32px;
 }
 
 .read-article {
-  background-color: #0D63EB;
+  background-color: #0d63eb;
   color: #ffffff;
   text-decoration: none;
   text-transform: uppercase;
@@ -343,23 +410,23 @@ const uniqueCategories = computed(() => {
 @media (max-width: 768px) {
   .weeklynews-hero h1 {
     font-size: 24px;
-        margin-top: -7rem;
-        margin-left: 1rem;
-        margin-right: 1rem;
-        
+    margin-top: -7rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
-  .weeklynews-details p{
-    margin-left:1rem;
-    margin-right:1rem;
+  .weeklynews-details p {
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
 
   .weeklynews-img {
     height: 150px;
   }
 
-  .weeklynews-header, .toc, .news-items {
+  .weeklynews-header,
+  .toc,
+  .news-items {
     padding: 1rem;
   }
 }
-
 </style>
