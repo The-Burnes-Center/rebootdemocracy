@@ -23,6 +23,13 @@ const { data: tags } = await useAsyncData(
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100vw;
+ position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+
 }
 
 .main-content {
