@@ -49,7 +49,7 @@
      <div class="curator-and-button">
        <Text
         as="h3"
-        size="4xl"
+        size="2xl"
         weight="bold"
         fontFamily="inria"
         lineHeight="extra-loose"
