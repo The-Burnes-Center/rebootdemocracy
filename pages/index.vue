@@ -66,10 +66,12 @@
           Blog Collaborators
         </Text>
         <button
-          class="meet-our-team-button"
+          class="base__button base__button--secondary"
           @click="router.push('/about#team-grid')"
         >
+          <span class="base__btn-slot">
           Meet Our Team →
+          </span> 
         </button>
       </div>
 
@@ -116,19 +118,18 @@
           >
             <div class="blog-card-grid grid-layout">
               <div
-                v-for="post in displayPosts.slice(0, 8)"
+                v-for="post in displayPosts.slice(0, 12)"
                 :key="post.id"
                 class="custom-card"
                 @click="navigateToBlogPost(post)"
               >
                 <!-- Image -->
-                <div
-                  v-if="'image' in post && post.image?.id"
-                  class="card-image"
-                >
-                  <img :src="getImageUrl(post.image)" :alt="post.title" />
+                <div class="card-image">
+                  <img 
+                    :src="'image' in post && post.image?.id ? getImageUrl(post.image) : '/images/exampleImage.png'" 
+                    :alt="post.title" 
+                  />
                 </div>
-
                 <!-- Content -->
                 <div class="card-content">
                   <Text
@@ -184,23 +185,26 @@
 
             <!-- View All Button -->
             <div class="view-all-container">
-              <button class="view-all-button" @click="navigateToAllPosts">
-                View All Posts
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 12H19M19 12L12 5M19 12L12 19"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+              <button class="base__button base__button--secondary" @click="navigateToAllPosts">
+                <span class="base__btn-slot">
+                  View All Posts
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="display: inline-block; vertical-align: middle; margin-left: 8px;"
+                  >
+                    <path
+                      d="M5 12H19M19 12L12 5M19 12L12 19"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
               </button>
             </div>
           </div>
