@@ -1,6 +1,7 @@
 <template>
   <div class="layout">
     <DefaultHeader :topicTags="tags" />
+      <div class="header-spacer"></div>
      <main class="main-content">
       <slot />
     </main>

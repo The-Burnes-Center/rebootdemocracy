@@ -2,6 +2,7 @@
 <template>
   <div>
     <BlogHeader :topicTags="tags" />
+     <div class="header-spacer"></div>
     <main>
       <slot />
     </main>

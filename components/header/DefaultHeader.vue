@@ -1,16 +1,16 @@
 <template>
   <header class="header-content__section">
-    <div class="header__logo">
-      <div class="hero__partner hero__first-partner">
-        <img
-          src="/images/burnes-branding-v4-bunes-center-logo-blue.svg"
-          alt="Burnes Center for Social Change"
-        />
-      </div>
-      <div class="hero__partner hero__second-partner">
-        <img src="/images/the-govlab-logo.svg" alt="The GovLab" />
-      </div>
-    </div>
+   <div class="header__logo">
+  <a href="https://burnes.northeastern.edu/" class="hero__partner hero__first-partner">
+    <img
+      src="/images/burnes-branding-v4-bunes-center-logo-blue.svg"
+      alt="Burnes Center for Social Change"
+    />
+  </a>
+  <a href="https://thegovlab.org/"  class="hero__partner hero__second-partner">
+    <img src="/images/the-govlab-logo.svg" alt="The GovLab" />
+  </a>
+</div>
 
     <!-- Mobile menu toggle -->
     <div class="mobile-menu-toggle" @click="toggleMobileMenu" v-if="isMobile">
@@ -60,7 +60,7 @@
       class="btn-header"
       variant="secondary"
       height="36px"
-      @click="onClick"
+      :onClick="onClick"
     >
       Sign up for updates
     </Button>
