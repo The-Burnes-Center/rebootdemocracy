@@ -90,7 +90,7 @@
   }
   
   .custom-searchbox input {
-    padding: 0.875rem 3rem 0.875rem 1rem;
+    padding: 0.875rem 3rem 0.875rem 1.5rem;
     font-size: 0.95rem;
   }
 }
@@ -123,9 +123,8 @@
   }
   
   .custom-searchbox input {
-    padding: 0.75rem 3rem 0.75rem 1rem;
+    padding: 0.75rem 3rem 0.75rem 2.3rem;
     font-size: 0.9rem;
-    border-radius: 30px;
   }
   
   /* Adjust button sizes for mobile */
@@ -152,7 +151,7 @@
   }
   
   .custom-searchbox input {
-    padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+    padding: 0.625rem 7rem 0.625rem 2rem;
     font-size: 0.875rem;
   }
 }

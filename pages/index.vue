@@ -6,8 +6,12 @@
       subtitle="Insights on AI, Governance and Democracy"
     />
 
+    <section class="home-featured-row" v-if="showSearchResults">
+  <GlobalSearch />
+</section>
+
     <!-- FEATURE + POSTCARDS ROW -->
-    <section class="home-featured-row">
+    <section class="home-featured-row" v-else>
       <!-- WRAPPER AROUND FEATURED + POSTCARDS -->
       <div class="home-featured-wrapper">
         <!-- FEATURED BLOG (Latest Post) -->
@@ -225,7 +229,8 @@ import { format } from "date-fns";
 
 // Composables and utilities
 const router = useRouter();
-const { resetSearch } = useSearchState();
+const { resetSearch, showSearchResults, searchQuery } = useSearchState();
+
 
 // Constants
 const DIRECTUS_URL = "https://content.thegovlab.com";

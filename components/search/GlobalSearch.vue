@@ -33,7 +33,7 @@
     <!-- Simple pagination placeholder -->
     <div class="search-pagination" v-if="showLoadMore">
       <Button
-        variant="primary"
+        variant="secondary"
         width="150px"
         height="36px"
         @click="loadMoreResults"
