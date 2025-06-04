@@ -38,6 +38,7 @@ const SizeToRem = {
   "3xl": "1.875rem", // 30px
   "4xl": "2rem", // 32px
   "5xl": "2.25rem", // 36px
+  "6xl": "3rem", // 48px
 } as const;
 
 // Element-specific default sizes

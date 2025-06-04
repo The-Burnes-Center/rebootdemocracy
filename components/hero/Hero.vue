@@ -3,7 +3,7 @@
     <div class="hero__content">
       <Text
         as="h1"
-        :size="'5xl'"
+        :size="'6xl'"
         :weight="'bold'"
         :fontFamily="'inria'"
         class="hero__title"
