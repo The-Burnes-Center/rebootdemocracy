@@ -102,7 +102,7 @@
 
   <!--Mobile view-->
   <Card
-    size="small"
+    size="large"
     :variant="'default'"
     :hoverable="hoverable"
     :class="['mobile-view', { 'featured-post': isFeatured }]"
