@@ -161,7 +161,6 @@
 .featured-card__read-more {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   background: linear-gradient(to bottom, #dbe9f6, #6182a2);
   display: flex;
   align-items: center;
@@ -174,6 +173,7 @@
   background: linear-gradient(135deg, #003366 0%, #003366 100%);
   color: white;
   transform: translateX(4px);
+  border-radius: 50%;
 }
 
 .featured-card__read-more svg {
