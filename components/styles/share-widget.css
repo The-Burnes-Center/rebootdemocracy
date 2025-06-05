@@ -1,22 +1,4 @@
-.share-widget {
-    display: flex;
-    width: 406px;
-    height: 24px;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 2rem;
-  }
-  
-  .share-widget__text {
-    width: 246px;
-    height: 24px;
-    font-family: var(--font-inter);
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 24px;
-    color: #000000;
-    margin: 0;
-  }
+
   
   .share-widget__icons {
     display: flex;
@@ -49,10 +31,7 @@
       height: auto;
       gap: 12px;
     }
-    
-    .share-widget__text {
-      width: 100%;
-    }
+  
     
     .share-widget__icons {
       width: 100%;

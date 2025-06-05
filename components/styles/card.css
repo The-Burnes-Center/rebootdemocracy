@@ -38,7 +38,7 @@
   .card--small {
     padding: 1rem;
     max-width: 100%;
-    max-height: none;
+    max-height: 27rem
   }
    .card--large {
     padding: 1rem;
@@ -62,7 +62,7 @@
 .card--normal {
   padding: 32px 30px 20px 30px;
   max-width: 24rem;
-  max-height: 22rem;
+  max-height: 18rem;
 }
 
 .card--large {

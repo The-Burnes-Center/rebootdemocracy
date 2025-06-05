@@ -25,7 +25,8 @@
 
           <!-- Blog content -->
           <template v-else>
-            <button class="blog-back-btn" @click="router.push('/blog')">
+          <div class="blog-section">
+               <button class="blog-back-btn" @click="router.push('/blog')">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -43,12 +44,18 @@
                 >Blog</Text
               >
             </button>
-
+            <div v-if="blog.image?.id" class="blog-banner-image">
+            <img
+              :src="`https://directus.theburnescenter.org/assets/${blog.image.id}`"
+              :alt="blog.image.description || blog.title"
+              class="blog-image"
+            />
+          </div>
             <!-- Blog title -->
             <TitleText
               :level="'h1'"
-              size="5xl"
-              weight="medium"
+              size="6xl"
+              weight="bold"
               class="blog-title"
               fontFamily="inria"
               lineHeight="super-loose"
@@ -58,19 +65,36 @@
             </TitleText>
 
             <!-- Category eyebrow - Now clickable -->
-            <div
-              v-if="blog.Tags && blog.Tags.length > 0"
-              class="blog-category-eyebrow"
-            >
-              <span
-                v-for="(tag, index) in blog.Tags"
-                :key="index"
-                class="category-tag"
-                @click="navigateToCategory(tag)"
-              >
-                {{ tag }}
-              </span>
-            </div>
+      <div class="tag-share-category">
+        <div class="blog-category-eyebrow">
+          <span
+            v-if="blog.Tags && blog.Tags.length > 0"
+            v-for="(tag, index) in blog.Tags"
+            :key="index"
+            class="category-tag"
+            @click="navigateToCategory(tag)"
+          >
+            {{ tag }}
+          </span>
+
+          <!-- Fallback tag -->
+          <span
+            v-else
+            class="category-tag"
+            @click="navigateToCategory('Blog')"
+          >
+            Blog
+          </span>
+       </div>
+
+          <div class="share-widget-desktop">
+            <ShareWidget
+              :url="`https://rebootdemocracy.ai/blog/${blog.slug}`"
+              :title="blog.title"
+              :description="blog.excerpt || 'A Reboot Democracy article.'"
+            />
+          </div>
+        </div>
 
             <!-- Excerpt -->
             <div v-if="blog.excerpt" class="blog-excerpt">
@@ -79,23 +103,50 @@
               </p>
             </div>
 
-            <!-- Publication info (date and author) -->
-            <div class="publication-info">
-              <Text size="sm" weight="normal" fontStyle="italic">
-                Published on
-                <Text as="span" size="sm" weight="bold" fontStyle="italic">
-                  {{ formatDate(blog.date) }}
-                </Text>
-                <template v-if="blog.authors && blog.authors.length > 0">
-                  by
-                  <Text as="span" size="sm" weight="bold" fontStyle="italic">
-                    {{ getAuthorsDisplayText(blog.authors) }}
-                  </Text>
-                </template>
-              </Text>
-            </div>
+              <!-- Publication info (date and author) -->
+  <div class="publication-info">
+    <Text size="lg" weight="normal">
+      Published on
+      <Text as="span" size="lg" weight="bold">
+        {{ formatDate(blog.date) }}
+      </Text>
+    </Text>
 
-            <!-- Audio component -->
+ <!-- Author info with image and Read Bio link -->
+    <div v-if="blog.authors && blog.authors.length > 0" class="author-info-list">
+      <div
+        v-for="(author, index) in blog.authors"
+        :key="index"
+        class="author-info"
+      >
+        <img
+          class="author-headshot"
+          :src="getAuthorImageUrl(author.team_id)"
+          :alt="getAuthorName(author.team_id)"
+        />
+        <div class="author-details">
+          <Text size="base" weight="bold">
+            {{ getAuthorName(author.team_id) }}
+          </Text>
+
+          <Text
+            v-if="author.team_id?.Link_to_bio"
+            as="a"
+            :href="author.team_id.Link_to_bio"
+            size="base"
+            weight="medium"
+            class="read-bio-link"
+          >
+            Read Bio →
+          </Text>
+        </div>
+      </div>
+    </div>
+</div>
+         
+          </div>
+
+           <!-- Audio component -->
             <div class="audio-version" v-if="blog?.audio_version">
               <p dir="ltr">
                 <em>Listen to the AI-generated audio version of this piece.</em>
@@ -109,51 +160,11 @@
             <div class="blog-content-container">
               <div class="blog-content" v-html="blog.content"></div>
             </div>
+          
           </template>
         </template>
       </article>
 
-      <!-- Sidebar content -->
-      <aside
-        class="right-content-blog"
-        v-if="blog && blog.authors && blog.authors.length > 0"
-      >
-        <div class="share-widget-mobile">
-          <ShareWidget
-            :url="`https://rebootdemocracy.ai/blog/${blogslug.value}`"
-            :title="blog?.title || 'RebootDemocracy.AI Blog'"
-            :description="
-              blog?.excerpt || 'A blog post from RebootDemocracy.AI'
-            "
-            align="center"
-          />
-        </div>
-
-        <!-- Author cards (multiple) -->
-        <div v-for="(author, index) in blog.authors" :key="index">
-          <AuthorCard
-            :author="author"
-            :imageUrl="getAuthorImageUrl(author?.team_id)"
-            :name="getAuthorName(author?.team_id)"
-            :bio="getAuthorBio(author?.team_id)"
-          />
-        </div>
-
-        <!-- Sign up widget -->
-        <SignUpButtonWidget
-          title="Sign Up for updates"
-          placeholder="Enter your email"
-          buttonLabel="Sign Up"
-          backgroundColor="#F9F9F9"
-        />
-        <div class="share-widget-desktop">
-          <ShareWidget
-            url="https://rebootdemocracy.ai/blog/your-post-slug"
-            title="Your post title"
-            description="A brief description of your content"
-          />
-        </div>
-      </aside>
     </section>
   </div>
   <!--Related Articles section-->

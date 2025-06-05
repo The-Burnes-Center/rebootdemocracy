@@ -120,7 +120,7 @@
           >
             <div class="blog-card-grid grid-layout">
               <div
-                v-for="post in displayPosts.slice(0, 12)"
+                v-for="(post, index) in displayPosts.slice(0, 12)"
                 :key="post.id"
                 class="custom-card"
                 @click="navigateToBlogPost(post)"
@@ -136,8 +136,24 @@
                     :alt="post.title"
                   />
                 </div>
+
                 <!-- Content -->
                 <div class="card-content">
+                  <!-- Category / Tag -->
+                  <Text
+                  as="span"
+                    size="sm"
+                    weight="extrabold"
+                    class="category-tag"
+                    :style="{
+                      color: index % 2 === 0 ? '#003366' : '#2F4F4F'
+                    }"
+                  >
+                    {{ post.Tags?.[0] || 'Blog' }}
+                  </Text>
+
+
+                  <!-- Title -->
                   <Text
                     as="h3"
                     size="xl"
@@ -149,6 +165,7 @@
                     {{ post.title }}
                   </Text>
 
+                  <!-- Excerpt -->
                   <Text
                     as="p"
                     size="base"
@@ -160,6 +177,7 @@
                     {{ post.excerpt }}
                   </Text>
 
+                  <!-- Meta (Date & Author) -->
                   <Text
                     as="p"
                     size="xs"
@@ -171,16 +189,9 @@
                     <Text as="span" size="xs" weight="bold" fontStyle="italic">
                       {{ formatDate(post.date) }}
                     </Text>
-                    <template
-                      v-if="getAuthorName(post) !== 'Reboot Democracy Team'"
-                    >
+                    <template v-if="getAuthorName(post) !== 'Reboot Democracy Team'">
                       by
-                      <Text
-                        as="span"
-                        size="xs"
-                        weight="bold"
-                        fontStyle="italic"
-                      >
+                      <Text as="span" size="xs" weight="bold" fontStyle="italic">
                         {{ getAuthorName(post) }}
                       </Text>
                     </template>
@@ -203,11 +214,7 @@
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    style="
-                      display: inline-block;
-                      vertical-align: middle;
-                      margin-left: 8px;
-                    "
+                    style="display: inline-block; vertical-align: middle; margin-left: 8px"
                   >
                     <path
                       d="M5 12H19M19 12L12 5M19 12L12 19"
@@ -222,6 +229,7 @@
             </div>
           </div>
         </template>
+
       </TabSwitch>
     </section>
   </div>

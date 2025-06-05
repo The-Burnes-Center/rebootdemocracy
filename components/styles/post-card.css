@@ -79,7 +79,6 @@
 
 /* Mobile width - Fixed styles */
 @media (max-width: 768px) {
-  /* Remove the problematic margin-top */
   .postcard__container {
     margin-top: 0;
   }
@@ -87,14 +86,14 @@
   /* Fix the content positioning */
   .postcard__content {
     position: relative;
-    top: 0; 
+    top: 0;
     left: 0;
-    flex-direction: column; 
+    flex-direction: column;
     gap: 1rem;
     padding: 0;
     align-items: flex-start;
   }
-
+  
   /* Adjust image for mobile */
   .postcard__image {
     width: 100%; /* Smaller image on mobile */
@@ -124,24 +123,17 @@
     max-height: 2.6em;
     width: 100%;
   }
-  
+
   /* Mobile view class specific styles */
   .mobile-view .postcard__container {
     padding: 0.5rem;
   }
-  
+
   /* Ensure proper spacing in postcards column on mobile */
   .postcards-column {
     gap: 1rem;
   }
-  
-  /* Card container adjustments for mobile */
-  .card--small {
-    padding: 1rem;
-    max-width: 100%;
-    max-height: none;
-  }
-  
+
   .card--large {
     padding: 1rem;
     max-width: 100%;
@@ -162,12 +154,12 @@
     flex: 1 1 100%;
     gap: 1rem; /* Reduced from 12rem */
   }
-  
+
   /* Ensure postcards are properly spaced */
   .postcards-column > * {
     margin-bottom: 1rem;
   }
-  
+
   .postcards-column > *:last-child {
     margin-bottom: 0;
   }

@@ -1,14 +1,5 @@
 <template>
   <div class="share-widget">
-    <Text
-      as="p"
-      size="base"
-      weight="bold"
-      class="share-widget__text"
-      :align="align"
-    >
-      Share
-    </Text>
     <div class="share-widget__icons">
       <a 
         :href="getShareUrl('x')" 
