@@ -307,8 +307,8 @@ p a {
 
 /* For mobile responsiveness */
 @media (max-width: 768px) {
-  .blog-back-btn{
-    margin-left:1rem;
+  .blog-back-btn {
+    margin-left: 1rem;
   }
   .blog-category-eyebrow {
     margin: 0.5rem 0 0.75rem;
@@ -318,7 +318,7 @@ p a {
     margin-right: 1rem;
   }
   .blog-banner-image img.blog-image {
-    height:15rem;
+    height: 15rem;
   }
 
   .category-tag {
@@ -371,6 +371,7 @@ p a {
     align-items: center;
   }
 
+ 
   .left-content-blog {
     padding-right: 0;
   }
