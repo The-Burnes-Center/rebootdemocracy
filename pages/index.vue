@@ -6,15 +6,15 @@
       subtitle="Insights on AI, Governance and Democracy"
     />
 
+    <!-- SEARCH RESULTS -->
     <section class="home-featured-row" v-if="showSearchResults">
       <GlobalSearch />
     </section>
 
-    <!-- FEATURE + POSTCARDS ROW -->
+    <!-- FEATURED + BLOG CARDS -->
     <section class="home-featured-row" v-else>
-      <!-- WRAPPER AROUND FEATURED + POSTCARDS -->
       <div class="home-featured-wrapper">
-        <!-- FEATURED BLOG (Latest Post) -->
+        <!-- FEATURED POST -->
         <FeatureCard
           v-if="featuredPost"
           class="featured-column"
@@ -31,16 +31,12 @@
           @click="navigateToBlogPost(featuredPost)"
         />
 
-        <!-- 3 LATEST BLOGS OR NEWS ITEMS -->
+        <!-- RECENT POSTS -->
         <div class="postcards-column">
           <PostCard
             v-for="(item, index) in latestThreePosts"
             :key="`post-${index}`"
-            :tag="
-              isBlogPost(item) && Array.isArray(item.Tags)
-                ? item.Tags[0]
-                : item.category
-            "
+            :tag="getTag(item)"
             :titleText="item.title"
             :excerpt="'excerpt' in item ? item.excerpt : ''"
             :imageUrl="
@@ -57,7 +53,7 @@
         </div>
       </div>
 
-      <!-- Blog Collaborators Heading -->
+      <!-- BLOG COLLABORATORS HEADING -->
       <div class="curator-and-button">
         <Text
           as="h3"
@@ -77,7 +73,7 @@
         </button>
       </div>
 
-      <!-- Blog Collaborators Flex -->
+      <!-- BLOG COLLABORATORS -->
       <div class="blog-collaborators-wrapper">
         <div class="collaborators-flex-grid">
           <CuratorBadge
@@ -97,15 +93,13 @@
             <AuthorBadge
               v-for="author in row"
               :key="author.name"
-              :name="author.name"
-              :title="author.title"
-              :imageUrl="author.imageUrl"
+              v-bind="author"
             />
           </div>
         </div>
       </div>
 
-      <!-- Blog Posts + Filters Section -->
+      <!-- BLOG POSTS WITH FILTERS -->
       <TabSwitch
         :tabs="tabOptions"
         :tagOptions="tagOptions"
@@ -115,7 +109,7 @@
       >
         <template #latest-posts>
           <div
-            v-if="!isLoading && displayPosts.length > 0"
+            v-if="!isLoading && displayPosts.length"
             class="blog-posts-section"
           >
             <div class="blog-card-grid grid-layout">
@@ -125,7 +119,6 @@
                 class="custom-card"
                 @click="navigateToBlogPost(post)"
               >
-                <!-- Image -->
                 <div class="card-image">
                   <img
                     :src="
@@ -137,23 +130,17 @@
                   />
                 </div>
 
-                <!-- Content -->
                 <div class="card-content">
-                  <!-- Category / Tag -->
                   <Text
-                  as="span"
+                    as="span"
                     size="sm"
                     weight="extrabold"
                     class="category-tag"
-                    :style="{
-                      color: index % 2 === 0 ? '#003366' : '#2F4F4F'
-                    }"
+                    :style="{ color: index % 2 === 0 ? '#003366' : '#2F4F4F' }"
                   >
-                    {{ post.Tags?.[0] || 'Blog' }}
+                    {{ post.Tags?.[0] || "Blog" }}
                   </Text>
 
-
-                  <!-- Title -->
                   <Text
                     as="h3"
                     size="xl"
@@ -165,19 +152,16 @@
                     {{ post.title }}
                   </Text>
 
-                  <!-- Excerpt -->
                   <Text
                     as="p"
                     size="base"
                     weight="medium"
                     color="text-primary"
-                    lineHeight="normal"
                     class="card-description"
                   >
                     {{ post.excerpt }}
                   </Text>
 
-                  <!-- Meta (Date & Author) -->
                   <Text
                     as="p"
                     size="xs"
@@ -189,9 +173,16 @@
                     <Text as="span" size="xs" weight="bold" fontStyle="italic">
                       {{ formatDate(post.date) }}
                     </Text>
-                    <template v-if="getAuthorName(post) !== 'Reboot Democracy Team'">
+                    <template
+                      v-if="getAuthorName(post) !== 'Reboot Democracy Team'"
+                    >
                       by
-                      <Text as="span" size="xs" weight="bold" fontStyle="italic">
+                      <Text
+                        as="span"
+                        size="xs"
+                        weight="bold"
+                        fontStyle="italic"
+                      >
                         {{ getAuthorName(post) }}
                       </Text>
                     </template>
@@ -200,7 +191,6 @@
               </div>
             </div>
 
-            <!-- View All Button -->
             <div class="view-all-container">
               <button
                 class="base__button base__button--secondary"
@@ -208,14 +198,7 @@
               >
                 <span class="base__btn-slot">
                   View All Posts
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    style="display: inline-block; vertical-align: middle; margin-left: 8px"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M5 12H19M19 12L12 5M19 12L12 19"
                       stroke="currentColor"
@@ -229,60 +212,51 @@
             </div>
           </div>
         </template>
-
       </TabSwitch>
     </section>
   </div>
 </template>
 
 <script lang="ts" setup>
-function isBlogPost(item: BlogPost | NewsItem): item is BlogPost {
-  return "Tags" in item;
-}
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import type { BlogPost, NewsItem } from "@/types/index.ts";
 import { format } from "date-fns";
+import type { BlogPost, NewsItem } from "@/types/index.ts";
 
-// Composables and utilities
 const router = useRouter();
 const { resetSearch, showSearchResults, searchQuery } = useSearchState();
 
-// Constants
-const DIRECTUS_URL = "https://directus.theburnescenter.org";
-
-// State
-const selectedTag = ref<string>("All Topics");
+const selectedTag = ref("All Topics");
 const displayPosts = ref<BlogPost[]>([]);
 const isLoadingState = ref(false);
+const DIRECTUS_URL = "https://directus.theburnescenter.org";
 
-// Fetch initial data
 const { data: latestCombinedPosts } = await useAsyncData(
   "latest-combined-posts",
   fetchLatestCombinedPosts
 );
-
 const { data: allBlogPosts } = await useAsyncData("homepage-blogs", () =>
   fetchBlogData()
 );
-
 const { data: allTags } = await useAsyncData(
   "homepage-tags",
   fetchAllUniqueTags
 );
-
 const { data: latestWeeklyNews } = await useAsyncData(
   "weekly-news",
   fetchLatestWeeklyNews
 );
 
-// Computed properties
+function getTag(item: BlogPost | NewsItem): string {
+  if ('Tags' in item && Array.isArray(item.Tags) && item.Tags.length > 0) {
+    return item.Tags[0];
+  }
+  return item.category || 'Blog';
+}
+
 const featuredPost = computed(() => latestCombinedPosts.value?.[0] || null);
-
 const latestThreePosts = computed(() => latestCombinedPosts.value || []);
-
 const tagOptions = computed(() => ["All Topics", ...(allTags.value || [])]);
-
 const isLoading = computed(() => isLoadingState.value);
 
 const weeklyNewsUrl = computed(() => {
@@ -298,18 +272,11 @@ const tabOptions = computed(() => [
     url: weeklyNewsUrl.value,
     external: true,
   },
-  {
-    title: "Events",
-    name: "events",
-    url: "/events",
-    external: true,
-  },
+  { title: "Events", name: "events", url: "/events", external: true },
 ]);
 
-// Initialize display posts
 displayPosts.value = allBlogPosts.value || [];
 
-// Collaborators data
 const collaborators = [
   [
     {
@@ -362,13 +329,9 @@ const collaborators = [
   ],
 ];
 
-// Methods
 function formatDate(dateValue: Date | string): string {
-  if (!dateValue) return "";
   try {
-    const date =
-      typeof dateValue === "string" ? new Date(dateValue) : dateValue;
-    return format(date, "MMMM d, yyyy");
+    return format(new Date(dateValue), "MMMM d, yyyy");
   } catch {
     return "";
   }
@@ -405,18 +368,20 @@ function getAuthorName(post: BlogPost | NewsItem): string {
 }
 
 function navigateToBlogPost(post: BlogPost | NewsItem): void {
-  if ("slug" in post && post.slug) {
-    router.push(`/blog/${post.slug}`);
-  } else if ("url" in post && post.url) {
-    window.location.href = post.url;
-  }
+  if ("slug" in post && post.slug) router.push(`/blog/${post.slug}`);
+  else if ("url" in post && post.url) window.location.href = post.url;
 }
 
-function handleTabChange(index: number, name: string): void {
-  // Tab switching is handled by TabSwitch component
-  if (name === "latest-posts") {
-    resetSearch();
-  }
+function navigateToAllPosts(): void {
+  const query =
+    selectedTag.value !== "All Topics"
+      ? { category: encodeURIComponent(selectedTag.value) }
+      : {};
+  router.push({ path: "/blog", query });
+}
+
+function handleTabChange(_: number, name: string): void {
+  if (name === "latest-posts") resetSearch();
 }
 
 async function handleTagFilter(tag: string): Promise<void> {
@@ -427,30 +392,24 @@ async function handleTagFilter(tag: string): Promise<void> {
     if (tag === "All Topics") {
       displayPosts.value = allBlogPosts.value || [];
     } else {
-      // Fetch filtered posts
       const [blogs, newsItems] = await Promise.all([
         fetchAllBlogPosts(),
         fetchWeeklyNewsItems(),
       ]);
 
-      // Filter blogs by tag
       const filteredBlogs = blogs.filter((post) => post.Tags?.includes(tag));
-
-      // Filter news by category
       const filteredNews = newsItems
-        .filter((item) => item.category === tag)
+        .filter((n) => n.category === tag)
         .map(
-          (newsItem) =>
+          (n) =>
             ({
-              ...newsItem,
-              id: newsItem.url || `news-${Date.now()}`,
-              Tags: newsItem.category ? [newsItem.category] : [],
+              ...n,
+              id: n.url || `news-${Date.now()}`,
+              Tags: n.category ? [n.category] : [],
             } as unknown as BlogPost)
         );
 
-      // Combine and sort
-      const combined = [...filteredBlogs, ...filteredNews];
-      combined.sort(
+      const combined = [...filteredBlogs, ...filteredNews].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
@@ -464,17 +423,5 @@ async function handleTagFilter(tag: string): Promise<void> {
   }
 }
 
-function navigateToAllPosts(): void {
-  const query =
-    selectedTag.value !== "All Topics"
-      ? { category: encodeURIComponent(selectedTag.value) }
-      : {};
-
-  router.push({ path: "/blog", query });
-}
-
-// Lifecycle
-onMounted(() => {
-  resetSearch();
-});
+onMounted(resetSearch);
 </script>
