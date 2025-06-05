@@ -248,7 +248,7 @@
         </div>
 
         <!-- Event section with loading state -->
-        <div v-if="isEventLoading" class="loading">Loading event...</div>
+        <!-- <div v-if="isEventLoading" class="loading">Loading event...</div>
         <UpcomingCard
           v-if="latestEvent"
           :title="latestEvent.title"
@@ -257,7 +257,7 @@
           :onClick="() => handleEventClick(latestEvent)"
           :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
           :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
-        />
+        /> -->
 
         <SignUpButtonWidget
           title="Sign Up for updates"
