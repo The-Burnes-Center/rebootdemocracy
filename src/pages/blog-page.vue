@@ -130,7 +130,7 @@ mounted() {
     fetchCombinedData() {
   self = this;
   const nowOffset = self.getDirectusNowOffset(); // "$NOW(-4 hours)" or "$NOW(-5 hours)"
-
+console.log(nowOffset)
   Promise.all([
     this.directus.items('reboot_democracy_blog').readByQuery({
       meta: 'total_count',
@@ -154,6 +154,7 @@ mounted() {
         filter: {
         _and: [
           { date: { _lte: nowOffset } },
+          { status: { _eq: 'published' } }
         ]
       },
       fields: [
