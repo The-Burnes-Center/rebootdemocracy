@@ -216,9 +216,9 @@ Instructions:
      *  Stream GPT response  *
      *************************/
     const stream = await openaiClient.chat.completions.create({
-      model: 'gpt-4.1',
+      model: 'gpt-4.1-mini',
       messages,
-      // max_completion_tokens: 2048,
+      max_completion_tokens: 2048,
       // temperature: 0.0,
       // store: true
       stream: true
