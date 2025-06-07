@@ -132,16 +132,6 @@
 .featured-card:hover .featured-card__read-more {
   background: linear-gradient(135deg, #003366 0%, #003366 100%);
   color: white;
-  transform: translateX(4px);
-  border-radius: 50%;
-}
-
-.featured-card__read-more svg {
-  transition: transform 0.3s ease;
-}
-
-.featured-card:hover .featured-card__read-more svg {
-  transform: translateX(2px);
 }
 
 /* Text clamping utilities */
