@@ -30,7 +30,7 @@
 }
 
 .mailing-list-section h3{
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-inria);
   font-size: 24px;
   margin:0;
 }
@@ -61,7 +61,7 @@ a.btn {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: 'Space Mono', monospace;
+  font-family: var(--font-inria);
   color: #000000;
 }
 

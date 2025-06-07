@@ -330,7 +330,7 @@ function useSample(q:string) { draft.value = q; send() }
     background-color: #f8f8f8;
     padding: 2px 4px;
     border-radius: 4px;
-    font-family: monospace;
+    font-family: var(--font-inria);
   }
   
   .bot-message :deep(pre) {
