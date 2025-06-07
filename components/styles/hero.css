@@ -1,4 +1,3 @@
-
 .hero__container {
   display: flex;
   flex-direction: column;
@@ -6,7 +5,7 @@
   align-items: center;
   width: 100%;
   padding: 5rem 0;
-  
+
   box-sizing: border-box;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.15);
@@ -21,13 +20,11 @@
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
- 
   padding-bottom: 1rem;
 }
 
 .search-content {
-  padding-top:0.5rem;
-
+  padding-top: 0.5rem;
 }
 
 .custom-searchbox input {
@@ -44,11 +41,11 @@
 }
 
 .hero__title {
-  color: #FFFFFF !important;
+  color: #ffffff !important;
 }
 
 .hero__subtitle {
-  color: #FFFFFF !important;
+  color: #ffffff !important;
 }
 
 .hero__first-partner img {
@@ -69,26 +66,28 @@
   .hero__container {
     padding: 3rem 0;
   }
-  
+
   .hero__content {
     padding: 0 1.5rem;
     gap: 1rem;
   }
-  
+
   /* Adjust Text component sizes for tablet */
   .hero__title {
-    font-size: 2.5rem !important; /* Override 6xl size */
+    line-height: 46px;
+    font-size: 2.5rem !important; 
+    text-align: center;
   }
-  
+
   .hero__subtitle {
-    font-size: 1.25rem !important; /* Override 2xl size */
+    font-size: 1.25rem !important; 
   }
-  
+
   .search-content {
     padding: 0 1.5rem;
     margin-top: 1.5rem;
   }
-  
+
   .custom-searchbox input {
     padding: 0.875rem 3rem 0.875rem 1.5rem;
     font-size: 0.95rem;
@@ -97,42 +96,41 @@
 
 /* Mobile Media Query */
 @media (max-width: 480px) {
-
   .hero__content {
     padding: 0 1rem;
     gap: 0.75rem;
   }
-  
+
   /* Further adjust Text component sizes for mobile */
   .hero__title {
-    font-size: 1.75rem !important; /* Override for mobile */
+    font-size: 1.75rem !important; 
     line-height: 1.3;
     text-align: center;
   }
-  
+
   .hero__subtitle {
-    font-size: 1rem !important; /* Override for mobile */
+    font-size: 1rem !important; 
     line-height: 1.5;
   }
-  
+
   .search-content {
     padding: 0 1rem;
     margin-top: 1.25rem;
     width: 100%;
     max-width: 100%;
   }
-  
+
   .custom-searchbox input {
     padding: 0.75rem 3rem 0.75rem 2.3rem;
     font-size: 0.9rem;
   }
-  
+
   /* Adjust button sizes for mobile */
   .custom-searchbox .ais-SearchBox-submit,
   .custom-searchbox .ais-SearchBox-reset {
     padding: 0.25rem;
   }
-  
+
   .custom-searchbox .ais-SearchBox-submitIcon,
   .custom-searchbox .ais-SearchBox-resetIcon {
     width: 14px;
@@ -145,11 +143,11 @@
   .hero__title {
     font-size: 1.5rem !important;
   }
-  
+
   .hero__subtitle {
     font-size: 0.9rem !important;
   }
-  
+
   .custom-searchbox input {
     padding: 0.625rem 7rem 0.625rem 2rem;
     font-size: 0.875rem;
@@ -161,4 +159,3 @@
 .hero__subtitle {
   margin: 0 !important;
 }
-
