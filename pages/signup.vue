@@ -121,11 +121,11 @@ export default {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-  font-family: "Red Hat Text", sans-serif;
+  font-family: var(--font-inria);
 }
 
 .signup-form h3 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-inter);
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 2rem;
@@ -137,6 +137,7 @@ export default {
   font-size: 0.85rem;
   margin-bottom: 1.5rem;
   color: var(--dark-grey);
+  font-family: var(--font-inria);
 }
 
 .mc-field-group {
@@ -149,7 +150,7 @@ export default {
 .mc-field-group label {
   font-weight: 600;
   font-size: 1rem;
-  font-family: "Red Hat Text", sans-serif;
+  font-family: var(--font-inria);
   color: var(--blue-rich);
 }
 
@@ -181,7 +182,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-inter);
   color: #000000;
   background: var(--yellow-action);
   border: 1px solid #000000;

@@ -179,7 +179,7 @@ function useSample(q:string) { draft.value = q; send() }
 
   border-radius: 5px;
   
-  font-family: Arial, sans-serif;
+  font-family: var(--font-inria); 
 
   /* Remove scroll here, move to .messages */
   /* overflow-y: scroll; */
