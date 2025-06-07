@@ -85,7 +85,7 @@ const formattedDate = props.date
   cursor: pointer;
   width: 300px;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
