@@ -68,9 +68,10 @@ const textColors = {
   "text-primary": "#000",
   "text-secondary": "#0D63EB",
   "text-tertiary": "#062C51",
-  "tag-primary": "#5C69AB",
+  "tag-primary": "#003366",
   "tag-secondary": "#0D63EB",
   "link-primary": "#0D63EB",
+
 };
 
 const alignmentClasses = {

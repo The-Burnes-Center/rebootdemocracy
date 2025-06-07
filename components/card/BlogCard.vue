@@ -5,19 +5,62 @@
     </div>
 
     <div class="blogcard-content">
-      <span class="blogcard-tag" v-if="tag">{{ tag }}</span>
+     <Text
+      v-if="tag"
+      as="span"
+      size="xs"
+      weight="bold"
+      color="tag-primary"
+      class="blogcard-tag"
+      transform="uppercase"
+      fontFamily="inter"
+    >
+      {{ tag }}
+    </Text>
 
-      <h3 class="blogcard-title">{{ title }}</h3>
+    <!-- Blog card title -->
+    <Text
+      as="h3"
+      size="xl"
+      weight="extrabold"
+      fontFamily="inria"
+      lineHeight="relaxed"
+      class="blogcard-title"
+    >
+      {{ title }}
+    </Text>
 
-      <p class="blogcard-excerpt">{{ excerpt }}</p>
+<!-- Blog card excerpt -->
+<Text
+  as="p"
+  size="base"
+  weight="medium"
+  color="text-primary"
+  lineHeight="normal"
+  class="blogcard-excerpt"
+>
+  {{ excerpt }}
+</Text>
 
-      <p class="blogcard-meta" v-if="date">
-        Published on
-        <strong>{{ formattedDate }}</strong>
-        <template v-if="author && author !== 'Reboot Democracy Team'">
-          by <strong>{{ author }}</strong>
-        </template>
-      </p>
+    <!-- Blog card meta -->
+    <Text
+      v-if="date"
+      as="p"
+      size="sm"
+      fontStyle="italic"
+      class="blogcard-meta"
+    >
+      Published on
+    <Text as="span" size="sm" weight="bold" fontStyle="italic">
+      {{ formattedDate }}
+    </Text>
+    <template v-if="author && author !== 'Reboot Democracy Team'">
+      by
+      <Text as="span" size="sm" weight="bold" fontStyle="italic">
+        {{ author }}
+      </Text>
+    </template>
+  </Text>
     </div>
   </div>
 </template>
@@ -75,14 +118,9 @@ const formattedDate = props.date
 }
 
 .blogcard-tag {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #003366;
-    font-family: var(--font-inter);
   background-color: #e6f0ff;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  text-transform: uppercase;
   display: inline-block;
   width: fit-content;
 }

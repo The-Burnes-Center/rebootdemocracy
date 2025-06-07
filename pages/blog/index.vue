@@ -507,8 +507,6 @@ const { data: eventData, pending: isEventLoading } = await useAsyncData(
 const allPosts = computed(() => allPostsData.value || []);
 const tags = computed(() => tagsData.value || []);
 const authors = computed(() => authorsData.value || []);
-const latestEvent = computed(() => eventData.value?.event || null);
-const isFutureEvent = computed(() => eventData.value?.isFutureEvent || false);
 
 const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)

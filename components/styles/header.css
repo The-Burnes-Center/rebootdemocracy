@@ -5,7 +5,8 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
-  background: linear-gradient(to bottom, #dbe9f6, #6182a2);
+  background-color: #ffffff;
+  backdrop-filter: blur(10px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
 }
