@@ -6,7 +6,7 @@
     <Text
       fontFamily="inria"
       size="4xl"
-      weight="normal"
+      weight="bold"
       class="section-heading"
       lineHeight="extra-loose"
     >
