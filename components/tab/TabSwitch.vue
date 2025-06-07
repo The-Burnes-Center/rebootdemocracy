@@ -20,7 +20,7 @@
         <FilterDropdown
           :options="tagOptions"
           :defaultSelected="selectedTag || 'All Topics'"
-          label="Filter by:"
+          label="Filter by Topics:"
           @option-selected="handleTagFilter"
         />
           <FilterDropdown

@@ -128,6 +128,7 @@
   .filter-container {
     width: 100%;
     margin-left: 0;
+    flex-direction: column;
   }
   
   .tab-button {
