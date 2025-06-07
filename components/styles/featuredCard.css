@@ -75,18 +75,11 @@
 .featured-card__title {
   font-size: 1.75rem;
   font-weight: 800;
-  color: #003366 !important;
+  color: #ffffff !important;
   line-height: 1.25;
   margin-bottom: 12px;
   letter-spacing: -0.02em;
   transition: color 0.3s ease;
-}
-
-.featured-card:hover .featured-card__title {
-  background: linear-gradient(135deg,#315895 0%, #315895 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* Footer section */
@@ -115,13 +108,13 @@
 .featured-card__author-name {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #2d3748;
+  color: #FFFFFF !important;
   margin: 0;
 }
 
 .featured-card__date {
   font-size: 0.75rem;
-  color: #a0aec0;
+  color: #FFFFFF !important;
   margin: 0;
 }
 

@@ -38,6 +38,7 @@
           size="base"
           weight="medium"
           fontFamily="inter"
+          color="text-primary-light"
           class="featured-card__description clamp-5"
         >
           {{ description }}
