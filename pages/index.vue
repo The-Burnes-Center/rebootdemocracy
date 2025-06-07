@@ -84,19 +84,13 @@
           />
         </div>
 
-        <div class="collaborators-fixed-grid">
-          <div
-            class="collaborators-row"
-            v-for="(row, rowIndex) in collaborators"
-            :key="`row-${rowIndex}`"
-          >
-            <AuthorBadge
-              v-for="author in row"
-              :key="author.name"
-              v-bind="author"
-            />
-          </div>
-        </div>
+      <div class="collaborators-fixed-grid">
+        <AuthorBadge
+          v-for="author in flattenedCollaborators"
+          :key="author.name"
+          v-bind="author"
+        />
+      </div>
       </div>
 
       <!-- BLOG POSTS WITH FILTERS -->
@@ -246,6 +240,10 @@ const { data: latestWeeklyNews } = await useAsyncData(
   "weekly-news",
   fetchLatestWeeklyNews
 );
+
+const flattenedCollaborators = computed(() => {
+  return collaborators.flat(); 
+});
 
 function getTag(item: BlogPost | NewsItem): string {
   if ('Tags' in item && Array.isArray(item.Tags) && item.Tags.length > 0) {
