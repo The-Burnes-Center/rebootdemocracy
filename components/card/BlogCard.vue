@@ -30,17 +30,17 @@
       {{ title }}
     </Text>
 
-<!-- Blog card excerpt -->
-<Text
-  as="p"
-  size="base"
-  weight="medium"
-  color="text-primary"
-  lineHeight="normal"
-  class="blogcard-excerpt"
->
-  {{ excerpt }}
-</Text>
+    <!-- Blog card excerpt -->
+    <Text
+      as="p"
+      size="base"
+      weight="medium"
+      color="text-primary"
+      lineHeight="normal"
+      class="blogcard-excerpt"
+    >
+      {{ excerpt }}
+    </Text>
 
     <!-- Blog card meta -->
     <Text

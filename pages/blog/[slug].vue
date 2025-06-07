@@ -54,7 +54,7 @@
             <!-- Blog title -->
             <TitleText
               :level="'h1'"
-              size="6xl"
+              size="5xl"
               weight="bold"
               class="blog-title"
               fontFamily="inria"
@@ -105,9 +105,9 @@
 
               <!-- Publication info (date and author) -->
   <div class="publication-info">
-    <Text size="lg" weight="normal">
+    <Text size="base" weight="normal">
       Published on
-      <Text as="span" size="lg" weight="bold">
+      <Text as="span" size="base" weight="bold">
         {{ formatDate(blog.date) }}
       </Text>
     </Text>
