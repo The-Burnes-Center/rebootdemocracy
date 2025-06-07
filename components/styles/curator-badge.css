@@ -19,23 +19,6 @@
   padding: 0 2rem;
 }
 
-/* Blog Collaborators Title */
-.new-blog-collab {
-  color: #003366;
-  position: relative;
-  padding-bottom: 0.5rem;
-}
-
-.new-blog-collab::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 60px;
-  height: 4px;
-  background: linear-gradient(90deg, #003366 0%, #6182a2 100%);
-  border-radius: 2px;
-}
 
 /* Meet Our Team Button */
 .meet-our-team-button {

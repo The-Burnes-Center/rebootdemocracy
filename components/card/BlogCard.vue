@@ -24,6 +24,7 @@
       size="xl"
       weight="extrabold"
       fontFamily="inria"
+      color="text-dark"
       lineHeight="relaxed"
       class="blogcard-title"
     >

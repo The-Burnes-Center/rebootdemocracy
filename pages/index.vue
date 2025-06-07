@@ -61,7 +61,8 @@
           weight="bold"
           fontFamily="inria"
           lineHeight="extra-loose"
-          class="textclass new-blog-collab"
+          color="text-dark"
+          class="new-blog-collab"
         >
           Blog Collaborators
         </Text>
@@ -80,7 +81,6 @@
             name="Beth Simone Noveck"
             title="Director at Burnes Center and the Govlab"
             imageUrl="/images/Beth_Simone_Noveck.png"
-            moreText="More incredible things done in their career"
           />
         </div>
 

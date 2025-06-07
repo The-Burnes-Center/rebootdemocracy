@@ -440,7 +440,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 }
 
 h2.red-subtitle {
-  color: var(--blue-rich);
+  color: #003366;
   font-weight: 500;
   text-transform: uppercase;
   line-height: 0.1em;
@@ -476,7 +476,7 @@ h2.red-subtitle span:after {
 
 /* Event Information */
 .event-information {
-  background-color: var(--blue-rich);
+  background-color: #003366;
   color: #ffffff;
   padding: 4rem 4rem;
   width: 100%;

@@ -66,6 +66,7 @@ const fontWeight = {
 // Define the default colors for texts
 const textColors = {
   "text-primary": "#000",
+  "text-dark": "#003366",
   "text-primary-light": "#FFFFFF",
   "text-secondary": "#0D63EB",
   "text-tertiary": "#062C51",

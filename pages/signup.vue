@@ -167,13 +167,13 @@ export default {
   font-weight: 700;
   margin-bottom: 2rem;
   text-align: center;
-  color: var(--blue-rich);
+  color: #003366;
 }
 
 .indicates-required {
   font-size: 0.85rem;
   margin-bottom: 1.5rem;
-  color: var(--dark-grey);
+  color: #003366;
   font-family: var(--font-inria);
 }
 
@@ -188,7 +188,7 @@ export default {
   font-weight: 600;
   font-size: 1rem;
   font-family: var(--font-inria);
-  color: var(--blue-rich);
+  color: #003366;
 }
 
 .mc-field-group input[type="text"],
@@ -220,7 +220,7 @@ export default {
   justify-content: center;
   align-items: center;
   font-family: var(--font-inter);
-  color: #000000;
+  color: #003366;
   background: var(--yellow-action);
   border: 1px solid #000000;
   border-radius: 6px;
