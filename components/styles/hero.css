@@ -48,19 +48,6 @@
   color: #ffffff !important;
 }
 
-.hero__first-partner img {
-  padding: 1px;
-  width: 135px;
-  height: auto;
-  object-fit: contain;
-}
-
-.hero__second-partner img {
-  padding-top: 0.5rem;
-  width: 130px;
-  height: auto;
-  object-fit: contain;
-}
 /* Tablet Media Query */
 @media (max-width: 768px) {
   .hero__container {

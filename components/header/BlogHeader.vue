@@ -1,13 +1,13 @@
 <template>
   <header class="header-content__section">
     <div class="header__logo">
-      <div class="hero__partner hero__first-partner">
+      <div class="hero__first-partner">
         <img
           src="/images/burnes-branding-v4-bunes-center-logo-blue.svg"
           alt="Burnes Center for Social Change"
         />
       </div>
-      <div class="hero__partner hero__second-partner">
+      <div class="hero__second-partner">
         <img src="/images/the-govlab-logo.svg" alt="The GovLab" />
       </div>
     </div>

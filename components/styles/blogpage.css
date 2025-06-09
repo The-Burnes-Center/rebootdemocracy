@@ -330,6 +330,7 @@ p a {
   }
   .blog-banner-image img.blog-image {
     height: 15rem;
+    object-fit: fill;
   }
 
   .category-tag {

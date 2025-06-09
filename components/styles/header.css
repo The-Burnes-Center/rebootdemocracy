@@ -2,6 +2,7 @@
 .header-content__section {
   padding: 0.9rem 2rem;
   display: flex;
+  z-index: 1200;
   justify-content: space-between;
   align-items: center;
   position: relative;
@@ -9,6 +10,19 @@
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+}
+.hero__first-partner img {
+  padding: 1px;
+  width: 135px;
+  height: auto;
+  object-fit: contain;
+}
+
+.hero__second-partner img {
+  padding-top: 0.5rem;
+  width: 130px;
+  height: auto;
+  object-fit: contain;
 }
 
 /* Sticky header only for desktop */
@@ -29,7 +43,7 @@
 
 /* Create space for fixed header */
 .header-spacer {
-  height: 50px; 
+  height: 50px;
 }
 
 /* Logo Styles */
@@ -39,32 +53,11 @@
   gap: 0.8rem;
 }
 
-.hero__partner {
-  display: block;
-  text-decoration: none;
-  transition: transform 0.3s ease, filter 0.3s ease;
-}
-
-.hero__partner:hover {
-  cursor: pointer;
-  transform: translateY(-2px);
-  filter: brightness(1.1);
-}
-
-.hero__partner img {
-  display: block;
-  transition: opacity 0.3s ease;
-}
-
-.hero__partner:hover img {
-  opacity: 0.9;
-}
-
 /* Logo Link Focus Styles */
 .header__logo a:focus-visible {
-  outline: 2px solid #4a6b8a;
+  outline: 0.5px solid #4a6b8a;
   outline-offset: 4px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 /* Search Container Styles */
@@ -91,7 +84,7 @@
 /* Algolia Search Box Styles */
 .search-container :deep(.ais-SearchBox-input) {
   padding: 8px 12px;
-  border: 1px solid #99b8d1;
+  border: 1px solid #000;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.9);
   transition: all 0.3s ease;
@@ -134,120 +127,13 @@
   transition: opacity 0.3s ease;
 }
 
-/* Navigation Menu Hover Effects */
-nav :deep(.header-menu__item-wrapper) {
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-nav :deep(.header-menu__item-wrapper:hover) {
-  transform: translateY(-1px);
-}
-
-nav :deep(.header-menu__item) {
-  position: relative;
-  padding: 0.5rem 1rem;
-  transition: color 0.3s ease;
-}
-
-nav :deep(.header-menu__item::after) {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: #4a6b8a;
-  transform: translateX(-50%);
-  transition: width 0.3s ease;
-}
-
-nav :deep(.header-menu__item:hover::after) {
-  width: 80%;
-}
-
-nav :deep(.header-menu__item:hover) {
-  color: #2c4a68;
-}
-
-/* Dropdown Menu Enhancements */
-nav :deep(.header-dropdown__container) {
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(153, 184, 209, 0.3);
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(10px);
-}
-
-nav :deep(.header-dropdown__item) {
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-nav :deep(.header-dropdown__item::before) {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 3px;
-  background: #6182a2;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-}
-
-nav :deep(.header-dropdown__item:hover) {
-  background: rgba(97, 130, 162, 0.08);
-  padding-left: 1.5rem;
-}
-
-nav :deep(.header-dropdown__item:hover::before) {
-  transform: translateX(0);
-}
-
-/* Button Hover Effects */
-.btn-header {
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.btn-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-  z-index: -1;
-}
-
-.btn-header:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-header:hover::before {
-  left: 100%;
-}
-
-.btn-header:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
 /* Mobile Menu Toggle Animation */
 .mobile-menu-toggle {
   cursor: pointer;
-  z-index: 1001;
+  z-index: 10000; 
   padding: 0.5rem;
   transition: transform 0.3s ease;
+  position: relative;
 }
 
 .mobile-menu-toggle:hover {
@@ -266,25 +152,34 @@ nav :deep(.header-dropdown__item:hover::before) {
 @media (max-width: 1050px) {
   .header-content__section {
     padding: 0.9rem 1.5rem;
+    position: relative;
+    z-index: 10001;
   }
-  
+
   .header-spacer {
-    height: 0px; /* Smaller height for mobile */
+    height: 0px;
   }
-  
-  nav {
+
+ nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background: white;
-    z-index: 1000;
+    z-index: 9999;
     padding-top: 60px;
     overflow-y: auto;
     animation: slideIn 0.3s ease;
+    width: 100%;
+    height: 100vh;
   }
-  
+
+    .mobile-menu-toggle {
+    position: relative;
+    z-index: 10002; 
+  }
+
   @keyframes slideIn {
     from {
       transform: translateX(-100%);
@@ -293,36 +188,7 @@ nav :deep(.header-dropdown__item:hover::before) {
       transform: translateX(0);
     }
   }
-  
-  .mobile-menu :deep(.menu__section) {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    align-items: flex-start;
-    padding: 1rem;
-  }
-  
-  .mobile-menu :deep(.header-menu__item-wrapper) {
-    width: 100%;
-    border-bottom: 1px solid #eee;
-    padding: 1rem 2rem;
-    transition: all 0.3s ease;
-  }
-  
-  .mobile-menu :deep(.header-menu__item-wrapper:active) {
-    background: rgba(97, 130, 162, 0.1);
-  }
-  
-  .mobile-menu :deep(.header-dropdown__container) {
-    position: relative;
-    box-shadow: none;
-    margin-left: 1rem;
-    margin-top: 0.5rem;
-    background: rgba(248, 250, 252, 0.8);
-    border-left: 3px solid #6182a2;
-    animation: fadeIn 0.3s ease;
-  }
-  
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -333,19 +199,17 @@ nav :deep(.header-dropdown__item:hover::before) {
       transform: translateY(0);
     }
   }
-  
+
   .btn-header {
     display: none;
   }
 }
 
-/* Additional Enhancements for Better UX */
-
 /* Smooth focus states */
 *:focus-visible {
-  outline: 2px solid #4a6b8a;
+  outline: 0.5px solid #4a6b8a;
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 /* Link transitions */
@@ -357,19 +221,6 @@ a {
 .header-content__section * {
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Add micro-interaction for dropdown arrows */
-nav :deep(.header-menu__item-wrapper:has(.header-dropdown__container) .header-menu__item::after) {
-  content: '▼';
-  font-size: 0.7em;
-  margin-left: 0.5rem;
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-nav :deep(.header-menu__item-wrapper:hover:has(.header-dropdown__container) .header-menu__item::after) {
-  transform: rotate(180deg);
 }
 
 /* Ensure proper spacing when both search and button are present */

@@ -30,7 +30,7 @@
       </template>
 
       <!-- Dropdown logic for items with children -->
-      <div v-else class="header-menu__item header-menu__dropdown">
+      <div v-else class="header-menu__item">
         <span
           class="header-menu__label"
           :class="{

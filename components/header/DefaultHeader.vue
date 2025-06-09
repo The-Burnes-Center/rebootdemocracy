@@ -1,13 +1,13 @@
 <template>
   <header class="header-content__section">
    <div class="header__logo">
-  <a href="https://burnes.northeastern.edu/" class="hero__partner hero__first-partner">
+  <a href="https://burnes.northeastern.edu/" class="hero__first-partner">
     <img
       src="/images/burnes-branding-v4-bunes-center-logo-blue.svg"
       alt="Burnes Center for Social Change"
     />
   </a>
-  <a href="https://thegovlab.org/"  class="hero__partner hero__second-partner">
+  <a href="https://thegovlab.org/"  class="hero__second-partner">
     <img src="/images/the-govlab-logo.svg" alt="The GovLab" />
   </a>
 </div>
