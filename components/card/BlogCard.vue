@@ -137,6 +137,7 @@ const formattedDate = props.date
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+   min-height: calc(1.4em * 3);
 }
 
 .blogcard-excerpt {
@@ -149,10 +150,14 @@ const formattedDate = props.date
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: calc(1.5em * 4);
 }
 
 .blogcard-meta {
   font-size: 0.875rem;
   color: #777;
+  padding-top:16px;
+  border-top: 1px solid #e5e7eb;
 }
+
 </style>
