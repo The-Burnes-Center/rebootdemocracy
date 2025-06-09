@@ -70,7 +70,7 @@
           class="base__button base__button--secondary"
           @click="router.push('/about#team-grid')"
         >
-          <span class="base__btn-slot"> Meet Our Team → </span>
+          <span class="base__btn-slot"> Meet Our Team </span>
         </button>
       </div>
 
