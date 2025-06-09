@@ -59,8 +59,8 @@ bun run build
 Locally preview production build:
 
 ```bash
-# npm
-npm run preview
+# npm to run the preview server
+npm run preview 
 
 # pnpm
 pnpm preview
