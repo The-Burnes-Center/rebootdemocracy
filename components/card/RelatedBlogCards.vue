@@ -21,7 +21,7 @@
           :variant="'default'"
           :hoverable="true"
           class="mobile-view"
-          @click="router.push(`/blog/${post.slug}`)"
+          @click="navigateTo(`/blog/${post.slug}`)"
         >
           <section class="postcard__container">
             <div class="postcard__content">
