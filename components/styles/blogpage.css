@@ -15,15 +15,6 @@
   );
 }
 
-.audio-version p em {
-  font-family: var(--font-inter);
-    font-size: 18px;
-    font-style: italic;
-    font-weight: 400;
-    line-height: 30px;
-    padding: 1rem 1rem;
-}
-
 .blog-banner-image {
   margin: 2rem 0;
   text-align: center;
@@ -337,7 +328,6 @@ p a {
     font-size: 0.7rem;
     padding: 0.2rem 0.4rem;
   }
-
 }
 
 @media (max-width: 1150px) and (min-width: 769px) {
@@ -450,11 +440,4 @@ p a {
   .blogcard-grid-wrapper {
     grid-template-columns: 1fr;
   }
-}
-
-@media (max-width: 400px) {
-
-.audio-version p em {
-    padding: 1rem 0rem;
-}
 }

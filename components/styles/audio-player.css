@@ -5,6 +5,11 @@
   justify-content: center;
   margin-top:1rem;
 }
+
+.audio-version p em {
+  font-family: var(--font-inria);
+}
+
 .audio-player {
   display: flex;
   width: 852px;

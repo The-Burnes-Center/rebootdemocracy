@@ -48,7 +48,7 @@
       </svg>
     </div>
 
-    <nav v-if="!isMobile || (isMobile && mobileMenuOpen)">
+    <nav v-if="!isMobile || (isMobile && mobileMenuOpen)" :class="{ 'nav-mobile-open': isMobile && mobileMenuOpen }">
       <HeaderMenu
         :items="menuItems"
         :class="{ 'mobile-menu': isMobile }"
