@@ -47,17 +47,17 @@
     <Text
       v-if="date"
       as="p"
-      size="sm"
+      size="xs"
       fontStyle="italic"
       class="blogcard-meta"
     >
       Published on
-    <Text as="span" size="sm" weight="bold" fontStyle="italic">
+    <Text as="span" size="xs" weight="bold" fontStyle="italic">
       {{ formattedDate }}
     </Text>
     <template v-if="author && author !== 'Reboot Democracy Team'">
       by
-      <Text as="span" size="sm" weight="bold" fontStyle="italic">
+      <Text as="span" size="xs" weight="bold" fontStyle="italic">
         {{ author }}
       </Text>
     </template>
