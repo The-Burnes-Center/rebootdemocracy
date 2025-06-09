@@ -31,7 +31,7 @@ npm run dev
 # pnpm
 pnpm dev
 
-# yarn
+# yarn to start the development server
 yarn dev
 
 # bun
