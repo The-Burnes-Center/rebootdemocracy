@@ -53,13 +53,13 @@
   --bg-opacity: 1;           
   --text-color: #003366;
 }
+.mobile-fullwidth {
+  width: 100% !important;
+}
+
 .base__button--secondary:hover{
    --text-color: #0d63eb;
    --border-color: #0d63eb;
-}
-
-.mobile-fullwidth {
-  width: 100% !important;
 }
 
 @media (max-width: 768px) {
