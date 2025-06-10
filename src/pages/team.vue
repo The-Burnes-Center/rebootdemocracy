@@ -19,8 +19,8 @@ export default {
   data() {
     return {
       teamData:[],
-      directus: new Directus('https://directus.theburnescenter.org/'),
-      url:'https://directus.theburnescenter.org/',
+      directus: new Directus('https://burnes-center.directus.app/'),
+      url:'https://burnes-center.directus.app/',
       path:this.$route.fullPath,
     }
   },

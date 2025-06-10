@@ -42,7 +42,7 @@ export default {
       seriesData: [],
       pageslug: this.$route.query,
       alleventsData: [],
-      directus: new Directus("https://directus.theburnescenter.org/"),
+      directus: new Directus("https://burnes-center.directus.app/"),
       path: this.$route.fullPath,
     };
   },

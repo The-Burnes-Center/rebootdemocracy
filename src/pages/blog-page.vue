@@ -54,7 +54,7 @@ export default {
       playpause:true,
       showmodal: false,
       weeklyNewsitem: [],
-      directus: new Directus('https://directus.theburnescenter.org/'),
+      directus: new Directus('https://burnes-center.directus.app/'),
       path:this.$route.fullPath,
       slideautoplay:1,
       slidetransition:7000,
@@ -154,7 +154,7 @@ console.log(nowOffset)
         filter: {
         _and: [
           { date: { _lte: nowOffset } },
-          { status: { _eq: 'published' } }
+          // { status: { _eq: 'published' } }
         ]
       },
       fields: [
@@ -167,6 +167,7 @@ console.log(nowOffset)
     const blogData = blogResult.data || [];
     console.log(blogData);
     const weeklyNewsData = weeklyNewsResult.data || [];
+    console.log("weeklyNewsData",weeklyNewsData)
 
     // Combine both arrays and sort chronologically by date (descending)
     const combinedData = [...blogData, ...weeklyNewsData].sort((a, b) => 
@@ -409,7 +410,7 @@ console.log(nowOffset)
 As researchers we want to understand how best to “do democracy” in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
-        { property: 'og:image', content: "https://directus.theburnescenter.org/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
+        { property: 'og:image', content: "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
         { property: 'twitter:title', content: "RebootDemocracy.AI"},
         { property: 'twitter:description', content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
 
@@ -420,7 +421,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 As researchers we want to understand how best to “do democracy” in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
-        { property: 'twitter:image', content: "https://directus.theburnescenter.org/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
+        { property: 'twitter:image', content: "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
         { property: 'twitter:card', content: "summary_large_image" },
       ],
     })

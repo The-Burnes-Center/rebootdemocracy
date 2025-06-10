@@ -41,7 +41,7 @@ export default {
       workshopData: [],
       playpause: true,
       showmodal: false,
-      directus: new Directus('https://directus.theburnescenter.org/'),
+      directus: new Directus('https://burnes-center.directus.app/'),
       path: this?.$route?.fullPath ?? '',
       slideautoplay: 1,
       slidetransition: 7000,
@@ -297,7 +297,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           },
           {
             property: 'og:image',
-            content: "https://directus.theburnescenter.org/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
+            content: "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
           },
           { property: 'twitter:title', content: "RebootDemocracy.AI" },
           {
@@ -314,7 +314,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
           },
           {
             property: 'twitter:image',
-            content: "https://directus.theburnescenter.org/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
+            content: "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"
           },
           { property: 'twitter:card', content: "summary_large_image" },
         ],

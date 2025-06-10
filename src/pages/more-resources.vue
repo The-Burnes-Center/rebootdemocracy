@@ -31,7 +31,7 @@ export default {
       articleData: [],
       indexData: [],
       selectedType: 'All',
-      directus: new Directus('https://directus.theburnescenter.org/'),
+      directus: new Directus('https://burnes-center.directus.app/'),
       path:this.$route.fullPath,
     }
   },
