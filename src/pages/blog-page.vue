@@ -154,7 +154,7 @@ console.log(nowOffset)
         filter: {
         _and: [
           { date: { _lte: nowOffset } },
-          // { status: { _eq: 'published' } }
+          { status: { _eq: 'published' } }
         ]
       },
       fields: [
