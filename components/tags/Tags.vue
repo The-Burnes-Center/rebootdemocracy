@@ -37,7 +37,7 @@ interface Tag {
   count?: number;
 }
 
-const directusUrl = "https://directus.theburnescenter.org";
+const directusUrl = "https://burnes-center.directus.app/";
 const tags = ref<Tag[]>([]);
 const rawTagsResponse = ref(null);
 const isLoading = ref(true);

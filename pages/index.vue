@@ -84,13 +84,13 @@
           />
         </div>
 
-      <div class="collaborators-fixed-grid">
-        <AuthorBadge
-          v-for="author in flattenedCollaborators"
-          :key="author.name"
-          v-bind="author"
-        />
-      </div>
+        <div class="collaborators-fixed-grid">
+          <AuthorBadge
+            v-for="author in flattenedCollaborators"
+            :key="author.name"
+            v-bind="author"
+          />
+        </div>
       </div>
 
       <!-- BLOG POSTS WITH FILTERS -->
@@ -101,7 +101,7 @@
         :selectedTag="selectedTag"
         @tab-changed="handleTabChange"
         @tag-filter="handleTagFilter"
-         @author-filter="handleAuthorFilter"
+        @author-filter="handleAuthorFilter"
       >
         <template #latest-posts>
           <div
@@ -132,7 +132,7 @@
                     size="xs"
                     weight="bold"
                     transform="uppercase"
-                    fontFamily="inter"  
+                    fontFamily="inter"
                     class="featured-card__tag"
                     :style="{ color: index % 2 === 0 ? '#003366' : '#2F4F4F' }"
                   >
@@ -194,9 +194,7 @@
                 class="base__button base__button--secondary"
                 @click="navigateToAllPosts"
               >
-                <span class="base__btn-slot">
-                  View All Posts
-                </span>
+                <span class="base__btn-slot"> View All Posts </span>
               </button>
             </div>
           </div>
@@ -219,7 +217,7 @@ const selectedTag = ref("All Topics");
 const selectedAuthor = ref("All Authors");
 const displayPosts = ref<BlogPost[]>([]);
 const isLoadingState = ref(false);
-const DIRECTUS_URL = "https://directus.theburnescenter.org";
+const DIRECTUS_URL = "https://burnes-center.directus.app/";
 
 // Keep track of dynamically fetched posts by author
 const authorPostsCache = ref<Map<string, BlogPost[]>>(new Map());
@@ -247,19 +245,25 @@ const { data: authorListData } = await useAsyncData(
     try {
       // Fetch all blog posts to extract complete author list
       const allPosts = await fetchAllBlogPosts();
-      
+
       // Extract authors with counts
       const authorCounts = new Map<string, number>();
-      
+
       allPosts.forEach((post) => {
         if ("authors" in post && post.authors) {
           const authorName = getAuthorName(post);
-          if (authorName !== "Unknown Author" && authorName !== "Reboot Democracy Team") {
-            authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+          if (
+            authorName !== "Unknown Author" &&
+            authorName !== "Reboot Democracy Team"
+          ) {
+            authorCounts.set(
+              authorName,
+              (authorCounts.get(authorName) || 0) + 1
+            );
           }
         }
       });
-      
+
       // Return sorted author names
       return Array.from(authorCounts.keys()).sort();
     } catch (error) {
@@ -275,18 +279,25 @@ const allAuthors = computed(() => {
 });
 
 const flattenedCollaborators = computed(() => {
-  return collaborators.flat(); 
+  return collaborators.flat();
 });
 
-function getTag(item: BlogPost | NewsItem): string {
-  if ('Tags' in item && Array.isArray(item.Tags) && item.Tags.length > 0) {
+function getTag(item: any): string {
+  if (item.Tags && Array.isArray(item.Tags) && item.Tags.length > 0) {
     return item.Tags[0];
   }
-  return item.category || 'Blog';
+  if (item.category) {
+    return item.category;
+  }
+  if (item.type === "news") {
+    return "News that caught our eye";
+  }
+  return "Blog";
 }
-
 const featuredPost = computed(() => latestCombinedPosts.value?.[0] || null);
-const latestThreePosts = computed(() => latestCombinedPosts.value || []);
+const latestThreePosts = computed(
+  () => latestCombinedPosts.value?.slice(1, 4) || []
+);
 const tagOptions = computed(() => ["All Topics", ...(allTags.value || [])]);
 const isLoading = computed(() => isLoadingState.value);
 const authorOptions = computed(() => ["All Authors", ...allAuthors.value]);
@@ -371,20 +382,20 @@ function formatDate(dateValue: Date | string): string {
 
 function getImageUrl(image: any): string {
   if (!image?.id) return "";
-  return `${DIRECTUS_URL}/assets/${image.id}?width=800`;
+  return `${DIRECTUS_URL}assets/${image.id}?width=800`;
 }
 
-function getAuthorName(post: BlogPost | NewsItem): string {
-  if ("authors" in post && post.authors?.length) {
+function getAuthorName(post: any): string {
+  // Handle blog posts with authors array
+  if (post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
     const authors = post.authors
-      .map((author) => {
+      .map((author: any) => {
         if (author.team_id) {
           return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
         }
         return null;
       })
       .filter(Boolean);
-
     if (authors.length === 1) return authors[0] || "Reboot Democracy Team";
     if (authors.length > 1) {
       const lastAuthor = authors.pop();
@@ -392,30 +403,41 @@ function getAuthorName(post: BlogPost | NewsItem): string {
     }
   }
 
-  if ("author" in post && post.author) {
+  // Handle weekly news with single author string
+  if (post.authors && typeof post.authors === "string") {
+    return post.authors;
+  }
+
+  // Handle legacy author field
+  if (post.author) {
     return post.author;
   }
 
   return "Reboot Democracy Team";
 }
 
-function navigateToBlogPost(post: BlogPost | NewsItem): void {
-  if ("slug" in post && post.slug) router.push(`/blog/${post.slug}`);
-  else if ("url" in post && post.url) window.location.href = post.url;
+function navigateToBlogPost(post: any): void {
+  if (post.type === "blog" && post.slug) {
+    router.push(`/blog/${post.slug}`);
+  } else if (post.type === "news" && post.edition) {
+    // Handle weekly news navigation
+    const edition = String(post.edition).replace(/\D/g, "");
+    router.push(`/newsthatcaughtoureye/${edition}`);
+  }
 }
 
 // UPDATED: Include author in navigation query
 function navigateToAllPosts(): void {
   const query: Record<string, string> = {};
-  
+
   if (selectedTag.value !== "All Topics") {
     query.category = encodeURIComponent(selectedTag.value);
   }
-  
+
   if (selectedAuthor.value !== "All Authors") {
     query.author = encodeURIComponent(selectedAuthor.value);
   }
-  
+
   router.push({ path: "/blog", query });
 }
 
@@ -433,14 +455,14 @@ async function fetchPostsByAuthor(authorName: string): Promise<BlogPost[]> {
   try {
     // Fetch all posts and filter by author
     const allPosts = await fetchAllBlogPosts();
-    const authorPosts = allPosts.filter(post => {
+    const authorPosts = allPosts.filter((post) => {
       const postAuthor = getAuthorName(post);
       return postAuthor === authorName;
     });
-    
+
     // Cache the results
     authorPostsCache.value.set(authorName, authorPosts);
-    
+
     return authorPosts;
   } catch (error) {
     console.error(`Error fetching posts for author ${authorName}:`, error);
@@ -459,15 +481,21 @@ async function applyFilters(): Promise<void> {
     if (selectedAuthor.value !== "All Authors") {
       // Fetch posts for the selected author
       const authorPosts = await fetchPostsByAuthor(selectedAuthor.value);
-      
+
       // If also filtering by tag, filter the author's posts
       if (selectedTag.value !== "All Topics") {
-        filteredPosts = authorPosts.filter((post) => post.Tags?.includes(selectedTag.value));
-        
+        filteredPosts = authorPosts.filter((post) =>
+          post.Tags?.includes(selectedTag.value)
+        );
+
         // Also check news items if filtering by tag
         const newsItems = await fetchWeeklyNewsItems();
         const filteredNews = newsItems
-          .filter((n) => n.category === selectedTag.value && getAuthorName(n) === selectedAuthor.value)
+          .filter(
+            (n) =>
+              n.category === selectedTag.value &&
+              getAuthorName(n) === selectedAuthor.value
+          )
           .map(
             (n) =>
               ({
@@ -476,7 +504,7 @@ async function applyFilters(): Promise<void> {
                 Tags: n.category ? [n.category] : [],
               } as unknown as BlogPost)
           );
-        
+
         filteredPosts = [...filteredPosts, ...filteredNews];
       } else {
         filteredPosts = authorPosts;
@@ -488,7 +516,9 @@ async function applyFilters(): Promise<void> {
         fetchWeeklyNewsItems(),
       ]);
 
-      const filteredBlogs = blogs.filter((post) => post.Tags?.includes(selectedTag.value));
+      const filteredBlogs = blogs.filter((post) =>
+        post.Tags?.includes(selectedTag.value)
+      );
       const filteredNews = newsItems
         .filter((n) => n.category === selectedTag.value)
         .map(
@@ -508,7 +538,9 @@ async function applyFilters(): Promise<void> {
     }
 
     // Sort by date
-    filteredPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    filteredPosts.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
 
     displayPosts.value = filteredPosts.slice(0, 20);
   } catch (error) {

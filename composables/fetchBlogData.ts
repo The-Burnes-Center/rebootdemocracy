@@ -1,9 +1,9 @@
 // blogService.ts
 import { createDirectus, rest, readItems } from '@directus/sdk';
-import type { BlogPost, Event, NewsItem } from '@/types/index.ts';
+import type { BlogPost, Event, NewsItem, WeeklyNews } from '@/types/index.ts';
 import { fetchWeeklyNewsItems } from './fetchWeeklyNews';
 
-const API_URL = 'https://directus.theburnescenter.org';
+const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
@@ -74,38 +74,6 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
     return [];
   }
 }
-
-// export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
-//   try {
-//     const filter = {
-//       _and: [
-//         { featuredBlog: { _eq: true } },
-//         { status: { _eq: 'published' } },
-//         { date: { _lte: '$NOW(-5 hours)' } }
-//       ]
-//     };
-
-//     const response = await directus.request(
-//       readItems('reboot_democracy_blog', {
-//         limit: 1,
-//         sort: ['-date'],
-//         fields: [
-//           '*.*',
-//           'authors.team_id.*',
-//           'authors.team_id.Headshot.*',
-//           'image.*'
-//         ],
-//         filter
-//       })
-//     );
-
-//     const blogs = response as BlogPost[];
-//     return blogs.length ? blogs[0] : null;
-//   } catch (error) {
-//     console.error('Error fetching featured blog:', error);
-//     return null;
-//   }
-// }
 
 export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
   try {
@@ -217,62 +185,74 @@ export async function fetchAllSlugs(): Promise<string[]> {
   }
 }
 
-export async function fetchLatestCombinedPosts(): Promise<(BlogPost | NewsItem)[]> {
+export async function fetchLatestCombinedPosts(): Promise<any[]> {
   try {
-    const blogPosts = await directus.request(
-      readItems('reboot_democracy_blog', {
-        limit: 5, 
+    // Fetch both blog and weekly news in parallel
+    const [blogResult, newsResult] = await Promise.all([
+      directus.request(readItems('reboot_democracy_blog', {
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
+        ],
+        limit: 6,
         sort: ['-date'],
         filter: {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _lte: '$NOW(-5 hours)' } }
           ]
-        },
-        fields: [
-          '*.*',
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*',
-          'image.*'
-        ]
-      })
-    );
+        }
+      })),
+      directus.request(readItems('reboot_democracy_weekly_news', {
+        fields: ['*.*'],
+        limit: 6,
+        sort: ['-date'],
+        filter: {
+          status: { _eq: 'published' },
+          date: { _nnull: true }
+        }
+      }))
+    ]);
 
-    // Step 2: Fetch all weekly news items
-    const newsItems = await fetchWeeklyNewsItems();
-
-    // Step 3: Add type identifier to distinguish between blog posts and news items
-    const blogPostsWithType = (blogPosts as BlogPost[]).map(post => ({
-      ...post,
-      _type: 'blog' as const
+    // Before combining, tag each item with type
+    const blogWithType = (blogResult || []).map(item => ({
+      type: 'blog',
+      id: item.id,
+      title: item.title,
+      excerpt: item.excerpt,
+      authors: item.authors,
+      date: item.date,
+      slug: item.slug,
+      image: item.image,
+      status: item.status,
+      Tags: item.Tags,
+      content: item.content,
+      // Add any other blog-specific fields you need
     }));
 
-    const newsItemsWithType = newsItems.map(item => ({
-      ...item,
-      _type: 'news' as const
+    const newsWithType = (newsResult || []).map(item => ({
+      type: 'news',
+      id: item.id,
+      title: item.title,
+      excerpt: item.summary, 
+      authors: item.author, 
+      date: item.date,
+      edition: item.edition,
+      slug: null, 
+      image: item.image, 
+      status: item.status,
+      Tags: ['News that caught our eye'], 
+      category: 'News that caught our eye'
     }));
 
-    // Step 4: Merge all items
-    const allItems = [...blogPostsWithType, ...newsItemsWithType];
+    // Combine and sort by date descending
+    const combined = [...blogWithType, ...newsWithType]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 6);
 
-    // Step 5: Sort with weekly news priority
-    allItems.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      
-      // If dates are different, sort by date (newest first)
-      if (dateA !== dateB) {
-        return dateB - dateA;
-      }
-      
-      // If dates are the same, prioritize weekly news
-      if (a._type === 'news' && b._type === 'blog') return -1;
-      if (a._type === 'blog' && b._type === 'news') return 1;
-      
-      return 0;
-    });
-
-    return allItems.slice(0, 3);
+    return combined;
   } catch (error) {
     console.error('Error fetching combined latest posts:', error);
     return [];

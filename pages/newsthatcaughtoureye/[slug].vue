@@ -163,7 +163,7 @@ interface WeeklyNewsPost {
 }
 
 // Directus
-const directus = createDirectus("https://directus.theburnescenter.org").with(
+const directus = createDirectus("https://burnes-center.directus.app/").with(
   rest()
 );
 const route = useRoute();

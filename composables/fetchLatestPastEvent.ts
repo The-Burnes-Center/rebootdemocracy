@@ -2,7 +2,7 @@
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import type { Event } from '@/types/Event';
 
-const API_URL = 'https://directus.theburnescenter.org';
+const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchLatestPastEvent(seriesTitle?: string): Promise<Event | null> {

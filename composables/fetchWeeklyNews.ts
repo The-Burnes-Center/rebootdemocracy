@@ -1,17 +1,21 @@
 // blogService.ts
 import { createDirectus, rest, readItems } from '@directus/sdk';
-import type { NewsItem, WeeklyNews } from '@/types/index.ts';
+import type { WeeklyNews } from '@/types/index.ts';
 
-const API_URL = 'https://directus.theburnescenter.org';
+const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
   try {
     const response = await directus.request<WeeklyNews[]>(
       readItems('reboot_democracy_weekly_news', {
-        fields: ['id', 'edition', 'title', 'summary', 'author', 'status'],
+        fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
         filter: {
-          status: { _eq: 'published' }
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _nnull: true } },
+            { title: { _contains: 'News that caught our eye' } }
+          ]
         },
         sort: ['-id'],
         limit: 1
@@ -21,7 +25,7 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
     if (response && response.length > 0) {
       return response[0];
     } else {
-      console.log('No weekly news found');
+      console.log('No "News that caught our eye" found');
       return null;
     }
   } catch (error) {
@@ -40,15 +44,29 @@ export async function fetchLatestWeeklyNewsId(): Promise<number | null> {
   }
 }
 
-export async function fetchWeeklyNewsItems(): Promise<NewsItem[]> {
+// UPDATED: Fetches only "News that caught our eye" entries
+export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
   try {
     const weeklyNewsEntries = await directus.request(
       readItems('reboot_democracy_weekly_news', {
         limit: -1,
-        sort: ['-id'],
-        fields: ['id', 'items.reboot_democracy_weekly_news_items_id.*'],
+        sort: ['-date'],
+        fields: [
+          'id',
+          'edition', 
+          'title',
+          'summary',
+          'author',
+          'date',
+          'status',
+          'image.*' 
+        ],
         filter: {
-          status: { _eq: 'published' }
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _nnull: true } },
+            { title: { _contains: 'News that caught our eye' } }
+          ]
         }
       })
     );
@@ -57,30 +75,34 @@ export async function fetchWeeklyNewsItems(): Promise<NewsItem[]> {
       return [];
     }
 
-    const allNewsItems: NewsItem[] = [];
+    // Return only the "News that caught our eye" entries
+    return weeklyNewsEntries as WeeklyNews[];
+  } catch (error) {
+    console.error('Error fetching weekly news entries:', error);
+    return [];
+  }
+}
 
-    weeklyNewsEntries.forEach((newsEntry) => {
-      if (Array.isArray(newsEntry.items)) {
-        const itemsFromThisEntry = newsEntry.items
-          .map((item: any) => {
-            const newsItem = item.reboot_democracy_weekly_news_items_id;
-            if (!newsItem) return null;
-            return {
-              title: newsItem.title,
-              excerpt: newsItem.excerpt,
-              author: newsItem.author,
-              category: newsItem.category,
-              date: newsItem.date,
-              url: newsItem.url
-            };
-          })
-          .filter(Boolean);
-
-        allNewsItems.push(...itemsFromThisEntry);
-      }
-    });
-
-    return allNewsItems;
+// UPDATED: Returns only "News that caught our eye" entries formatted for combined blog/news display
+export async function fetchWeeklyNewsItems(): Promise<any[]> {
+  try {
+    const weeklyNewsEntries = await fetchWeeklyNewsEntries();
+    
+    // Transform weekly news entries to be compatible with the combined blog/news structure
+    return weeklyNewsEntries.map((entry) => ({
+      type: 'news',
+      id: entry.id,
+      title: entry.title,
+      excerpt: entry.summary, 
+      authors: entry.author, 
+      date: entry.date,
+      edition: entry.edition,
+      slug: null, 
+      image: entry.image, 
+      status: entry.status,
+      Tags: ['News that caught our eye'], 
+      category: 'News that caught our eye'
+    }));
   } catch (error) {
     console.error('Error fetching weekly news items:', error);
     return [];

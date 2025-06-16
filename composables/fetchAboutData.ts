@@ -2,7 +2,7 @@
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import type { Team } from '@/types/Team';
 
-const API_URL = 'https://directus.theburnescenter.org';
+const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchTeamData(): Promise<Team[]> {

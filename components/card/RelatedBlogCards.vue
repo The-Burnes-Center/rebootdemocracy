@@ -27,7 +27,7 @@
             <div class="postcard__content">
               <div v-if="post.image?.id" class="postcard__image">
                 <img
-                  :src="`https://directus.theburnescenter.org/assets/${post.image.id}?width=600`"
+                  :src="`https://burnes-center.directus.app//assets/${post.image.id}?width=600`"
                   :alt="post.title"
                 />
               </div>
@@ -91,7 +91,7 @@
             <div class="postcard__content">
               <div v-if="post.image?.id" class="postcard__image">
                 <img
-                  :src="`https://directus.theburnescenter.org/assets/${post.image.id}?width=600`"
+                  :src="`https://burnes-center.directus.app//assets/${post.image.id}?width=600`"
                   :alt="post.title"
                 />
               </div>

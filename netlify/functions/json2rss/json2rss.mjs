@@ -6,7 +6,7 @@ import he from 'he';
 exports.handler = async function (event, context) {
 
   const { toXML } = pkg;
-  const directus = new Directus('https://directus.theburnescenter.org/');
+  const directus = new Directus('https://burnes-center.directus.app//');
   const blogPAW = directus.items("reboot_democracy_blog");
 
 
@@ -74,7 +74,7 @@ exports.handler = async function (event, context) {
 
       // Handle image and content
       if (e.image && e.image.id) {
-        let imageUrl = 'https://directus.theburnescenter.org/assets/' + e.image.id + '?width=400&quality=70&format=jpg';
+        let imageUrl = 'https://burnes-center.directus.app//assets/' + e.image.id + '?width=400&quality=70&format=jpg';
 
         itemcont["item"]["enclosure"] = {
           _attrs: {

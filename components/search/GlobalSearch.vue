@@ -129,7 +129,7 @@ const showLoadMore = computed(
     typedSearchResults.value.length < totalResults.value
 );
 
-const directusUrl = "https://directus.theburnescenter.org";
+const directusUrl = "https://burnes-center.directus.app/";
 
 // Unified handlers for all item types
 function getItemTitle(item: SearchResultItem): string {

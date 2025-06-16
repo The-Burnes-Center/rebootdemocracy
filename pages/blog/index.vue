@@ -320,7 +320,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 });
 
 // Constants
-const DIRECTUS_URL = "https://directus.theburnescenter.org";
+const DIRECTUS_URL = "https://burnes-center.directus.app/";
 const POSTS_PER_PAGE = 15;
 const router = useRouter();
 const route = useRoute();
@@ -433,7 +433,7 @@ const { data: allPostsData, pending: isPostsLoading} = await useAsyncData(
   "all-blog-posts",
   async () => {
     const [blogPosts, newsItems] = await Promise.all([
-      fetchAllBlogPosts(), // newest-first from Directus
+      fetchAllBlogPosts(), 
       fetchWeeklyNewsItems(),
     ]);
 

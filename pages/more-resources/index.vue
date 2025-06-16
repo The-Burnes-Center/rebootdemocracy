@@ -5,7 +5,7 @@ import MailingListComponent from "../../components/mailing/Mailing.vue";
 import { createDirectus, rest, readItems } from "@directus/sdk";
 
 // Directus client setup
-const DIRECTUS_URL = "https://directus.theburnescenter.org";
+const DIRECTUS_URL = "https://burnes-center.directus.app/";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
 
 // Formatting utilities
