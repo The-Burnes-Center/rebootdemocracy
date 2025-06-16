@@ -73,7 +73,7 @@ const validAudioSrc = computed(() => {
   }
 
   // Otherwise, ensure it has the proper Directus base URL
-  return `https://burnes-center.directus.app//assets/${props.audioSrc.replace(
+  return `https://burnes-center.directus.app/assets/${props.audioSrc.replace(
     /^\//,
     ""
   )}`;

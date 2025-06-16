@@ -71,16 +71,8 @@ type SearchResultItem = {
   _sourceIndex?: string;
   date?: string | null;
   edition?: string;
-  item?: {
-    author?: string;
-    excerpt?: string;
-    category?: string;
-    title?: string;
-    date?: string;
-    id?: number;
-    url: string;
-  };
   summary?: string;
+  // REMOVED: item property since we're treating weekly news as single entries
 };
 
 const {
@@ -101,11 +93,8 @@ const typedSearchResults = computed(
 const mergedResults = computed(() => {
   const today = new Date();
   return typedSearchResults.value.filter((item) => {
-    const dateStr =
-      item._sourceIndex === "reboot_democracy_weekly_news"
-        ? item.item?.date || item.date
-        : item.date;
-
+    // UPDATED: Handle date filtering for both blog posts and weekly news entries
+    const dateStr = item.date;
     if (!dateStr) return false;
 
     const itemDate = new Date(dateStr);
@@ -116,6 +105,12 @@ const mergedResults = computed(() => {
 const newsResults = computed(() =>
   typedSearchResults.value.filter(
     (item) => item._sourceIndex === "reboot_democracy_weekly_news"
+  )
+);
+
+const rebootResults = computed(() =>
+  typedSearchResults.value.filter(
+    (item) => item._sourceIndex === "reboot_democracy_blog"
   )
 );
 
@@ -130,32 +125,28 @@ const showLoadMore = computed(
 );
 
 const directusUrl = "https://burnes-center.directus.app/";
-
-// Unified handlers for all item types
+// UPDATED: Unified handlers for all item types
 function getItemTitle(item: SearchResultItem): string {
-  if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    return item.item?.title || item.title || "Untitled";
-  }
   return item.title || "Untitled";
 }
 
 function getItemExcerpt(item: SearchResultItem): string {
-  const text =
-    item._sourceIndex === "reboot_democracy_weekly_news"
-      ? item.item?.excerpt || item.excerpt || item.summary || ""
-      : item.excerpt || "";
+  // UPDATED: Handle both blog posts and weekly news entries
+  const text = item._sourceIndex === "reboot_democracy_weekly_news"
+    ? item.summary || item.excerpt || ""
+    : item.excerpt || "";
 
   return truncateText(text, 150);
 }
 
 function getItemAuthor(item: SearchResultItem): string {
+  // UPDATED: Handle both blog posts and weekly news entries
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    if (typeof item?.item?.author === "string") {
-      return item.item.author;
-    }
-    return "Unknown Author";
+    // For weekly news, author is directly on the entry
+    return item.author || "Unknown Author";
   }
 
+  // For blog posts, handle the authors array structure
   if (typeof item.author === "string") return item.author;
   const authorObj = item.authors?.[0]?.team_id;
   if (authorObj?.First_Name && authorObj?.Last_Name) {
@@ -165,10 +156,16 @@ function getItemAuthor(item: SearchResultItem): string {
 }
 
 function getItemImageUrl(item: SearchResultItem): string {
+  // UPDATED: Handle images for both content types
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
+    // Weekly news might have images, but default to placeholder if not
+    if (typeof item.image === "object" && item.image?.id) {
+      return `${directusUrl}assets/${item.image.id}?width=512`;
+    }
     return "/images/exampleImage.png";
   }
 
+  // Blog posts
   if (typeof item.image === "object" && item.image?.filename_disk) {
     return getImageUrl(item.image, 512);
   }
@@ -177,25 +174,34 @@ function getItemImageUrl(item: SearchResultItem): string {
 }
 
 function getItemDate(item: SearchResultItem): Date | undefined {
-  const dateString =
-    item._sourceIndex === "reboot_democracy_weekly_news"
-      ? item.item?.date || item.date
-      : item.date;
-
-  return dateString ? new Date(dateString) : undefined;
+  return item.date ? new Date(item.date) : undefined;
 }
 
 function getItemTag(item: SearchResultItem): string {
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    return item?.item?.category || "News that caught our eye";
+    return "News that caught our eye";
   }
+  
+  // For blog posts, use Tags or default
+  if (item.Tags && Array.isArray(item.Tags) && item.Tags.length > 0) {
+    return item.Tags[0];
+  }
+  
   return "Blog";
 }
 
+// UPDATED: Handle navigation for both content types
 function handleItemClick(item: SearchResultItem): void {
   if (item._sourceIndex === "reboot_democracy_weekly_news") {
-    openInSameTab(item.item?.url);
+    // Navigate to weekly news page using edition
+    if (item.edition) {
+      const edition = String(item.edition).replace(/\D/g, "");
+      router.push(`/newsthatcaughtoureye/${edition}`);
+    } else {
+      console.error("Cannot navigate: weekly news item has no edition", item);
+    }
   } else {
+    // Navigate to blog post
     navigateToBlogPost(item);
   }
 }
@@ -208,13 +214,15 @@ function navigateToBlogPost(item: SearchResultItem) {
   }
 }
 
-function openInSameTab(url: string | undefined) {
-  if (url) {
-    window.location.href = url;
-  }
-}
-
 function truncateText(text: string, maxLength: number): string {
   return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
+}
+
+// Helper function for image URLs
+function getImageUrl(image: { id?: string; filename_disk?: string }, width?: number): string {
+  if (image.id) {
+    return `${directusUrl}assets/${image.id}${width ? `?width=${width}` : ''}`;
+  }
+  return "/images/exampleImage.png";
 }
 </script>

@@ -46,7 +46,7 @@
               </button>
               <div v-if="blog.image?.id" class="blog-banner-image">
                 <img
-                  :src="`https://burnes-center.directus.app//assets/${blog.image.id}`"
+                  :src="`https://burnes-center.directus.app/assets/${blog.image.id}`"
                   :alt="blog.image.description || blog.title"
                   class="blog-image"
                 />
@@ -154,7 +154,7 @@
                 <em>Listen to the AI-generated audio version of this piece.</em>
               </p>
               <AudioPlayer
-                :audioSrc="`https://burnes-center.directus.app//assets/${blog.audio_version.id}`"
+                :audioSrc="`https://burnes-center.directus.app/assets/${blog.audio_version.id}`"
               />
             </div>
 
@@ -225,7 +225,7 @@ if (import.meta.server) {
     ogDescription:
       "RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.",
     ogImage:
-      "https://burnes-center.directus.app//assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+      "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
     ogUrl: `https://rebootdemocracy.ai/blog/${route.params.slug}`,
     twitterCard: "summary_large_image",
   });
@@ -257,7 +257,7 @@ As researchers, we want to understand how best to “do democracy” in practice
   ogImage: () =>
     blog.value?.image
       ? getImageUrl(blog.value.image)
-      : "https://burnes-center.directus.app//assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+      : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
   ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
   twitterCard: "summary_large_image",
 });
@@ -277,7 +277,7 @@ function getAuthorImageUrl(authorData: any, width: number = 600): string {
   if (!authorData || !authorData.Headshot || !authorData.Headshot.id) {
     return "/images/exampleImage.png";
   }
-  return `https://burnes-center.directus.app//assets/${authorData.Headshot.id}?width=${width}`;
+  return `https://burnes-center.directus.app/assets/${authorData.Headshot.id}?width=${width}`;
 }
 
 // Function to get author name

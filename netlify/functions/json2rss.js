@@ -10,7 +10,7 @@ async function initializeJsToXml() {
   return toXML;
 }
 
-const directus = createDirectus('https://burnes-center.directus.app//').with(rest());
+const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
 
 exports.handler = async function (event, context) {
   try {
@@ -100,7 +100,7 @@ exports.handler = async function (event, context) {
         let mediaContent = null;
 
         if (post.image && post.image.id) {
-          const imageUrl = `https://burnes-center.directus.app//assets/${post.image.id}?width=400&quality=70&format=jpg`;
+          const imageUrl = `https://burnes-center.directus.app/assets/${post.image.id}?width=400&quality=70&format=jpg`;
 
           enclosure = {
             _attrs: {
