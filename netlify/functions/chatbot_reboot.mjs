@@ -58,7 +58,6 @@ const blogPostChunkFields = `
   imageId
   _additional { id distance certainty }
 `;
-
 /*********************************************
  *  Search helper – BM25 then nearText       *
  *********************************************/
