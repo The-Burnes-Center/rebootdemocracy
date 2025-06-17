@@ -186,9 +186,9 @@ async function deleteById(collection, id) {
 /****************  Netlify handler ******************************/
 export async function handler(event) {
   try {
-        const testPayload = { collection: "reboot_democracy_blog", id: "28418", action: "reboot_democracy_blog.items.update" };
-    const { id: itemId, action } = testPayload;
-    // const { id: itemId, action } = JSON.parse(event.body);
+    //     const testPayload = { collection: "reboot_democracy_blog", id: "28418", action: "reboot_democracy_blog.items.update" };
+    // const { id: itemId, action } = testPayload;
+    const { id: itemId, action } = JSON.parse(event.body);
     const [collection, , eventType] = action.split('.');
 
     if (!['reboot_democracy_blog', 'reboot_democracy_weekly_news'].includes(collection)) {
