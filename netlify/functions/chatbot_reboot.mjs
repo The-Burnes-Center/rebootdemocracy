@@ -249,7 +249,7 @@ Instructions:
       }
       if (r._className === 'RebootBlogPostChunk') {
         // Use the slug to construct the URL if available
-        const url = r.slug ? `https://rebootdemocracy.org/blog/${r.slug}` : r.fullUrl;
+        const url = r.slug ? `https://rebootdemocracy.ai/blog/${r.slug}` : r.fullUrl;
         return url ? [{ title: r.title, url: url }] : [];
       }
       return [];
