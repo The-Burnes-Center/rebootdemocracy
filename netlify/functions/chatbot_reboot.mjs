@@ -184,7 +184,7 @@ Instructions:
 - If not enough information is available, you can ask the user for more information.
 - Never provide information that is not backed by your context or is common knowledge.
 - Look carefully at all in your context before you present the information to the user.
-- **If the context contains a direct mention of the user’s query (e.g., a person’s name), focus your answer on that information first.**
+- **If the context contains a direct mention of the user's query (e.g., a person's name), focus your answer on that information first.**
 - Be optimistic and cheerful but keep a professional nordic style of voice.
 - For longer outputs use bullet points and markdown to make the information easy to read.
 - Do not reference your contexts and the different document sources—just provide the information based on those sources.
@@ -249,7 +249,9 @@ Instructions:
         return r.itemUrl ? [{ title: r.itemTitle || r.title, url: r.itemUrl }] : [];
       }
       if (r._className === 'RebootBlogPostChunk') {
-        return r.fullUrl ? [{ title: r.title, url: r.fullUrl }] : [];
+        // Use the slug to construct the URL if available
+        const url = r.slug ? `https://rebootdemocracy.org/blog/${r.slug}` : r.fullUrl;
+        return url ? [{ title: r.title, url: url }] : [];
       }
       return [];
     });
