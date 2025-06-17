@@ -407,7 +407,7 @@ console.log(nowOffset)
 2. Better outcomes
 3. Increased trust in institutions
 4. And in one another
-As researchers we want to understand how best to “do democracy” in practice.
+As researchers we want to understand how best to "do democracy" in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
         { property: 'og:image', content: "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
@@ -418,7 +418,7 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 2. Better outcomes
 3. Increased trust in institutions
 4. And in one another
-As researchers we want to understand how best to “do democracy” in practice.
+As researchers we want to understand how best to "do democracy" in practice.
 
 Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`},
         { property: 'twitter:image', content: "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b"},
@@ -588,7 +588,30 @@ Emboldened by the advent of generative AI, we are excited about the future possi
       });
     },
 
-
+    getDisplayTitle(item) {
+      return item._type === 'weeklyNews' ? item.itemTitle : item.title;
+    },
+    getDisplayDate(item) {
+      return item.date || item.itemDate;
+    },
+    getDisplayAuthors(item) {
+      if (item._type === 'blogPost') {
+        return Array.isArray(item.authors) ? item.authors.join(', ') : item.authors;
+      }
+      return item.itemAuthor;
+    },
+    getDisplayImage(item) {
+      if (item._type === 'weeklyNews') return '/newsheader.jpg';
+      if (item.imageFilename) return this.directus._url + 'assets/' + item.imageFilename;
+      return '/newsheader.jpg';
+    },
+    getDisplayUrl(item) {
+      if (item._type === 'blogPost') return item.fullUrl || ('/blog/' + item.slug);
+      return item.itemUrl || ('/newsthatcaughtoureye/' + item.edition);
+    },
+    getTypeBadge(item) {
+      return item._type === 'blogPost' ? 'Blog Post' : 'Weekly News';
+    },
   }
 }
 </script>
@@ -758,42 +781,23 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 <!-- Search section -->
 <!-- <div v-if="searchResults.length > 0 && searchTerm" class="allposts-section"> -->
   <div v-if="dedupedSearchResults.length > 0 && searchTerm" class="allposts-section">
-  <div class="allposts-post-row"  v-for="(item, index) in dedupedSearchResults" :key="item.objectId || item.directusId">
-    <a :href="item._type === 'blogPost'
-                ? (item.fullUrl || ('/blog/' + item.slug))
-                : (item.itemUrl || ('/newsthatcaughtoureye/' + item.edition))" >
+  <div class="allposts-post-row" v-for="(item, index) in dedupedSearchResults" :key="item.objectId || item.directusId">
+    <a :href="getDisplayUrl(item)">
       <div v-lazy-load>
-        <img v-if="item._type === 'weeklyNews'"
-             class="blog-list-img"
-             data-src="/newsheader.jpg">
-        <img v-else-if="item.imageFilename"
-             class="blog-list-img"
-             :data-src="directus._url + 'assets/' + item.imageFilename">
-        <img v-else
-             class="blog-list-img"
-             data-src="/newsheader.jpg">
+        <img class="blog-list-img" :data-src="getDisplayImage(item)">
       </div>
       <div class="allposts-post-details" style="max-width:320px">
-        <h3>{{ item._type === 'weeklyNews' ? item.itemTitle : item.title }}</h3>
-        <p class="post-date" v-if="item.date || item.itemDate">
-          Published on {{ formatDateOnly(new Date(item.date || item.itemDate)) }}
+        <span class="type-badge" :class="item._type">{{ getTypeBadge(item) }}</span>
+        <h3>{{ getDisplayTitle(item) }}</h3>
+        <p class="post-date" v-if="getDisplayDate(item)">
+          Published on {{ formatDateOnly(new Date(getDisplayDate(item))) }}
         </p>
-        <!-- <p v-if="item._type === 'weeklyNews'">{{ item.itemDescription }}</p>
-        <p v-else-if="item.excerpt">{{ item.excerpt }}</p>
-        <p v-else-if="item.summary">{{ item.summary }}</p> -->
-        <div v-if="item._type === 'blogPost' && item.authors" class="author-list">
-  <p class="author-name">
-    {{ Array.isArray(item.authors) ? item.authors.join(', ') : item.authors }}
-  </p>
-</div>
-        <div v-else-if="item._type === 'weeklyNews' && item.itemAuthor" class="author-list">
-          <p class="author-name">{{ item.itemAuthor }}</p>
+        <div class="author-list">
+          <p class="author-name">{{ getDisplayAuthors(item) }}</p>
         </div>
       </div>
     </a>
-
   </div>
-
 </div>
 <div class="read-more-post"  v-if="dedupedSearchResults.length > 0 && searchTerm" >
 <a href="/all-blog-posts" class="btn btn-small btn-primary">Read All Posts</a>

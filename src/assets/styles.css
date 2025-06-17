@@ -952,7 +952,7 @@ line-height: normal;
   display:flex;
   flex-direction: column;
   gap: 4px;
-  padding-left: 10px;
+  padding-left: 20px;
 }
 .other-blog-posts{
   display:flex;
@@ -1007,7 +1007,7 @@ height: 120px;
 .allposts-post-row a{
   display:flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content:flex-start;
   align-items: left;
   padding: 1rem 2rem 1rem 0rem;
 
