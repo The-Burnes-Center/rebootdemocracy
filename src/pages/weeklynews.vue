@@ -31,6 +31,7 @@ export default {
       showmodal: false,
       directus: new Directus("https://burnes-center.directus.app/"),
       path: this.$route.fullPath,
+      isLoading: false, // Added this missing property
     };
   },
   computed: {
@@ -47,7 +48,9 @@ export default {
   watch: {
     '$route': {
       handler() {
+        this.slug = this.$route.params.name; 
         this.loadModal();
+        this.fetchBlog(); 
       },
       deep: true,
       immediate: true
@@ -70,19 +73,76 @@ export default {
     PastDate(d1) {
       return isPast(d1);
     },
+    
+    async getLatestEdition() {
+      try {
+        console.log('Getting latest edition...');
+        
+        const response = await this.directus
+          .items('reboot_democracy_weekly_news')
+          .readByQuery({
+            fields: ['edition'],
+            filter: {
+              status: {
+                _eq: 'published'
+              }
+            },
+            limit: -1
+          });
+                
+        if (response.data && response.data.length > 0) {
+          const editions = response.data
+            .map(item => parseInt(item.edition))
+            .filter(edition => !isNaN(edition))
+            .sort((a, b) => b - a);
+                    
+          if (editions.length > 0) {
+            const latestEdition = editions[0].toString();
+            console.log('Latest edition found:', latestEdition);
+            return latestEdition;
+          }
+        }
+        
+        return null;
+      } catch (error) {
+        console.error("Error fetching latest edition:", error);
+        return null;
+      }
+    },
+
     async fetchBlog() {
       try {
-        const response = await fetchPostData.call(this, this.slug);
+        this.isLoading = true;
+        let slugToUse = this.slug;
+                
+        // Check if the slug is "latest"
+        if (this.slug === 'latest') {
+          const latestEdition = await this.getLatestEdition();          
+          if (latestEdition) {
+            slugToUse = latestEdition.toString();
+            this.$router.replace(`/newsthatcaughtoureye/${latestEdition}`);
+            this.slug = slugToUse;
+          } else {
+            this.$router.replace('/');
+            return;
+          }
+        }
+
+        const response = await fetchPostData.call(this, slugToUse);
         this.postData = response.data;
+        
         if (this.postData.length === 0) {
           window.location.href = "/";
         }
-        console.log(this.postData);
+        
         this.postData.length > 0 ? this.fillMeta() : this.fillMetaDefault();
       } catch (error) {
         console.error("An error occurred while fetching the blog data: ", error);
+      } finally {
+        this.isLoading = false;
       }
     },
+    
     loadModal() {
       this.directus
         .items('reboot_democracy_modal')
@@ -153,19 +213,30 @@ export default {
 </script>
 
 <template>
+  <!-- Loading state -->
+  <div v-if="isLoading">
+    <header-comp></header-comp>
+    <div style="display: flex; justify-content: center; align-items: center; height: 300px; font-size: 18px;">
+      <p>Loading latest news...</p>
+    </div>
+    <footer-comp></footer-comp>
+  </div>
 
+  <!-- Main content - only show when not loading and data exists -->
+  <div v-else-if="postData && postData.length > 0 && postData[0]">
     <!-- Header Component -->
     <header-comp></header-comp>
 
     <div class="weeklynews-hero">
-          <img v-if="!postData[0].image" class="weeklynews-img" src= "../assets/newsheader.jpg" />
-          <img v-if="postData[0].image"  class="weeklynews-img" :src= "'https://burnes-center.directus.app/assets/'+ postData[0].image.id" />
-        
+      <img v-if="!postData[0].image" class="weeklynews-img" src="../assets/newsheader.jpg" />
+      <img v-if="postData[0].image" class="weeklynews-img" :src="'https://burnes-center.directus.app/assets/'+ postData[0].image.id" />
+      
       <div class="weeklynews-details">
         <h1>{{postData[0].title}}</h1>
-         <p>Published by {{postData[0].author}} on {{ formatDateOnly(new Date(postData[0].date)) }} </p>
+        <p>Published by {{postData[0].author}} on {{ formatDateOnly(new Date(postData[0].date)) }} </p>
       </div>
     </div>
+    
     <!-- Table of Contents -->
     <div class="toc">
       <p class="excerpt"> {{postData[0].summary}}</p><br>
@@ -193,19 +264,20 @@ export default {
         </li>
       </ul>
     </div>
+    
     <div class="news-items" v-if="postData[0].events">
-          <h2 class="group-heading">
-          Upcoming Events
-        </h2>
-       <div class="news-item" v-html="postData[0].events">
+      <h2 class="group-heading">
+        Upcoming Events
+      </h2>
+      <div class="news-item" v-html="postData[0].events">
       </div>
     </div>
 
-        <div class="news-items" v-if="postData[0].announcements">
-          <h2 class="group-heading">
-          Special Announcements
-        </h2>
-       <div class="news-item" v-html="postData[0].announcements">
+    <div class="news-items" v-if="postData[0].announcements">
+      <h2 class="group-heading">
+        Special Announcements
+      </h2>
+      <div class="news-item" v-html="postData[0].announcements">
       </div>
     </div>
 
@@ -238,7 +310,7 @@ export default {
             <p><b>Related Articles:</b></p>
             <ul>
               <li v-for="related_item in item.reboot_democracy_weekly_news_items_id.related_links">
-                <a  :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
+                <a :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
               </li>
             </ul>
           </div>
@@ -248,6 +320,14 @@ export default {
 
     <!-- Footer Component -->
     <footer-comp></footer-comp>
+  </div>
 
+  <!-- Error state -->
+  <div v-else>
+    <header-comp></header-comp>
+    <div style="display: flex; justify-content: center; align-items: center; height: 300px; font-size: 18px;">
+      <p>No content found. Redirecting...</p>
+    </div>
+    <footer-comp></footer-comp>
+  </div>
 </template>
-
