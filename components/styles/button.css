@@ -56,11 +56,12 @@
 .mobile-fullwidth {
   width: 100% !important;
 }
-/* 
+
 .base__button--secondary:hover{
    --text-color: #fc6423;
-   --bg-color: #FFFFFF;
-} */
+   --bg-color: #f0ccbd;
+    --border-color: #f0ccbd;  
+}
 
 @media (max-width: 768px) {
   .base__button {

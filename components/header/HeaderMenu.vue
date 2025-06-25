@@ -45,7 +45,7 @@
             width="12"
             height="8"
             viewBox="0 0 12 8"
-            fill="none"
+            fill="white"
             class="dropdown-icon"
             :class="{
               active: openDropdown === index,

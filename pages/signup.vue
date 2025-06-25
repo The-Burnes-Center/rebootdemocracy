@@ -220,19 +220,20 @@ export default {
   justify-content: center;
   align-items: center;
   font-family: var(--font-inter);
-  color: #003366;
-  background: var(--yellow-action);
+  color: #FFFFFF;
+  background: #fc6423;
   border: 1px solid #000000;
   border-radius: 6px;
   padding: 0.75rem 1.5rem;
   margin-top: 1.5rem;
   width: 100%;
   transition: background 0.3s ease;
+  cursor: pointer;
 }
 
 .clear input[type="submit"]:hover {
-  background-color: var(--yellow-rich);
-  color: #fff;
+  background-color: #f0ccbd;
+  color: #fc6423;
 }
 
 .response {
