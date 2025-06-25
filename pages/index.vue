@@ -111,9 +111,10 @@
             <div class="blog-card-grid grid-layout">
               <div
                 v-for="(post, index) in displayPosts.slice(0, 12)"
-                :key="post.id"
+                :key="post.id || `post-${index}`"
                 class="custom-card"
-                @click="navigateToBlogPost(post)"
+                @click.prevent="handlePostClick(post)"
+                style="cursor: pointer;"
               >
                 <div class="card-image">
                   <img
@@ -417,13 +418,50 @@ function getAuthorName(post: any): string {
 }
 
 function navigateToBlogPost(post: any): void {
-  if (post.type === "blog" && post.slug) {
-    router.push(`/blog/${post.slug}`);
-  } else if (post.type === "news" && post.edition) {
-    // Handle weekly news navigation
-    const edition = String(post.edition).replace(/\D/g, "");
-    router.push(`/newsthatcaughtoureye/${edition}`);
+  
+  try {
+    // Handle blog posts
+    if (post.type === "blog" || (!post.type && post.slug)) {
+      if (post.slug) {
+        router.push(`/blog/${post.slug}`);
+      } else {
+        console.error("Blog post missing slug:", post);
+      }
+    } 
+    // Handle weekly news
+    else if (post.type === "news" || post.edition) {
+      const edition = String(post.edition || post.id || "").replace(/\D/g, "");
+      if (edition) {
+        console.log("Navigating to news post:", `/newsthatcaughtoureye/${edition}`);
+        router.push(`/newsthatcaughtoureye/${edition}`);
+      } else {
+        console.error("News post missing edition:", post);
+      }
+    }
+    // Handle posts with direct URL
+    else if (post.url) {
+      router.push(post.url);
+    }
+    // Fallback:
+    else if (post.slug || post.id) {
+      const identifier = post.slug || post.id;
+      console.log("Fallback navigation to:", `/blog/${identifier}`);
+      router.push(`/blog/${identifier}`);
+    }
+    else {
+      console.error("Unable to determine navigation path for post:", post);
+    }
+  } catch (error) {
+    console.error("Navigation error:", error, post);
   }
+}
+function handlePostClick(post: any, event?: Event): void {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  navigateToBlogPost(post);
 }
 
 // UPDATED: Include author in navigation query
