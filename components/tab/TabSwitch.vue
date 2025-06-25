@@ -20,9 +20,15 @@
         <FilterDropdown
           :options="tagOptions"
           :defaultSelected="selectedTag || 'All Topics'"
-          label="Filter by:"
+          label="Filter by Topics:"
           @option-selected="handleTagFilter"
         />
+          <FilterDropdown
+            :options="authorOptions"
+            :defaultSelected="selectedAuthor || 'All Authors'"
+            label="Filter by Author:"
+            @option-selected="handleAuthorFilter"
+          />
       </div>
     </div>
 
@@ -70,7 +76,15 @@ const props = defineProps({
      type: Array as () => string[],
   default: () => []
   },
+  authorOptions: {
+    type: Array as () => string[],
+    default: () => []
+  },
   selectedTag: {
+    type: String,
+    default: ''
+  },
+  selectedAuthor: {
     type: String,
     default: ''
   }
@@ -78,7 +92,8 @@ const props = defineProps({
 
 const emit = defineEmits([
   'tab-changed', 
-  'tag-filter'
+  'tag-filter',
+  'author-filter'
 ]);
 
 const activeTab = ref(props.initialTab !== undefined ? props.initialTab : 0);
@@ -100,6 +115,11 @@ function handleTabClick(tab: TabItem, index: number) {
 function handleTagFilter(option: string | { name: string }) {
   const tagValue = typeof option === 'string' ? option : option.name;
   emit("tag-filter", tagValue);
+}
+
+function handleAuthorFilter(option: string | { name: string }) {
+  const authorValue = typeof option === 'string' ? option : option.name;
+  emit("author-filter", authorValue);
 }
 
 onMounted(() => {

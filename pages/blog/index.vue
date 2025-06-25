@@ -141,20 +141,23 @@
             v-if="!isPostsLoading && displayedPosts.length > 0"
             class="blog-list"
           >
-            <PostCard
-              v-for="(post, index) in displayedPosts"
-              :key="getPostKey(post)"
-              :tag="getPostTag(post)"
-              :titleText="getPostTitle(post)"
-              :author="getAuthorName(post)"
-              :excerpt="getPostExcerpt(post)"
-              :imageUrl="getImageUrl(getPostImage(post))"
-              :date="getPostDate(post)"
-              :tagIndex="index % 5"
-              variant="default"
-              :hoverable="true"
-              @click="handlePostClick(post)"
-            />
+            <div class="blogcard-grid-wrapper">
+              <BlogCard
+                v-for="post in displayedPosts"
+                :key="getPostKey(post)"
+                :title="getPostTitle(post)"
+                :excerpt="getPostExcerpt(post)"
+                :imageUrl="
+                  'image' in post && post.image?.id
+                    ? getImageUrl(post.image)
+                    : '/images/exampleImage.png'
+                "
+                :tag="getPostTag(post)"
+                :author="getAuthorName(post)"
+                :date="getPostDate(post)"
+                @click="handlePostClick(post)"
+              />
+            </div>
           </div>
 
           <!-- No blogs found message -->
@@ -171,7 +174,7 @@
           <!-- Show More button appears when there are more posts to load -->
           <div v-if="!isPostsLoading && hasMorePosts" class="btn-mid">
             <Button
-              variant="primary"
+              variant="secondary"
               width="140px"
               height="36px"
               @click="loadMorePosts"
@@ -245,7 +248,7 @@
         </div>
 
         <!-- Event section with loading state -->
-        <div v-if="isEventLoading" class="loading">Loading event...</div>
+        <!-- <div v-if="isEventLoading" class="loading">Loading event...</div>
         <UpcomingCard
           v-if="latestEvent"
           :title="latestEvent.title"
@@ -254,7 +257,7 @@
           :onClick="() => handleEventClick(latestEvent)"
           :buttonLabel="isFutureEvent ? 'Register' : 'Watch'"
           :cardTitle="isFutureEvent ? 'Upcoming Event' : 'Featured Event'"
-        />
+        /> -->
 
         <SignUpButtonWidget
           title="Sign Up for updates"
@@ -317,8 +320,8 @@ Emboldened by the advent of generative AI, we are excited about the future possi
 });
 
 // Constants
-const DIRECTUS_URL = "https://content.thegovlab.com";
-const POSTS_PER_PAGE = 7;
+const DIRECTUS_URL = "https://burnes-center.directus.app/";
+const POSTS_PER_PAGE = 15;
 const router = useRouter();
 const route = useRoute();
 
@@ -356,7 +359,7 @@ interface Author {
 }
 
 const getAuthorName = (post: BlogPost | NewsItem): string => {
-  if ("authors" in post && post.authors && post.authors.length > 0) {
+  if ("authors" in post && post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
     if (post.authors.length > 1) {
       const authorNames = post.authors
         .map((author) => {
@@ -379,11 +382,17 @@ const getAuthorName = (post: BlogPost | NewsItem): string => {
     return author
       ? `${author.First_Name} ${author.Last_Name}`
       : "Reboot Democracy Team";
-  } else if ("author" in post && post.author) {
+  } 
+  else if ("authors" in post && post.authors && typeof post.authors === "string") {
+    return post.authors;
+  }
+  else if ("author" in post && post.author) {
     return post.author;
   }
+  
   return "Reboot Democracy Team";
 };
+
 
 // Data processing functions
 const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
@@ -407,46 +416,56 @@ const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
 };
 
 const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
-  if (!posts || posts.length === 0) return [];
+  try {
+    if (!posts || posts.length === 0) return [];
 
-  const authorCounts = new Map<string, number>();
+    const authorCounts = new Map<string, number>();
 
-  // Only count authors from blog posts, not from weekly news items
-  posts.forEach((post) => {
-    if ("authors" in post && post.authors) {
-      const authorName = getAuthorName(post);
-      if (authorName !== "Unknown Author") {
-        authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+    posts.forEach((post, index) => {
+      try {
+        if (!post) return;
+        
+        const authorName = getAuthorName(post);
+        
+        // Only count meaningful author names
+        if (authorName && 
+            authorName !== "Unknown Author" && 
+            authorName !== "Reboot Democracy Team" &&
+            authorName.trim() !== "") {
+          authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+        }
+      } catch (postError) {
+        console.error(`Error processing post ${index}:`, postError, post);
       }
-    }
-  });
+    });
 
-  return Array.from(authorCounts.entries())
-    .map(([name, count]) => ({ id: name, name, count }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(authorCounts.entries())
+      .map(([name, count]) => ({ id: name, name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.error('Error in extractAuthorsWithCounts:', error);
+    return []; 
+  }
 };
 
-const { data: allPostsData } = await useAsyncData(
-  'all-blog-posts',
+
+const { data: allPostsData, pending: isPostsLoading } = await useAsyncData(
+  "all-blog-posts",
   async () => {
     const [blogPosts, newsItems] = await Promise.all([
-      fetchAllBlogPosts(),      // newest-first from Directus
-      fetchWeeklyNewsItems()
-    ])
+      fetchAllBlogPosts(),
+      fetchWeeklyNewsItems(),
+    ]);
 
-    const sortDesc   = (a:any, b:any) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+    const sortDesc = (a: any, b: any) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime();
 
-    const newsSorted = [...newsItems].sort(sortDesc)
+    const newsSorted = [...newsItems].sort(sortDesc);
 
-    // final array: every blog → every news
-    return [...blogPosts, ...newsSorted]
+    return [...blogPosts, ...newsSorted];
   },
-  { server: true }   // optional: don’t re-fetch in browser
-)
-
-
-
+  { server: true } 
+);
 
 // Prefetch tags data
 const { data: tagsData, pending: isTagsLoading } = await useAsyncData(
@@ -507,8 +526,6 @@ const { data: eventData, pending: isEventLoading } = await useAsyncData(
 const allPosts = computed(() => allPostsData.value || []);
 const tags = computed(() => tagsData.value || []);
 const authors = computed(() => authorsData.value || []);
-const latestEvent = computed(() => eventData.value?.event || null);
-const isFutureEvent = computed(() => eventData.value?.isFutureEvent || false);
 
 const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)
@@ -600,7 +617,7 @@ const handlePostClick = (post: BlogPost | NewsItem): void => {
     resetSearch();
     router.push(`/blog/${post.slug}`);
   } else if ("url" in post && post.url) {
-        window.location.href = post.url
+    window.location.href = post.url;
   } else {
     console.error("Cannot navigate: Post has no slug or URL", post);
   }
@@ -608,7 +625,7 @@ const handlePostClick = (post: BlogPost | NewsItem): void => {
 
 const handleEventClick = (event: Event | null) => {
   if (event?.link) {
-     window.location.href = event.link
+    window.location.href = event.link;
   }
 };
 
@@ -650,15 +667,15 @@ onMounted(() => {
   window.addEventListener("resize", checkIfMobile);
 
   // Prefer path param; fall back to ?category= for legacy links
-const categoryParam = props.initialCategory ?? (route.query.category as string | undefined)
-if (categoryParam) {
-  const categoryName = decodeURIComponent(categoryParam)
-  const found = tags.value.find(
-    (t) => t.name.toLowerCase() === categoryName.toLowerCase()
-  )
-  if (found) selectedCategory.value = found.name
-}
-
+  const categoryParam =
+    props.initialCategory ?? (route.query.category as string | undefined);
+  if (categoryParam) {
+    const categoryName = decodeURIComponent(categoryParam);
+    const found = tags.value.find(
+      (t) => t.name.toLowerCase() === categoryName.toLowerCase()
+    );
+    if (found) selectedCategory.value = found.name;
+  }
 
   const authorParam = route.query.author as string | undefined;
   if (authorParam) {

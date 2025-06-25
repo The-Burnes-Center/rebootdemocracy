@@ -3,6 +3,7 @@
     as="p"
     :size="size"
     :weight="weight"
+    :lineHeight="lineHeight"
     :class="[marginClass, lineClampClass]"
     v-bind="$attrs"
   >
@@ -26,12 +27,23 @@ const marginSizes = {
 
 // Props interface
 interface ParagraphProps {
-  size?: string;
+  size?:
+    | "xs"
+    | "base"
+    | "lg"
+    | "sm"
+    | "xl"
+    | "2xl"
+    | "3xl"
+    | "4xl"
+    | "5xl"
+    | undefined;
   weight?: string;
   margin?: keyof typeof marginSizes;
   marginTop?: keyof typeof marginSizes;
   marginBottom?: keyof typeof marginSizes;
   lineClamp?: number;
+  lineHeight?: "normal" | "tight" | "relaxed" | "extraRelaxed" | "loose" | "extra-loose" | "super-loose" | undefined;
 }
 
 // Define props with defaults
@@ -71,4 +83,3 @@ const lineClampClass = computed(() => {
   return props.lineClamp > 0 ? `paragraph-line-clamp-${props.lineClamp}` : "";
 });
 </script>
-

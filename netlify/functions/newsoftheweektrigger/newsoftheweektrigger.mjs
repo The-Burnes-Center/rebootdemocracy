@@ -6,7 +6,7 @@ import he from 'he';
 exports.handler = async function (event, context) {
 
   const { toXML } = pkg;
-  const directus = new Directus('https://content.thegovlab.com/');
+  const directus = new Directus('https://burnes-center.directus.app/');
   const blogPAW = directus.items("reboot_democracy_weekly_news");
   const publicData = await blogPAW.readByQuery({
     filter: {

@@ -1,15 +1,11 @@
 <template>
   <div class="tags-test">
     <h2>Tags Fetch Test</h2>
-    
-    <div v-if="isLoading" class="loading">
-      Loading tags...
-    </div>
-    
-    <div v-else-if="error" class="error">
-      Error: {{ error }}
-    </div>
-    
+
+    <div v-if="isLoading" class="loading">Loading tags...</div>
+
+    <div v-else-if="error" class="error">Error: {{ error }}</div>
+
     <div v-else>
       <h3>Available Tags: {{ tags.length }}</h3>
       <ul class="tags-list">
@@ -23,7 +19,7 @@
           </span>
         </li>
       </ul>
-      
+
       <div class="raw-data">
         <h3>Raw API Response:</h3>
         <pre>{{ JSON.stringify(rawTagsResponse, null, 2) }}</pre>
@@ -33,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from "vue";
 
 interface Tag {
   id: string;
@@ -41,7 +37,7 @@ interface Tag {
   count?: number;
 }
 
-const directusUrl = "https://content.thegovlab.com";
+const directusUrl = "https://burnes-center.directus.app/";
 const tags = ref<Tag[]>([]);
 const rawTagsResponse = ref(null);
 const isLoading = ref(true);
@@ -52,31 +48,31 @@ const fetchTags = async () => {
   try {
     isLoading.value = true;
     error.value = null;
-    
+
     // Get all tags
-    const response = await fetch(
-      `${directusUrl}/items/Tags?fields=id,name`
-    );
-    
+    const response = await fetch(`${directusUrl}/items/Tags?fields=id,name`);
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch tags: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch tags: ${response.status} ${response.statusText}`
+      );
     }
-    
+
     const data = await response.json();
     rawTagsResponse.value = data; // Store raw response for debugging
-    
+
     // Process tags
     if (data.data && Array.isArray(data.data)) {
       tags.value = data.data.map((tag: any) => ({
         id: tag.id,
-        name: tag.name
+        name: tag.name,
       }));
     } else {
-      throw new Error('Invalid API response format');
+      throw new Error("Invalid API response format");
     }
   } catch (err: any) {
-    console.error('Error fetching tags:', err);
-    error.value = err.message || 'Failed to fetch tags';
+    console.error("Error fetching tags:", err);
+    error.value = err.message || "Failed to fetch tags";
   } finally {
     isLoading.value = false;
   }
@@ -86,26 +82,26 @@ const fetchTags = async () => {
 const fetchPostCount = async (tagId: string) => {
   try {
     // Find the tag in our array
-    const tagIndex = tags.value.findIndex(tag => tag.id === tagId);
+    const tagIndex = tags.value.findIndex((tag) => tag.id === tagId);
     if (tagIndex === -1) return;
-    
+
     // Make API call to count posts with this tag
     const response = await fetch(
       `${directusUrl}/items/BlogPosts?filter[Tags][_contains]=${tagId}&aggregate[count]=*`
     );
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch post count: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    console.log('Post count response:', data);
-    
+    console.log("Post count response:", data);
+
     // Update tag with count
     const count = data.data?.[0]?.count || 0;
-    tags.value[tagIndex] = { 
-      ...tags.value[tagIndex], 
-      count 
+    tags.value[tagIndex] = {
+      ...tags.value[tagIndex],
+      count,
     };
   } catch (err) {
     console.error(`Error fetching post count for tag ${tagId}:`, err);
@@ -116,23 +112,23 @@ const fetchPostCount = async (tagId: string) => {
 const testAlternativeFilter = async () => {
   try {
     if (tags.value.length === 0) return;
-    
+
     const tagId = tags.value[0].id;
     console.log(`Testing alternative filter for tag ${tagId}`);
-    
+
     // Try different filter syntax
     const response = await fetch(
       `${directusUrl}/items/BlogPosts?filter[Tags][_in]=${tagId}&aggregate[count]=*`
     );
-    
+
     if (!response.ok) {
       throw new Error(`Alternative filter failed: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    console.log('Alternative filter response:', data);
+    console.log("Alternative filter response:", data);
   } catch (err) {
-    console.error('Error testing alternative filter:', err);
+    console.error("Error testing alternative filter:", err);
   }
 };
 
@@ -152,7 +148,8 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-.loading, .error {
+.loading,
+.error {
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 4px;

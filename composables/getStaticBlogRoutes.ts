@@ -2,7 +2,7 @@
 import { createDirectus, rest, readItems } from '@directus/sdk';
 
 export const getStaticBlogRoutes = async (): Promise<string[]> => {
-  const directus = createDirectus('https://content.thegovlab.com').with(rest());
+  const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
 
   const posts = await directus.request(
     readItems('reboot_democracy_blog', {

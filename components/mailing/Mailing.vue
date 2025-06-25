@@ -3,13 +3,18 @@
   <div class="mailing-list-section">
     <div class="mailing-list-row">
       <div class="col-50">
-        <h3>Sign up for the Reboot Democracy Mailing List to Learn about Upcoming Events</h3>
+        <h3>
+          Sign up for the Reboot Democracy Mailing List to Learn about Upcoming
+          Events
+        </h3>
         <!-- <p>Click Below to Register for a Specific Event</p> -->
       </div>
       <div class="col-50">
         <!-- <p>Join our mailing list</p> -->
         <!-- <input type="text" placeholder="" name="entry.250007595" aria-hidden="true"> -->
-        <a href="/signup" class="btn btn-primary btn-dark btn-medium">Sign up to receive updates!</a>
+        <a href="/signup" class="btn btn-primary btn-dark btn-medium"
+          >Sign up to receive updates!</a
+        >
       </div>
     </div>
   </div>
@@ -29,10 +34,10 @@
   background-color: var(--purple-icon);
 }
 
-.mailing-list-section h3{
-  font-family: 'Space Grotesk', sans-serif;
+.mailing-list-section h3 {
+  font-family: var(--font-inria);
   font-size: 24px;
-  margin:0;
+  margin: 0;
 }
 
 .mailing-list-row {
@@ -61,7 +66,7 @@ a.btn {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: 'Space Mono', monospace;
+  font-family: var(--font-inria);
   color: #000000;
 }
 
@@ -72,7 +77,7 @@ a.btn {
 }
 
 .btn-dark {
-  color: #000000 !important;
+  color: #003366 !important;
 }
 
 .btn-medium {
@@ -82,26 +87,24 @@ a.btn {
   height: 42px;
 }
 
-
-
 /* Responsive styles */
 @media (max-width: 768px) {
   .mailing-list-section {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .mailing-list-row {
     padding: 1rem;
     flex-direction: column;
     width: fit-content;
   }
-  
+
   .col-50 {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .col-50 input {
     width: 100%;
   }

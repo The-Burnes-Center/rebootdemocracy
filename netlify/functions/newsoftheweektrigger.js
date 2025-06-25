@@ -10,7 +10,7 @@ async function initializeJsToXml() {
   return toXML;
 }
 
-const directus = createDirectus('https://content.thegovlab.com/').with(rest());
+const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
 
 exports.handler = async function (event, context) {
   try {

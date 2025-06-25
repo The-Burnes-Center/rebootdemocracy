@@ -30,7 +30,7 @@
       </template>
 
       <!-- Dropdown logic for items with children -->
-      <div v-else class="header-menu__item header-menu__dropdown">
+      <div v-else class="header-menu__item">
         <span
           class="header-menu__label"
           :class="{
@@ -45,7 +45,7 @@
             width="12"
             height="8"
             viewBox="0 0 12 8"
-            fill="none"
+            fill="white"
             class="dropdown-icon"
             :class="{
               active: openDropdown === index,

@@ -1,7 +1,7 @@
 <template>
   <!--Used reusable container card by passing variant and size-->
   <Card
-    size="extra-large"
+    size="large"
     :variant="'default'"
     :hoverable="hoverable"
     :class="['desktop-view', { 'featured-post': isFeatured }]"
@@ -43,7 +43,8 @@
               size="xl"
               :lineClamp="2"
               :level="'h3'"
-              weight="semibold"
+              weight="bold"
+              class="textclass"
             >
               {{ titleText }}
             </TitleText>
@@ -55,7 +56,7 @@
               v-if="excerpt"
               size="base"
               lineHeight="normal"
-              :lineClamp="3"
+              :lineClamp="2"
               weight="medium"
             >
               {{ excerpt }}
@@ -101,7 +102,7 @@
 
   <!--Mobile view-->
   <Card
-    size="small"
+    size="large"
     :variant="'default'"
     :hoverable="hoverable"
     :class="['mobile-view', { 'featured-post': isFeatured }]"
@@ -133,7 +134,7 @@
                 lineHeight="normal"
                 margin="none"
                 size="xs"
-                index="0"
+                :index="0"
                 >Featured</Tag
               >
             </div>
@@ -154,10 +155,10 @@
           <div class="postcard__details">
             <BodyText
               v-if="excerpt"
-              size="base"
-              lineHeight="normal"
-              :lineClamp="isFeatured ? 4 : 3"
+              size="lg"
               weight="medium"
+              lineHeight="extraRelaxed"
+              :lineClamp="2"
             >
               {{ excerpt }}
             </BodyText>

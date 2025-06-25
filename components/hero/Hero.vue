@@ -3,8 +3,8 @@
     <div class="hero__content">
       <Text
         as="h1"
-        :size="'2xl'"
-        :weight="'normal'"
+        :size="'6xl'"
+        :weight="'bold'"
         :fontFamily="'inria'"
         class="hero__title"
       >
@@ -12,8 +12,8 @@
       </Text>
       <Text
         as="p"
-        :size="'xs'"
-        :weight="'bold'"
+        :size="'2xl'"
+        :weight="'semibold'"
         :fontFamily="'inria'"
         class="hero__subtitle"
       >

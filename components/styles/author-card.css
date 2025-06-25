@@ -16,7 +16,7 @@
   h3.author-name {
     font-size: 14px;
     line-height: 21px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter);
     font-weight: 700;
     color: #000000;
     margin: 0%;
@@ -25,7 +25,7 @@
   h4.author-title {
     font-size: 11px;
     line-height: 13.75px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter);
     font-weight: 400;
     color: #000000;
     margin: 0%;
@@ -34,7 +34,7 @@
   p.author-bio {
     font-size: 14px;
     line-height: 17.5px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter);
     font-weight: 300;
     color: #000000;
     margin: 0%;

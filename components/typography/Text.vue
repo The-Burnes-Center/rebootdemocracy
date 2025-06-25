@@ -38,6 +38,7 @@ const SizeToRem = {
   "3xl": "1.875rem", // 30px
   "4xl": "2rem", // 32px
   "5xl": "2.25rem", // 36px
+  "6xl": "3rem", // 48px
 } as const;
 
 // Element-specific default sizes
@@ -65,11 +66,14 @@ const fontWeight = {
 // Define the default colors for texts
 const textColors = {
   "text-primary": "#000",
+  "text-dark": "#003366",
+  "text-primary-light": "#FFFFFF",
   "text-secondary": "#0D63EB",
   "text-tertiary": "#062C51",
-  "tag-primary": "#5C69AB",
+  "tag-primary": "#f06e3a",
   "tag-secondary": "#0D63EB",
   "link-primary": "#0D63EB",
+
 };
 
 const alignmentClasses = {
@@ -101,9 +105,10 @@ const lineHeights = {
   tight: "1.25", // 20px
   normal: "1.5", // 24px
   relaxed: "1.75", // 28px
+  extraRelaxed: "1.875", // 30px
   loose: "2", // 32px
   "extra-loose": "2.4", // 40px
-  "super-loose": "2.8125" // 45px
+  "super-loose": "2.8125", // 45px
 } as const;
 
 const marginSizes = {

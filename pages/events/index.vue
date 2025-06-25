@@ -303,7 +303,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 /* Typography */
 .events-page h1 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-inter);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -314,12 +314,12 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 }
 
 .events-page h2 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-inter);
   margin: 0;
 }
 
 .events-page h3 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-inter);
   font-size: 24px;
   margin: 0;
   margin: 0;
@@ -334,14 +334,14 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 .events-page p,
 .events-page li {
-  font-family: "Red Hat Text", sans-serif;
+  font-family: var(--font-inria);
   font-weight: 500;
 }
 
 .events-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-family: "Space Mono", monospace;
+  font-family:var(--font-inria);
   letter-spacing: 2.4px;
 }
 
@@ -356,7 +356,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-inter);
   color: #000000;
 }
 
@@ -418,7 +418,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 }
 
 .events-hero h1 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-inria);
 }
 
 .events-row {
@@ -440,7 +440,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 }
 
 h2.red-subtitle {
-  color: var(--blue-rich);
+  color: #003366;
   font-weight: 500;
   text-transform: uppercase;
   line-height: 0.1em;
@@ -476,14 +476,14 @@ h2.red-subtitle span:after {
 
 /* Event Information */
 .event-information {
-  background-color: var(--blue-rich);
+  background-color: #003366;
   color: #ffffff;
   padding: 4rem 4rem;
   width: 100%;
 }
 
 .event-information h1 {
-  font-family: Space Grotesk;
+  font-family: var(--font-inria);
   font-style: normal;
   font-weight: 700;
   line-height: normal;
@@ -768,7 +768,7 @@ img.partner-logo-img {
 @media (max-width: 768px) {
   .events-page h1 {
     font-size: 30px;
-    font-family: "Space Mono", monospace;
+    font-family: var(--font-inria);
   }
 
   h2.red-subtitle span:before {
@@ -822,7 +822,7 @@ img.partner-logo-img {
   }
 
   .events-hero h1 {
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--font-inter);
   }
 
   .events-row {

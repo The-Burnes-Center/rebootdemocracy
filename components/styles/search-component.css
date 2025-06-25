@@ -24,6 +24,9 @@
 
 .search-results-container {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 2rem 0;
   min-width: 53rem;
 }
@@ -49,7 +52,6 @@
 
 .blog-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
 }
 
@@ -115,15 +117,16 @@
     margin-top: 12rem;
   }
   .result-category {
-    gap: 12rem;
+    gap: 2rem;
   }
   .search-results-container {
     min-width: 0;
     padding: 1rem;
     margin-bottom: 0rem;
+    margin-top:0rem;
   }
   .search-results-header {
-    margin-left:2rem;
+    margin-left: 2rem;
     margin-bottom: 0rem;
   }
 }

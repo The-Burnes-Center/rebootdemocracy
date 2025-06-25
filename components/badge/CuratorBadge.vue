@@ -37,16 +37,7 @@
       >
         {{ title }}
       </Text>
-      
-      <Text 
-        as="p" 
-        size="xs" 
-        weight="normal"
-        fontStyle="italic"
-        class="curator-badge__more"
-      >
-        {{ moreInfo }}
-      </Text>
+    
     </div>
   </div>
 </template>
@@ -56,10 +47,8 @@ interface CuratorBadgeProps {
   name: string;
   title: string;
   imageUrl: string;
-  moreInfo?: string;
 }
 
 const props = withDefaults(defineProps<CuratorBadgeProps>(), {
-  moreInfo: "More incredible things done in their career"
 });
 </script>

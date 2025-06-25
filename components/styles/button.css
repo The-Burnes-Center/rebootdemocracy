@@ -25,6 +25,8 @@
   border: 3px solid var(--border-color, #0d63eb);
 }
 
+
+
 .base__btn-slot {
   font-family: var(--font-inter, "Inter");
   color: var(--text-color, #0d63eb);
@@ -46,14 +48,19 @@
 
 /* Variant: Secondary */
 .base__button--secondary {
-  --bg-color: #ffffff;
-  --border-color: #0d63eb;
-  --bg-opacity: 0.2;
-  --text-color: #0d63eb;
+  --bg-color: #fc6423;      
+  --border-color: #fc6423;   
+  --bg-opacity: 1;           
+  --text-color: #FFFFFF;
 }
-
 .mobile-fullwidth {
   width: 100% !important;
+}
+
+.base__button--secondary:hover{
+   --text-color: #fc6423;
+   --bg-color: #f0ccbd;
+    --border-color: #f0ccbd;  
 }
 
 @media (max-width: 768px) {

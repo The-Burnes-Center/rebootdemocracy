@@ -31,7 +31,7 @@ npm run dev
 # pnpm
 pnpm dev
 
-# yarn
+# yarn to start the development server
 yarn dev
 
 # bun
@@ -40,7 +40,7 @@ bun run dev
 
 ## Production
 
-Build the application for production:
+## Build the application for production:
 
 ```bash
 # npm
@@ -59,8 +59,8 @@ bun run build
 Locally preview production build:
 
 ```bash
-# npm
-npm run preview
+# npm 
+npm run preview 
 
 # pnpm
 pnpm preview
@@ -68,8 +68,7 @@ pnpm preview
 # yarn
 yarn preview
 
-# bun
-bun run preview
+
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

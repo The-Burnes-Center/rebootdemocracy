@@ -1,9 +1,9 @@
 // blogService.ts
 import { createDirectus, rest, readItems } from '@directus/sdk';
-import type { BlogPost, Event } from '@/types/index.ts';
+import type { BlogPost, Event, NewsItem, WeeklyNews } from '@/types/index.ts';
 import { fetchWeeklyNewsItems } from './fetchWeeklyNews';
 
-const API_URL = 'https://content.thegovlab.com';
+const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
@@ -25,7 +25,7 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
 
     const response = await directus.request(
       readItems('reboot_democracy_blog', {
-        limit: 7,
+        limit: 13,
         meta: 'total_count',
         sort: ['-date'],
         fields: [
@@ -72,38 +72,6 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
   } catch (error) {
     console.error('Error fetching all blog posts:', error);
     return [];
-  }
-}
-
-export async function fetchFeaturedBlog(): Promise<BlogPost | null> {
-  try {
-    const filter = {
-      _and: [
-        { featuredBlog: { _eq: true } },
-        { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW(-5 hours)' } }
-      ]
-    };
-
-    const response = await directus.request(
-      readItems('reboot_democracy_blog', {
-        limit: 1,
-        sort: ['-date'],
-        fields: [
-          '*.*',
-          'authors.team_id.*',
-          'authors.team_id.Headshot.*',
-          'image.*'
-        ],
-        filter
-      })
-    );
-
-    const blogs = response as BlogPost[];
-    return blogs.length ? blogs[0] : null;
-  } catch (error) {
-    console.error('Error fetching featured blog:', error);
-    return null;
   }
 }
 
@@ -213,6 +181,80 @@ export async function fetchAllSlugs(): Promise<string[]> {
     return posts.map((post: any) => `/blog/${post.slug}`);
   } catch (error) {
     console.error('Failed to fetch slugs for prerendering:', error);
+    return [];
+  }
+}
+
+export async function fetchLatestCombinedPosts(): Promise<any[]> {
+  try {
+    // Fetch both blog and weekly news in parallel
+    const [blogResult, newsResult] = await Promise.all([
+      directus.request(readItems('reboot_democracy_blog', {
+        fields: [
+          '*.*',
+          'authors.team_id.*',
+          'authors.team_id.Headshot.*',
+          'image.*'
+        ],
+        limit: 6,
+        sort: ['-date'],
+        filter: {
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _lte: '$NOW(-5 hours)' } }
+          ]
+        }
+      })),
+      directus.request(readItems('reboot_democracy_weekly_news', {
+        fields: ['*.*'],
+        limit: 6,
+        sort: ['-date'],
+        filter: {
+          status: { _eq: 'published' },
+          date: { _nnull: true }
+        }
+      }))
+    ]);
+
+    // Before combining, tag each item with type
+    const blogWithType = (blogResult || []).map(item => ({
+      type: 'blog',
+      id: item.id,
+      title: item.title,
+      excerpt: item.excerpt,
+      authors: item.authors,
+      date: item.date,
+      slug: item.slug,
+      image: item.image,
+      status: item.status,
+      Tags: item.Tags,
+      content: item.content,
+      // Add any other blog-specific fields you need
+    }));
+
+    const newsWithType = (newsResult || []).map(item => ({
+      type: 'news',
+      id: item.id,
+      title: item.title,
+      excerpt: item.summary, 
+      authors: item.author, 
+      date: item.date,
+      edition: item.edition,
+      slug: null, 
+      image: item.image, 
+      status: item.status,
+      Tags: ['News that caught our eye'], 
+      category: 'News that caught our eye'
+    }));
+
+    // Combine and sort by date descending
+    const combined = [...blogWithType, ...newsWithType]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 6);
+
+    return combined;
+  } catch (error) {
+    console.error('Error fetching combined latest posts:', error);
     return [];
   }
 }
