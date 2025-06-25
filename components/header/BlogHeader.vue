@@ -19,7 +19,7 @@
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
+        fill="white"
       >
         <mask
           id="mask0_706_4166"
@@ -35,7 +35,7 @@
         <g mask="url(#mask0_706_4166)">
           <path
             d="M3 6H21M3 12H21M3 18H21"
-            stroke="black"
+            stroke="white"
             stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -48,26 +48,28 @@
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
+        fill="black"
       >
         <path
           d="M5 5L19 19M5 19L19 5"
-          stroke="black"
+          stroke="#000000"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
       </svg>
     </div>
- 
-    <nav v-show="!isMobile || (isMobile && mobileMenuOpen)" :class="{ 'nav-mobile-open': isMobile && mobileMenuOpen }">
+
+    <nav
+      v-show="!isMobile || (isMobile && mobileMenuOpen)"
+      :class="{ 'nav-mobile-open': isMobile && mobileMenuOpen }"
+    >
       <HeaderMenu
         :items="menuItems"
         :class="{ 'mobile-menu': isMobile }"
         @item-click="handleMenuItemClick"
       />
     </nav>
-
 
     <div class="search-container" v-if="!isMobile">
       <ais-instant-search
@@ -115,9 +117,9 @@ const toggleMobileMenu = (): void => {
 
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
   event.preventDefault();
-  
-  if (item.name === 'team') {
-    router.push({ path: '/about', hash: '#team-grid' });
+
+  if (item.name === "team") {
+    router.push({ path: "/about", hash: "#team-grid" });
   } else if (item.external && item.to) {
     window.location.href = item.to;
   } else if (item.to) {
@@ -152,17 +154,32 @@ const menuItems = computed<MenuItem[]>(() => {
       ],
     },
     {
-  label: "Our Work",
-  name: "work",
-  children: [
-    { label: "About Beth Noveck", name: "research", to: "https://thegovlab.org/beth-simone-noveck.html", external: true },
-    { label: "InnovateUS", name: "teachings", to: "https://innovate-us.org/", external: true },
-    { label: "Public Entrepreneur", name: "projects", to: "https://www.publicentrepreneur.org/", external: true },
-    { label: "Engagements", name: "partners", to: "/our-engagements" },
-    { label: "Research", name: "research", to: "/our-research" },
-    { label: "More Resources", name: "resources", to: "/more-resources" },
-  ],
-},
+      label: "Our Work",
+      name: "work",
+      children: [
+        {
+          label: "About Beth Noveck",
+          name: "research",
+          to: "https://thegovlab.org/beth-simone-noveck.html",
+          external: true,
+        },
+        {
+          label: "InnovateUS",
+          name: "teachings",
+          to: "https://innovate-us.org/",
+          external: true,
+        },
+        {
+          label: "Public Entrepreneur",
+          name: "projects",
+          to: "https://www.publicentrepreneur.org/",
+          external: true,
+        },
+        { label: "Engagements", name: "partners", to: "/our-engagements" },
+        { label: "Research", name: "research", to: "/our-research" },
+        { label: "More Resources", name: "resources", to: "/more-resources" },
+      ],
+    },
     { label: "Sign up", name: "signup", to: "/signup" },
   ];
 });

@@ -20,11 +20,11 @@
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
+        fill="white"
       >
         <path
           d="M3 6H21M3 12H21M3 18H21"
-          stroke="black"
+          stroke="white"
           stroke-width="2.5"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -36,11 +36,11 @@
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
+        fill="black"
       >
         <path
           d="M5 5L19 19M5 19L19 5"
-          stroke="black"
+          stroke="#000000"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"

@@ -101,9 +101,14 @@
 
   .header-menu__label {
     display: flex;
+    color: #000000;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
     width: 100%;
+  }
+
+  .header-menu__label svg{
+    --color-icon: black;
   }
 }
