@@ -242,7 +242,7 @@ export default {
       <p class="excerpt"> {{postData[0].summary}}</p><br>
       <p><strong>In the news this week</strong></p>
       <ul>
-        <li v-for="cat in uniqueCategories" :key="cat">
+        <li v-for="cat in uniqueCategories" :key="cat"  v-show="cat!='Special Topics'">
           <a :href="'#' + cat.toLowerCase().replace(/\s+/g, '')">
             <strong>{{ cat }}:</strong>
           </a>
@@ -284,11 +284,11 @@ export default {
     <!-- Grouped News Items by Category -->
     <div class="news-items">
       <div v-for="cat in uniqueCategories" :key="cat">
-        <h2 :id="cat.toLowerCase().replace(/\s+/g, '')" class="group-heading">
+        <h2 :id="cat.toLowerCase().replace(/\s+/g, '')" class="group-heading" v-show="cat!='Special Topics'">
           {{ cat }}
         </h2>
         <div v-for="item in postData[0].items.filter(item => (item.reboot_democracy_weekly_news_items_id.category || 'News that caught our eye') === cat)"
-             :key="item.reboot_democracy_weekly_news_items_id.id"
+             :key="item.reboot_democracy_weekly_news_items_id.id" v-if="cat!='Special Topics'"
              class="news-item">
           <p class="category-badge">
             <span>{{ item.reboot_democracy_weekly_news_items_id.category || 'News that caught our eye' }}</span>
@@ -317,7 +317,17 @@ export default {
         </div>
       </div>
     </div>
-
+    <!-- Grouped News Items by Category -->
+    <div class="news-items">
+      <div v-for="cat in uniqueCategories" :key="cat">
+        <div v-for="item in postData[0].items.filter(item => (item.reboot_democracy_weekly_news_items_id.category || 'News that caught our eye') === cat)"
+             :key="item.reboot_democracy_weekly_news_items_id.id" v-if="cat=='Special Topics'"
+             class="news-item">
+          <h4 class="item-title"><strong>{{ item.reboot_democracy_weekly_news_items_id.title }}</strong></h4>
+          <p class="item-excerpt" v-html="item.reboot_democracy_weekly_news_items_id.special_topics"></p>
+        </div>
+      </div>
+    </div>
     <!-- Footer Component -->
     <footer-comp></footer-comp>
   </div>
