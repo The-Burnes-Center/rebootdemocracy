@@ -359,7 +359,7 @@ interface Author {
 }
 
 const getAuthorName = (post: BlogPost | NewsItem): string => {
-  if ("authors" in post && post.authors && post.authors.length > 0) {
+  if ("authors" in post && post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
     if (post.authors.length > 1) {
       const authorNames = post.authors
         .map((author) => {
@@ -382,11 +382,17 @@ const getAuthorName = (post: BlogPost | NewsItem): string => {
     return author
       ? `${author.First_Name} ${author.Last_Name}`
       : "Reboot Democracy Team";
-  } else if ("author" in post && post.author) {
+  } 
+  else if ("authors" in post && post.authors && typeof post.authors === "string") {
+    return post.authors;
+  }
+  else if ("author" in post && post.author) {
     return post.author;
   }
+  
   return "Reboot Democracy Team";
 };
+
 
 // Data processing functions
 const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
@@ -410,30 +416,44 @@ const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
 };
 
 const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
-  if (!posts || posts.length === 0) return [];
+  try {
+    if (!posts || posts.length === 0) return [];
 
-  const authorCounts = new Map<string, number>();
+    const authorCounts = new Map<string, number>();
 
-  // Only count authors from blog posts, not from weekly news items
-  posts.forEach((post) => {
-    if ("authors" in post && post.authors) {
-      const authorName = getAuthorName(post);
-      if (authorName !== "Unknown Author") {
-        authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+    posts.forEach((post, index) => {
+      try {
+        if (!post) return;
+        
+        const authorName = getAuthorName(post);
+        
+        // Only count meaningful author names
+        if (authorName && 
+            authorName !== "Unknown Author" && 
+            authorName !== "Reboot Democracy Team" &&
+            authorName.trim() !== "") {
+          authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+        }
+      } catch (postError) {
+        console.error(`Error processing post ${index}:`, postError, post);
       }
-    }
-  });
+    });
 
-  return Array.from(authorCounts.entries())
-    .map(([name, count]) => ({ id: name, name, count }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(authorCounts.entries())
+      .map(([name, count]) => ({ id: name, name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.error('Error in extractAuthorsWithCounts:', error);
+    return []; 
+  }
 };
 
-const { data: allPostsData, pending: isPostsLoading} = await useAsyncData(
+
+const { data: allPostsData, pending: isPostsLoading } = await useAsyncData(
   "all-blog-posts",
   async () => {
     const [blogPosts, newsItems] = await Promise.all([
-      fetchAllBlogPosts(), 
+      fetchAllBlogPosts(),
       fetchWeeklyNewsItems(),
     ]);
 
@@ -442,10 +462,9 @@ const { data: allPostsData, pending: isPostsLoading} = await useAsyncData(
 
     const newsSorted = [...newsItems].sort(sortDesc);
 
-    // final array: every blog → every news
     return [...blogPosts, ...newsSorted];
   },
-  { server: true } // optional: don’t re-fetch in browser
+  { server: true } 
 );
 
 // Prefetch tags data

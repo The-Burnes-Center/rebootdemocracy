@@ -127,6 +127,7 @@ export async function fetchWeeklyNewsItems(): Promise<any[]> {
       title: entry.title,
       excerpt: entry.summary, 
       authors: entry.author, 
+      author: entry.author, 
       date: entry.date,
       edition: entry.edition,
       slug: null, 

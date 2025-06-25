@@ -210,6 +210,8 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { format } from "date-fns";
 import type { BlogPost, NewsItem } from "@/types/index.ts";
+import { fetchAllBlogPosts } from "~/composables/fetchBlogData";
+import { fetchWeeklyNewsItems } from "~/composables/fetchWeeklyNews";
 
 const router = useRouter();
 const { resetSearch, showSearchResults, searchQuery } = useSearchState();
@@ -312,7 +314,7 @@ const weeklyNewsUrl = computed(() => {
     edition = latestWeeklyNews.value.id;
   } else {
     const newsPost = latestCombinedPosts.value?.find(
-      (post) => post.type === "news"
+      (post: { type: string; }) => post.type === "news"
     );
     if (newsPost?.edition) {
       edition = newsPost.edition;
@@ -336,7 +338,7 @@ const tabOptions = computed(() => [
     external: true,
     disabled:
       !latestWeeklyNews.value?.edition &&
-      !latestCombinedPosts.value?.find((post) => post.type === "news"),
+      !latestCombinedPosts.value?.find((post: { type: string; }) => post.type === "news"),
   },
   { title: "Events", name: "events", url: "/events", external: true },
 ]);
@@ -432,7 +434,7 @@ function getAuthorName(post: any): string {
   }
 
   // Handle legacy author field
-  if (post.author) {
+  if (post.author && typeof post.author === "string") {
     return post.author;
   }
 
@@ -630,7 +632,7 @@ onMounted(() => {
   console.log("latestWeeklyNews:", latestWeeklyNews.value);
   console.log(
     "latestCombinedPosts news:",
-    latestCombinedPosts.value?.filter((p) => p.type === "news")
+    latestCombinedPosts.value?.filter((p: { type: string; }) => p.type === "news")
   );
   console.log("Final weeklyNewsUrl:", weeklyNewsUrl.value);
 });
