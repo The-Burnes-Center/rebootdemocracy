@@ -1,6 +1,26 @@
-.blog-detail {
-  max-width: 100%;
+.blog-gradient-background {
+  width: 100%;
+  background: linear-gradient(135deg, #e6efff 0%, #e6efff 100%);
+  padding: 3rem 0;
+  min-height: 50vh; 
+}
+
+
+.blog-gradient-inner {
+  max-width: 960px;
   margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.blog-top-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.blog-detail {
+  max-width: 960px;
+  margin: auto;
+  padding: 2rem;
 }
 
 .blog-section {
@@ -8,25 +28,18 @@
   flex-direction: column;
   gap: 1rem;
   padding-top: 1rem;
-  background: linear-gradient(135deg, #e6efff 0%, #e6efff 100%);
 }
 
-.blog-banner-image {
-  margin: 2rem 0;
-  text-align: center;
-}
 
 .blog-banner-image img.blog-image {
-  width: 70%;
-  height: 30rem;
+  width: 100%;
+  height: auto;
   border-radius: 12px;
   object-fit: cover;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .blog-title {
-  padding-left: 15rem;
-  padding-right: 15rem;
   color: #003266 !important;
 }
 .card-tag {
@@ -39,8 +52,6 @@ p.excerpt-paragraph {
   font-family: var(--font-inter);
   font-weight: 400;
   margin: 0;
-  padding-left: 15rem;
-  padding-right: 15rem;
 }
 
 .read-bio-link {
@@ -86,8 +97,6 @@ p a {
   box-sizing: border-box;
   overflow: hidden;
   padding-top: 2rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
   padding-bottom: 2rem;
 }
 
@@ -119,8 +128,6 @@ p a {
 }
 
 .publication-info {
-  margin-left: 15rem;
-  margin-right: 15re4m;
   margin-bottom: 2rem;
   color: #003266 !important;
 }
@@ -164,7 +171,6 @@ p a {
 .blog-content {
   font-family: var(--font-inter);
   line-height: 30px;
-  padding: 1rem 15rem;
 }
 
 .blog-content h1 {
@@ -209,7 +215,9 @@ p a {
   gap: 4rem;
   align-items: flex-start;
   background-color: #ffffff;
-  padding: 2rem 7rem;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 0rem;
 }
 
 .related-posts-list {
@@ -293,7 +301,6 @@ p a {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 15rem;
 }
 
 /* Category eyebrow styling */
@@ -332,8 +339,6 @@ p a {
   p.excerpt-paragraph {
     margin-left: 1rem;
     margin-right: 1rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
   }
   .blog-banner-image img.blog-image {
     height: 15rem;
@@ -395,7 +400,6 @@ p a {
   }
 
   .blog-content {
-    padding: 0 0.8rem;
     margin: 0rem;
   }
 
@@ -413,8 +417,6 @@ p a {
 
   .blog-title {
     margin: 1rem !important;
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
   }
 
   .tag-share-category {
@@ -427,8 +429,7 @@ p a {
     margin-top: 0;
     margin-left: 1rem;
     margin-right: 1rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
+
   }
 
   .share-widget-desktop {
