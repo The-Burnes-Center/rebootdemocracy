@@ -13,34 +13,18 @@
     </div>
     <!-- Mobile menu toggle -->
     <div class="mobile-menu-toggle" @click="toggleMobileMenu" v-if="isMobile">
-      <svg
-        v-if="!mobileMenuOpen"
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
+      <svg  v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24"
         height="24"
         viewBox="0 0 24 24"
-      >
-        <mask
-          id="mask0_706_4166"
-          style="mask-type: luminance"
-          maskUnits="userSpaceOnUse"
-          x="0"
-          y="0"
-          width="24"
-          height="24"
-        >
-          <path d="M24 0H0V24H24V0Z"/>
-        </mask>
-        <g mask="url(#mask0_706_4166)">
-          <path
-            d="M3 6H21M3 12H21M3 18H21"
-            stroke="white"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </g>
-      </svg>
+        style="fill:#FFFFFF;"> 
+        <path
+          d="M3 6H21M3 12H21M3 18H21"
+          stroke="white"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />   
+       </svg>
       <svg
         v-else
         xmlns="http://www.w3.org/2000/svg"

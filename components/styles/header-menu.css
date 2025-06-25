@@ -99,8 +99,10 @@
     width: 100%;
     border-bottom: 1px solid #e0e0e0;
   }
+}
 
-  .header-menu__label {
+@media (max-width: 768px) {
+   .header-menu__label {
     display: flex;
     color: #000000;
     justify-content: space-between;

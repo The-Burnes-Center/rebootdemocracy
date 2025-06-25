@@ -307,10 +307,7 @@
   .right-content {
     margin-bottom: 1rem;
   }
-  .mobile-menu-toggle svg path {
-  stroke: white !important;
-  fill: none !important;
-}
+
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
