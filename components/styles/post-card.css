@@ -4,6 +4,7 @@
   max-width: 100%;
 }
 
+
 .postcard__content {
   display: flex;
   width: 100%;
@@ -93,7 +94,7 @@
     padding: 0;
     align-items: flex-start;
   }
-  
+
   /* Adjust image for mobile */
   .postcard__image {
     width: 100%; /* Smaller image on mobile */
@@ -145,7 +146,7 @@
 @media (max-width: 768px) {
   .home-featured-wrapper {
     flex-direction: column;
-    gap: 2rem; 
+    gap: 2rem;
     padding: 1rem 0.5rem;
   }
 

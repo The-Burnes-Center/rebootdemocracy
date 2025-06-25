@@ -64,7 +64,7 @@
                 {{ blog.title }}
               </TitleText>
 
-              <!-- Category eyebrow - Now clickable -->
+              <!-- Category eyebrow -->
               <div class="tag-share-category">
                 <div class="blog-category-eyebrow">
                   <span

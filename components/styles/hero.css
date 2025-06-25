@@ -19,7 +19,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    rgba(0, 0, 0, 0.4),
+    #003468,
     rgba(0, 0, 0, 0.4)
   );
   z-index: 1;

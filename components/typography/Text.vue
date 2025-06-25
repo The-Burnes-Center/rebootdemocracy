@@ -70,7 +70,7 @@ const textColors = {
   "text-primary-light": "#FFFFFF",
   "text-secondary": "#0D63EB",
   "text-tertiary": "#062C51",
-  "tag-primary": "#003366",
+  "tag-primary": "#f06e3a",
   "tag-secondary": "#0D63EB",
   "link-primary": "#0D63EB",
 

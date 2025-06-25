@@ -7,7 +7,7 @@
 }
 
 .header-menu__label {
-  color: #003366;
+  color: #ffffff;
   font-family: var(--font-inter);
   font-size: 1rem;
   --color-icon: #003366;
@@ -19,13 +19,17 @@
 
 
 .topic-label {
-  background-color: #003366;
+  background-color: #fc6423;
   color: white;
   padding: 0.5rem 0.75rem;
   border-radius: 3px;
   --color-icon: white;
 }
 
+.topic-label.active {
+  background-color: #FFFFFF;
+  color: #fc6423;
+}
 
 .dropdown-icon {
   margin-left: 6px;
@@ -51,7 +55,7 @@
 }
 
 .topic-icon.active {
-  --color-icon: white;
+  --color-icon: #fc6423;
 }
 
 /* Mobile dropdown styles for inline display */

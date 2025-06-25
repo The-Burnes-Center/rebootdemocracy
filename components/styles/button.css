@@ -48,19 +48,19 @@
 
 /* Variant: Secondary */
 .base__button--secondary {
-   --bg-color: #FFFFFF;      
-  --border-color: #003366;   
+  --bg-color: #fc6423;      
+  --border-color: #fc6423;   
   --bg-opacity: 1;           
-  --text-color: #003366;
+  --text-color: #FFFFFF;
 }
 .mobile-fullwidth {
   width: 100% !important;
 }
-
+/* 
 .base__button--secondary:hover{
-   --text-color: #0d63eb;
-   --border-color: #0d63eb;
-}
+   --text-color: #fc6423;
+   --bg-color: #FFFFFF;
+} */
 
 @media (max-width: 768px) {
   .base__button {

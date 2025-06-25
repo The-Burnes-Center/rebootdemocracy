@@ -119,12 +119,17 @@ const formattedDate = props.date
 }
 
 .blogcard-tag {
-  background-color: #e6f0ff;
+  background-color: #feebe3;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   display: inline-block;
   width: fit-content;
 }
+
+.blogcard-tag:hover {
+  background-color: #f5d1c2;
+}
+
 
 .blogcard-title {
   font-size: 1.25rem;

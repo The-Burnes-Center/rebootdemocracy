@@ -134,7 +134,7 @@
                     transform="uppercase"
                     fontFamily="inter"
                     class="featured-card__tag"
-                    :style="{ color: index % 2 === 0 ? '#003366' : '#2F4F4F' }"
+                    :color="'tag-primary'"
                   >
                     {{ post.Tags?.[0] || "Blog" }}
                   </Text>
