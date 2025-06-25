@@ -114,7 +114,7 @@
                 :key="post.id || `post-${index}`"
                 class="custom-card"
                 @click.prevent="handlePostClick(post)"
-                style="cursor: pointer;"
+                style="cursor: pointer"
               >
                 <div class="card-image">
                   <img
@@ -304,8 +304,27 @@ const isLoading = computed(() => isLoadingState.value);
 const authorOptions = computed(() => ["All Authors", ...allAuthors.value]);
 
 const weeklyNewsUrl = computed(() => {
-  const edition = latestWeeklyNews.value?.edition || "51";
-  return `/newsthatcaughtoureye/${String(edition).replace(/\D/g, "")}`;
+  let edition = null;
+
+  if (latestWeeklyNews.value?.edition) {
+    edition = latestWeeklyNews.value.edition;
+  } else if (latestWeeklyNews.value?.id) {
+    edition = latestWeeklyNews.value.id;
+  } else {
+    const newsPost = latestCombinedPosts.value?.find(
+      (post) => post.type === "news"
+    );
+    if (newsPost?.edition) {
+      edition = newsPost.edition;
+    } else if (newsPost?.id) {
+      edition = newsPost.id;
+    }
+  }
+  if (edition) {
+    const cleanEdition = String(edition).replace(/\D/g, "");
+    return `/newsthatcaughtoureye/${cleanEdition}`;
+  }
+  return `/newsthatcaughtoureye/51`;
 });
 
 const tabOptions = computed(() => [
@@ -315,6 +334,9 @@ const tabOptions = computed(() => [
     name: "news",
     url: weeklyNewsUrl.value,
     external: true,
+    disabled:
+      !latestWeeklyNews.value?.edition &&
+      !latestCombinedPosts.value?.find((post) => post.type === "news"),
   },
   { title: "Events", name: "events", url: "/events", external: true },
 ]);
@@ -418,7 +440,6 @@ function getAuthorName(post: any): string {
 }
 
 function navigateToBlogPost(post: any): void {
-  
   try {
     // Handle blog posts
     if (post.type === "blog" || (!post.type && post.slug)) {
@@ -427,12 +448,15 @@ function navigateToBlogPost(post: any): void {
       } else {
         console.error("Blog post missing slug:", post);
       }
-    } 
+    }
     // Handle weekly news
     else if (post.type === "news" || post.edition) {
       const edition = String(post.edition || post.id || "").replace(/\D/g, "");
       if (edition) {
-        console.log("Navigating to news post:", `/newsthatcaughtoureye/${edition}`);
+        console.log(
+          "Navigating to news post:",
+          `/newsthatcaughtoureye/${edition}`
+        );
         router.push(`/newsthatcaughtoureye/${edition}`);
       } else {
         console.error("News post missing edition:", post);
@@ -441,26 +465,24 @@ function navigateToBlogPost(post: any): void {
     // Handle posts with direct URL
     else if (post.url) {
       router.push(post.url);
-    }
-    // Fallback:
-    else if (post.slug || post.id) {
+    } else if (post.slug || post.id) {
       const identifier = post.slug || post.id;
       console.log("Fallback navigation to:", `/blog/${identifier}`);
       router.push(`/blog/${identifier}`);
-    }
-    else {
+    } else {
       console.error("Unable to determine navigation path for post:", post);
     }
   } catch (error) {
     console.error("Navigation error:", error, post);
   }
 }
+
 function handlePostClick(post: any, event?: Event): void {
   if (event) {
     event.preventDefault();
     event.stopPropagation();
   }
-  
+
   navigateToBlogPost(post);
 }
 
@@ -483,7 +505,6 @@ function handleTabChange(_: number, name: string): void {
   if (name === "latest-posts") resetSearch();
 }
 
-// NEW: Function to fetch posts by specific author
 async function fetchPostsByAuthor(authorName: string): Promise<BlogPost[]> {
   // Check cache first
   if (authorPostsCache.value.has(authorName)) {
@@ -601,5 +622,16 @@ async function handleAuthorFilter(author: string): Promise<void> {
   await applyFilters();
 }
 
-onMounted(resetSearch);
+onMounted(() => {
+  resetSearch();
+
+  // Temporary debug to see what's happening
+  console.log("=== WEEKLY NEWS DEBUG ===");
+  console.log("latestWeeklyNews:", latestWeeklyNews.value);
+  console.log(
+    "latestCombinedPosts news:",
+    latestCombinedPosts.value?.filter((p) => p.type === "news")
+  );
+  console.log("Final weeklyNewsUrl:", weeklyNewsUrl.value);
+});
 </script>
