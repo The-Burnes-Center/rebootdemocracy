@@ -1,5 +1,4 @@
 
-/* Keep existing page layout styles */
 .page-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
