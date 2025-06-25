@@ -19,7 +19,6 @@
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="white"
       >
         <mask
           id="mask0_706_4166"
@@ -30,7 +29,7 @@
           width="24"
           height="24"
         >
-          <path d="M24 0H0V24H24V0Z" fill="white" />
+          <path d="M24 0H0V24H24V0Z"/>
         </mask>
         <g mask="url(#mask0_706_4166)">
           <path
