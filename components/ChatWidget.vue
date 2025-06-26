@@ -197,7 +197,11 @@ function useSample(q:string) { draft.value = q; send() }
   flex-direction: column;
   
 }
-
+.input-bar {
+  display: flex;
+  flex-direction: row;
+  
+}
 /* Make the messages section scrollable */
 .messages {
   flex: 1 1 auto;
@@ -219,11 +223,11 @@ function useSample(q:string) { draft.value = q; send() }
 /* FAB button always visible */
 .fab {
   position: absolute;
-    top: 20px;
-    /* bottom: 40px; */
-    z-index: 201;
-    width: 40px;
-    height: 40px;
+  top: 20px;
+  /* bottom: 40px; */
+  z-index: 201;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #007bff;
   color: white;
@@ -234,8 +238,22 @@ function useSample(q:string) { draft.value = q; send() }
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Add these properties to ensure it stays circular */
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  overflow: hidden;
 }
 
+/* Add styling for the bot icon to ensure it doesn't stretch the button */
+.bot-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
 
 /* Hide the chat window and background when not open */
 .open {
