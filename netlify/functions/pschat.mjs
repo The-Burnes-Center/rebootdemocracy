@@ -216,7 +216,6 @@ Your thoughtful answer in markdown:
       context.res.body += `data: ${JSON.stringify({ content })}\n\n`;
       await new Promise(resolve => context.awsRequestId ? resolve() : context.awsLambda.context.succeed(context.res));
     }
-
     // Send the source documents as the final message
     const sourceDocuments = limitedResults.length > 0 
       ? Array.from(new Map(limitedResults.map(result => {
