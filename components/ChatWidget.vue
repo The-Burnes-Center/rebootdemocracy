@@ -141,6 +141,16 @@ async function send () {
         if (payload.sourceDocuments) bot.sources = payload.sourceDocuments
       }
     }
+    
+    // 4. Scroll to show beginning of the answer
+    await nextTick()
+    setTimeout(() => {
+      const botMessageElement = msgList.value?.querySelector('.msg.bot:last-child')
+      if (botMessageElement) {
+        botMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+    
   } catch (err) {
     // Print as much info as possible
     console.error('ChatWidget send() error:', err)
@@ -194,7 +204,9 @@ function useSample(q:string) { draft.value = q; send() }
   max-height: 55vh;
   overflow-y: auto;
   margin-bottom: 20px;
-  padding-right: 8px; /* for scrollbar */
+  padding: 5px; /* for scrollbar */
+  border:1px solid #ccc;
+
 }
 
 /* Panel layout */
@@ -249,7 +261,11 @@ function useSample(q:string) { draft.value = q; send() }
 }
 }
 
-  
+    
+.welcome {
+    border-bottom:1px solid #ccc;
+  }
+
   .welcome-message {
     margin-bottom: 20px;
   }
@@ -379,20 +395,33 @@ function useSample(q:string) { draft.value = q; send() }
     border: none;
     border-radius: 0 5px 5px 0;
     cursor: pointer;
+    height: 42px; /* Fixed height to prevent size changes */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px; /* Ensure minimum width */
   }
   
   button:disabled {
     background-color: #cccccc;
   }
 
-  .loading-dots {
-  display: inline-block;
+.loading-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   letter-spacing: 2px;
+  height: 100%;
+  width: 100%;
 }
 
 .loading-dots .dot {
   animation: blink 1.4s infinite both;
-  font-size: 1.2em;
+  font-size: 1.8em;
+  color: #007bff; /* Blue color for dots */
+  line-height: 1;
+  display: inline-block;
+  height: 1em; /* Fixed height */
 }
 
 .loading-dots .dot:nth-child(2) {
@@ -403,7 +432,13 @@ function useSample(q:string) { draft.value = q; send() }
 }
 
 @keyframes blink {
-  0%, 80%, 100% { opacity: 0; }
-  40% { opacity: 1; }
+  0%, 80%, 100% { 
+    opacity: 0; 
+    color: #007bff; /* Blue when visible */
+  }
+  40% { 
+    opacity: 1; 
+    color: #ffffff; /* White when fully visible */
+  }
 }
   </style>

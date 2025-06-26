@@ -12,7 +12,6 @@ package = "netlify-plugin-cache"
   node_bundler = "esbuild"
   external_node_modules = ["@directus/sdk", "jstoxml", "he"]
 
-
 [[redirects]]
 from = "/*"
 to = "/index.html"
