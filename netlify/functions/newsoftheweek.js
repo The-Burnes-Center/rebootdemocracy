@@ -12,7 +12,7 @@ async function initializeJsToXml() {
 
 const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
 
-exports.handler = async function (event, context) {
+export const handler = async function (event, context) {
   try {
     // Initialize the jstoxml module
     const toXML = await initializeJsToXml();

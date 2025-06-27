@@ -1,9 +1,9 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
 import pkg from 'jstoxml';
-import * as Directus from '@directus/sdk';
+import { Directus } from '@directus/sdk';
 import he from 'he';
 
-exports.handler = async function (event, context) {
+export const handler = async function (event, context) {
 
   const { toXML } = pkg;
   const directus = new Directus('https://burnes-center.directus.app/');
