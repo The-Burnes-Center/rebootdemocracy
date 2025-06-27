@@ -17,7 +17,7 @@ export default defineNuxtConfig({
   nitro: {
   preset: 'netlify',
   prerender: {
-    crawlLinks: true,
+    crawlLinks: false,
     failOnError: false,
     concurrency: 1, 
     routes: []
