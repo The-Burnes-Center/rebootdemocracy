@@ -34,6 +34,7 @@ const SizeToRem = {
   base: "1rem", // 16px
   lg: "1.125rem", // 18px
   xl: "1.25rem", // 20px
+  "1.5xl": "1.3rem", // 22px
   "2xl": "1.5rem", // 24px
   "3xl": "1.875rem", // 30px
   "4xl": "2rem", // 32px

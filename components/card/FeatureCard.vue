@@ -7,39 +7,41 @@
     :hoverable="true"
     role="article"
   >
-    <div class="featured-card__image-wrapper">
+    <!-- <div class="featured-card__image-wrapper">
       <img :src="imageUrl" :alt="title" class="featured-card__image" />
-    </div>
+    </div> -->
 
     <div class="featured-card__body">
       <div class="featured-card__content">
-          <Text
-            size="xs"
-            weight="extrabold"
-            class="featured-card__tag"
-            transform="uppercase"
-            fontFamily="inter"
-            color="tag-primary"
-          >
-            {{ tag }}
-          </Text>
+        <Text
+          size="xs"
+          weight="extrabold"
+          class="featured-card__tag"
+          transform="uppercase"
+          fontFamily="inter"
+          color="tag-primary"
+        >
+          {{ tag }}
+        </Text>
         <Text
           as="h3"
           size="3xl"
           weight="bold"
           fontFamily="inria"
-          class="featured-card__title clamp-3"
+          class="featured-card__title clamp-4"
+          lineHeight="loose"
         >
           {{ title }}
         </Text>
 
         <Text
           as="p"
-          size="base"
+          size="1.5xl"
           weight="medium"
           fontFamily="inter"
           color="text-primary-light"
-          class="featured-card__description clamp-5"
+          class="featured-card__description clamp-10"
+          lineHeight="loose"
         >
           {{ description }}
         </Text>

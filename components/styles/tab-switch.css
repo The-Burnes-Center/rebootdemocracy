@@ -102,6 +102,30 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .tab-headers{
+    flex-direction: column;
+  }
+
+  .tab-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .filter-container {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .tab-content {
+    padding: 20px;
+    min-width: unset; 
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .tab-switch {
@@ -144,5 +168,11 @@
     margin-top: 1rem;
     padding: 5px 2px;
     min-width: unset; /* Remove the hardcoded width */
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-headers {
+    padding: 0 10px;
   }
 }
