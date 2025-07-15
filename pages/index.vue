@@ -7,173 +7,226 @@
     />
     
     <!-- SEARCH RESULTS -->
-    <section class="home-featured-row" v-if="showSearchResults">
-      <GlobalSearch />
+    <section class="home-section" v-if="showSearchResults">
+      <div class="container">
+        <GlobalSearch />
+      </div>
     </section>
     
-    <!-- FEATURED + BLOG CARDS -->
-    <section class="home-featured-row" v-else>
-      <div class="home-featured-wrapper">
-        <!-- FEATURED POST -->
-        <FeatureCard
-          v-if="featuredPost"
-          class="featured-column"
-          :imageUrl="getImageUrl(featuredPost.image)"
-          :tag="getTag(featuredPost)"
-          :title="featuredPost.title || 'Untitled'"
-          :description="featuredPost.excerpt || ''"
-          :date="featuredPost.date || ''"
-          :author="getAuthorName(featuredPost)"
-          @click="navigateToBlogPost(featuredPost)"
-        />
-        
-        <!-- RECENT POSTS -->
-        <div class="postcards-column">
-          <PostCard
-            v-for="(item, index) in latestThreePosts"
-            :key="`post-${index}`"
-            :tag="getTag(item)"
-            :titleText="item.title"
-            :excerpt="item.excerpt || ''"
-            :imageUrl="getImageUrl(item.image)"
-            :author="getAuthorName(item)"
-            :date="item.date"
-            :isFeatured="false"
-            :hoverable="true"
-            @click="navigateToBlogPost(item)"
-          />
-        </div>
-      </div>
-      
-      <!-- BLOG COLLABORATORS HEADING -->
-      <div class="curator-and-button">
-        <Text
-          as="h3"
-          size="2xl"
-          weight="bold"
-          fontFamily="inria"
-          lineHeight="extra-loose"
-          color="text-dark"
-          class="new-blog-collab"
-        >
-          Blog Collaborators
-        </Text>
-        <button
-          class="base__button base__button--secondary"
-          @click="router.push('/about#team-grid')"
-        >
-          <span class="base__btn-slot">Meet Our Team</span>
-        </button>
-      </div>
-      
-      <!-- BLOG COLLABORATORS -->
-      <div class="blog-collaborators-wrapper">
-        <div class="collaborators-flex-grid">
-          <CuratorBadge
-            name="Beth Simone Noveck"
-            title="Director at Burnes Center and the Govlab"
-            imageUrl="/images/Beth_Simone_Noveck.png"
-          />
-        </div>
-        <div class="collaborators-fixed-grid">
-          <AuthorBadge
-            v-for="author in flattenedCollaborators"
-            :key="author.name"
-            v-bind="author"
-          />
-        </div>
-      </div>
-      
-      <!-- BLOG POSTS WITH FILTERS -->
-      <TabSwitch
-        :tabs="tabOptions"
-        :tagOptions="tagOptions"
-        :authorOptions="authorOptions"
-        :selectedTag="selectedTag"
-        @tab-changed="handleTabChange"
-        @tag-filter="handleTagFilter"
-        @author-filter="handleAuthorFilter"
-      >
-        <template #latest-posts>
-          <div v-if="!isLoading && displayPosts.length" class="blog-posts-section">
-            <div class="blog-card-grid grid-layout">
-              <div
-                v-for="(post, index) in displayPosts.slice(0, 12)"
-                :key="post.id || `post-${index}`"
-                class="custom-card"
-                @click="handlePostClick(post)"
-                style="cursor: pointer"
-              >
-                <div class="card-image">
-                  <img
-                    :src="getImageUrl(post.image)"
-                    :alt="post.title"
-                  />
-                </div>
-                <div class="card-content">
-                  <Text
-                    as="span"
-                    size="xs"
-                    weight="bold"
-                    transform="uppercase"
-                    fontFamily="inter"
-                    class="featured-card__tag"
-                    :color="'tag-primary'"
-                  >
-                    {{ getTag(post) }}
-                  </Text>
-                  <Text
-                    as="h3"
-                    size="xl"
-                    weight="bold"
-                    fontFamily="inria"
-                    lineHeight="relaxed"
-                    class="card-title"
-                  >
-                    {{ post.title }}
-                  </Text>
-                  <Text
-                    as="p"
-                    size="base"
-                    weight="medium"
-                    color="text-primary"
-                    class="card-description"
-                  >
-                    {{ post.excerpt }}
-                  </Text>
-                  <Text
-                    as="p"
-                    size="xs"
-                    fontStyle="italic"
-                    class="card-meta"
-                    v-if="post.date"
-                  >
-                    Published on
-                    <Text as="span" size="xs" weight="bold" fontStyle="italic">
-                      {{ formatDate(post.date) }}
-                    </Text>
-                    <template v-if="getAuthorName(post) !== 'Reboot Democracy Team'">
-                      by
-                      <Text as="span" size="xs" weight="bold" fontStyle="italic">
-                        {{ getAuthorName(post) }}
-                      </Text>
-                    </template>
-                  </Text>
-                </div>
-              </div>
-            </div>
-            <div class="view-all-container">
-              <button
-                class="base__button base__button--secondary"
-                @click="navigateToAllPosts"
-              >
-                <span class="base__btn-slot">View All Posts</span>
-              </button>
+    <!-- MAIN CONTENT -->
+    <template v-else>
+      <!-- FEATURED POSTS SECTION -->
+      <section class="home-section home-featured">
+        <div class="home-container">
+          <div class="home-featured-wrapper">
+            <!-- FEATURED POST -->
+            <FeatureCard
+              v-if="featuredPost"
+              class="featured-column"
+              :imageUrl="getImageUrl(featuredPost.image)"
+              :tag="getTag(featuredPost)"
+              :title="featuredPost.title || 'Untitled'"
+              :description="featuredPost.excerpt || ''"
+              :date="featuredPost.date || ''"
+              :author="getAuthorName(featuredPost)"
+              @click="navigateToBlogPost(featuredPost)"
+            />
+            
+            <!-- RECENT POSTS -->
+            <div class="postcards-column">
+              <PostCard
+                v-for="(item, index) in latestThreePosts"
+                :key="`post-${index}`"
+                :tag="getTag(item)"
+                :titleText="item.title"
+                :excerpt="item.excerpt || ''"
+                :imageUrl="getImageUrl(item.image)"
+                :author="getAuthorName(item)"
+                :date="item.date"
+                :isFeatured="false"
+                :hoverable="true"
+                @click="navigateToBlogPost(item)"
+              />
             </div>
           </div>
-        </template>
-      </TabSwitch>
-    </section>
+        </div>
+      </section>
+
+      <!-- SUBSCRIPTION SECTION (Full Width) -->
+      <section class="home-section home-subscription">
+        <div class="container">
+          <div class="subscription-content-wrapper">
+            <div class="subscription-text">
+              <Text
+                as="h2"
+                size="3xl"
+                weight="bold"
+                color="text-primary-light"
+                fontFamily="inria"
+                class="subscription-title"
+              >
+                Subscribe for Updates
+              </Text>
+               <Text
+                as="p"
+                weight="normal"
+                color="text-primary-light"
+                fontFamily="inter"
+                class="subscription-description"
+              >
+                A weekly curation of new findings and developments on innovation in governance
+              </Text>
+            </div>
+             <Button
+              class="btn-header"
+              variant="secondary"
+              height="50px"
+              :onClick="onClick"
+            >
+              Sign up for updates
+            </Button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- BLOG POSTS SECTION -->
+      <section class="home-section home-blog">
+        <div class="container">
+          <TabSwitch
+            :tabs="tabOptions"
+            :tagOptions="tagOptions"
+            :authorOptions="authorOptions"
+            :selectedTag="selectedTag"
+            @tab-changed="handleTabChange"
+            @tag-filter="handleTagFilter"
+            @author-filter="handleAuthorFilter"
+          >
+            <template #latest-posts>
+              <div v-if="!isLoading && displayPosts.length" class="blog-posts-section">
+                <div class="blog-card-grid">
+                  <div
+                    v-for="(post, index) in displayPosts.slice(0, 9)"
+                    :key="post.id || `post-${index}`"
+                    class="custom-card"
+                    @click="handlePostClick(post)"
+                    style="cursor: pointer"
+                  >
+                    <div class="card-image">
+                      <img
+                        :src="getImageUrl(post.image)"
+                        :alt="post.title"
+                      />
+                    </div>
+                    <div class="card-content">
+                      <Text
+                        as="span"
+                        size="xs"
+                        weight="bold"
+                        transform="uppercase"
+                        fontFamily="inter"
+                        class="featured-card__tag"
+                        :color="'tag-primary'"
+                      >
+                        {{ getTag(post) }}
+                      </Text>
+                      <Text
+                        as="h3"
+                        size="xl"
+                        weight="bold"
+                        fontFamily="inria"
+                        lineHeight="relaxed"
+                        class="card-title"
+                      >
+                        {{ post.title }}
+                      </Text>
+                      <Text
+                        as="p"
+                        size="base"
+                        weight="medium"
+                        color="text-primary"
+                        class="card-description"
+                      >
+                        {{ post.excerpt }}
+                      </Text>
+                      <Text
+                        as="p"
+                        size="xs"
+                        fontStyle="italic"
+                        class="card-meta"
+                        v-if="post.date"
+                      >
+                        Published on
+                        <Text as="span" size="xs" weight="bold" fontStyle="italic">
+                          {{ formatDate(post.date) }}
+                        </Text>
+                        <template v-if="getAuthorName(post) !== 'Reboot Democracy Team'">
+                          by
+                          <Text as="span" size="xs" weight="bold" fontStyle="italic">
+                            {{ getAuthorName(post) }}
+                          </Text>
+                        </template>
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+                <div class="view-all-container">
+                  <button
+                    class="base__button base__button--secondary"
+                    @click="navigateToAllPosts"
+                  >
+                    <span class="base__btn-slot">View All Posts</span>
+                  </button>
+                </div>
+              </div>
+            </template>
+          </TabSwitch>
+        </div>
+      </section>
+
+      <!-- COLLABORATORS SECTION -->
+      <section class="home-section home-collaborators">
+        <div class="container">
+          <!-- BLOG COLLABORATORS HEADING -->
+          <div class="curator-and-button">
+            <Text
+              as="h3"
+              size="2xl"
+              weight="bold"
+              fontFamily="inria"
+              lineHeight="extra-loose"
+              color="text-dark"
+              class="new-blog-collab"
+            >
+              Blog Collaborators
+            </Text>
+            <button
+              class="base__button base__button--secondary"
+              @click="router.push('/about#team-grid')"
+            >
+              <span class="base__btn-slot">Meet Our Team</span>
+            </button>
+          </div>
+          
+          <!-- BLOG COLLABORATORS -->
+          <div class="blog-collaborators-wrapper">
+            <div class="collaborators-flex-grid">
+              <CuratorBadge
+                name="Beth Simone Noveck"
+                title="Director at Burnes Center and the Govlab"
+                imageUrl="/images/Beth_Simone_Noveck.png"
+              />
+            </div>
+            <div class="collaborators-fixed-grid">
+              <AuthorBadge
+                v-for="author in flattenedCollaborators"
+                :key="author.name"
+                v-bind="author"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    </template>
   </div>
 </template>
 
@@ -234,6 +287,9 @@ const { data: authorListData } = await useAsyncData(
   }
 );
 
+const { data: featuredContributors }
+  = await useAsyncData('featured-contributors', fetchFeaturedContributors);
+
 // Computed properties
 const featuredPost = computed(() => latestCombinedPosts.value?.[0] || null);
 const latestThreePosts = computed(() => latestCombinedPosts.value?.slice(1, 4) || []);
@@ -266,60 +322,15 @@ const tabOptions = computed(() => [
   { title: "Events", name: "events", url: "/events", external: true },
 ]);
 
-const flattenedCollaborators = computed(() => collaborators.flat());
-
-// Static data
-const collaborators = [
-  [
-    {
-      name: "Audrey Tang",
-      title: "Taiwan's first Minister of Digital Affairs",
-      imageUrl: "/images/Audrey_Tang.png",
-    },
-    {
-      name: "Dane Gambrell",
-      title: "Fellow at Burnes Center",
-      imageUrl: "/images/Dane_Gambrell.png",
-    },
-    {
-      name: "Tiago C. Peixoto",
-      title: "Senior Public Sector Specialist",
-      imageUrl: "/images/Tiago_C_Peixoto.png",
-    },
-    {
-      name: "Giulio Quaggiotto",
-      title: "Head of UNDP's Strategic Innovation unit",
-      imageUrl: "/images/Giulio_Quaggiotto.png",
-    },
-    {
-      name: "Jacob Kemp",
-      title: "AI & Social Impact Fellow",
-      imageUrl: "/images/Jacob_Kemp.png",
-    },
-  ],
-  [
-    {
-      name: "Seth Harris",
-      title: "Senior Fellow at Burnes Center",
-      imageUrl: "/images/Seth_Harris.png",
-    },
-    {
-      name: "Hannah Hetzer",
-      title: "Fellow at Burnes Center",
-      imageUrl: "/images/Hannah_Hetzer.png",
-    },
-    {
-      name: "Bonnie McGilpin",
-      title: "Fellow at Burnes Center",
-      imageUrl: "/images/Bonnie_McGilpin.png",
-    },
-    {
-      name: "Anirudh Dinesh",
-      title: "Fellow at Burnes Center",
-      imageUrl: "/images/Anirudh_Dinesh.png",
-    },
-  ],
-];
+const flattenedCollaborators = computed(() =>
+  featuredContributors.value?.map((member) => ({
+    name: `${member.First_Name} ${member.Last_Name}`,
+    title: member.Title,
+    imageUrl: member.Headshot?.id
+      ? `https://burnes-center.directus.app/assets/${member.Headshot.id}`
+      : '/images/exampleImage.png',
+  })) || []
+);
 
 // Utility functions
 function formatDate(dateValue: Date | string): string {
@@ -422,6 +433,10 @@ function navigateToAllPosts(): void {
 function handleTabChange(_: number, name: string): void {
   if (name === "latest-posts") resetSearch();
 }
+
+const onClick = (): void => {
+  window.location.href = "/signup";
+};
 
 // Filtering functions
 async function fetchPostsByAuthor(authorName: string): Promise<BlogPost[]> {

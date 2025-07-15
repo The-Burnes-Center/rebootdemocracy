@@ -4,39 +4,18 @@
   flex-direction: column;
   background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
   position: relative;
-  border-bottom: 1px solid #003366;
 }
 
 /* Header with Button */
 .curator-and-button {
+  max-width: 1300px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 2rem;
-  margin-bottom: 0.5rem;
-  margin-top:1.5rem;
-  padding: 0 2rem;
-}
-
-
-/* Meet Our Team Button */
-.meet-our-team-button {
-  padding: 0.25rem 1rem;
-  border: 2px solid #003366;
-  background: white;
-  color: #003366;
-  font-weight: 600;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-family: var(--font-inter);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  padding: 1rem 1rem;
 }
 
 .meet-our-team-button:hover {
@@ -191,8 +170,8 @@
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
-    padding: 0;
-    margin-bottom: 2rem;
+    padding: 1rem 1rem;
+    margin-bottom: 0.5rem;
   }
   
   .new-blog-collab {

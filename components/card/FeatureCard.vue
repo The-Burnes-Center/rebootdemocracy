@@ -7,9 +7,9 @@
     :hoverable="true"
     role="article"
   >
-    <!-- <div class="featured-card__image-wrapper">
+    <div class="featured-card__image-wrapper">
       <img :src="imageUrl" :alt="title" class="featured-card__image" />
-    </div> -->
+    </div>
 
     <div class="featured-card__body">
       <div class="featured-card__content">
@@ -28,7 +28,7 @@
           size="3xl"
           weight="bold"
           fontFamily="inria"
-          class="featured-card__title clamp-4"
+          class="featured-card__title clamp-3"
           lineHeight="loose"
         >
           {{ title }}
@@ -40,7 +40,7 @@
           weight="medium"
           fontFamily="inter"
           color="text-primary-light"
-          class="featured-card__description clamp-10"
+          class="featured-card__description clamp-4"
           lineHeight="loose"
         >
           {{ description }}

@@ -8,6 +8,12 @@
   overflow: hidden;
 }
 
+.home-container {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
 .left-content {
   width: 100%;
   max-width: 100%;
@@ -38,8 +44,7 @@
 .view-all-container {
   display: flex;
   justify-content: center;
-  margin-top: 3rem;
-  margin-bottom: 2rem;
+  margin-top: 2rem;
   padding: 0 1rem;
 }
 
@@ -75,10 +80,6 @@
   gap: 2rem;
   width: 100%;
   padding: 0 1rem;
-}
-
-.grid-layout {
-  /* Additional grid layout properties if needed */
 }
 
 /* Custom card styles - matching your template */
@@ -196,9 +197,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
-  border-bottom: 1px solid #003366;
-  padding: 1rem;
-  padding-bottom: 3rem;
+  padding: 2rem 1rem;
   border-radius: 1px;
 }
 
@@ -247,6 +246,35 @@
 
 .home-page .filter-actions {
   margin-left: 16px;
+}
+
+/* Subscription Section - Full Width */
+.home-subscription {
+  background: #003266;
+  padding: 2rem 2rem;
+  width: 100%;
+}
+
+.subscription-content-wrapper {
+  max-width: 1150px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.subscription-text{
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.subscription-description {
+  opacity: 0.95;
+  line-height: 1.6;
+  max-width: 600px;
 }
 
 /* Animation */
