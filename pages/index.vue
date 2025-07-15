@@ -5,14 +5,14 @@
       title="Rebooting Democracy in the Age of AI"
       subtitle="Insights on AI, Governance and Democracy"
     />
-    
+
     <!-- SEARCH RESULTS -->
     <section class="home-section" v-if="showSearchResults">
       <div class="container">
         <GlobalSearch />
       </div>
     </section>
-    
+
     <!-- MAIN CONTENT -->
     <template v-else>
       <!-- FEATURED POSTS SECTION -->
@@ -31,7 +31,7 @@
               :author="getAuthorName(featuredPost)"
               @click="navigateToBlogPost(featuredPost)"
             />
-            
+
             <!-- RECENT POSTS -->
             <div class="postcards-column">
               <PostCard
@@ -67,17 +67,18 @@
               >
                 Subscribe for Updates
               </Text>
-               <Text
+              <Text
                 as="p"
                 weight="normal"
                 color="text-primary-light"
                 fontFamily="inter"
                 class="subscription-description"
               >
-                A weekly curation of new findings and developments on innovation in governance
+                A weekly curation of new findings and developments on innovation
+                in governance
               </Text>
             </div>
-             <Button
+            <Button
               class="btn-header"
               variant="secondary"
               height="50px"
@@ -88,7 +89,7 @@
           </div>
         </div>
       </section>
-      
+
       <!-- BLOG POSTS SECTION -->
       <section class="home-section home-blog">
         <div class="container">
@@ -102,7 +103,10 @@
             @author-filter="handleAuthorFilter"
           >
             <template #latest-posts>
-              <div v-if="!isLoading && displayPosts.length" class="blog-posts-section">
+              <div
+                v-if="!isLoading && displayPosts.length"
+                class="blog-posts-section"
+              >
                 <div class="blog-card-grid">
                   <div
                     v-for="(post, index) in displayPosts.slice(0, 9)"
@@ -112,10 +116,7 @@
                     style="cursor: pointer"
                   >
                     <div class="card-image">
-                      <img
-                        :src="getImageUrl(post.image)"
-                        :alt="post.title"
-                      />
+                      <img :src="getImageUrl(post.image)" :alt="post.title" />
                     </div>
                     <div class="card-content">
                       <Text
@@ -156,12 +157,24 @@
                         v-if="post.date"
                       >
                         Published on
-                        <Text as="span" size="xs" weight="bold" fontStyle="italic">
+                        <Text
+                          as="span"
+                          size="xs"
+                          weight="bold"
+                          fontStyle="italic"
+                        >
                           {{ formatDate(post.date) }}
                         </Text>
-                        <template v-if="getAuthorName(post) !== 'Reboot Democracy Team'">
+                        <template
+                          v-if="getAuthorName(post) !== 'Reboot Democracy Team'"
+                        >
                           by
-                          <Text as="span" size="xs" weight="bold" fontStyle="italic">
+                          <Text
+                            as="span"
+                            size="xs"
+                            weight="bold"
+                            fontStyle="italic"
+                          >
                             {{ getAuthorName(post) }}
                           </Text>
                         </template>
@@ -185,7 +198,7 @@
 
       <!-- COLLABORATORS SECTION -->
       <section class="home-section home-collaborators">
-        <div class="container">
+        <div class="blog-collab-container">
           <!-- BLOG COLLABORATORS HEADING -->
           <div class="curator-and-button">
             <Text
@@ -206,7 +219,7 @@
               <span class="base__btn-slot">Meet Our Team</span>
             </button>
           </div>
-          
+
           <!-- BLOG COLLABORATORS -->
           <div class="blog-collaborators-wrapper">
             <div class="collaborators-flex-grid">
@@ -271,14 +284,17 @@ const { data: authorListData } = await useAsyncData(
     try {
       const allPosts = await fetchAllBlogPosts();
       const authorCounts = new Map<string, number>();
-      
+
       allPosts.forEach((post) => {
         const authorName = getAuthorName(post);
-        if (authorName !== "Unknown Author" && authorName !== "Reboot Democracy Team") {
+        if (
+          authorName !== "Unknown Author" &&
+          authorName !== "Reboot Democracy Team"
+        ) {
           authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
         }
       });
-      
+
       return Array.from(authorCounts.keys()).sort();
     } catch (error) {
       console.error("Error fetching author list:", error);
@@ -287,28 +303,36 @@ const { data: authorListData } = await useAsyncData(
   }
 );
 
-const { data: featuredContributors }
-  = await useAsyncData('featured-contributors', fetchFeaturedContributors);
+const { data: featuredContributors } = await useAsyncData(
+  "featured-contributors",
+  fetchFeaturedContributors
+);
 
 // Computed properties
 const featuredPost = computed(() => latestCombinedPosts.value?.[0] || null);
-const latestThreePosts = computed(() => latestCombinedPosts.value?.slice(1, 4) || []);
+const latestThreePosts = computed(
+  () => latestCombinedPosts.value?.slice(1, 4) || []
+);
 const tagOptions = computed(() => ["All Topics", ...(allTags.value || [])]);
-const authorOptions = computed(() => ["All Authors", ...(authorListData.value || [])]);
+const authorOptions = computed(() => [
+  "All Authors",
+  ...(authorListData.value || []),
+]);
 const isLoading = computed(() => isLoadingState.value);
 
 const weeklyNewsUrl = computed(() => {
-  const newsItems = latestCombinedPosts.value?.filter((post) => post.type === "news") || [];
-  const latestNews = newsItems.sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+  const newsItems =
+    latestCombinedPosts.value?.filter((post) => post.type === "news") || [];
+  const latestNews = newsItems.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )[0];
-  
+
   if (latestNews?.edition) {
     const cleanEdition = String(latestNews.edition).replace(/\D/g, "");
     return `/newsthatcaughtoureye/${cleanEdition}`;
   }
-  
-  return `/newsthatcaughtoureye/51`; 
+
+  return `/newsthatcaughtoureye/51`;
 });
 
 const tabOptions = computed(() => [
@@ -322,14 +346,15 @@ const tabOptions = computed(() => [
   { title: "Events", name: "events", url: "/events", external: true },
 ]);
 
-const flattenedCollaborators = computed(() =>
-  featuredContributors.value?.map((member) => ({
-    name: `${member.First_Name} ${member.Last_Name}`,
-    title: member.Title,
-    imageUrl: member.Headshot?.id
-      ? `https://burnes-center.directus.app/assets/${member.Headshot.id}`
-      : '/images/exampleImage.png',
-  })) || []
+const flattenedCollaborators = computed(
+  () =>
+    featuredContributors.value?.map((member) => ({
+      name: `${member.First_Name} ${member.Last_Name}`,
+      title: member.Title,
+      imageUrl: member.Headshot?.id
+        ? `https://burnes-center.directus.app/assets/${member.Headshot.id}`
+        : "/images/exampleImage.png",
+    })) || []
 );
 
 // Utility functions
@@ -364,18 +389,18 @@ function getAuthorName(post: any): string {
         return null;
       })
       .filter(Boolean);
-      
+
     if (authors.length === 1) return authors[0] || "Reboot Democracy Team";
     if (authors.length > 1) {
       const lastAuthor = authors.pop();
       return `${authors.join(", ")} and ${lastAuthor}`;
     }
   }
-  
+
   // Handle string authors
   if (typeof post.authors === "string") return post.authors;
   if (typeof post.author === "string") return post.author;
-  
+
   return "Reboot Democracy Team";
 }
 
@@ -388,7 +413,7 @@ function navigateToBlogPost(post: any): void {
         return;
       }
     }
-    
+
     if (post.type === "news" || post.edition) {
       const edition = String(post.edition || post.id || "").replace(/\D/g, "");
       if (edition) {
@@ -396,17 +421,17 @@ function navigateToBlogPost(post: any): void {
         return;
       }
     }
-    
+
     if (post.url) {
       router.push(post.url);
       return;
     }
-    
+
     if (post.slug || post.id) {
       router.push(`/blog/${post.slug || post.id}`);
       return;
     }
-    
+
     console.error("Unable to determine navigation path for post:", post);
   } catch (error) {
     console.error("Navigation error:", error, post);
@@ -419,14 +444,14 @@ function handlePostClick(post: any): void {
 
 function navigateToAllPosts(): void {
   const query: Record<string, string> = {};
-  
+
   if (selectedTag.value !== "All Topics") {
     query.category = encodeURIComponent(selectedTag.value);
   }
   if (selectedAuthor.value !== "All Authors") {
     query.author = encodeURIComponent(selectedAuthor.value);
   }
-  
+
   router.push({ path: "/blog", query });
 }
 
@@ -443,13 +468,13 @@ async function fetchPostsByAuthor(authorName: string): Promise<BlogPost[]> {
   if (authorPostsCache.value.has(authorName)) {
     return authorPostsCache.value.get(authorName) || [];
   }
-  
+
   try {
     const allPosts = await fetchAllBlogPosts();
     const authorPosts = allPosts.filter((post) => {
       return getAuthorName(post) === authorName;
     });
-    
+
     authorPostsCache.value.set(authorName, authorPosts);
     return authorPosts;
   } catch (error) {
@@ -460,30 +485,34 @@ async function fetchPostsByAuthor(authorName: string): Promise<BlogPost[]> {
 
 async function applyFilters(): Promise<void> {
   isLoadingState.value = true;
-  
+
   try {
     let filteredPosts: BlogPost[] = [];
-    
+
     if (selectedAuthor.value !== "All Authors") {
       const authorPosts = await fetchPostsByAuthor(selectedAuthor.value);
-      
+
       if (selectedTag.value !== "All Topics") {
         filteredPosts = authorPosts.filter((post) =>
           post.Tags?.includes(selectedTag.value)
         );
-        
+
         const newsItems = await fetchWeeklyNewsItems();
         const filteredNews = newsItems
-          .filter((n) =>
-            n.category === selectedTag.value &&
-            getAuthorName(n) === selectedAuthor.value
+          .filter(
+            (n) =>
+              n.category === selectedTag.value &&
+              getAuthorName(n) === selectedAuthor.value
           )
-          .map((n) => ({
-            ...n,
-            id: n.url || `news-${Date.now()}`,
-            Tags: n.category ? [n.category] : [],
-          } as unknown as BlogPost));
-          
+          .map(
+            (n) =>
+              ({
+                ...n,
+                id: n.url || `news-${Date.now()}`,
+                Tags: n.category ? [n.category] : [],
+              } as unknown as BlogPost)
+          );
+
         filteredPosts = [...filteredPosts, ...filteredNews];
       } else {
         filteredPosts = authorPosts;
@@ -493,29 +522,32 @@ async function applyFilters(): Promise<void> {
         fetchAllBlogPosts(),
         fetchWeeklyNewsItems(),
       ]);
-      
+
       const filteredBlogs = blogs.filter((post) =>
         post.Tags?.includes(selectedTag.value)
       );
-      
+
       const filteredNews = newsItems
         .filter((n) => n.category === selectedTag.value)
-        .map((n) => ({
-          ...n,
-          id: n.url || `news-${Date.now()}`,
-          Tags: n.category ? [n.category] : [],
-        } as unknown as BlogPost));
-        
+        .map(
+          (n) =>
+            ({
+              ...n,
+              id: n.url || `news-${Date.now()}`,
+              Tags: n.category ? [n.category] : [],
+            } as unknown as BlogPost)
+        );
+
       filteredPosts = [...filteredBlogs, ...filteredNews];
     } else {
       displayPosts.value = allBlogPosts.value || [];
       return;
     }
-    
+
     filteredPosts.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-    
+
     displayPosts.value = filteredPosts.slice(0, 20);
   } catch (error) {
     console.error("Error filtering posts:", error);
@@ -541,3 +573,9 @@ onMounted(() => {
   displayPosts.value = allBlogPosts.value || [];
 });
 </script>
+
+<style>
+.blog-collab-container {
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+}
+</style>

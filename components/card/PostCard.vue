@@ -20,10 +20,13 @@
             <div class="tag-container">
               <Tag
                 v-if="tag"
-                lineHeight="normal"
-                margin="none"
+                 as="span"
                 size="xs"
-                :index="tagIndex"
+                weight="bold"
+                transform="uppercase"
+                fontFamily="inter"
+                class="featured-card__tag"
+                :color="'tag-primary'"
                 >{{ tag }}</Tag
               >
               <span v-if="isFeatured" class="tag-separator">|</span>
@@ -35,9 +38,8 @@
                 :index="0"
                 >Featured</Tag
               >
-            </div>
 
-            <!--title-->
+                 <!--title-->
             <TitleText
               v-if="titleText"
               size="xl"
@@ -48,6 +50,9 @@
             >
               {{ titleText }}
             </TitleText>
+            </div>
+
+         
           </div>
 
           <!--excerpt-->
