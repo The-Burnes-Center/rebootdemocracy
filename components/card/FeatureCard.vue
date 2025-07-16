@@ -18,7 +18,7 @@
           weight="extrabold"
           class="featured-card__tag"
           transform="uppercase"
-          fontFamily="inter"
+          fontFamily="inria"
           color="tag-primary"
         >
           {{ tag }}
@@ -29,7 +29,7 @@
           weight="bold"
           fontFamily="inria"
           class="featured-card__title clamp-3"
-          lineHeight="loose"
+          lineHeight="more-loose"
         >
           {{ title }}
         </Text>
@@ -38,7 +38,7 @@
           as="p"
           size="1.5xl"
           weight="medium"
-          fontFamily="inter"
+          fontFamily="habibi"
           color="text-primary-light"
           class="featured-card__description clamp-4"
           lineHeight="loose"

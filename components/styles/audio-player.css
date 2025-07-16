@@ -1,9 +1,9 @@
-.audio-version{
+.audio-version {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top:1rem;
+  margin-top: 1rem;
 }
 
 .audio-version p em {
@@ -55,7 +55,7 @@
 }
 
 .audio-player__time {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;
@@ -156,4 +156,3 @@
     margin-left: 8px;
   }
 }
-

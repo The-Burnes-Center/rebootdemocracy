@@ -11,21 +11,61 @@ export async function fetchTeamData(): Promise<Team[]> {
     const response = await directus.request(
       readItems('Reboot_Democracy_team', {
         limit: -1,
-        meta: 'total_count',
+        filter: {
+          collaborator_type: {
+            _contains: ['team']  
+          },
+        },
         fields: [
           'id',
           'First_Name',
           'Last_Name',
           'Title',
           'Link_to_bio',
+          'collaborator_type',
           { Headshot: ['id', 'filename_disk'] },
         ],
       })
     );
+    
+    console.log('Team members fetched successfully:', response.length);
     return response as Team[];
   } catch (error) {
     console.error('Error fetching team data:', error);
-    return [];
+    
+    try {
+      const allMembers = await directus.request(
+        readItems('Reboot_Democracy_team', {
+          limit: -1,
+          fields: [
+            'id',
+            'First_Name',
+            'Last_Name',
+            'Title',
+            'Link_to_bio',
+            'collaborator_type',
+            { Headshot: ['id', 'filename_disk'] },
+          ],
+        })
+      );
+      
+      // Filter in JavaScript
+      const teamMembers = allMembers.filter((member: any) => {
+        if (typeof member.collaborator_type === 'string') {
+          return member.collaborator_type === 'team';
+        }
+        if (Array.isArray(member.collaborator_type)) {
+          return member.collaborator_type.includes('team');
+        }
+        return false;
+      });
+      
+      console.log('Team members found (fallback):', teamMembers.length);
+      return teamMembers as Team[];
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      return [];
+    }
   }
 }
 
@@ -38,7 +78,7 @@ export async function fetchFeaturedContributors(): Promise<Team[]> {
         limit: 9,
         filter: {
           collaborator_type: {
-            _contains: 'featured_contributors',
+            _contains: ['featured_contributors'],  
           },
         },
         fields: [

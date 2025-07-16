@@ -15,7 +15,7 @@ blockquote.quote-block {
 blockquote.quote-block::before {
   content: "\201C";
   display: block;
-  color: #0D63EB;
+  color: #0d63eb;
   font-family: "Geist Mono";
   font-size: 80px;
   font-style: normal;
@@ -43,7 +43,7 @@ blockquote.quote-block p {
   display: block;
   margin-top: 1rem;
   color: rgba(0, 0, 0, 0.6);
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 16px;
   font-style: normal;
   font-weight: 400;

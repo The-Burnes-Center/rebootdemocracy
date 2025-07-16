@@ -1,13 +1,12 @@
-
 .filter-dropdown {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-family: var(--font-inter);
+  font-family: var(--font-inria);
 }
 
 .filter-dropdown__label {
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 400;
   line-height: 24px;
   color: #000;
@@ -16,8 +15,8 @@
 .filter-dropdown__select {
   position: relative;
   min-width: 200px;
-  padding: 4px 16px;
-  border: 1px solid #000;
+  padding: 3px 12px;
+  border: 2px solid #000;
   border-radius: 2px;
   cursor: pointer;
   display: flex;
@@ -48,7 +47,7 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  padding:0.5rem;
+  padding: 0.5rem;
   width: 100%;
   max-height: 18rem;
   overflow-y: auto;

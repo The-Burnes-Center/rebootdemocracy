@@ -74,13 +74,7 @@
 }
 
 .featured-card__title {
-  font-size: 1.75rem;
-  font-weight: 800;
   color: #ffffff !important;
-  line-height: 1.25;
-  margin-bottom: 12px;
-  letter-spacing: -0.02em;
-  transition: color 0.3s ease;
 }
 
 /* Footer section */

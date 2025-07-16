@@ -1,6 +1,6 @@
 .menu__section {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   align-items: center;
   width: 100%;
   position: relative;
@@ -8,7 +8,7 @@
 
 .header-menu__label {
   color: #ffffff;
-  font-family: var(--font-inter);
+  font-family: var(--font-inria);
   font-size: 1rem;
   --color-icon: white;
   font-style: normal;
@@ -74,7 +74,7 @@
 }
 
 .header-dropdown__itemLabel-mobile {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   color: #1e1e1e;
   font-size: 0.9rem;
   font-weight: 500;
@@ -88,22 +88,21 @@
 
 @media (max-width: 1050px) {
   .header-menu__label {
-      display: flex;
-      color: #000000;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      width: 100%;
-    }
-    .header-menu__label svg {
-        --color-icon: #000;
-    }
+    display: flex;
+    color: #000000;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    width: 100%;
+  }
+  .header-menu__label svg {
+    --color-icon: #000;
+  }
   .menu__section {
     flex-direction: column;
     width: 100%;
     text-align: left;
     padding: 0;
-    
   }
 
   .header-menu__item-wrapper {
@@ -113,7 +112,7 @@
 }
 
 @media (max-width: 768px) {
-   .header-menu__label {
+  .header-menu__label {
     display: flex;
     color: #000000;
     justify-content: space-between;
@@ -122,7 +121,7 @@
     width: 100%;
   }
 
-  .header-menu__label svg{
+  .header-menu__label svg {
     --color-icon: black;
   }
 }

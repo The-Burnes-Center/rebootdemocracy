@@ -134,12 +134,11 @@
   transform: scale(1.08);
 }
 
-/* Content section - matching your template */
 .card-content {
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   flex: 1;
 }
 
@@ -161,8 +160,6 @@
 }
 
 .card-description {
-  font-size: 0.938rem;
-  line-height: 1.6;
   color: #64748b;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -173,10 +170,7 @@
 }
 
 .card-meta {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  padding-top: 16px;
-  margin-top: auto;
+  padding-top: 10px;
   border-top: 1px solid #e5e7eb;
 }
 
@@ -197,7 +191,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
-  padding: 2rem 1rem;
+  padding: 2rem 2rem;
   border-radius: 1px;
 }
 
@@ -256,7 +250,8 @@
 }
 
 .subscription-content-wrapper {
-  max-width: 1150px;
+  max-width: 1450px;
+  padding: 1rem 2rem;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -273,7 +268,6 @@
 
 .subscription-description {
   opacity: 0.95;
-  line-height: 1.6;
   max-width: 600px;
 }
 

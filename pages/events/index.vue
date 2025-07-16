@@ -13,7 +13,6 @@ const route = useRoute();
 const iniLoad = ref(0);
 const showingFullText = ref(true);
 
-
 useHead({
   meta: [
     { name: "title", content: "Reboot Democracy Lecture Series" },
@@ -303,7 +302,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 /* Typography */
 .events-page h1 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -314,12 +313,12 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 }
 
 .events-page h2 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   margin: 0;
 }
 
 .events-page h3 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 24px;
   margin: 0;
   margin: 0;
@@ -341,7 +340,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 .events-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-family:var(--font-inria);
+  font-family: var(--font-inria);
   letter-spacing: 2.4px;
 }
 
@@ -356,7 +355,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   color: #000000;
 }
 
@@ -822,7 +821,7 @@ img.partner-logo-img {
   }
 
   .events-hero h1 {
-    font-family: var(--font-inter);
+    font-family: var(--font-habibi);
   }
 
   .events-row {

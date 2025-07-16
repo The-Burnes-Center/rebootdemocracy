@@ -21,7 +21,7 @@
             <div class="section-header" @click="toggleCategoriesVisible">
               <Text
                 as="h2"
-                fontFamily="inter"
+                fontFamily="habibi"
                 size="lg"
                 color="text-primary"
                 weight="bold"
@@ -65,7 +65,7 @@
             <div class="section-header" @click="toggleAuthorsVisible">
               <Text
                 as="h2"
-                fontFamily="inter"
+                fontFamily="habibi"
                 size="lg"
                 color="text-primary"
                 weight="bold"
@@ -110,7 +110,7 @@
             <div class="results-count">
               <Text
                 as="span"
-                fontFamily="inter"
+                fontFamily="habibi"
                 size="base"
                 color="text-primary"
                 weight="medium"
@@ -190,7 +190,7 @@
           <!-- Categories section -->
           <Text
             as="h2"
-            fontFamily="inter"
+            fontFamily="habibi"
             size="lg"
             color="text-primary"
             weight="bold"
@@ -220,7 +220,7 @@
           <!-- Authors section -->
           <Text
             as="h2"
-            fontFamily="inter"
+            fontFamily="habibi"
             size="lg"
             color="text-primary"
             weight="bold"
@@ -359,7 +359,12 @@ interface Author {
 }
 
 const getAuthorName = (post: BlogPost | NewsItem): string => {
-  if ("authors" in post && post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
+  if (
+    "authors" in post &&
+    post.authors &&
+    Array.isArray(post.authors) &&
+    post.authors.length > 0
+  ) {
     if (post.authors.length > 1) {
       const authorNames = post.authors
         .map((author) => {
@@ -382,17 +387,18 @@ const getAuthorName = (post: BlogPost | NewsItem): string => {
     return author
       ? `${author.First_Name} ${author.Last_Name}`
       : "Reboot Democracy Team";
-  } 
-  else if ("authors" in post && post.authors && typeof post.authors === "string") {
+  } else if (
+    "authors" in post &&
+    post.authors &&
+    typeof post.authors === "string"
+  ) {
     return post.authors;
-  }
-  else if ("author" in post && post.author) {
+  } else if ("author" in post && post.author) {
     return post.author;
   }
-  
+
   return "Reboot Democracy Team";
 };
-
 
 // Data processing functions
 const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
@@ -424,14 +430,16 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
     posts.forEach((post, index) => {
       try {
         if (!post) return;
-        
+
         const authorName = getAuthorName(post);
-        
+
         // Only count meaningful author names
-        if (authorName && 
-            authorName !== "Unknown Author" && 
-            authorName !== "Reboot Democracy Team" &&
-            authorName.trim() !== "") {
+        if (
+          authorName &&
+          authorName !== "Unknown Author" &&
+          authorName !== "Reboot Democracy Team" &&
+          authorName.trim() !== ""
+        ) {
           authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
         }
       } catch (postError) {
@@ -443,11 +451,10 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
       .map(([name, count]) => ({ id: name, name, count }))
       .sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error('Error in extractAuthorsWithCounts:', error);
-    return []; 
+    console.error("Error in extractAuthorsWithCounts:", error);
+    return [];
   }
 };
-
 
 const { data: allPostsData, pending: isPostsLoading } = await useAsyncData(
   "all-blog-posts",
@@ -464,7 +471,7 @@ const { data: allPostsData, pending: isPostsLoading } = await useAsyncData(
 
     return [...blogPosts, ...newsSorted];
   },
-  { server: true } 
+  { server: true }
 );
 
 // Prefetch tags data

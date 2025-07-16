@@ -5,63 +5,63 @@
     </div>
 
     <div class="blogcard-content">
-     <Text
-      v-if="tag"
-      as="span"
-      size="xs"
-      weight="bold"
-      color="tag-primary"
-      class="blogcard-tag"
-      transform="uppercase"
-      fontFamily="inter"
-    >
-      {{ tag }}
-    </Text>
-
-    <!-- Blog card title -->
-    <Text
-      as="h3"
-      size="xl"
-      weight="extrabold"
-      fontFamily="inria"
-      color="text-dark"
-      lineHeight="relaxed"
-      class="blogcard-title"
-    >
-      {{ title }}
-    </Text>
-
-    <!-- Blog card excerpt -->
-    <Text
-      as="p"
-      size="base"
-      weight="medium"
-      color="text-primary"
-      lineHeight="normal"
-      class="blogcard-excerpt"
-    >
-      {{ excerpt }}
-    </Text>
-
-    <!-- Blog card meta -->
-    <Text
-      v-if="date"
-      as="p"
-      size="xs"
-      fontStyle="italic"
-      class="blogcard-meta"
-    >
-      Published on
-    <Text as="span" size="xs" weight="bold" fontStyle="italic">
-      {{ formattedDate }}
-    </Text>
-    <template v-if="author && author !== 'Reboot Democracy Team'">
-      by
-      <Text as="span" size="xs" weight="bold" fontStyle="italic">
-        {{ author }}
+      <Text
+        v-if="tag"
+        as="span"
+        size="xs"
+        weight="bold"
+        color="tag-primary"
+        class="blogcard-tag"
+        transform="uppercase"
+        fontFamily="inria"
+      >
+        {{ tag }}
       </Text>
-    </template>
-  </Text>
+
+      <!-- Blog card title -->
+      <Text
+        as="h3"
+        size="xl"
+        weight="extrabold"
+        fontFamily="inria"
+        color="text-dark"
+        lineHeight="relaxed"
+        class="blogcard-title"
+      >
+        {{ title }}
+      </Text>
+
+      <!-- Blog card excerpt -->
+      <Text
+        as="p"
+        size="base"
+        weight="medium"
+        color="text-primary"
+        lineHeight="normal"
+        class="blogcard-excerpt"
+      >
+        {{ excerpt }}
+      </Text>
+
+      <!-- Blog card meta -->
+      <Text
+        v-if="date"
+        as="p"
+        size="xs"
+        fontStyle="italic"
+        class="blogcard-meta"
+      >
+        Published on
+        <Text as="span" size="xs" weight="bold" fontStyle="italic">
+          {{ formattedDate }}
+        </Text>
+        <template v-if="author && author !== 'Reboot Democracy Team'">
+          by
+          <Text as="span" size="xs" weight="bold" fontStyle="italic">
+            {{ author }}
+          </Text>
+        </template>
+      </Text>
     </div>
   </div>
 </template>
@@ -130,11 +130,10 @@ const formattedDate = props.date
   background-color: #f5d1c2;
 }
 
-
 .blogcard-title {
   font-size: 1.25rem;
   color: #003366;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-weight: 600;
   line-height: 1.4;
   margin: 0;
@@ -142,12 +141,12 @@ const formattedDate = props.date
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-   min-height: calc(1.4em * 3);
+  min-height: calc(1.4em * 3);
 }
 
 .blogcard-excerpt {
   font-size: 1rem;
-   font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   color: #555;
   line-height: 1.5;
   margin: 0;
@@ -161,8 +160,7 @@ const formattedDate = props.date
 .blogcard-meta {
   font-size: 0.875rem;
   color: #777;
-  padding-top:16px;
+  padding-top: 16px;
   border-top: 1px solid #e5e7eb;
 }
-
 </style>

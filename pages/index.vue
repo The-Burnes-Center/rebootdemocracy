@@ -59,10 +59,11 @@
             <div class="subscription-text">
               <Text
                 as="h2"
-                size="3xl"
+                size="4xl"
                 weight="bold"
                 color="text-primary-light"
                 fontFamily="inria"
+                lineHeight="loose"
                 class="subscription-title"
               >
                 Subscribe for Updates
@@ -71,7 +72,8 @@
                 as="p"
                 weight="normal"
                 color="text-primary-light"
-                fontFamily="inter"
+                fontFamily="habibi"
+                lineHeight="normal"
                 class="subscription-description"
               >
                 A weekly curation of new findings and developments on innovation
@@ -124,7 +126,7 @@
                         size="xs"
                         weight="bold"
                         transform="uppercase"
-                        fontFamily="inter"
+                        fontFamily="inria"
                         class="featured-card__tag"
                         :color="'tag-primary'"
                       >
@@ -146,13 +148,17 @@
                         weight="medium"
                         color="text-primary"
                         class="card-description"
+                        fontFamily="habibi"
+                        lineHeight="normal"
                       >
                         {{ post.excerpt }}
                       </Text>
                       <Text
-                        as="p"
+                        as="span"
                         size="xs"
                         fontStyle="italic"
+                        weight="bold"
+                        fontFamily="habibi"
                         class="card-meta"
                         v-if="post.date"
                       >
@@ -162,6 +168,7 @@
                           size="xs"
                           weight="bold"
                           fontStyle="italic"
+                          fontFamily="sora"
                         >
                           {{ formatDate(post.date) }}
                         </Text>
@@ -174,6 +181,7 @@
                             size="xs"
                             weight="bold"
                             fontStyle="italic"
+                            fontFamily="sora"
                           >
                             {{ getAuthorName(post) }}
                           </Text>
@@ -353,7 +361,7 @@ const flattenedCollaborators = computed(
       title: member.Title,
       imageUrl: member.Headshot?.id
         ? `https://burnes-center.directus.app/assets/${member.Headshot.id}`
-        : "/images/exampleImage.png",
+        : "/images/fallbackperson.png",
     })) || []
 );
 

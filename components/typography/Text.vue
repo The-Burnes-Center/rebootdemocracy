@@ -74,7 +74,6 @@ const textColors = {
   "tag-primary": "#f06e3a",
   "tag-secondary": "#0D63EB",
   "link-primary": "#0D63EB",
-
 };
 
 const alignmentClasses = {
@@ -90,8 +89,10 @@ const fontStyleMap = {
 };
 
 const fontFamilyMap = {
-  inter: "var(--font-inter)",
+  habibi: "var( --font-habibi)",
   inria: "var(--font-inria)",
+  sora: "var(--font-sora)",
+  "habibi-bold": "var(--font-habibi-bold)",
 };
 
 const transformMap = {
@@ -108,6 +109,7 @@ const lineHeights = {
   relaxed: "1.75", // 28px
   extraRelaxed: "1.875", // 30px
   loose: "2", // 32px
+  "more-loose": "2.25", // 36px
   "extra-loose": "2.4", // 40px
   "super-loose": "2.8125", // 45px
 } as const;
@@ -150,7 +152,7 @@ const props = withDefaults(defineProps<TextProps>(), {
   color: "text-primary",
   align: "left",
   fontStyle: "normal",
-  fontFamily: "inter",
+  fontFamily: "habibi",
   class: "",
   transform: "none",
   text: "",
