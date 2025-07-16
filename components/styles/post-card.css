@@ -183,7 +183,8 @@
 }
 
 .blog-related-posts .postcard__image {
-  width: 100%;
+  width: 15rem;
+  height: 10rem;
   left: 0;
   position: relative;
 }

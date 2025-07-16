@@ -40,6 +40,8 @@
                     margin="none"
                     size="xs"
                     :index="index"
+                    fontFamily="inria"
+                    class="featured-card__tag"
                   >
                     {{ post.Tags[0] }}
                   </Tag>
@@ -52,7 +54,7 @@
                     post.excerpt
                   }}</BodyText>
                   <div class="postcard__meta">
-                    <Text size="xs" weight="normal" fontStyle="italic">
+                    <Text size="xs" weight="normal" fontStyle="italic" >
                       <template v-if="post.date && post.authors?.[0]?.team_id">
                         Published on
                         <Text
@@ -60,6 +62,7 @@
                           size="xs"
                           weight="bold"
                           fontStyle="italic"
+                            fontFamily="sora"
                           >{{ formatDate(post.date) }}</Text
                         >
                         by
@@ -68,6 +71,7 @@
                           size="xs"
                           weight="bold"
                           fontStyle="italic"
+                            fontFamily="sora"
                           >{{ getAuthorName(post.authors[0].team_id) }}</Text
                         >
                       </template>
@@ -102,9 +106,11 @@
                     weight="extrabold"
                     size="xs"
                     :index="index"
+                    fontFamily="inria"
+                    class="featured-card__tag"
                     >{{ post.Tags[0] }}</Tag
                   >
-                  <TitleText size="xl" :lineClamp="2" :level="'h3'">{{
+                  <TitleText size="xl" weight="bold" fontFamily="inria"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
                     post.title
                   }}</TitleText>
                 </div>
@@ -113,7 +119,7 @@
                     post.excerpt
                   }}</BodyText>
                   <div class="postcard__meta">
-                    <Text size="xs" weight="normal" fontStyle="italic">
+                    <Text size="xs" weight="normal" fontStyle="italic" fontFamily="habibi">
                       <template v-if="post.date && post.authors?.[0]?.team_id">
                         Published on
                         <Text
@@ -121,6 +127,7 @@
                           size="xs"
                           weight="bold"
                           fontStyle="italic"
+                          fontFamily="sora"
                           >{{ formatDate(post.date) }}</Text
                         >
                         by
@@ -129,6 +136,7 @@
                           size="xs"
                           weight="bold"
                           fontStyle="italic"
+                          fontFamily="sora"
                           >{{ getAuthorName(post.authors[0].team_id) }}</Text
                         >
                       </template>

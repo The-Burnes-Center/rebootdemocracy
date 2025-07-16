@@ -46,8 +46,8 @@
                 :lineClamp="2"
                 :level="'h3'"
                 weight="bold"
-                class="textclass"
                 fontFamily="inria"
+                color="text-dark"
               >
                 {{ titleText }}
               </TitleText>
@@ -154,6 +154,7 @@
               :level="'h3'"
               weight="medium"
               fontFamily="inria"
+               color="text-dark"
             >
               {{ titleText }}
             </TitleText>
@@ -178,11 +179,11 @@
                 <!-- If both date and author exist -->
                 <template v-if="date && author">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="sora">{{
                     formatDate(date)
                   }}</Text>
                   by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="sora">{{
                     author
                   }}</Text>
                 </template>
@@ -190,7 +191,7 @@
                 <!-- If only date exists -->
                 <template v-else-if="date">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="sora">{{
                     formatDate(date)
                   }}</Text>
                 </template>
@@ -198,7 +199,7 @@
                 <!-- If only author exists -->
                 <template v-else-if="author">
                   Published by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">{{
                     author
                   }}</Text>
                 </template>
@@ -224,7 +225,7 @@ interface PostCardProps {
   tagIndex?: number;
   variant?: "default" | "outline" | "flat";
   hoverable?: boolean;
-  isFeatured?: boolean; // New prop to indicate if blog post is featured
+  isFeatured?: boolean; 
 }
 
 const props = withDefaults(defineProps<PostCardProps>(), {
@@ -237,7 +238,7 @@ const props = withDefaults(defineProps<PostCardProps>(), {
   tagIndex: 0,
   variant: "default",
   hoverable: false,
-  isFeatured: false, // Default to not featured
+  isFeatured: false, 
 });
 
 const emit = defineEmits(["click"]);
