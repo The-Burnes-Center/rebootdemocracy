@@ -164,7 +164,7 @@ const selectedType = ref("All");
 
 /* Typography Styles */
 .our-engagements-page h1 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -173,7 +173,7 @@ const selectedType = ref("All");
 }
 
 .our-engagements-page h4 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 18px;
   margin: 0;
   padding: 0;
@@ -196,7 +196,7 @@ const selectedType = ref("All");
 .our-engagements-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   letter-spacing: 2.4px;
 }
 
@@ -211,7 +211,7 @@ const selectedType = ref("All");
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   color: #000000;
 }
 
@@ -333,7 +333,7 @@ const selectedType = ref("All");
 }
 
 .resource-menu li {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 20px;
   font-style: normal;
   font-weight: 700;
@@ -443,7 +443,7 @@ const selectedType = ref("All");
 @media (max-width: 768px) {
   .our-engagements-page h1 {
     font-size: 30px;
-    font-family: var(--font-inter);
+    font-family: var(--font-habibi);
   }
 
   .resource-page {

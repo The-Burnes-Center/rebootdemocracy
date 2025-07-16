@@ -16,6 +16,7 @@
         weight="bold"
         fontStyle="italic"
         class="curator-badge__label"
+        fontFamily="habibi"
       >
         Curated by
       </Text>
@@ -25,6 +26,7 @@
         size="base" 
         weight="bold" 
         class="curator-badge__name"
+        fontFamily="sora"
       >
         {{ name }}
       </Text>
@@ -34,6 +36,7 @@
         size="xs" 
         weight="normal" 
         class="curator-badge__title"
+        fontFamily="habibi"
       >
         {{ title }}
       </Text>

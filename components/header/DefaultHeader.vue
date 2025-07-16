@@ -55,7 +55,7 @@
     <Button
       class="btn-header"
       variant="secondary"
-      height="36px"
+      height="38px"
       :onClick="onClick"
     >
       Sign up for updates

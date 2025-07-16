@@ -20,10 +20,13 @@
             <div class="tag-container">
               <Tag
                 v-if="tag"
-                lineHeight="normal"
-                margin="none"
+                as="span"
                 size="xs"
-                :index="tagIndex"
+                weight="bold"
+                transform="uppercase"
+                fontFamily="inria"
+                class="featured-card__tag"
+                :color="'tag-primary'"
                 >{{ tag }}</Tag
               >
               <span v-if="isFeatured" class="tag-separator">|</span>
@@ -35,19 +38,20 @@
                 :index="0"
                 >Featured</Tag
               >
-            </div>
 
-            <!--title-->
-            <TitleText
-              v-if="titleText"
-              size="xl"
-              :lineClamp="2"
-              :level="'h3'"
-              weight="bold"
-              class="textclass"
-            >
-              {{ titleText }}
-            </TitleText>
+              <!--title-->
+              <TitleText
+                v-if="titleText"
+                size="xl"
+                :lineClamp="2"
+                :level="'h3'"
+                weight="bold"
+                class="textclass"
+                fontFamily="inria"
+              >
+                {{ titleText }}
+              </TitleText>
+            </div>
           </div>
 
           <!--excerpt-->
@@ -58,21 +62,22 @@
               lineHeight="normal"
               :lineClamp="2"
               weight="medium"
+              fontFamily="habibi"
             >
               {{ excerpt }}
             </BodyText>
 
             <!--meta info-->
             <div v-if="date || author" class="postcard__meta">
-              <Text size="xs" weight="normal" fontStyle="italic">
+              <Text size="xs" weight="normal" fontStyle="italic" fontFamily="habibi">
                 <!-- If both date and author exist -->
                 <template v-if="date && author">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">{{
                     formatDate(date)
                   }}</Text>
                   by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">{{
                     author
                   }}</Text>
                 </template>
@@ -80,7 +85,7 @@
                 <!-- If only date exists -->
                 <template v-else-if="date">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{
                     formatDate(date)
                   }}</Text>
                 </template>
@@ -88,7 +93,7 @@
                 <!-- If only author exists -->
                 <template v-else-if="author">
                   Published by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{
                     author
                   }}</Text>
                 </template>
@@ -125,6 +130,7 @@
                 lineHeight="normal"
                 margin="none"
                 size="xs"
+                fontFamily="inria"
                 :index="tagIndex"
                 >{{ tag }}</Tag
               >
@@ -134,6 +140,7 @@
                 lineHeight="normal"
                 margin="none"
                 size="xs"
+                fontFamily="inria"
                 :index="0"
                 >Featured</Tag
               >
@@ -146,6 +153,7 @@
               :lineClamp="2"
               :level="'h3'"
               weight="medium"
+              fontFamily="inria"
             >
               {{ titleText }}
             </TitleText>
@@ -158,6 +166,7 @@
               size="lg"
               weight="medium"
               lineHeight="extraRelaxed"
+              fontFamily="habibi"
               :lineClamp="2"
             >
               {{ excerpt }}
@@ -169,11 +178,11 @@
                 <!-- If both date and author exist -->
                 <template v-if="date && author">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
                     formatDate(date)
                   }}</Text>
                   by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
                     author
                   }}</Text>
                 </template>
@@ -181,7 +190,7 @@
                 <!-- If only date exists -->
                 <template v-else-if="date">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
                     formatDate(date)
                   }}</Text>
                 </template>
@@ -189,7 +198,7 @@
                 <!-- If only author exists -->
                 <template v-else-if="author">
                   Published by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{
                     author
                   }}</Text>
                 </template>

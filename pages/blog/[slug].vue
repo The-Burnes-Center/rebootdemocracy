@@ -43,7 +43,7 @@
                       fill="black"
                     />
                   </svg>
-                  <Text as="span" size="sm" weight="extradarkbold" marginLeft="sm">
+                  <Text as="span"  weight="bold" marginLeft="sm" fontFamily="inria">
                     Blog
                   </Text>
                 </button>
@@ -109,9 +109,9 @@
 
                 <!-- Authors + date -->
                 <div class="publication-info">
-                  <Text size="base" weight="normal">
+                  <Text size="base" weight="normal" fontFamily="habibi">
                     Published on
-                    <Text as="span" size="base" weight="bold">
+                    <Text as="span" size="base" weight="bold" fontFamily="sora">
                       {{ formatDate(blog.date) }}
                     </Text>
                   </Text>
@@ -131,7 +131,7 @@
                         :alt="getAuthorName(author.team_id)"
                       />
                       <div class="author-details">
-                        <Text size="base" weight="bold">
+                        <Text size="base" weight="bold" fontFamily="habibi">
                           {{ getAuthorName(author.team_id) }}
                         </Text>
                         <Text

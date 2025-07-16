@@ -182,7 +182,7 @@ const dataFetchError = computed(() => indexError.value || articleError.value);
 
 /* Typography Styles */
 .resource-page h1 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -193,13 +193,13 @@ const dataFetchError = computed(() => indexError.value || articleError.value);
 }
 
 .resource-page h2 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   margin: 0;
   padding: 0;
 }
 
 .resource-page h4 {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 18px;
   margin: 0;
   padding: 0;
@@ -225,7 +225,7 @@ const dataFetchError = computed(() => indexError.value || articleError.value);
 .resource-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   letter-spacing: 2.4px;
 }
 
@@ -240,7 +240,7 @@ const dataFetchError = computed(() => indexError.value || articleError.value);
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   color: #000000;
 }
 
@@ -372,7 +372,7 @@ const dataFetchError = computed(() => indexError.value || articleError.value);
 }
 
 .resource-menu li {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   font-size: 20px;
   font-style: normal;
   font-weight: 700;
@@ -469,7 +469,7 @@ const dataFetchError = computed(() => indexError.value || articleError.value);
 @media (max-width: 768px) {
   .resource-page h1 {
     font-size: 30px;
-    font-family: var(--font-inter);
+    font-family: var(--font-habibi);
   }
 
   .resource-page {

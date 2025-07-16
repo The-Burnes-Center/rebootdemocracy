@@ -1,5 +1,3 @@
-
-
 .about-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -7,7 +5,7 @@
   font-family: var(--font-inria);
 }
 
-.about-container h1{
+.about-container h1 {
   letter-spacing: normal;
 }
 
@@ -32,7 +30,7 @@
 }
 
 .team-member:hover {
-cursor:pointer;
+  cursor: pointer;
 }
 
 .member-photo {
@@ -54,7 +52,7 @@ cursor:pointer;
 
 .member-info {
   padding: 1.5rem;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
 }
 
 .bio-link {

@@ -119,6 +119,9 @@
 .paragraph-line-height-loose {
   line-height: 32px;
 }
+.paragraph-line-height-more-loose {
+  line-height: 36px;
+}
 
 .paragraph-line-height-extra-loose {
   line-height: 40px;

@@ -1,5 +1,5 @@
 import { defineNuxtConfig } from "nuxt/config";
-import '@nuxtjs/algolia'; 
+import '@nuxtjs/algolia';
 import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 
@@ -15,34 +15,32 @@ export default defineNuxtConfig({
     enabled: true,
   },
   nitro: {
-  preset: 'netlify',
-  prerender: {
-    crawlLinks: false,
-    failOnError: false,
-    concurrency: 1, 
-    routes: []
+    preset: 'netlify',
+    prerender: {
+      crawlLinks: false,
+      failOnError: false,
+      concurrency: 1,
+      routes: []
+    },
+    output: {
+      dir: '.output',
+      publicDir: '.output/public',
+      serverDir: '.output/server'
+    }
   },
- 
-  output: {
-    dir: '.output',
-    publicDir: '.output/public',
-    serverDir: '.output/server'
-  }
-},
-
- hooks: {
-  async 'nitro:config'(nitroConfig) {
-     const blogRoutes = await getStaticBlogRoutes();
-     const categoryRoutes = await getStaticCategoryRoutes();
-
-    nitroConfig.prerender = nitroConfig.prerender ?? {};
-    nitroConfig.prerender.routes = [
-      ...(nitroConfig.prerender.routes ?? []),
-      ...blogRoutes,
-      ...categoryRoutes
-    ];
-  }
-},
+  hooks: {
+    async 'nitro:config'(nitroConfig) {
+      const blogRoutes = await getStaticBlogRoutes();
+      const categoryRoutes = await getStaticCategoryRoutes();
+      
+      nitroConfig.prerender = nitroConfig.prerender ?? {};
+      nitroConfig.prerender.routes = [
+        ...(nitroConfig.prerender.routes ?? []),
+        ...blogRoutes,
+        ...categoryRoutes
+      ];
+    }
+  },
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
     applicationId: process.env.ALGOLIA_APP_ID,
@@ -87,6 +85,12 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'shortcut icon', type: 'images/newsheader.png', href: '/images/newsheader.png' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: "anonymous" },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Habibi&family=Lexend:wght@100..900&family=Outfit:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Sora:wght@100..800&display=swap'
+        },
         {
           rel: 'stylesheet',
           href: 'https://kit.fontawesome.com/59ddbfe387.css',

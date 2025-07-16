@@ -381,7 +381,7 @@ const uniqueCategories = computed(() => {
 
 .item-title {
   color: #0d63eb;
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
 }
 
 .item-meta {
@@ -390,7 +390,7 @@ const uniqueCategories = computed(() => {
 }
 
 .item-excerpt {
-  font-family: var(--font-inter);
+  font-family: var(--font-habibi);
   line-height: 32px;
 }
 
