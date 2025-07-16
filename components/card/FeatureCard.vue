@@ -53,7 +53,7 @@
             <Text as="p" size="sm" class="featured-card__author-name">
               {{ author }}
             </Text>
-            <Text as="p" size="xs" class="featured-card__date">
+            <Text as="p" size="xs" class="featured-card__date" fontFamily="sora">
               {{ formattedDate }}
             </Text>
           </div>
