@@ -1,12 +1,12 @@
 <template>
   <div class="about-container">
-    <TitleText level="h1" weight="bold">About Us</TitleText>
-    <Text margin="md">We use artificial intelligence to help institutions and communities solve problems together. We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
+    <TitleText level="h1" weight="bold" fontFamily="var(--font-inria)">About Us</TitleText>
+    <Text margin="md" fontFamily="habibi">We use artificial intelligence to help institutions and communities solve problems together. We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
       Better governance, Better outcomes, Increased trust in institutions And in one another. As researchers we want to understand how best to “do democracy” in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.
     </Text>
     
     <div class="team-section">
-      <TitleText level="h1" weight="bold" >Our Team</TitleText>
+      <TitleText level="h1" weight="bold" fontFamily="var(--font-inria)">Our Team</TitleText>
       
       <div v-if="loading">
         <Text>Loading team data...</Text>
@@ -23,7 +23,7 @@
           :key="member.id" 
           class="team-member"
         >
-          <div class="member-photo">
+          <div class="member-photo" fontFamily="var(--font-inria)">
             <img
               v-if="member.Headshot"
               :src="getImageUrl(member.Headshot, 512)"
@@ -33,24 +33,23 @@
           </div>
           
           <div class="member-info">
-            <TitleText level="h3" weight="medium">{{ member.First_Name }} {{ member.Last_Name }}</TitleText>
+            <TitleText level="h3" weight="bold" fontFamily="var(--font-sora)" color="text-dark">{{ member.First_Name }} {{ member.Last_Name }}</TitleText>
             <Text 
               as="p" 
               class="member-title" 
-              fontStyle="italic" 
               color="text-tertiary" 
               size="sm"
+              fontFamily="habibi"
               marginBottom="md"
             >{{ member.Title }}</Text>
             
             <a
               v-if="member.Link_to_bio"
               :href="member.Link_to_bio"
-              target="_blank"
               rel="noopener noreferrer"
               class="bio-link"
             >
-              <Text as="span" color="link-primary" weight="medium" size="sm">View Bio</Text>
+              <Text as="span" color="link-primary" weight="medium" size="sm" fontFamily="habibi">View Bio</Text>
             </a>
           </div>
         </div>
