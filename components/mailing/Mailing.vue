@@ -57,29 +57,23 @@
 
 /* Button styles */
 a.btn {
-  font-size: 0.8rem;
+  font-size: 1rem;
   margin: 0;
   font-weight: 700;
-  letter-spacing: 0.09em;
   text-decoration: none;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   font-family: var(--font-inria);
-  color: #000000;
+  color: #ffffff;
+  border: none;
 }
 
 .btn-primary {
   color: #ffffff;
-  background: var(--yellow-action) !important;
-  border: 1px solid #000000;
+  background: #fc6423!important;
 }
-
-.btn-dark {
-  color: #003366 !important;
-}
-
 .btn-medium {
   width: fit-content;
   min-height: 42px;

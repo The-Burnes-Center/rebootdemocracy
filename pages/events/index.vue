@@ -109,7 +109,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
       <div class="events-title-row">
         <div class="events-title-col">
           <h1>Rebooting Democracy in the Age of AI</h1>
-          <h2 class="red-subtitle" ><span>Lecture Series</span></h2>
+          <h2 class="red-subtitle"><span>Lecture Series</span></h2>
         </div>
       </div>
       <div class="events-row">
@@ -356,7 +356,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
   justify-content: center;
   align-items: center;
   font-family: var(--font-inria);
-  color: #000000;
+  color: #FFFFFF;
 }
 
 .events-page a.btn:hover {
@@ -371,18 +371,18 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 .events-page .register-btn {
   color: #ffffff;
-  background: #fc6423!important;
+  background: #fc6423 !important;
   height: 100% !important;
   margin-top: 20px !important;
 }
 
 .events-page .btn-dark {
-  color: #000000 !important;
+  color: #FFFFFF !important;
 }
 
 .events-page .btn-secondary {
-  color: #000000;
-  background: var(--peach-action);
+  color: #FFFFFF !important;
+  background: #fc6423 !important;
   border: 1px solid #000000;
 }
 

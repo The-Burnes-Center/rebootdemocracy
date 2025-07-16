@@ -356,6 +356,7 @@ const scrollTop = () => {
 }
 
 .resource-description p {
+  font-family: var(--font-habibi);
   font-size: 20px;
 }
 
