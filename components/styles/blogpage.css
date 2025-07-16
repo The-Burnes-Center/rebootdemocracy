@@ -45,18 +45,11 @@
 }
 
 p.excerpt-paragraph {
-  font-size: 18px;
-  line-height: 30px;
+  font-size: 20px;
+  line-height: 32px;
   font-family: var(--font-habibi);
   font-weight: 400;
   margin: 0;
-}
-
-.read-bio-link {
-  font-size: 1rem;
-  text-decoration: none;
-  margin-top: 2px;
-  display: inline-block;
 }
 
 .right-content-blog {
@@ -109,20 +102,15 @@ p a {
 }
 
 .blog-back-btn {
+  max-width: 1150px;
   background: none;
   border: none;
   cursor: pointer;
   color: #000;
-  font-family: var(--font-habibi);
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 150%;
+  line-height: 32px;
   padding: 0;
   display: flex;
-  align-items: center;
-  margin-top: 1rem;
-  margin-left: 5rem;
+  align-items: center
 }
 
 .publication-info {
@@ -168,7 +156,20 @@ p a {
 
 .blog-content {
   font-family: var(--font-habibi);
-  line-height: 30px;
+  line-height: 32px;
+}
+
+.blog-content p iframe {
+  max-width: 1150px;
+  margin: 0 auto;
+  display: block;
+}
+
+.blog-content span{
+  font-family: var(--font-habibi);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .blog-content h1 {
@@ -187,7 +188,7 @@ p a {
   font-weight: 700;
 }
 .blog-content p {
-  font-size: 18px;
+  font-size: 20px;
   font-style: normal;
   font-weight: 400;
   margin: 0;
@@ -200,8 +201,16 @@ p a {
 }
 .blog-content p em {
   font-family: var(--font-habibi);
+  font-size: 20px;
+  font-style: italic;
+  font-weight: 400;
 }
 
+.blog-content p a {
+  font-family: var(--font-habibi);
+  font-size: 20px;
+  font-weight: 400;
+}
 .share-widget-mobile {
   display: none;
 }
@@ -259,18 +268,6 @@ p a {
   }
 }
 
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1.4;
-  margin: 0;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .tag-share-category {
   display: flex;
   justify-content: space-between;
@@ -285,15 +282,15 @@ p a {
 }
 
 .category-tag {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: #f06e3a;
   background-color: #feebe3;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-family: var(--font-habibi);
+  font-family: var(--font-inria);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }

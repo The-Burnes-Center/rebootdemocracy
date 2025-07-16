@@ -22,7 +22,7 @@
       <Text
         as="h3"
         size="xl"
-        weight="extrabold"
+        weight="bold"
         fontFamily="inria"
         color="text-dark"
         lineHeight="relaxed"
@@ -50,14 +50,15 @@
         size="xs"
         fontStyle="italic"
         class="blogcard-meta"
+        fontFamily="habibi"
       >
         Published on
-        <Text as="span" size="xs" weight="bold" fontStyle="italic">
+        <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">
           {{ formattedDate }}
         </Text>
         <template v-if="author && author !== 'Reboot Democracy Team'">
           by
-          <Text as="span" size="xs" weight="bold" fontStyle="italic">
+          <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">
             {{ author }}
           </Text>
         </template>
@@ -131,11 +132,6 @@ const formattedDate = props.date
 }
 
 .blogcard-title {
-  font-size: 1.25rem;
-  color: #003366;
-  font-family: var(--font-habibi);
-  font-weight: 600;
-  line-height: 1.4;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -145,10 +141,6 @@ const formattedDate = props.date
 }
 
 .blogcard-excerpt {
-  font-size: 1rem;
-  font-family: var(--font-habibi);
-  color: #555;
-  line-height: 1.5;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 4;
@@ -158,8 +150,6 @@ const formattedDate = props.date
 }
 
 .blogcard-meta {
-  font-size: 0.875rem;
-  color: #777;
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
 }

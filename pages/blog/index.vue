@@ -110,7 +110,7 @@
             <div class="results-count">
               <Text
                 as="span"
-                fontFamily="habibi"
+                fontFamily="inria"
                 size="base"
                 color="text-primary"
                 weight="medium"
@@ -175,8 +175,8 @@
           <div v-if="!isPostsLoading && hasMorePosts" class="btn-mid">
             <Button
               variant="secondary"
-              width="140px"
-              height="36px"
+              width="150px"
+              height="40px"
               @click="loadMorePosts"
             >
               Show More
@@ -190,7 +190,7 @@
           <!-- Categories section -->
           <Text
             as="h2"
-            fontFamily="habibi"
+            fontFamily="inria"
             size="lg"
             color="text-primary"
             weight="bold"
