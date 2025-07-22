@@ -3,7 +3,6 @@ import '@nuxtjs/algolia';
 import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 
-
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
@@ -52,7 +51,11 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true },
     '/blog': { prerender: true },
-    '/blog/**': { prerender: true }
+    '/blog/**': { prerender: true },
+    '/events/reboot-democracy': {
+      redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
+      prerender: true
+    }
   },
   css: [
     './components/styles/index.css',
@@ -66,23 +69,7 @@ export default defineNuxtConfig({
   ],
   app: {
     head: {
-      title: 'Reboot Democracy',
-      meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge,chrome=1' },
-        { name: 'description', content: 'Insights on AI, Governance and Democracy' },
-        { name: 'title', content: 'Reboot Democracy' },
-        { property: 'og:title', content: 'Reboot Democracy' },
-        { property: 'og:type', content: 'website' },
-        { property: 'og:url', content: 'https://rebootdemocracy.ai' },
-        { property: 'og:description', content: 'Insights on AI, Governance and Democracy' },
-        { property: 'og:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
-        { property: 'twitter:title', content: 'RebootDemocracy.AI' },
-        { property: 'twitter:description', content: 'Insights on AI, Governance and Democracy' },
-        { property: 'twitter:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
-        { property: 'twitter:card', content: 'summary_large_image' }
-      ],
+    
       link: [
         { rel: 'shortcut icon', type: 'images/newsheader.png', href: '/images/newsheader.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

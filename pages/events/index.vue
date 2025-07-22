@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRoute, useHead, useAsyncData } from "#imports";
+import { useRoute, useAsyncData } from "#imports";
 import { format, isPast, isFuture } from "date-fns";
 import {
   fetchIndexData,
@@ -14,32 +14,26 @@ const iniLoad = ref(0);
 const showingFullText = ref(true);
 
 useHead({
+  title: 'Reboot Democracy Lecture Series',
   meta: [
-    { name: "title", content: "Reboot Democracy Lecture Series" },
+    { name: "description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
+    
+    // OpenGraph tags
     { property: "og:title", content: "Reboot Democracy Lecture Series" },
-    {
-      property: "og:description",
-      content:
-        "How can we leverage the power of artificial intelligence to reimagine democracy?",
-    },
-    {
-      property: "og:image",
-      content: "https://rebootdemocracy.ai/meta-temp.png",
-    },
-    { property: "twitter:title", content: "Reboot Democracy Lecture Series" },
-    {
-      property: "twitter:description",
-      content:
-        "How can we leverage the power of artificial intelligence to reimagine democracy?",
-    },
-    {
-      property: "twitter:image",
-      content: "https://rebootdemocracy.ai/meta-temp.png",
-    },
-    { property: "twitter:card", content: "summary_large_image" },
+    { property: "og:description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
+    { property: "og:image", content: "https://rebootdemocracy.ai/meta-temp.png" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://rebootdemocracy.ai/events/reboot-democracy" },
+    
+    // Twitter tags
+    { name: "twitter:title", content: "Reboot Democracy Lecture Series" },
+    { name: "twitter:description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
+    { name: "twitter:image", content: "https://rebootdemocracy.ai/meta-temp.png" },
+    { name: "twitter:card", content: "summary_large_image" }
   ],
 });
 
+// Rest of your component code remains the same...
 const { data: indexData } = await useAsyncData("reboot-index", fetchIndexData);
 const { data: allEventsRaw } = await useAsyncData(
   "reboot-events",
@@ -103,6 +97,7 @@ const isPastDate = (d1: Date): boolean => isPast(d1);
 const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 </script>
 
+<!-- Template remains exactly the same -->
 <template>
   <div class="events-page">
     <div class="events-hero">
@@ -287,6 +282,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
     </div>
   </div>
 </template>
+
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
