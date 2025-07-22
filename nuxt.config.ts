@@ -52,6 +52,12 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/blog': { prerender: true },
     '/blog/**': { prerender: true },
+    '/events': { prerender: true },
+    '/more-resources': { prerender: true },
+    '/newsthatcaughtoureye/**': { prerender: true },
+    '/about': { prerender: true },
+    '/our-research': { prerender: true },
+    '/our-engagements': { prerender: true },
     '/events/reboot-democracy': {
       redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
       prerender: true
