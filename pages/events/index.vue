@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRoute, useAsyncData } from "#imports";
+import { useRoute, useAsyncData, useHead } from "#imports";
 import { format, isPast, isFuture } from "date-fns";
 import {
   fetchIndexData,
   fetchEventsData,
   fetchSeriesData,
 } from "@/composables/fetchEvent";
+import { getImageUrl } from "@/composables/useImageUrl.js";
 import type { EventItem, GeneralEventsSeries } from "@/types/Event";
 
 const route = useRoute();
 const iniLoad = ref(0);
 const showingFullText = ref(true);
+
 
 useHead({
   title: 'Reboot Democracy Lecture Series',
@@ -21,14 +23,14 @@ useHead({
     // OpenGraph tags
     { property: "og:title", content: "Reboot Democracy Lecture Series" },
     { property: "og:description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
-    { property: "og:image", content: "https://rebootdemocracy.ai/meta-temp.png" },
+    { property: "og:image", content: "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
     { property: "og:type", content: "website" },
-    { property: "og:url", content: "https://rebootdemocracy.ai/events/reboot-democracy" },
+    { property: "og:url", content: "https://rebootdemocracy.ai/events?Reboot%20Democracy%20Lecture%20Series" },
     
     // Twitter tags
     { name: "twitter:title", content: "Reboot Democracy Lecture Series" },
     { name: "twitter:description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
-    { name: "twitter:image", content: "https://rebootdemocracy.ai/meta-temp.png" },
+    { name: "twitter:image", content: "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
     { name: "twitter:card", content: "summary_large_image" }
   ],
 });
