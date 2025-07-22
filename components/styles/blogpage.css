@@ -265,7 +265,7 @@ p > strong {
 /* Media Embeds */
 .blog-content p iframe {
   max-width: 1150px;
-  margin: 0 auto;
+  margin: 1.5rem auto;
   display: block;
 }
 
@@ -385,6 +385,14 @@ p > strong {
   .page-layout-blog {
     grid-template-columns: 1fr;
     gap: 0rem;
+  }
+
+   .blog-content p iframe {
+    max-width: 100%;
+    width: 100%;
+    margin: 1rem auto;
+    display: block;
+    box-sizing: border-box;
   }
   
   .blog-gradient-inner {
