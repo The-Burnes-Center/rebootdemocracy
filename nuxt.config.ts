@@ -2,6 +2,7 @@ import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
 import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
+import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -31,12 +32,14 @@ export default defineNuxtConfig({
     async 'nitro:config'(nitroConfig) {
       const blogRoutes = await getStaticBlogRoutes();
       const categoryRoutes = await getStaticCategoryRoutes();
+      const newsRoutes = await getStaticNewsRoutes();
       
       nitroConfig.prerender = nitroConfig.prerender ?? {};
       nitroConfig.prerender.routes = [
         ...(nitroConfig.prerender.routes ?? []),
         ...blogRoutes,
-        ...categoryRoutes
+        ...categoryRoutes,
+        ...newsRoutes
       ];
     }
   },
@@ -59,6 +62,10 @@ export default defineNuxtConfig({
     '/about': { prerender: true },
     '/our-research': { prerender: true },
     '/our-engagements': { prerender: true },
+    '/newsthatcaughtoureye/latest': { 
+    prerender: false,  
+    headers: { 'cache-control': 's-maxage=60' } 
+  },
     '/events/reboot-democracy': {
       redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
       prerender: true
@@ -75,8 +82,7 @@ export default defineNuxtConfig({
     }
   ],
   app: {
-    head: {
-    
+    head: {     
       link: [
         { rel: 'shortcut icon', type: 'images/newsheader.png', href: '/images/newsheader.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
