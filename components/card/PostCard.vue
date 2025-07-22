@@ -46,8 +46,8 @@
                 :lineClamp="2"
                 :level="'h3'"
                 weight="bold"
-                class="textclass"
                 fontFamily="inria"
+                color="text-dark"
               >
                 {{ titleText }}
               </TitleText>
@@ -126,11 +126,13 @@
             <div class="tag-container">
               <Tag
                 v-if="tag"
-                weight="normal"
-                lineHeight="normal"
-                margin="none"
+                as="span"
                 size="xs"
+                weight="bold"
+                transform="uppercase"
                 fontFamily="inria"
+                class="featured-card__tag"
+                :color="'tag-primary'"
                 :index="tagIndex"
                 >{{ tag }}</Tag
               >
@@ -149,11 +151,12 @@
             <!--title-->
             <TitleText
               v-if="titleText"
-              size="lg"
-              :lineClamp="2"
-              :level="'h3'"
-              weight="medium"
-              fontFamily="inria"
+               size="xl"
+                :lineClamp="2"
+                :level="'h3'"
+                weight="bold"
+                fontFamily="inria"
+                color="text-dark"
             >
               {{ titleText }}
             </TitleText>
@@ -163,11 +166,11 @@
           <div class="postcard__details">
             <BodyText
               v-if="excerpt"
-              size="lg"
-              weight="medium"
-              lineHeight="extraRelaxed"
-              fontFamily="habibi"
+               size="base"
+              lineHeight="normal"
               :lineClamp="2"
+              weight="medium"
+              fontFamily="habibi"
             >
               {{ excerpt }}
             </BodyText>
@@ -178,11 +181,11 @@
                 <!-- If both date and author exist -->
                 <template v-if="date && author">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="sora">{{
                     formatDate(date)
                   }}</Text>
                   by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="sora">{{
                     author
                   }}</Text>
                 </template>
@@ -190,7 +193,7 @@
                 <!-- If only date exists -->
                 <template v-else-if="date">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic"  fontFamily="sora">{{
                     formatDate(date)
                   }}</Text>
                 </template>
@@ -198,7 +201,7 @@
                 <!-- If only author exists -->
                 <template v-else-if="author">
                   Published by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">{{
                     author
                   }}</Text>
                 </template>
@@ -224,7 +227,7 @@ interface PostCardProps {
   tagIndex?: number;
   variant?: "default" | "outline" | "flat";
   hoverable?: boolean;
-  isFeatured?: boolean; // New prop to indicate if blog post is featured
+  isFeatured?: boolean; 
 }
 
 const props = withDefaults(defineProps<PostCardProps>(), {
@@ -237,7 +240,7 @@ const props = withDefaults(defineProps<PostCardProps>(), {
   tagIndex: 0,
   variant: "default",
   hoverable: false,
-  isFeatured: false, // Default to not featured
+  isFeatured: false, 
 });
 
 const emit = defineEmits(["click"]);

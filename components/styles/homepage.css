@@ -1,3 +1,8 @@
+/* ===================================
+   LAYOUT & CONTAINER STYLES
+   =================================== */
+
+/* Main Page Layout */
 .page-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -8,12 +13,14 @@
   overflow: hidden;
 }
 
+/* Home Container */
 .home-container {
   max-width: 1450px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
+/* Content Sections */
 .left-content {
   width: 100%;
   max-width: 100%;
@@ -30,50 +37,24 @@
   border-radius: 8px;
 }
 
+
+/* ===================================
+   BLOG SECTION STYLES
+   =================================== */
+
+/* Blog Layout */
 .blog-featured-and-list {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   margin-bottom: 3rem;
 }
+
 .blog-posts-section {
   width: 100%;
 }
 
-/* View All Button Container */
-.view-all-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-  padding: 0 1rem;
-}
-
-.view-all-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #003366;
-  color: white;
-  border: none;
-  padding: 14px 32px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 51, 102, 0.15);
-}
-
-.view-all-button:hover {
-  background: #002244;
-  box-shadow: 0 4px 16px rgba(0, 51, 102, 0.25);
-}
-
-.view-all-button svg {
-  transition: transform 0.3s ease;
-}
-
-/* Blog grid and card styles - matching your template class names */
+/* Blog Grid */
 .blog-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -82,7 +63,7 @@
   padding: 0 1rem;
 }
 
-/* Custom card styles - matching your template */
+/* Blog Card Styles */
 .custom-card {
   background: #ffffff;
   border-radius: 12px;
@@ -115,7 +96,7 @@
   border-color: #e0e0e0;
 }
 
-/* Image section - matching your template */
+/* Card Image */
 .card-image {
   position: relative;
   height: 200px;
@@ -134,6 +115,7 @@
   transform: scale(1.08);
 }
 
+/* Card Content */
 .card-content {
   padding: 24px;
   display: flex;
@@ -154,7 +136,7 @@
 }
 
 .card-title:hover {
-  color: linear-gradient(135deg, #315895 0%, #315895 100%);
+  color: #315895;
 }
 
 .card-description {
@@ -177,7 +159,11 @@
   color: #003366;
 }
 
-/* Home featured row styles */
+
+/* ===================================
+   FEATURED SECTION STYLES
+   =================================== */
+
 .home-featured-row {
   margin-top: 1.5rem;
   padding-bottom: 2rem;
@@ -193,7 +179,6 @@
   border-radius: 1px;
 }
 
-
 .postcards-column {
   display: flex;
   flex-direction: column;
@@ -206,13 +191,52 @@
   gap: 1rem;
 }
 
-/* Button and filter styles */
+
+/* ===================================
+   BUTTON & CONTROL STYLES
+   =================================== */
+
+/* View All Button */
+.view-all-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.view-all-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #003366;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 51, 102, 0.15);
+}
+
+.view-all-button:hover {
+  background: #002244;
+  box-shadow: 0 4px 16px rgba(0, 51, 102, 0.25);
+}
+
+.view-all-button svg {
+  transition: transform 0.3s ease;
+}
+
+/* Other Buttons */
 .btn-mid {
   display: flex;
   justify-content: center;
   margin-top: 2rem;
 }
 
+/* Filter Controls */
 .tag-filter-indicator {
   display: flex;
   justify-content: space-between;
@@ -240,7 +264,11 @@
   margin-left: 16px;
 }
 
-/* Subscription Section - Full Width */
+
+/* ===================================
+   SUBSCRIPTION SECTION
+   =================================== */
+
 .home-subscription {
   background: #003266;
   padding: 2rem 2rem;
@@ -258,7 +286,7 @@
   flex-wrap: wrap;
 }
 
-.subscription-text{
+.subscription-text {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -269,7 +297,18 @@
   max-width: 600px;
 }
 
-/* Animation */
+/* Subscription Button - Override btn-header hiding on mobile */
+.subscription-content-wrapper .btn-header {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -281,57 +320,70 @@
   }
 }
 
-/* Responsive Design */
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+/* Mobile - Up to 768px */
 @media (max-width: 768px) {
+  .home-container {
+    padding: 0.2rem;
+  }
+  
+  .page-layout {
+    grid-template-columns: 1fr;
+    padding: 1rem 0.5rem;
+  }
+  
+  .left-content {
+    margin-bottom: 5rem;
+    padding: 0rem;
+  }
+  
+  .right-content {
+    margin-bottom: 1rem;
+  }
+  
+  .postcards-column {
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+  
   .blog-card-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
-    padding: 0 0.5rem;
+    padding: 0 1rem;
   }
-
+  
   .card-content {
     padding: 20px;
   }
-
+  
   .card-title {
     font-size: 1.125rem;
   }
-
+  
   .card-image {
     height: 180px;
   }
-
+  
   .home-featured-wrapper {
-    display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
-    padding: 1rem 0.5rem; 
-    padding-bottom: 2rem; 
+    padding: 1rem 0.5rem;
+    padding-bottom: 2rem;
   }
-
+  
   .home-featured-row {
     margin-top: 1rem;
     padding-bottom: 1rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
   }
-
-  .page-layout {
-    grid-template-columns: 1fr;
-    padding: 1rem 0.5rem;
-  }
-
-  .left-content {
-    margin-bottom: 5rem;
-    padding: 0rem;
-  }
-
-  .right-content {
-    margin-bottom: 1rem;
-  }
-
 }
 
+/* Tablet - 768px to 1024px */
 @media (min-width: 768px) and (max-width: 1024px) {
   .blog-card-grid {
     grid-template-columns: 1fr;
@@ -339,57 +391,72 @@
   }
 }
 
+/* Tablet Large - 800px to 1024px */
 @media (min-width: 800px) and (max-width: 1024px) {
   .page-layout {
     grid-template-columns: 1fr;
     padding: 1rem;
   }
+  
   .home-featured-wrapper {
-
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-
-  
 }
 
+/* Desktop - 1024px to 1440px */
 @media (min-width: 1024px) and (max-width: 1440px) {
   .blog-card-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
+/* Desktop Large - 1200px */
+@media (max-width: 1200px) {
+  .home-featured-wrapper {
+    justify-content: center;
+    max-width: 1250px;
+    margin: 0 auto;
+  }
+}
+
+/* Desktop XL - 1441px to 1920px */
 @media (min-width: 1441px) and (max-width: 1920px) {
   .page-layout {
     width: 95%;
   }
-
+  
   .blog-card-grid {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
 }
 
-/* Hover state for touch devices */
+/* Desktop XXL - 1920px+ */
+@media (min-width: 1920px) {
+  .home-featured-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* Touch Devices */
 @media (hover: none) {
   .custom-card:active {
     transform: scale(0.98);
   }
 }
 
- @media (max-width: 1200px) {
- 
-  .home-featured-wrapper {
-    
-    justify-content: center;
-    max-width: 1250px; 
-    margin: 0 auto;
+/* Small Mobile Devices - Up to 480px */
+@media (max-width: 480px) {
+  .subscription-content-wrapper {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
   }
-
-}
-
-@media (min-width: 1920px) {
-  .home-featured-wrapper {
-    max-width: 1400px; 
-    margin: 0 auto;
+  
+  .subscription-content-wrapper .btn-header {
+    width: 100%;
+    max-width: 300px;
   }
 }

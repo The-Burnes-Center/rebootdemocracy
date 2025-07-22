@@ -177,7 +177,7 @@
   }
   
   .featured-card__body {
-    padding: 20px 16px 16px; 
+    padding: 20px 10px;
     gap: 16px; 
   }
 }

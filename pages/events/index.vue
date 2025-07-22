@@ -119,7 +119,6 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
             <div class="btn-row">
               <a
                 href="/signup"
-                target="_blank"
                 class="btn btn-primary btn-dark btn-medium register-btn"
                 >Sign up to receive updates!</a
               >
@@ -302,7 +301,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 /* Typography */
 .events-page h1 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-inria);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -313,12 +312,12 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 }
 
 .events-page h2 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-inria);
   margin: 0;
 }
 
 .events-page h3 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-inria);
   font-size: 24px;
   margin: 0;
   margin: 0;
@@ -333,8 +332,9 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 .events-page p,
 .events-page li {
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-weight: 500;
+  margin: 0;
 }
 
 .events-page .eyebrow {
@@ -346,7 +346,7 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 /* Button Styles */
 .events-page a.btn {
-  font-size: 0.8rem;
+  font-size: 1rem;
   margin: 0;
   font-weight: 700;
   letter-spacing: 0.09em;
@@ -355,8 +355,8 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-habibi);
-  color: #000000;
+  font-family: var(--font-inria);
+  color: #FFFFFF;
 }
 
 .events-page a.btn:hover {
@@ -371,18 +371,18 @@ const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
 
 .events-page .register-btn {
   color: #ffffff;
-  background: var(--yellow-action) !important;
+  background: #fc6423 !important;
   height: 100% !important;
   margin-top: 20px !important;
 }
 
 .events-page .btn-dark {
-  color: #000000 !important;
+  color: #FFFFFF !important;
 }
 
 .events-page .btn-secondary {
-  color: #000000;
-  background: var(--peach-action);
+  color: #FFFFFF !important;
+  background: #fc6423 !important;
   border: 1px solid #000000;
 }
 
@@ -486,7 +486,6 @@ h2.red-subtitle span:after {
   font-style: normal;
   font-weight: 700;
   line-height: normal;
-  letter-spacing: -2.5px;
   font-size: 40px;
 }
 
@@ -499,6 +498,7 @@ h2.red-subtitle span:after {
 
 .event-long-description {
   width: 100%;
+  padding: 2rem 0;
 }
 
 .event-long-description div {
@@ -535,6 +535,7 @@ h2.event-selector {
 h2.event-selector.Eactive {
   font-size: 1.4em;
   opacity: 100%;
+  font-family: var(--font-inria);
 }
 
 p.event-date {

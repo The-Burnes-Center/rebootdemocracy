@@ -114,7 +114,7 @@
 @media (max-width: 768px) {
   .blog-list-search {
     flex-direction: column;
-    margin-top: 12rem;
+    margin-top: 2rem;
   }
   .result-category {
     gap: 2rem;

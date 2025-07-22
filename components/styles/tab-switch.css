@@ -130,7 +130,6 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .tab-switch {
-    margin-top: 1rem;
     justify-content: center;
     align-items: center;
   }
@@ -174,6 +173,6 @@
 
 @media (max-width: 480px) {
   .tab-headers {
-    padding: 0 10px;
+    padding: 0 20px;
   }
 }

@@ -6,7 +6,7 @@ import type { IndexData, ResourceItem } from "../../types/index.ts";
 import { createDirectus, readItems, rest } from "@directus/sdk";
 
 // Constants
-const DIRECTUS_URL = "https://burnes-center.directus.app/";
+const DIRECTUS_URL = "https://burnes-center.directus.app";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
 
 // State management
@@ -298,6 +298,7 @@ const selectedType = ref("All");
 }
 
 .resource-description p {
+  font-family: var(--font-habibi);
   font-size: 20px;
 }
 
