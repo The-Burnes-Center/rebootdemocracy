@@ -212,14 +212,13 @@ export default {
 }
 
 .clear input[type="submit"] {
-  font-size: 0.8rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: 0.09em;
   text-decoration: none;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-inria);
   color: #ffffff;
   background: #fc6423;
   border: 1px solid #000000;
@@ -259,6 +258,7 @@ export default {
 @media (max-width: 768px) {
   .signup-form {
     padding: 2rem 1rem;
+    margin: 3rem 1rem;
   }
 
   .mc-field-group input {
