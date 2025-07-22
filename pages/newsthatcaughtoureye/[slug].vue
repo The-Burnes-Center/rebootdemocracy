@@ -6,15 +6,16 @@
     </div>
 
     <div v-else-if="error" class="error-container">
-      <p>{{ error }}</p>
-      <Button variant="primary" @click="router.push('/')"
+      <p>{{ error.message || 'An error occurred while loading the content.' }}</p>
+      <Button variant="primary" @click="navigateTo('/')"
         >Return to Home</Button
       >
     </div>
 
     <template v-else-if="postData && postData.length > 0">
       <div class="weeklynews-hero">
-        <img class="weeklynews-img" src="/images/newsheader.png" />
+        <img v-if="!postData[0].image" class="weeklynews-img" src="/images/newsheader.png" />
+        <img v-if="postData[0].image" class="weeklynews-img" :src="'https://content.thegovlab.com/assets/' + postData[0].image.id" />
         <div class="weeklynews-details">
           <h1>{{ postData[0].title }}</h1>
           <p>
@@ -61,6 +62,24 @@
             </span>
           </li>
         </ul>
+      </div>
+
+      <!-- Upcoming Events Section -->
+      <div class="news-items" v-if="postData[0].events">
+        <h2 class="group-heading">
+          Upcoming Events
+        </h2>
+        <div class="news-item" v-html="postData[0].events">
+        </div>
+      </div>
+
+      <!-- Special Announcements Section -->
+      <div class="news-items" v-if="postData[0].announcements">
+        <h2 class="group-heading">
+          Special Announcements
+        </h2>
+        <div class="news-item" v-html="postData[0].announcements">
+        </div>
       </div>
 
       <!-- Grouped News Items by Category -->
@@ -113,6 +132,16 @@
             >
               Read article
             </a>
+
+            <!-- Related Links Section -->
+            <div v-if="item.reboot_democracy_weekly_news_items_id.related_links != ''" class="weekly-news-related-articles">
+              <p><b>Related Articles:</b></p>
+              <ul>
+                <li v-for="related_item in item.reboot_democracy_weekly_news_items_id.related_links">
+                  <a :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -122,11 +151,18 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { useRoute, useRouter, useHead, useSeoMeta } from "#imports";
+import { useRoute, useRouter, navigateTo } from "#imports";
 import { format } from "date-fns";
 import { createDirectus, rest, readItems } from "@directus/sdk";
 
 // Interfaces
+interface RelatedNewsItem {
+  reboot_weekly_news_related_news_id: {
+    title: string;
+    link: string;
+  };
+}
+
 interface WeeklyNewsItem {
   id: string;
   title: string;
@@ -136,6 +172,7 @@ interface WeeklyNewsItem {
   excerpt: string;
   url: string;
   category?: string;
+  related_links?: RelatedNewsItem[] | '';
 }
 
 interface WeeklyNewsItemWrapper {
@@ -159,6 +196,8 @@ interface WeeklyNewsPost {
   status: string;
   items: WeeklyNewsItemWrapper[];
   image?: ImageItem;
+  events?: string;
+  announcements?: string;
 }
 
 // Constants
@@ -170,7 +209,50 @@ const route = useRoute();
 const router = useRouter();
 const slug = computed(() => route.params.slug as string);
 
-// Fetch post data with useAsyncData
+// Helper function to get the latest edition
+const getLatestEdition = async () => {
+  try {
+    const response = await directus.request(
+      readItems("reboot_democracy_weekly_news", {
+        fields: ["edition"],
+        filter: {
+          status: { _eq: "published" },
+        },
+        limit: -1,
+      })
+    );
+
+    if (response && response.length > 0) {
+      const editions = response
+        .map((item: any) => parseInt(item.edition))
+        .filter((edition: number) => !isNaN(edition))
+        .sort((a: number, b: number) => b - a);
+
+      if (editions.length > 0) {
+        return editions[0].toString();
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching latest edition:", error);
+    return null;
+  }
+};
+
+// Handle "latest" slug
+let effectiveSlug = slug.value;
+if (slug.value === "latest") {
+  if (process.server) {
+    // Server-side: fetch latest edition
+    const latestEdition = await getLatestEdition();
+    if (latestEdition) {
+      effectiveSlug = latestEdition;
+    }
+  }
+}
+
+// Fetch post data with useAsyncData - optimized for build time
 const {
   data: postData,
   pending: isLoading,
@@ -178,22 +260,47 @@ const {
 } = await useAsyncData(
   `weekly-news-${slug.value}`,
   async () => {
-    const response = await directus.request(
-      readItems("reboot_democracy_weekly_news", {
-        meta: "total_count",
-        limit: -1,
-        fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*"],
-        filter: {
-          _and: [
-            { edition: { _eq: slug.value } },
-            { status: { _eq: "published" } },
-          ],
-        },
-      })
-    );
-    return response as WeeklyNewsPost[];
+    try {
+      let slugToUse = slug.value;
+      
+      // Check if the slug is "latest"
+      if (slug.value === "latest") {
+        const latestEdition = await getLatestEdition();
+        if (latestEdition) {
+          slugToUse = latestEdition;
+          // On client side, replace the URL
+          if (process.client) {
+            await navigateTo(`/newsthatcaughtoureye/${latestEdition}`, { replace: true });
+          }
+        } else {
+          throw new Error("No published editions found");
+        }
+      }
+
+      const response = await directus.request(
+        readItems("reboot_democracy_weekly_news", {
+          meta: "total_count",
+          limit: -1,
+          fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*,items.reboot_democracy_weekly_news_items_id.related_links.*.*"],
+          filter: {
+            _and: [
+              { edition: { _eq: slugToUse } },
+              { status: { _eq: "published" } },
+            ],
+          },
+        })
+      );
+      return response as WeeklyNewsPost[];
+    } catch (err) {
+      console.error('Error fetching weekly news:', err);
+      throw err;
+    }
   },
-  { server: true }
+  { 
+    server: true,
+    lazy: false, 
+    transform: (data) => data, 
+  }
 );
 
 // Format date
@@ -212,7 +319,7 @@ const uniqueCategories = computed(() => {
   return [...new Set(cats)];
 });
 
-// Set up meta tags
+// Set up meta tags with reactive values
 const post = computed(() => postData.value?.[0]);
 
 const metaTitle = computed(() => 
@@ -239,10 +346,9 @@ const metaUrl = computed(() =>
     : "https://rebootdemocracy.ai/newsthatcaughtoureye"
 );
 
-// Use useHead for basic meta tags
 useHead({
-  title: metaTitle.value,
-  meta: [
+  title: () => metaTitle.value,
+  meta: () => [
     { name: 'description', content: metaDescription.value },
     { property: 'og:title', content: metaTitle.value },
     { property: 'og:description', content: metaDescription.value },
@@ -256,19 +362,19 @@ useHead({
   ]
 });
 
-// Also use useSeoMeta for better compatibility
+// Also use useSeoMeta with reactive values
 useSeoMeta({
-  title: metaTitle.value,
-  description: metaDescription.value,
-  ogTitle: metaTitle.value,
-  ogDescription: metaDescription.value,
-  ogImage: metaImageUrl.value,
-  ogType: post.value ? 'article' : 'website',
-  ogUrl: metaUrl.value,
-  twitterTitle: metaTitle.value,
-  twitterDescription: metaDescription.value,
-  twitterImage: metaImageUrl.value,
-  twitterCard: 'summary_large_image',
+  title: () => metaTitle.value,
+  description: () => metaDescription.value,
+  ogTitle: () => metaTitle.value,
+  ogDescription: () => metaDescription.value,
+  ogImage: () => metaImageUrl.value,
+  ogType: () => post.value ? 'article' : 'website',
+  ogUrl: () => metaUrl.value,
+  twitterTitle: () => metaTitle.value,
+  twitterDescription: () => metaDescription.value,
+  twitterImage: () => metaImageUrl.value,
+  twitterCard: () => 'summary_large_image',
 });
 
 </script>
@@ -392,6 +498,38 @@ useSeoMeta({
   font-size: 12px;
   font-family: var(--font-inria);
   font-weight: 600;
+}
+
+/* Related Articles Section */
+.weekly-news-related-articles {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-left: 3px solid #0d63eb;
+}
+
+.weekly-news-related-articles p {
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font-inria);
+}
+
+.weekly-news-related-articles ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.weekly-news-related-articles li {
+  margin-bottom: 0.25rem;
+}
+
+.weekly-news-related-articles a {
+  color: #0d63eb;
+  text-decoration: none;
+  font-family: var(--font-inria);
+}
+
+.weekly-news-related-articles a:hover {
+  text-decoration: underline;
 }
 
 /* Loading and Error Styles */
