@@ -8,6 +8,31 @@ import { createDirectus, rest, readItems } from "@directus/sdk";
 const DIRECTUS_URL = "https://burnes-center.directus.app/";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
 
+useHead({
+  title: 'Reboot Democracy',
+  meta: [
+    { 
+      name: 'description', 
+      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` 
+    },
+    { property: 'og:title', content: 'Reboot Democracy' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: 'https://rebootdemocracy.ai' },
+    { 
+      property: 'og:description', 
+      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` 
+    },
+    { property: 'og:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
+    { name: 'twitter:title', content: 'RebootDemocracy.AI' },
+    { 
+      name: 'twitter:description', 
+      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` 
+    },
+    { name: 'twitter:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
+    { name: 'twitter:card', content: 'summary_large_image' }
+  ],
+});
+
 // Formatting utilities
 const formatDateTime = (d: Date | string) =>
   format(new Date(d), "MMMM d, yyyy, h:mm aa");
