@@ -406,9 +406,9 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
         ) {
           if (authorName.includes(',') || authorName.includes(' and ')) {
             const authors = authorName
-              .split(/[,]|(\sand\s)/i)
-              .map(a => a.trim())
-              .filter(a => a && a !== 'and');
+              .split(/,|\s+and\s+/i)  
+              .map(a => a ? a.trim() : '')  
+              .filter(a => a && a !== 'and' && a !== '');
             
             authors.forEach(author => {
               if (author && author !== "Reboot Democracy Team") {
@@ -513,7 +513,7 @@ const tags = computed(() => tagsData.value || []);
 const authors = computed(() => authorsData.value || []);
 
 const filteredAuthors = computed(() =>
-  authors.value.filter((author) => author.count > 1)
+  authors.value.filter((author) => author.count >= 1)
 );
 
 watch(selectedAuthor, async (newAuthor) => {

@@ -57,7 +57,6 @@ export default defineNuxtConfig({
     '/blog/**': { prerender: true },
     '/events': { prerender: true },
     '/more-resources': { prerender: true },
-    '/newsthatcaughtoureye': { prerender: true },
     '/newsthatcaughtoureye/**': { prerender: true },
     '/about': { prerender: true },
     '/our-research': { prerender: true },
