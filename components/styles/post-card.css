@@ -97,7 +97,7 @@
 
   /* Adjust image for mobile */
   .postcard__image {
-    width: 100%; /* Smaller image on mobile */
+    width: 100%; 
     height: 8rem;
     position: relative;
     left: 0;
@@ -128,11 +128,6 @@
   /* Mobile view class specific styles */
   .mobile-view .postcard__container {
     padding: 0.5rem;
-  }
-
-  /* Ensure proper spacing in postcards column on mobile */
-  .postcards-column {
-    gap: 1rem;
   }
 
   .card--large {
@@ -191,4 +186,12 @@
 
 .blog-related-posts .postcard__details {
   gap: 0.5rem;
+}
+
+/*smaller mobile screen */
+@media (max-width: 480px) {
+  .blog-related-posts .postcard__image {
+   width: 100%;
+    height: 10rem;
+  }
 }

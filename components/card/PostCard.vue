@@ -126,11 +126,13 @@
             <div class="tag-container">
               <Tag
                 v-if="tag"
-                weight="normal"
-                lineHeight="normal"
-                margin="none"
+                as="span"
                 size="xs"
+                weight="bold"
+                transform="uppercase"
                 fontFamily="inria"
+                class="featured-card__tag"
+                :color="'tag-primary'"
                 :index="tagIndex"
                 >{{ tag }}</Tag
               >
@@ -149,12 +151,12 @@
             <!--title-->
             <TitleText
               v-if="titleText"
-              size="lg"
-              :lineClamp="2"
-              :level="'h3'"
-              weight="medium"
-              fontFamily="inria"
-               color="text-dark"
+               size="xl"
+                :lineClamp="2"
+                :level="'h3'"
+                weight="bold"
+                fontFamily="inria"
+                color="text-dark"
             >
               {{ titleText }}
             </TitleText>
@@ -164,11 +166,11 @@
           <div class="postcard__details">
             <BodyText
               v-if="excerpt"
-              size="lg"
-              weight="medium"
-              lineHeight="extraRelaxed"
-              fontFamily="habibi"
+               size="base"
+              lineHeight="normal"
               :lineClamp="2"
+              weight="medium"
+              fontFamily="habibi"
             >
               {{ excerpt }}
             </BodyText>

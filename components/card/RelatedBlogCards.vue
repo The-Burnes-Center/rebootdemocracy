@@ -32,12 +32,9 @@
                 />
               </div>
               <div class="postcard__text-content">
-                <div>
                   <Tag
                     v-if="post.Tags?.[0]"
-                    weight="normal"
-                    lineHeight="normal"
-                    margin="none"
+                    weight="extrabold"
                     size="xs"
                     :index="index"
                     fontFamily="inria"
@@ -45,33 +42,30 @@
                   >
                     {{ post.Tags[0] }}
                   </Tag>
-                  <TitleText size="xl" :lineClamp="2" :level="'h3'">{{
+                  <TitleText size="xl" weight="bold" fontFamily="inria"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
                     post.title
                   }}</TitleText>
-                </div>
                 <div class="postcard__details">
-                  <BodyText size="base" lineHeight="normal" :lineClamp="3">{{
-                    post.excerpt
-                  }}</BodyText>
+                  <BodyText size="base" :lineClamp="3">{{ post.excerpt }}</BodyText>
                   <div class="postcard__meta">
-                    <Text size="xs" weight="normal" fontStyle="italic" >
+                    <Text size="xs" weight="normal" fontStyle="italic" fontFamily="habibi" >
                       <template v-if="post.date && post.authors?.[0]?.team_id">
                         Published on
                         <Text
-                          as="span"
+                           as="span"
                           size="xs"
                           weight="bold"
                           fontStyle="italic"
-                            fontFamily="sora"
+                          fontFamily="sora"
                           >{{ formatDate(post.date) }}</Text
                         >
                         by
                         <Text
-                          as="span"
+                           as="span"
                           size="xs"
                           weight="bold"
                           fontStyle="italic"
-                            fontFamily="sora"
+                          fontFamily="sora"
                           >{{ getAuthorName(post.authors[0].team_id) }}</Text
                         >
                       </template>

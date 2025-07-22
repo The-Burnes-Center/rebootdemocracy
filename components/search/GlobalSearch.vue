@@ -35,7 +35,7 @@
       <Button
         variant="secondary"
         width="150px"
-        height="36px"
+        height="40px"
         @click="loadMoreResults"
         :disabled="isSearching"
       >

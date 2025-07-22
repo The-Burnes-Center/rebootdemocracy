@@ -109,11 +109,12 @@
           <div class="results-and-filter">
             <div class="results-count">
               <Text
-                as="span"
+                as="h2"
                 fontFamily="inria"
-                size="base"
+                size="lg"
                 color="text-primary"
-                weight="medium"
+                weight="bold"
+                align="left"
               >
                 Showing {{ displayedPosts.length }} of
                 {{ filteredPosts.length }} results
@@ -220,12 +221,11 @@
           <!-- Authors section -->
           <Text
             as="h2"
-            fontFamily="habibi"
+            fontFamily="inria"
             size="lg"
             color="text-primary"
             weight="bold"
             align="left"
-            class="section-title"
           >
             Authors
           </Text>
