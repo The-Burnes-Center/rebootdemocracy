@@ -4,34 +4,9 @@ import { format, isPast, isFuture } from "date-fns";
 import { useRoute, useHead } from "#imports";
 import type { IndexData, ResourceItem } from "../../types/index.ts";
 import { createDirectus, readItems, rest } from "@directus/sdk";
-
-// Constants
+import { useSeoMeta } from '#imports';
 const DIRECTUS_URL = "https://burnes-center.directus.app";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
-useHead({
-  title: 'Reboot Democracy',
-  meta: [
-    { 
-      name: 'description', 
-      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` 
-    },
-    { property: 'og:title', content: 'Reboot Democracy' },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: 'https://rebootdemocracy.ai' },
-    { 
-      property: 'og:description', 
-      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` 
-    },
-    { property: 'og:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
-    { name: 'twitter:title', content: 'RebootDemocracy.AI' },
-    { 
-      name: 'twitter:description', 
-      content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` 
-    },
-    { name: 'twitter:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
-    { name: 'twitter:card', content: 'summary_large_image' }
-  ],
-});
 
 // State management
 const route = useRoute();
@@ -96,6 +71,20 @@ const {
 );
 
 const selectedType = ref("All");
+useSeoMeta({
+  title: 'Reboot Democracy',
+  ogTitle: 'Reboot Democracy',
+  description: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
+  ogDescription: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
+  ogType: 'website',
+  ogUrl: 'https://rebootdemocracy.ai',
+  ogImage: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3',
+  twitterTitle: 'RebootDemocracy.AI',
+  twitterDescription: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
+  twitterImage: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3',
+  twitterCard: 'summary_large_image'
+});
+
 </script>
 
 <template>

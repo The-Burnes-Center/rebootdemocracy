@@ -125,7 +125,8 @@ import { computed } from "vue";
 import { useRoute, useRouter, useHead } from "#imports";
 import { format } from "date-fns";
 import { createDirectus, rest, readItems } from "@directus/sdk";
-
+import { useSeoMeta } from "#imports";
+import { watchEffect } from "vue";
 // Interfaces
 interface WeeklyNewsItem {
   id: string;
@@ -196,118 +197,6 @@ const {
   { server: true }
 );
 
-// Set meta tags based on post data
-useHead(() => {
-  if (postData.value && postData.value.length > 0) {
-    const post = postData.value[0];
-    const summaryText = post.summary ? post.summary.replace(/<[^>]+>/g, "").slice(0, 200) : "";
-    const imageUrl = post.image
-      ? `${DIRECTUS_URL}/assets/${post.image.id}`
-      : `${DIRECTUS_URL}/assets/4650f4e2-6cc2-407b-ab01-b74be4838235`;
-
-    return {
-      title: `${post.title} - News That Caught Our Eye`,
-      meta: [
-        { 
-          name: "description", 
-          content: summaryText || "Weekly news roundup on AI and democracy" 
-        },
-        { 
-          property: "og:title", 
-          content: `${post.title} - News That Caught Our Eye` 
-        },
-        { 
-          property: "og:type", 
-          content: "article" 
-        },
-        {
-          property: "og:url",
-          content: `https://rebootdemocracy.ai/newsthatcaughtoureye/${post.edition}`,
-        },
-        {
-          property: "og:description",
-          content: summaryText || "Weekly news roundup on AI and democracy",
-        },
-        { 
-          property: "og:image", 
-          content: imageUrl 
-        },
-        { 
-          property: "article:published_time", 
-          content: post.date 
-        },
-        { 
-          property: "article:author", 
-          content: post.author 
-        },
-        { 
-          name: "twitter:title", 
-          content: `${post.title} - News That Caught Our Eye` 
-        },
-        {
-          name: "twitter:description",
-          content: summaryText || "Weekly news roundup on AI and democracy",
-        },
-        { 
-          name: "twitter:image", 
-          content: imageUrl 
-        },
-        { 
-          name: "twitter:card", 
-          content: "summary_large_image" 
-        },
-      ],
-    };
-  } else {
-    // Default meta tags when no post data
-    return {
-      title: "News That Caught Our Eye - Reboot Democracy",
-      meta: [
-        { 
-          name: "description", 
-          content: "Weekly news roundup on AI and democracy from Reboot Democracy" 
-        },
-        { 
-          property: "og:title", 
-          content: "News That Caught Our Eye - Reboot Democracy" 
-        },
-        {
-          property: "og:description",
-          content: "Weekly news roundup on AI and democracy from Reboot Democracy",
-        },
-        {
-          property: "og:image",
-          content: "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3",
-        },
-        { 
-          property: "og:type", 
-          content: "website" 
-        },
-        { 
-          property: "og:url", 
-          content: "https://rebootdemocracy.ai/newsthatcaughtoureye" 
-        },
-        { 
-          name: "twitter:title", 
-          content: "News That Caught Our Eye - Reboot Democracy" 
-        },
-        {
-          name: "twitter:description",
-          content: "Weekly news roundup on AI and democracy from Reboot Democracy",
-        },
-        {
-          name: "twitter:image",
-          content: "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3",
-        },
-        { 
-          name: "twitter:card", 
-          content: "summary_large_image" 
-        },
-      ],
-    };
-  }
-});
-
 // Format date
 const formatDateOnly = (date: Date): string => {
   return format(date, "MMMM d, yyyy");
@@ -323,6 +212,43 @@ const uniqueCategories = computed(() => {
   );
   return [...new Set(cats)];
 });
+
+watchEffect(() => {
+  const post = postData.value?.[0];
+
+  const summaryText = post?.summary
+    ? post.summary.replace(/<[^>]+>/g, "").slice(0, 200)
+    : "Weekly news roundup on AI and democracy from Reboot Democracy";
+
+  const imageUrl = post?.image
+    ? `${DIRECTUS_URL}/assets/${post.image.id}`
+    : "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3";
+
+  useSeoMeta({
+    title: post
+      ? `${post.title} - News That Caught Our Eye`
+      : "News That Caught Our Eye - Reboot Democracy",
+
+    description: summaryText,
+    ogTitle: post
+      ? `${post.title} - News That Caught Our Eye`
+      : "News That Caught Our Eye - Reboot Democracy",
+    ogDescription: summaryText,
+    ogImage: imageUrl,
+    ogType: post ? "article" : "website",
+    ogUrl: post
+      ? `https://rebootdemocracy.ai/newsthatcaughtoureye/${post.edition}`
+      : "https://rebootdemocracy.ai/newsthatcaughtoureye",
+
+    twitterTitle: post
+      ? `${post.title} - News That Caught Our Eye`
+      : "News That Caught Our Eye - Reboot Democracy",
+    twitterDescription: summaryText,
+    twitterImage: imageUrl,
+    twitterCard: "summary_large_image",
+  });
+});
+
 </script>
 
 <style>

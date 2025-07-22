@@ -139,7 +139,7 @@
 
           <!-- Display filtered blogs when loaded -->
           <div
-            v-if="!isPostsLoading && displayedPosts.length > 0"
+            v-if="!isPostsLoading && !isFilteringByAuthor && displayedPosts.length > 0"
             class="blog-list"
           >
             <div class="blogcard-grid-wrapper">
@@ -161,8 +161,13 @@
             </div>
           </div>
 
+          <!-- Loading state when filtering by author -->
+          <div v-else-if="isFilteringByAuthor" class="loading">
+            Loading posts by {{ selectedAuthor }}...
+          </div>
+
           <!-- No blogs found message -->
-          <div v-else-if="!isPostsLoading" class="no-blogs">
+          <div v-else-if="!isPostsLoading && !isFilteringByAuthor" class="no-blogs">
             <span v-if="selectedCategory">
               No posts found in category "{{ selectedCategory }}"
             </span>
@@ -259,10 +264,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
+import { fetchAllBlogPosts } from "~/composables/fetchBlogData";
+import { fetchWeeklyNewsItems } from "~/composables/fetchWeeklyNews";
+import {
+  fetchPostsByAuthor,
+  getAuthorName as getAuthorNameUtil,
+  getAllAuthors,
+} from "~/composables/useAuthorPosts";
 
 const props = defineProps<{ initialCategory?: string }>();
 
@@ -323,6 +335,8 @@ const isMobile = ref(false);
 const selectedCategory = ref<string | null>(null);
 const selectedAuthor = ref<string | null>(null);
 const currentPage = ref(1);
+const authorFilteredPosts = ref<any[]>([]);
+const isFilteringByAuthor = ref(false);
 
 // Toggle functions
 const toggleCategoriesVisible = () => {
@@ -347,45 +361,7 @@ interface Author {
 }
 
 const getAuthorName = (post: BlogPost | NewsItem): string => {
-  if (
-    "authors" in post &&
-    post.authors &&
-    Array.isArray(post.authors) &&
-    post.authors.length > 0
-  ) {
-    if (post.authors.length > 1) {
-      const authorNames = post.authors
-        .map((author) => {
-          if (author.team_id) {
-            return `${author.team_id.First_Name} ${author.team_id.Last_Name}`;
-          }
-          return null;
-        })
-        .filter(Boolean);
-
-      if (authorNames.length > 0) {
-        if (authorNames.length === 1) return authorNames[0];
-        const lastAuthor = authorNames.pop();
-        return `${authorNames.join(", ")} and ${lastAuthor}`;
-      }
-      return "Reboot Democracy Team";
-    }
-
-    const author = post.authors[0]?.team_id;
-    return author
-      ? `${author.First_Name} ${author.Last_Name}`
-      : "Reboot Democracy Team";
-  } else if (
-    "authors" in post &&
-    post.authors &&
-    typeof post.authors === "string"
-  ) {
-    return post.authors;
-  } else if ("author" in post && post.author) {
-    return post.author;
-  }
-
-  return "Reboot Democracy Team";
+  return getAuthorNameUtil(post);
 };
 
 // Data processing functions
@@ -428,7 +404,21 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
           authorName !== "Reboot Democracy Team" &&
           authorName.trim() !== ""
         ) {
-          authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+          if (authorName.includes(',') || authorName.includes(' and ')) {
+            const authors = authorName
+              .split(/[,]|(\sand\s)/i)
+              .map(a => a.trim())
+              .filter(a => a && a !== 'and');
+            
+            authors.forEach(author => {
+              if (author && author !== "Reboot Democracy Team") {
+                authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
+              }
+            });
+          } else {
+            // Single author
+            authorCounts.set(authorName, (authorCounts.get(authorName) || 0) + 1);
+          }
         }
       } catch (postError) {
         console.error(`Error processing post ${index}:`, postError, post);
@@ -526,8 +516,29 @@ const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count > 1)
 );
 
+watch(selectedAuthor, async (newAuthor) => {
+  if (newAuthor && !selectedCategory.value) {
+    isFilteringByAuthor.value = true;
+    try {
+      const posts = await fetchPostsByAuthor(newAuthor);
+      authorFilteredPosts.value = posts;
+    } catch (error) {
+      console.error('Error fetching posts by author:', error);
+      authorFilteredPosts.value = [];
+    } finally {
+      isFilteringByAuthor.value = false;
+    }
+  } else {
+    authorFilteredPosts.value = [];
+  }
+});
+
 // Filtered posts based on selected category/author
 const filteredPosts = computed(() => {
+  if (selectedAuthor.value && !selectedCategory.value && authorFilteredPosts.value.length > 0) {
+    return authorFilteredPosts.value;
+  }
+
   let filtered = allPosts.value;
 
   if (selectedCategory.value) {
@@ -542,9 +553,24 @@ const filteredPosts = computed(() => {
   }
 
   if (selectedAuthor.value) {
-    filtered = filtered.filter(
-      (post) => getAuthorName(post) === selectedAuthor.value
-    );
+    // For author filtering when combined with category or as fallback
+    filtered = filtered.filter((post) => {
+      const authorName = getAuthorName(post);
+
+      // Check if the selected author appears anywhere in the author string
+      if (authorName.includes(',') || authorName.includes(' and ')) {
+        // Multiple authors - check if selected author is one of them
+        const authors = authorName
+          .split(/[,]|(\sand\s)/i)
+          .map(a => a.trim())
+          .filter(a => a && a !== 'and');
+
+        return authors.some(author => author === selectedAuthor.value);
+      } else {
+        // Single author - exact match
+        return authorName === selectedAuthor.value;
+      }
+    });
   }
 
   return filtered;
@@ -633,6 +659,7 @@ const loadMorePosts = () => {
 // Filter management
 const selectCategory = (category: string) => {
   selectedAuthor.value = null;
+  authorFilteredPosts.value = []; // Clear author filtered posts
   selectedCategory.value = category;
   currentPage.value = 1;
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -648,6 +675,7 @@ const selectAuthor = (author: string) => {
 const clearFilters = () => {
   selectedCategory.value = null;
   selectedAuthor.value = null;
+  authorFilteredPosts.value = []; 
   currentPage.value = 1;
 };
 
@@ -658,6 +686,8 @@ const checkIfMobile = () => {
 
 // Lifecycle hooks
 onMounted(() => {
+  window.scrollTo({ top: 0, behavior: "instant" });
+  
   checkIfMobile();
   window.addEventListener("resize", checkIfMobile);
 
@@ -674,8 +704,9 @@ onMounted(() => {
 
   const authorParam = route.query.author as string | undefined;
   if (authorParam) {
+    const decodedAuthor = decodeURIComponent(authorParam);
     const foundAuthor = authors.value.find(
-      (author) => author.name.toLowerCase() === authorParam.toLowerCase()
+      (author) => author.name.toLowerCase() === decodedAuthor.toLowerCase()
     );
 
     if (foundAuthor) {

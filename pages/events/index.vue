@@ -9,31 +9,11 @@ import {
 } from "@/composables/fetchEvent";
 import { getImageUrl } from "@/composables/useImageUrl.js";
 import type { EventItem, GeneralEventsSeries } from "@/types/Event";
+import { useSeoMeta } from "#imports";
 
 const route = useRoute();
 const iniLoad = ref(0);
 const showingFullText = ref(true);
-
-
-useHead({
-  title: 'Reboot Democracy Lecture Series',
-  meta: [
-    { name: "description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
-    
-    // OpenGraph tags
-    { property: "og:title", content: "Reboot Democracy Lecture Series" },
-    { property: "og:description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
-    { property: "og:image", content: "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
-    { property: "og:type", content: "website" },
-    { property: "og:url", content: "https://rebootdemocracy.ai/events?Reboot%20Democracy%20Lecture%20Series" },
-    
-    // Twitter tags
-    { name: "twitter:title", content: "Reboot Democracy Lecture Series" },
-    { name: "twitter:description", content: "How can we leverage the power of artificial intelligence to reimagine democracy?" },
-    { name: "twitter:image", content: "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3" },
-    { name: "twitter:card", content: "summary_large_image" }
-  ],
-});
 
 // Rest of your component code remains the same...
 const { data: indexData } = await useAsyncData("reboot-index", fetchIndexData);
@@ -97,6 +77,21 @@ const formatDateTime = (d1: Date): string =>
 const formatDateOnly = (d1: Date): string => format(d1, "MMMM d, yyyy");
 const isPastDate = (d1: Date): boolean => isPast(d1);
 const isFutureDate = (d1: Date): boolean => isFuture(new Date(d1));
+
+useSeoMeta({
+  title: 'Reboot Democracy Lecture Series',
+  description: 'How can we leverage the power of artificial intelligence to reimagine democracy?',
+  ogTitle: 'Reboot Democracy Lecture Series',
+  ogDescription: 'How can we leverage the power of artificial intelligence to reimagine democracy?',
+  ogImage: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3',
+  ogType: 'website',
+  ogUrl: 'https://rebootdemocracy.ai/events?Reboot%20Democracy%20Lecture%20Series',
+  twitterTitle: 'Reboot Democracy Lecture Series',
+  twitterDescription: 'How can we leverage the power of artificial intelligence to reimagine democracy?',
+  twitterImage: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3',
+  twitterCard: 'summary_large_image'
+});
+
 </script>
 
 <!-- Template remains exactly the same -->

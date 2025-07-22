@@ -4,36 +4,12 @@ import { format, isPast, isFuture } from "date-fns";
 import MailingListComponent from "../../components/mailing/Mailing.vue";
 import { createDirectus, rest, readItems } from "@directus/sdk";
 import { getImageUrl } from "@/composables/useImageUrl.js";
-import { useHead } from "#imports";
+import { useSeoMeta } from '#imports';
 
 // Directus client setup
 const DIRECTUS_URL = "https://burnes-center.directus.app/";
 const directus = createDirectus(DIRECTUS_URL).with(rest());
 
-useHead({
-  title: 'Resources - Reboot Democracy',
-  meta: [
-    { 
-      name: 'description', 
-      content: 'Explore our collection of resources, process documents, worksheets, podcasts, and videos on reimagining democracy with AI.' 
-    },
-    { property: 'og:title', content: 'Resources - Reboot Democracy' },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: 'https://rebootdemocracy.ai/resources' },
-    { 
-      property: 'og:description', 
-      content: 'Explore our collection of resources, process documents, worksheets, podcasts, and videos on reimagining democracy with AI.' 
-    },
-    { property: 'og:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
-    { name: 'twitter:title', content: 'Resources - Reboot Democracy' },
-    { 
-      name: 'twitter:description', 
-      content: 'Explore our collection of resources, process documents, worksheets, podcasts, and videos on reimagining democracy with AI.' 
-    },
-    { name: 'twitter:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
-    { name: 'twitter:card', content: 'summary_large_image' }
-  ],
-});
 // Formatting utilities
 const formatDateTime = (d: Date | string) =>
   format(new Date(d), "MMMM d, yyyy, h:mm aa");
@@ -97,6 +73,21 @@ const isLoading = computed(
   () => isIndexLoading.value || isArticleLoading.value
 );
 const dataFetchError = computed(() => indexError.value || articleError.value);
+// SEO metadata
+useSeoMeta({
+  title: 'Resources - Reboot Democracy',
+  ogTitle: 'Resources - Reboot Democracy',
+  description: 'Explore our collection of resources, process documents, worksheets, podcasts, and videos on reimagining democracy with AI.',
+  ogDescription: 'Explore our collection of resources, process documents, worksheets, podcasts, and videos on reimagining democracy with AI.',
+  ogType: 'website',
+  ogUrl: 'https://rebootdemocracy.ai/resources',
+  ogImage: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3',
+  twitterTitle: 'Resources - Reboot Democracy',
+  twitterDescription: 'Explore our collection of resources, process documents, worksheets, podcasts, and videos on reimagining democracy with AI.',
+  twitterImage: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3',
+  twitterCard: 'summary_large_image'
+});
+
 </script>
 
 <template>

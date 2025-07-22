@@ -1,4 +1,6 @@
 export interface WeeklyNews {
+  date: any;
+  image: any;
   id: number;
   edition:number;
   status?: string;
