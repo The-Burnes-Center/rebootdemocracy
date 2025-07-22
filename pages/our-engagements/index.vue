@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { format, isPast, isFuture } from "date-fns";
-import { useRoute } from "vue-router";
+import { useRoute, useHead } from "#imports";
 import type { IndexData, ResourceItem } from "../../types/index.ts";
 import { createDirectus, readItems, rest } from "@directus/sdk";
 
