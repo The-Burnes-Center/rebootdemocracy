@@ -122,11 +122,10 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { useRoute, useRouter, useHead } from "#imports";
+import { useRoute, useRouter, useHead, useSeoMeta } from "#imports";
 import { format } from "date-fns";
 import { createDirectus, rest, readItems } from "@directus/sdk";
-import { useSeoMeta } from "#imports";
-import { watchEffect } from "vue";
+
 // Interfaces
 interface WeeklyNewsItem {
   id: string;
@@ -213,40 +212,63 @@ const uniqueCategories = computed(() => {
   return [...new Set(cats)];
 });
 
-watchEffect(() => {
-  const post = postData.value?.[0];
+// Set up meta tags
+const post = computed(() => postData.value?.[0]);
 
-  const summaryText = post?.summary
-    ? post.summary.replace(/<[^>]+>/g, "").slice(0, 200)
-    : "Weekly news roundup on AI and democracy from Reboot Democracy";
+const metaTitle = computed(() => 
+  post.value 
+    ? `${post.value.title} - News That Caught Our Eye`
+    : "News That Caught Our Eye - Reboot Democracy"
+);
 
-  const imageUrl = post?.image
-    ? `${DIRECTUS_URL}/assets/${post.image.id}`
-    : "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3";
+const metaDescription = computed(() => 
+  post.value?.summary
+    ? post.value.summary.replace(/<[^>]+>/g, "").slice(0, 200)
+    : "Weekly news roundup on AI and democracy from Reboot Democracy"
+);
 
-  useSeoMeta({
-    title: post
-      ? `${post.title} - News That Caught Our Eye`
-      : "News That Caught Our Eye - Reboot Democracy",
+const metaImageUrl = computed(() => 
+  post.value?.image
+    ? `${DIRECTUS_URL}/assets/${post.value.image.id}`
+    : "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3"
+);
 
-    description: summaryText,
-    ogTitle: post
-      ? `${post.title} - News That Caught Our Eye`
-      : "News That Caught Our Eye - Reboot Democracy",
-    ogDescription: summaryText,
-    ogImage: imageUrl,
-    ogType: post ? "article" : "website",
-    ogUrl: post
-      ? `https://rebootdemocracy.ai/newsthatcaughtoureye/${post.edition}`
-      : "https://rebootdemocracy.ai/newsthatcaughtoureye",
+const metaUrl = computed(() => 
+  post.value
+    ? `https://rebootdemocracy.ai/newsthatcaughtoureye/${post.value.edition}`
+    : "https://rebootdemocracy.ai/newsthatcaughtoureye"
+);
 
-    twitterTitle: post
-      ? `${post.title} - News That Caught Our Eye`
-      : "News That Caught Our Eye - Reboot Democracy",
-    twitterDescription: summaryText,
-    twitterImage: imageUrl,
-    twitterCard: "summary_large_image",
-  });
+// Use useHead for basic meta tags
+useHead({
+  title: metaTitle.value,
+  meta: [
+    { name: 'description', content: metaDescription.value },
+    { property: 'og:title', content: metaTitle.value },
+    { property: 'og:description', content: metaDescription.value },
+    { property: 'og:image', content: metaImageUrl.value },
+    { property: 'og:type', content: post.value ? 'article' : 'website' },
+    { property: 'og:url', content: metaUrl.value },
+    { name: 'twitter:title', content: metaTitle.value },
+    { name: 'twitter:description', content: metaDescription.value },
+    { name: 'twitter:image', content: metaImageUrl.value },
+    { name: 'twitter:card', content: 'summary_large_image' },
+  ]
+});
+
+// Also use useSeoMeta for better compatibility
+useSeoMeta({
+  title: metaTitle.value,
+  description: metaDescription.value,
+  ogTitle: metaTitle.value,
+  ogDescription: metaDescription.value,
+  ogImage: metaImageUrl.value,
+  ogType: post.value ? 'article' : 'website',
+  ogUrl: metaUrl.value,
+  twitterTitle: metaTitle.value,
+  twitterDescription: metaDescription.value,
+  twitterImage: metaImageUrl.value,
+  twitterCard: 'summary_large_image',
 });
 
 </script>

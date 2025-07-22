@@ -10,7 +10,7 @@ package = "netlify-plugin-cache"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@directus/sdk", "jstoxml", "he"]
+  external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
   directory = "netlify/functions"
 
 [[redirects]]
@@ -31,6 +31,7 @@ force = true
 
 [dev]
 command = "npm run dev"
+targetPort = 3000
 
 [images]
 remote_images = ["https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"]

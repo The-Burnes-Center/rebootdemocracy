@@ -1,32 +1,22 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
-const { createDirectus, rest, readItems } = require('@directus/sdk');
-const he = require('he');
-
-// Fix for the jstoxml ESM module issue
-let toXML;
-async function initializeJsToXml() {
-  const jstoxml = await import('jstoxml');
-  toXML = jstoxml.default.toXML || jstoxml.toXML;
-  return toXML;
-}
+import { createDirectus, rest, readItems } from '@directus/sdk';
+import he from 'he';
 
 const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
 
 export const handler = async function (event, context) {
   try {
     // Initialize the jstoxml module
-    const toXML = await initializeJsToXml();
-    
+    const jstoxml = await import('jstoxml');
+    const toXML = jstoxml.toXML || jstoxml;
+
     console.log("Attempting to fetch data from Directus...");
     
-    // Try with simplified query first for debugging
     const publicData = await directus.request(
       readItems('reboot_democracy_weekly_news', {
-        // Temporarily remove filter to see if any data exists
-        // filter: { _and: [{ status: { _eq: "published" } } ] },
         limit: -1,
         sort: ['-id'],
-        fields: ["*"]  // Simplified fields parameter
+        fields: ["*"]  
       })
     );
     

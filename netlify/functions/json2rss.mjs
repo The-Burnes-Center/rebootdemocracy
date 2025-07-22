@@ -1,12 +1,13 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
-const { createDirectus, rest, readItems } = require('@directus/sdk');
-const he = require('he');
+import { createDirectus, rest, readItems } from '@directus/sdk';
+import he from 'he';
+
 
 // Fix for the jstoxml ESM module issue
 let toXML;
 async function initializeJsToXml() {
   const jstoxml = await import('jstoxml');
-  toXML = jstoxml.default.toXML || jstoxml.toXML;
+  const toXML = jstoxml.toXML || jstoxml;
   return toXML;
 }
 
