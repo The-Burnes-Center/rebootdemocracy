@@ -1,22 +1,28 @@
 <template>
-  <!--Used reusable container card by passing variant and size-->
+  <!--Desktop view-->
   <Card
     size="large"
     :variant="'default'"
     :hoverable="hoverable"
     :class="['desktop-view', { 'featured-post': isFeatured }]"
+    :aria-label="`Article: ${titleText} by ${author}, published ${formatDate(date)}`"
+    role="article"
+    tabindex="0"
     @click="$emit('click')"
+    @keydown="handleKeydown"
   >
     <section class="postcard__container">
-      <!--image-->
       <div class="postcard__content">
         <div v-if="imageUrl" class="postcard__image">
-          <img :src="imageUrl" :alt="titleText" />
+          <img 
+            :src="imageUrl" 
+            :alt="`Article image for ${titleText}`"
+            loading="lazy"
+          />
         </div>
 
         <div class="postcard__text-content">
           <div>
-            <!--tag with featured badge-->
             <div class="tag-container">
               <Tag
                 v-if="tag"
@@ -27,19 +33,20 @@
                 fontFamily="inria"
                 class="featured-card__tag"
                 :color="'tag-primary'"
-                >{{ tag }}</Tag
-              >
-              <span v-if="isFeatured" class="tag-separator">|</span>
+                role="text"
+                :aria-label="`Category: ${tag}`"
+              >{{ tag }}</Tag>
+              <span v-if="isFeatured" class="tag-separator" aria-hidden="true">|</span>
               <Tag
                 v-if="isFeatured"
                 lineHeight="normal"
                 margin="none"
                 size="xs"
                 :index="0"
-                >Featured</Tag
-              >
+                role="text"
+                aria-label="This is a featured post"
+              >Featured</Tag>
 
-              <!--title-->
               <TitleText
                 v-if="titleText"
                 size="xl"
@@ -54,7 +61,6 @@
             </div>
           </div>
 
-          <!--excerpt-->
           <div class="postcard__details">
             <BodyText
               v-if="excerpt"
@@ -63,39 +69,46 @@
               :lineClamp="2"
               weight="medium"
               fontFamily="habibi"
+              role="text"
+              :aria-label="`Article excerpt: ${excerpt}`"
             >
               {{ excerpt }}
             </BodyText>
 
-            <!--meta info-->
             <div v-if="date || author" class="postcard__meta">
-              <Text size="xs" weight="normal" fontStyle="italic" fontFamily="habibi">
-                <!-- If both date and author exist -->
+              <Text 
+                size="xs" 
+                weight="normal" 
+                fontStyle="italic" 
+                fontFamily="habibi"
+                role="text"
+                :aria-label="`Published on ${formatDate(date)} by ${author}`"
+              >
                 <template v-if="date && author">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">{{
-                    formatDate(date)
-                  }}</Text>
+                  <Text 
+                    as="span" 
+                    size="xs" 
+                    weight="bold" 
+                    fontStyle="italic" 
+                    fontFamily="sora"
+                  >{{ formatDate(date) }}</Text>
                   by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">{{
-                    author
-                  }}</Text>
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">{{ author }}</Text>
                 </template>
-
-                <!-- If only date exists -->
                 <template v-else-if="date">
                   Published on
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{
-                    formatDate(date)
-                  }}</Text>
+                  <Text 
+                    as="span" 
+                    size="xs" 
+                    weight="bold" 
+                    fontStyle="italic" 
+                    fontFamily="habibi"
+                  >{{ formatDate(date) }}</Text>
                 </template>
-
-                <!-- If only author exists -->
                 <template v-else-if="author">
                   Published by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{
-                    author
-                  }}</Text>
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{ author }}</Text>
                 </template>
               </Text>
             </div>
@@ -105,19 +118,27 @@
     </section>
   </Card>
 
-  <!--Mobile view-->
+  <!--Mobile view with same accessibility enhancements-->
   <Card
     size="large"
     :variant="'default'"
     :hoverable="hoverable"
     :class="['mobile-view', { 'featured-post': isFeatured }]"
+    :aria-label="`Article: ${titleText} by ${author}, published ${formatDate(date)}`"
+    role="article" 
+    tabindex="0"
     @click="$emit('click')"
+    @keydown="handleKeydown"
   >
+    <!-- Mobile view content similar to desktop with same accessibility features -->
     <section class="postcard__container">
-      <!--image-->
       <div class="postcard__content">
         <div v-if="imageUrl" class="postcard__image">
-          <img :src="imageUrl" :alt="titleText" />
+          <img 
+            :src="imageUrl" 
+            :alt="`Article image for ${titleText}`"
+            loading="lazy"
+          />
         </div>
 
         <div class="postcard__text-content">
@@ -227,7 +248,7 @@ interface PostCardProps {
   tagIndex?: number;
   variant?: "default" | "outline" | "flat";
   hoverable?: boolean;
-  isFeatured?: boolean; 
+  isFeatured?: boolean;
 }
 
 const props = withDefaults(defineProps<PostCardProps>(), {
@@ -240,22 +261,27 @@ const props = withDefaults(defineProps<PostCardProps>(), {
   tagIndex: 0,
   variant: "default",
   hoverable: false,
-  isFeatured: false, 
+  isFeatured: false,
 });
 
-const emit = defineEmits(["click"]);
+const emit = defineEmits(["click", "keydown"]);
 
 const formatDate = (dateValue: Date | string) => {
   if (!dateValue) return "unknown date";
   try {
-    const date =
-      typeof dateValue === "string"
-        ? parseISO(dateValue)
-        : dateValue || new Date();
+    const date = typeof dateValue === "string" ? parseISO(dateValue) : dateValue || new Date();
     return format(date, "MMMM d, yyyy");
   } catch (error) {
     console.error("Error formatting date:", error);
     return "invalid date";
   }
+};
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    emit('click', event);
+  }
+  emit('keydown', event);
 };
 </script>

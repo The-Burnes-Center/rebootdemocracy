@@ -7,17 +7,20 @@
     />
 
     <!-- SEARCH RESULTS -->
-    <section class="home-section" v-if="showSearchResults">
+    <section class="home-section" v-if="showSearchResults" aria-label="Search Results">
       <div class="container">
         <GlobalSearch />
       </div>
     </section>
 
     <!-- MAIN CONTENT -->
-    <template v-else>
+    <main v-else>
       <!-- FEATURED POSTS SECTION -->
-      <section class="home-section home-featured">
+      <section class="home-section home-featured" aria-labelledby="featured-posts-heading">
         <div class="home-container">
+          <!-- Screen reader only heading -->
+          <h2 id="featured-posts-heading" class="sr-only">Featured and Recent Posts</h2>
+          
           <div class="home-featured-wrapper">
             <!-- FEATURED POST -->
             <FeatureCard
@@ -29,11 +32,13 @@
               :description="featuredPost.excerpt || ''"
               :date="featuredPost.date || ''"
               :author="getAuthorName(featuredPost)"
+              :aria-label="`Featured post: ${featuredPost.title || 'Untitled'} by ${getAuthorName(featuredPost)}`"
               @click="navigateToBlogPost(featuredPost)"
+              @keydown="handleKeyboardNavigation($event, () => navigateToBlogPost(featuredPost))"
             />
 
             <!-- RECENT POSTS -->
-            <div class="postcards-column">
+            <div class="postcards-column" role="list" aria-label="Recent posts">
               <PostCard
                 v-for="(item, index) in latestThreePosts"
                 :key="`post-${index}`"
@@ -45,7 +50,10 @@
                 :date="item.date"
                 :isFeatured="false"
                 :hoverable="true"
+                role="listitem"
+                :aria-label="`Post: ${item.title} by ${getAuthorName(item)}, published ${formatDate(item.date)}`"
                 @click="navigateToBlogPost(item)"
+                @keydown="handleKeyboardNavigation($event, () => navigateToBlogPost(item))"
               />
             </div>
           </div>
@@ -53,12 +61,13 @@
       </section>
 
       <!-- SUBSCRIPTION SECTION (Full Width) -->
-      <section class="home-section home-subscription">
+      <section class="home-section home-subscription" aria-labelledby="subscription-heading">
         <div class="container">
           <div class="subscription-content-wrapper">
             <div class="subscription-text">
               <Text
                 as="h2"
+                id="subscription-heading"
                 size="4xl"
                 weight="bold"
                 color="text-primary-light"
@@ -85,6 +94,7 @@
               variant="secondary"
               height="50px"
               :onClick="onClick"
+              aria-label="Sign up for weekly updates about democracy and governance"
             >
               Sign up for updates
             </Button>
@@ -93,8 +103,11 @@
       </section>
 
       <!-- BLOG POSTS SECTION -->
-      <section class="home-section home-blog">
+      <section class="home-section home-blog" aria-labelledby="blog-posts-heading">
         <div class="container">
+          <!-- Screen reader only heading -->
+          <h2 id="blog-posts-heading" class="sr-only">Blog Posts and News</h2>
+          
           <TabSwitch
             :tabs="tabOptions"
             :tagOptions="tagOptions"
@@ -108,17 +121,26 @@
               <div
                 v-if="!isLoading && displayPosts.length"
                 class="blog-posts-section"
+                role="region"
+                aria-label="Latest blog posts"
               >
-                <div class="blog-card-grid">
-                  <div
+                <div class="blog-card-grid" role="list">
+                  <article
                     v-for="(post, index) in displayPosts.slice(0, 9)"
                     :key="post.id || `post-${index}`"
                     class="custom-card"
+                    role="listitem"
+                    tabindex="0"
                     @click="handlePostClick(post)"
-                    style="cursor: pointer"
+                    @keydown="handleKeyboardNavigation($event, () => handlePostClick(post))"
+                    :aria-label="`Blog post: ${post.title} by ${getAuthorName(post)}, published ${formatDate(post.date)}`"
                   >
                     <div class="card-image">
-                      <img :src="getImageUrl(post.image)" :alt="post.title" />
+                      <img 
+                        :src="getImageUrl(post.image)" 
+                        :alt="`Featured image for ${post.title}`"
+                        loading="lazy"
+                      />
                     </div>
                     <div class="card-content">
                       <Text
@@ -129,6 +151,8 @@
                         fontFamily="inria"
                         class="featured-card__tag"
                         :color="'tag-primary'"
+                        role="text"
+                        :aria-label="`Category: ${getTag(post)}`"
                       >
                         {{ getTag(post) }}
                       </Text>
@@ -161,6 +185,8 @@
                         fontFamily="habibi"
                         class="card-meta"
                         v-if="post.date"
+                        role="text"
+                        :aria-label="`Published on ${formatDate(post.date)} by ${getAuthorName(post)}`"
                       >
                         Published on
                         <Text
@@ -188,16 +214,40 @@
                         </template>
                       </Text>
                     </div>
-                  </div>
+                  </article>
                 </div>
                 <div class="view-all-container">
                   <button
                     class="base__button base__button--secondary"
                     @click="navigateToAllPosts"
+                    @keydown="handleKeyboardNavigation($event, navigateToAllPosts)"
+                    aria-label="View all blog posts"
                   >
                     <span class="base__btn-slot">View All Posts</span>
                   </button>
                 </div>
+              </div>
+
+              <!-- Loading state with proper accessibility -->
+              <div 
+                v-else-if="isLoading" 
+                class="loading-state"
+                role="status"
+                aria-live="polite"
+                aria-label="Loading blog posts"
+              >
+                <div class="loading-spinner" aria-hidden="true"></div>
+                <span class="sr-only">Loading blog posts, please wait</span>
+              </div>
+
+              <!-- Empty state -->
+              <div 
+                v-else 
+                class="empty-state"
+                role="status"
+                aria-live="polite"
+              >
+                <p>No blog posts available at this time.</p>
               </div>
             </template>
           </TabSwitch>
@@ -205,12 +255,13 @@
       </section>
 
       <!-- COLLABORATORS SECTION -->
-      <section class="home-section home-collaborators">
+      <section class="home-section home-collaborators" aria-labelledby="collaborators-heading">
         <div class="blog-collab-container">
           <!-- BLOG COLLABORATORS HEADING -->
           <div class="curator-and-button">
             <Text
               as="h3"
+              id="collaborators-heading"
               size="2xl"
               weight="bold"
               fontFamily="inria"
@@ -223,6 +274,8 @@
             <button
               class="base__button base__button--secondary"
               @click="router.push('/about#team-grid')"
+              @keydown="handleKeyboardNavigation($event, () => router.push('/about#team-grid'))"
+              aria-label="Learn more about our team members"
             >
               <span class="base__btn-slot">Meet Our Team</span>
             </button>
@@ -230,24 +283,25 @@
 
           <!-- BLOG COLLABORATORS -->
           <div class="blog-collaborators-wrapper">
-            <div class="collaborators-flex-grid">
+            <div class="collaborators-flex-grid" role="region" aria-label="Featured curator">
               <CuratorBadge
                 name="Beth Simone Noveck"
                 title="Director at Burnes Center and the Govlab"
                 imageUrl="/images/Beth_Simone_Noveck.png"
               />
             </div>
-            <div class="collaborators-fixed-grid">
+            <div class="collaborators-fixed-grid" role="list" aria-label="Blog collaborators">
               <AuthorBadge
                 v-for="author in flattenedCollaborators"
                 :key="author.name"
                 v-bind="author"
+                role="listitem"
               />
             </div>
           </div>
         </div>
       </section>
-    </template>
+    </main>
   </div>
 </template>
 
@@ -266,14 +320,15 @@ import {
 
 const router = useRouter();
 const { resetSearch, showSearchResults } = useSearchState();
+
 useHead({
-  title: 'Reboot Democracy',
+  title: 'Reboot Democracy - AI for Participatory Democracy',
   meta: [
     { 
       name: 'description', 
       content: `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to better governance, better outcomes, increased trust in institutions, and in one another. As researchers we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.` 
     },
-    { property: 'og:title', content: 'Reboot Democracy' },
+    { property: 'og:title', content: 'Reboot Democracy - AI for Participatory Democracy' },
     { property: 'og:type', content: 'website' },
     { property: 'og:url', content: 'https://rebootdemocracy.ai' },
     { 
@@ -372,6 +427,14 @@ const flattenedCollaborators = computed(
         : "/images/fallbackperson.png",
     })) || []
 );
+
+// Accessibility: Keyboard navigation handler
+function handleKeyboardNavigation(event: KeyboardEvent, callback: () => void): void {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    callback();
+  }
+}
 
 // Utility functions
 function formatDate(dateValue: Date | string): string {
@@ -539,5 +602,79 @@ onMounted(() => {
 <style>
 .blog-collab-container {
   background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus styles for keyboard navigation */
+.custom-card:focus,
+button:focus,
+[tabindex="0"]:focus {
+  outline: 1px solid grey;
+  outline-offset: 2px;
+}
+
+/* Loading state styles */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #f3f4f6;
+  border-top: 1px solid gray;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty state styles */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+/* Enhanced hover and focus states */
+.custom-card:hover,
+.custom-card:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Skip link for keyboard users */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: grey;
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: 6px;
 }
 </style>

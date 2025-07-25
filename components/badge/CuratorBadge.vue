@@ -1,11 +1,12 @@
 <template>
-  <div class="curator-badge">
+  <div class="curator-badge" role="region" aria-label="Featured curator">
     <div class="curator-badge__left">
       <div class="curator-badge__image-container">
         <img 
-          :src="imageUrl" 
-          :alt="name" 
-          class="curator-badge__image" 
+          :src="imageUrl"
+          :alt="`Photo of ${name}, ${title}`"
+          class="curator-badge__image"
+          loading="lazy"
         />
       </div>
     </div>
@@ -17,14 +18,15 @@
         fontStyle="italic"
         class="curator-badge__label"
         fontFamily="habibi"
+        role="text"
       >
         Curated by
       </Text>
       
       <Text 
-        as="h3" 
-        size="base" 
-        weight="bold" 
+        as="h3"
+        size="base"
+        weight="bold"
         class="curator-badge__name"
         fontFamily="sora"
       >
@@ -32,15 +34,16 @@
       </Text>
       
       <Text 
-        as="p" 
-        size="xs" 
-        weight="normal" 
+        as="p"
+        size="xs"
+        weight="normal"
         class="curator-badge__title"
         fontFamily="habibi"
+        role="text"
+        :aria-label="`Position: ${title}`"
       >
         {{ title }}
       </Text>
-    
     </div>
   </div>
 </template>
@@ -52,6 +55,5 @@ interface CuratorBadgeProps {
   imageUrl: string;
 }
 
-const props = withDefaults(defineProps<CuratorBadgeProps>(), {
-});
+const props = defineProps<CuratorBadgeProps>();
 </script>

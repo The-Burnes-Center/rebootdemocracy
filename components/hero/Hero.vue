@@ -1,5 +1,5 @@
 <template>
-  <div class="hero__container">
+  <header class="hero__container" role="banner">
     <div class="hero__content">
       <Text
         as="h1"
@@ -7,6 +7,7 @@
         :weight="'bold'"
         :fontFamily="'inria'"
         class="hero__title"
+        id="main-heading"
       >
         {{ title }}
       </Text>
@@ -16,14 +17,15 @@
         :weight="'semibold'"
         :fontFamily="'inria'"
         class="hero__subtitle"
+        role="text"
+        aria-describedby="main-heading"
       >
         {{ subtitle }}
       </Text>
     </div>
-
-    <div class="search-content">
+    
+    <div class="search-content" role="search" aria-label="Search blog posts">
       <ais-instant-search
-        ais-instant-search
         :index-name="primaryIndex"
         :search-client="algoliaClient"
       >
@@ -31,10 +33,11 @@
           @input="handleSearchInput"
           @reset="handleSearchReset"
           class="custom-searchbox"
+          aria-label="Search for blog posts and articles"
         />
       </ais-instant-search>
     </div>
-  </div>
+  </header>
 </template>
 
 <script setup lang="ts">

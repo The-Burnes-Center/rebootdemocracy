@@ -1,13 +1,22 @@
 <template>
-  <div class="author-badge">
+  <div 
+    class="author-badge" 
+    role="listitem"
+    :aria-label="`Team member: ${name}, ${title || 'Collaborator'}`"
+  >
     <div class="author-badge__image-container">
-      <img :src="imageUrl" :alt="name" class="author-badge__image" />
+      <img 
+        :src="imageUrl" 
+        :alt="`Photo of ${name}`" 
+        class="author-badge__image"
+        loading="lazy"
+      />
     </div>
     <div class="author-badge__content">
       <h3 class="author-name">
         {{ name }}
       </h3>
-      <h4 class="author-title">
+      <h4 class="author-title" :aria-label="`Position: ${title || 'Collaborator'}`">
         {{ title || 'Collaborator' }}
       </h4>
     </div>

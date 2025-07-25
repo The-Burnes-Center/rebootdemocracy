@@ -1,3 +1,4 @@
+
 <template>
   <component
     :is="as"
@@ -11,6 +12,9 @@
       ...marginStyle,
     }"
     :class="[alignmentClass, lineHeightClass, customClass]"
+    :aria-label="ariaLabel"
+    :role="role"
+    :id="id"
   >
     <template v-if="$slots.default">
       <slot />
@@ -123,7 +127,6 @@ const marginSizes = {
   xl: "2rem", // 32px
 } as const;
 
-// Props interface
 interface TextProps {
   as?: keyof typeof ElementDefaultSizes;
   size?: keyof typeof SizeToRem;
@@ -142,6 +145,9 @@ interface TextProps {
   marginRight?: keyof typeof marginSizes;
   marginBottom?: keyof typeof marginSizes;
   marginLeft?: keyof typeof marginSizes;
+  ariaLabel?: string;
+  role?: string;
+  id?: string;
 }
 
 // Define props with defaults
@@ -163,76 +169,37 @@ const props = withDefaults(defineProps<TextProps>(), {
   marginRight: undefined,
   marginBottom: undefined,
   marginLeft: undefined,
+  ariaLabel: undefined,
+  role: undefined,
+  id: undefined,
 });
 
+// ... (rest of computed properties remain the same)
 const fontSize = computed(() => {
   if (props.size) {
     return SizeToRem[props.size];
   }
-
   const defaultSizeForElement = ElementDefaultSizes[props.as];
   return SizeToRem[defaultSizeForElement];
 });
 
-const weightValue = computed(() => {
-  return fontWeight[props.weight];
-});
-
-const fontColor = computed(() => {
-  return textColors[props.color];
-});
-
-const alignmentClass = computed(() => {
-  return alignmentClasses[props.align];
-});
-
-const fontStyleValue = computed(() => {
-  return fontStyleMap[props.fontStyle];
-});
-
-const fontFamilyValue = computed(() => {
-  return fontFamilyMap[props.fontFamily];
-});
-
-const customClass = computed(() => {
-  return props.class;
-});
-
-const transformValue = computed(() => {
-  return transformMap[props.transform];
-});
-
-// Compute line height class
-const lineHeightClass = computed(() => {
-  return `paragraph-line-height-${props.lineHeight}`;
-});
+const weightValue = computed(() => fontWeight[props.weight]);
+const fontColor = computed(() => textColors[props.color]);
+const alignmentClass = computed(() => alignmentClasses[props.align]);
+const fontStyleValue = computed(() => fontStyleMap[props.fontStyle]);
+const fontFamilyValue = computed(() => fontFamilyMap[props.fontFamily]);
+const customClass = computed(() => props.class);
+const transformValue = computed(() => transformMap[props.transform]);
+const lineHeightClass = computed(() => `paragraph-line-height-${props.lineHeight}`);
 
 const marginStyle = computed(() => {
   const styles: Record<string, string> = {};
-
-  // If specific margins are provided, they take precedence
-  if (props.margin) {
-    styles.margin = marginSizes[props.margin];
-  }
-  if (props.marginTop) {
-    styles.marginTop = marginSizes[props.marginTop];
-  }
-  if (props.marginRight) {
-    styles.marginRight = marginSizes[props.marginRight];
-  }
-  if (props.marginBottom) {
-    styles.marginBottom = marginSizes[props.marginBottom];
-  }
-  if (props.marginLeft) {
-    styles.marginLeft = marginSizes[props.marginLeft];
-  }
-  if (
-    props.margin !== "none" &&
-    !props.marginTop &&
-    !props.marginRight &&
-    !props.marginBottom &&
-    !props.marginLeft
-  ) {
+  if (props.margin) styles.margin = marginSizes[props.margin];
+  if (props.marginTop) styles.marginTop = marginSizes[props.marginTop];
+  if (props.marginRight) styles.marginRight = marginSizes[props.marginRight];
+  if (props.marginBottom) styles.marginBottom = marginSizes[props.marginBottom];
+  if (props.marginLeft) styles.marginLeft = marginSizes[props.marginLeft];
+  if (props.margin !== "none" && !props.marginTop && !props.marginRight && !props.marginBottom && !props.marginLeft) {
     styles.margin = marginSizes[props.margin];
   }
 
