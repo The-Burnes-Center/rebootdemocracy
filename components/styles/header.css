@@ -4,9 +4,8 @@
 
 /* Global Focus States */
 *:focus-visible {
-  outline: 0.5px solid #4a6b8a;
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff;
 }
 
 /* Link Transitions */
@@ -57,7 +56,7 @@ a {
 
 .header__logo a:focus-visible {
   outline: 0.5px solid #4a6b8a;
-  outline-offset: 4px;
+  outline-offset: 2px;
   border-radius: 2px;
 }
 

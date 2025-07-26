@@ -1,30 +1,72 @@
 <template>
-  <header class="header-content__section">
+  <header class="header-content__section" role="banner">
     <div class="header__logo">
       <div class="hero__first-partner">
-        <img
-          src="/images/burnes-center-white.png"
-          alt="Burnes Center for Social Change"
-        />
+        <a
+          href="https://burnes.northeastern.edu/"
+          aria-label="Visit Burnes Center for Social Change website"
+          class="logo-link"
+        >
+          <img
+            src="/images/burnes-center-white.png"
+            alt="Burnes Center for Social Change logo"
+            width="120"
+            height="40"
+            tabindex="-1"
+            role="presentation"
+          />
+        </a>
       </div>
       <div class="hero__second-partner">
-        <img src="/images/the-govlab-logo-white.png" alt="The GovLab" />
+        <a
+          href="https://thegovlab.org/"
+          aria-label="Visit The GovLab website"
+          class="logo-link"
+        >
+          <img
+            src="/images/the-govlab-logo-white.png"
+            alt="The GovLab logo"
+            width="100"
+            height="40"
+            tabindex="-1"
+            role="presentation"
+          />
+        </a>
       </div>
     </div>
+
     <!-- Mobile menu toggle -->
-    <div class="mobile-menu-toggle" @click="toggleMobileMenu" v-if="isMobile">
-      <svg  v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24"
+    <div
+      class="mobile-menu-toggle"
+      @click="toggleMobileMenu"
+      v-if="isMobile"
+      :aria-expanded="mobileMenuOpen"
+      :aria-label="
+        mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'
+      "
+      type="button"
+    >
+      <svg
+        v-if="!mobileMenuOpen"
+        xmlns="http://www.w3.org/2000/svg"
+        x="0px"
+        y="0px"
+        width="24"
         height="24"
         viewBox="0 0 24 24"
-        style="fill:#FFFFFF;"> 
+        style="fill: #ffffff"
+        aria-hidden="true"
+        focusable="false"
+        role="presentation"
+      >
         <path
           d="M3 6H21M3 12H21M3 18H21"
           stroke="white"
           stroke-width="2.5"
           stroke-linecap="round"
           stroke-linejoin="round"
-        />   
-       </svg>
+        />
+      </svg>
       <svg
         v-else
         xmlns="http://www.w3.org/2000/svg"
@@ -32,6 +74,9 @@
         height="24"
         viewBox="0 0 24 24"
         fill="black"
+        aria-hidden="true"
+        focusable="false"
+        role="presentation"
       >
         <path
           d="M5 5L19 19M5 19L19 5"
@@ -46,6 +91,9 @@
     <nav
       v-show="!isMobile || (isMobile && mobileMenuOpen)"
       :class="{ 'nav-mobile-open': isMobile && mobileMenuOpen }"
+      :aria-hidden="isMobile && !mobileMenuOpen"
+      role="navigation"
+      aria-label="Main navigation"
     >
       <HeaderMenu
         :items="menuItems"
@@ -54,12 +102,22 @@
       />
     </nav>
 
-    <div class="search-container" v-if="!isMobile">
+    <div
+      class="search-container"
+      v-if="!isMobile"
+      role="search"
+      aria-label="Search site content"
+    >
       <ais-instant-search
         :index-name="indexName"
         :search-client="algoliaClient"
       >
-        <ais-search-box @input="handleSearchInput" @reset="handleSearchReset" />
+        <ais-search-box
+          @input="handleSearchInput"
+          @reset="handleSearchReset"
+          placeholder="Search blogs..."
+          aria-label="Search for articles and content"
+        />
       </ais-instant-search>
     </div>
   </header>
@@ -96,6 +154,25 @@ const isMobile = ref(false);
 
 const toggleMobileMenu = (): void => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
+
+  // Manage focus for mobile menu
+  if (mobileMenuOpen.value) {
+    // Focus trap management could be added here
+    document.addEventListener("keydown", handleMobileMenuKeydown);
+  } else {
+    document.removeEventListener("keydown", handleMobileMenuKeydown);
+  }
+};
+
+const handleMobileMenuKeydown = (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    mobileMenuOpen.value = false;
+    document.removeEventListener("keydown", handleMobileMenuKeydown);
+    const menuButton = document.querySelector(
+      ".mobile-menu-toggle"
+    ) as HTMLElement;
+    menuButton?.focus();
+  }
 };
 
 const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
@@ -109,10 +186,12 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
     router.push(item.to);
   }
 };
+
 const handleMenuItemClick = (item: MenuItem, event: MouseEvent): void => {
   handleMenuClick(item, event);
   if (isMobile.value) {
     mobileMenuOpen.value = false;
+    document.removeEventListener("keydown", handleMobileMenuKeydown);
   }
 };
 
@@ -171,6 +250,7 @@ const checkIfMobile = (): void => {
   isMobile.value = window.innerWidth < 1050;
   if (!isMobile.value) {
     mobileMenuOpen.value = false;
+    document.removeEventListener("keydown", handleMobileMenuKeydown);
   }
 };
 
@@ -190,6 +270,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener("resize", checkIfMobile);
+  document.removeEventListener("keydown", handleMobileMenuKeydown);
 });
 </script>
 
@@ -197,5 +278,48 @@ onUnmounted(() => {
 .search-container {
   position: relative;
   width: 300px;
+}
+
+.logo-link {
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.logo-link:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.logo-link:hover {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+.logo-link img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+.mobile-menu-toggle svg {
+  pointer-events: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .logo-link:focus,
+  .mobile-menu-toggle:focus {
+    box-shadow: 0 0 0 3px #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .logo-link,
+  .mobile-menu-toggle {
+    transition: none;
+  }
 }
 </style>
