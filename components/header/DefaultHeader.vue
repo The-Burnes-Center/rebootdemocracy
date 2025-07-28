@@ -261,7 +261,7 @@ onUnmounted(() => {
 
 .logo-link:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #ffffff;
+  box-shadow: 0 0 0 2px #e3d9d9;
 }
 
 .logo-link:hover {
@@ -281,7 +281,6 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .logo-link:focus,
@@ -296,7 +295,5 @@ onUnmounted(() => {
   .mobile-menu-toggle {
     transition: none;
   }
-
-
 }
 </style>

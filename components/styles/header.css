@@ -5,7 +5,7 @@
 /* Global Focus States */
 *:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #ffffff;
+  box-shadow: 0 0 0 2px #e3d9d9;
 }
 
 /* Link Transitions */
@@ -18,7 +18,6 @@ a {
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
 }
-
 
 /* ===================================
    BASE HEADER STYLES
@@ -42,7 +41,6 @@ a {
 .header-spacer {
   height: 50px;
 }
-
 
 /* ===================================
    LOGO STYLES
@@ -73,7 +71,6 @@ a {
   object-fit: contain;
 }
 
-
 /* ===================================
    MOBILE MENU TOGGLE
    =================================== */
@@ -97,7 +94,6 @@ a {
 .mobile-menu-toggle:hover svg path {
   stroke-width: 3;
 }
-
 
 /* ===================================
    SEARCH STYLES
@@ -169,7 +165,6 @@ a {
   transform: scale(1.1);
 }
 
-
 /* ===================================
    BUTTON STYLES
    =================================== */
@@ -178,7 +173,6 @@ a {
   white-space: nowrap;
   flex-shrink: 0;
 }
-
 
 /* ===================================
    DESKTOP STYLES (1051px+)
@@ -195,7 +189,6 @@ a {
   }
 }
 
-
 /* ===================================
    MOBILE STYLES (max 1050px)
    =================================== */
@@ -205,19 +198,19 @@ a {
   nav:not(.nav-mobile-open) {
     display: none !important;
   }
-  
+
   /* Mobile header adjustments */
   .header-content__section {
     z-index: 10001;
     gap: 1rem;
     padding: 0.9rem 2rem;
   }
-  
+
   /* Remove header spacer on mobile */
   .header-spacer {
     height: 0;
   }
-  
+
   /* Mobile navigation overlay */
   .nav-mobile-open {
     position: fixed;
@@ -233,13 +226,12 @@ a {
     width: 100%;
     height: 100vh;
   }
-  
+
   /* Hide header button on mobile */
   .btn-header {
     display: none;
   }
 }
-
 
 /* ===================================
    ANIMATIONS

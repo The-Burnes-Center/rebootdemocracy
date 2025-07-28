@@ -96,12 +96,12 @@
 <style scoped>
 .footer__link:focus {
   outline: none;
-  box-shadow: 0 0 0 1px #4a6b8a;
+  box-shadow: 0 0 0 1px #e3d9d9;
 }
 
 .footer__logo-link:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #4a6b8a; 
+  box-shadow: 0 0 0 2px #e3d9d9; 
   border-radius: 4px;
 }
 
