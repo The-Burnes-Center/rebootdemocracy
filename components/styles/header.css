@@ -194,10 +194,7 @@ a {
    =================================== */
 
 @media (max-width: 1050px) {
-  /* Hide navigation by default on mobile */
-  nav:not(.nav-mobile-open) {
-    display: none !important;
-  }
+
 
   /* Mobile header adjustments */
   .header-content__section {

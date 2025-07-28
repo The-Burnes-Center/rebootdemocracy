@@ -839,8 +839,7 @@ img.partner-logo-img {
   .register-btn {
     color: #ffffff;
     background: var(--yellow-action) !important;
-    height: 20% !important;
-    width: 50% !important;
+    height: 30% !important;
   }
 
   .event-grid-row {

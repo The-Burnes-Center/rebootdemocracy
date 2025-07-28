@@ -64,7 +64,6 @@
   padding-left: 2rem;
 }
 
-
 /* ===================================
    BLOG HEADER & METADATA
    =================================== */
@@ -128,7 +127,6 @@
   color: #003266 !important;
 }
 
-
 /* ===================================
    AUTHOR INFORMATION
    =================================== */
@@ -169,7 +167,6 @@
   text-decoration: underline;
   margin-top: 2px;
 }
-
 
 /* ===================================
    BLOG CONTENT STYLES
@@ -276,7 +273,6 @@ p > strong {
   margin: 0.5em auto;
 }
 
-
 /* ===================================
    SHARE WIDGET
    =================================== */
@@ -284,7 +280,6 @@ p > strong {
 .share-widget-mobile {
   display: none;
 }
-
 
 /* ===================================
    RELATED POSTS SECTION
@@ -344,7 +339,6 @@ p > strong {
   object-fit: cover;
 }
 
-
 /* ===================================
    RESPONSIVE DESIGN
    =================================== */
@@ -387,75 +381,78 @@ p > strong {
     gap: 0rem;
   }
 
-   .blog-content p iframe {
+  .blog-top-section {
+    gap:1rem;
+  }
+  .blog-content p iframe {
     max-width: 100%;
     width: 100%;
     margin: 1rem auto;
     display: block;
     box-sizing: border-box;
   }
-  
+
   .blog-gradient-inner {
     padding: 0 1rem;
   }
-  
+
   .left-content-blog {
     padding-right: 0;
   }
-  
+
   .right-content-blog {
     padding: 1rem;
   }
-  
+
   /* Header elements */
   .blog-back-btn {
     margin-left: 1rem;
   }
-  
+
   .blog-title {
-    margin: 1rem !important;
+    margin: 0rem 1rem !important;
   }
-  
+
   .blog-detail h1.text-left.paragraph-line-height-super-loose.blog-title,
   .left-content-blog .text-left.paragraph-line-height-super-loose.blog-title {
-    padding: 0.2rem;
+    padding: 0rem 0.2rem;
   }
-  
+
   /* Category and tags */
   .blog-category-eyebrow {
-    margin: 0.75rem 0.5rem 1rem;
+    margin: 0.2rem 0rem;
   }
-  
-  .category-tag {
-    padding: 0.2rem 0.4rem;
-  }
-  
+
   .tag-share-category {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap:1rem;
     margin: 0rem;
-    padding: 0rem 1rem !important;
+    align-items: flex-start;
+    padding-left: 1rem;
   }
-  
+
   /* Content adjustments */
   p.excerpt-paragraph {
     margin-left: 1rem;
     margin-right: 1rem;
   }
-  
+
   .blog-banner-image img.blog-image {
     height: 15rem;
     object-fit: fill;
   }
-  
+
   .blog-content {
     margin: 0rem;
   }
-  
+
   .publication-info {
     margin-top: 0;
     margin-left: 1rem;
     margin-right: 1rem;
   }
-  
+
   /* Related posts */
   .related-posts-section {
     justify-content: center;
@@ -463,19 +460,14 @@ p > strong {
     gap: 6rem;
     padding: 2rem 2rem;
   }
-  
+
   .related-posts-list {
     flex-direction: column;
     gap: 12rem;
     justify-content: center;
     align-items: center;
   }
-  
-  /* Share widget toggle */
-  .share-widget-desktop {
-    display: none;
-  }
-  
+
   .share-widget-mobile {
     display: initial;
   }
