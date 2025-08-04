@@ -1,4 +1,4 @@
-<!-- components/ChatWidget.vue -->
+<!-- components/ChatWidget.vue new styles update -->
 <template>
   <ClientOnly>
     <div class="chat-container chatbot-app" :class="{ open }">
