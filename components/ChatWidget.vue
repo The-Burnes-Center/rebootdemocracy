@@ -334,7 +334,7 @@ function useSample(q: string) {
 }
 .welcome p {
   font-weight: 300;
-  font-size: 12px;
+  font-size: 14px;
   margin: 0;
   line-height: 1.5;
   padding: 0.5rem 0rem; 
@@ -369,8 +369,14 @@ function useSample(q: string) {
 .welcome-message {
   margin-bottom: 5px;
   font-family: var(--font-habibi);
-  font-size: 12px;
-  font-weight: 300;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.msg.bot :deep(p),
+.msg.bot :deep(h3) {
+  font-family: var(--font-habibi);
+  font-size: 16px;
 }
 
 .sample-questions {
@@ -407,7 +413,7 @@ function useSample(q: string) {
   border-radius: 10px;
   max-width: 90%;
   margin-left: auto;
-  font-size: 12px;
+  font-size: 16px;
   font-family: var(--font-habibi);
 }
 
@@ -430,7 +436,7 @@ function useSample(q: string) {
   border-radius: 2px;
   line-height: 1.25;
   transition: background-color 0.3s, color 0.3s;
-  font-size: 12px;
+  font-size: 16px;
   font-family: var(--font-inria);
   font-weight: 600;
 }
