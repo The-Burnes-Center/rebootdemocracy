@@ -58,7 +58,7 @@
             </div>
           </section>
 
-                    <footer class="input-bar">
+          <footer class="input-bar">
             <div class="input-container">
               <input
                 v-model="draft"
@@ -263,7 +263,8 @@ function useSample(q: string) {
   z-index: 1001;
   width: 35px;
   height: 35px;
-  outline: none;  background: none;
+  outline: none;
+  background: none;
   color: rgba(1, 42, 55, 1);
   font-size: 1.2em;
   border: none;
@@ -337,7 +338,7 @@ function useSample(q: string) {
   font-size: 14px;
   margin: 0;
   line-height: 1.5;
-  padding: 0.5rem 0rem; 
+  padding: 0.5rem 0rem;
 }
 /* Hide the chat window and background when not open */
 .open {
@@ -373,10 +374,20 @@ function useSample(q: string) {
   font-weight: 600;
 }
 
+.msg.bot {
+  padding: 0.8rem;
+}
+
 .msg.bot :deep(p),
-.msg.bot :deep(h3) {
+.msg.bot :deep(h1),
+.msg.bot :deep(h2),
+.msg.bot :deep(h3),
+.msg.bot :deep(h4),
+.msg.bot :deep(ul),
+.msg.bot :deep(ol),
+.msg.bot :deep(li) {
   font-family: var(--font-habibi);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .sample-questions {
@@ -503,19 +514,19 @@ function useSample(q: string) {
   display: flex;
 }
 
- input {
-   width: 100%;
-   padding: 15px 50px 15px 20px;
-   border: 1px solid #ccc;
-   border-radius: 20px;
-   height: 80px;
-   background-color: #fff;
-   font-size: 14px;
-   line-height: 20px;
-   margin-bottom: 0;
-   resize: none;
-   outline: none;
- }
+input {
+  width: 100%;
+  padding: 15px 50px 15px 20px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  height: 80px;
+  background-color: #fff;
+  font-size: 14px;
+  line-height: 20px;
+  margin-bottom: 0;
+  resize: none;
+  outline: none;
+}
 
 input:focus {
   border-color: rgba(1, 42, 55, 0.5);
