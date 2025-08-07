@@ -1,10 +1,10 @@
 <!-- components/ChatWidget.vue - Redesigned to match site design system -->
 <template>
   <ClientOnly>
-    <div class="chat-container chatbot-app" :class="{ open }">
+    <div class="chat-container chatbot-app" :class="{ open: isOpen }">
       <!-- FAB toggle button -->
-      <button class="fab" :class="{ 'fab-pulse': !open }" @click="open = !open">
-        <span v-if="!open" class="bot-icon">
+      <button class="fab" :class="{ 'fab-pulse': !isOpen }" @click="isOpen = !isOpen">
+        <span v-if="!isOpen" class="bot-icon">
           <i class="fa-solid fa-message-bot"></i>
         </span>
         <span v-else class="close-icon">
@@ -14,7 +14,7 @@
 
       <!-- Chat Panel -->
       <transition name="slide-up">
-        <div v-if="open" class="panel">
+        <div v-if="isOpen" class="panel">
           <!-- Header -->
           <header class="chat-header">
             <div class="header-content">
@@ -72,6 +72,12 @@
                     </li>
                   </ul>
                 </div>
+                <div class="message-actions" v-if="m.text">
+                  <!-- <button class="download-docx" @click="downloadDocx(m, i)" :title="'Download this answer as .docx'">
+                    <i class="fa-solid fa-file-word"></i>
+                    <span>Download .docx</span>
+                  </button> -->
+                </div>
               </div>
             </div>
           </section>
@@ -107,13 +113,16 @@
 <script setup lang="ts">
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+// Note: We'll also dynamically import these in the click handler to be extra safe in SSR
+import { saveAs } from "file-saver";
+import htmlDocx from "html-docx-js-typescript";
 
 const draft = ref("");
 const msgs = ref<{ sender: "user" | "bot"; text: string; sources?: any[] }[]>(
   []
 );
-const busy = ref(false);
-const open = ref(false);
+const busy = ref<boolean>(false);
+const isOpen = ref<boolean>(false);
 const sample = [
   "Can you summarize the latest research on AI and participatory decision-making in urban planning?",
   "Give me case studies where AI was integrated into public engagement.",
@@ -121,6 +130,97 @@ const sample = [
 ];
 
 const md = (t: string) => DOMPurify.sanitize(marked.parse(t) as string);
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function buildDocHtml(message: { text: string; sources?: Array<{ title?: string; url?: string }> }): string {
+  const contentHtml = md(message.text);
+  const sourcesSection = (message.sources?.length ?? 0) > 0
+    ? `<h3>Sources</h3><ol>` +
+      message.sources!
+        .map((s) => `<li><a href="${s.url ?? "#"}">${escapeHtml(s.title || s.url || "Source")}</a></li>`)
+        .join("") +
+      `</ol>`
+    : "";
+
+  const timestamp = new Date().toLocaleString();
+
+  return `<!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <title>Reboot Democracy Bot – Answer</title>
+      <style>
+        body { font-family: Arial, Helvetica, sans-serif; color:#111827; line-height:1.6; }
+        h1,h2,h3 { color:#003366; margin: 0.6em 0 0.4em; }
+        a { color:#0d63eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .header { border-left:4px solid #003366; padding:12px 16px; background:#f8f9fa; margin-bottom:16px; }
+        .meta { font-size:12px; color:#6b7280; }
+        .answer { font-size:14px; }
+        blockquote{ border-left:4px solid #e5e7eb; margin:8px 0; padding-left:12px; color:#6b7280; font-style:italic; }
+        code{ background:#f3f4f6; padding:2px 6px; border-radius:4px; color:#dc2626; }
+        pre{ background:#f3f4f6; padding:12px; border-radius:6px; overflow-x:auto; }
+        .sources{ margin-top:16px; border-top:1px solid #e5e7eb; padding-top:8px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h2>Reboot Democracy Bot – Answer</h2>
+        <div class="meta">${escapeHtml(timestamp)}</div>
+      </div>
+      <main class="answer">${contentHtml}${sourcesSection ? `<div class="sources">${sourcesSection}</div>` : ""}</main>
+    </body>
+  </html>`;
+}
+
+async function downloadDocx(message: { text: string; sources?: any[] }, index: number): Promise<void> {
+  try {
+    const html = buildDocHtml(message);
+    // Try serverless export first for maximum compatibility/quality
+    const resp = await fetch('/.netlify/functions/export_docx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html, fileName: `reboot-answer-${index + 1}` })
+    });
+
+    if (resp.ok) {
+      // Prefer binary path – Netlify decodes base64 when isBase64Encoded = true
+      const buf = await resp.arrayBuffer();
+      const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reboot-answer-${index + 1}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // Fallback to client-side .doc export if serverless fails
+    const htmlBlob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(htmlBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reboot-answer-${index + 1}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to export DOCX:", error);
+    alert("Sorry, the download failed. Please try again.");
+  }
+}
 
 /** Scroll chat to bottom each update */
 const msgList = ref<HTMLDivElement>();
@@ -485,6 +585,33 @@ function useSample(q: string) {
   padding-left: 12px;
   color: #6b7280;
   font-style: italic;
+}
+
+.message-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.download-docx {
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #003366;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-inria);
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.download-docx:hover {
+  border-color: #0d63eb;
+  color: #0d63eb;
+  background: #f0f7ff;
 }
 
 /* Sources */
