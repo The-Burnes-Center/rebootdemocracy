@@ -5,7 +5,7 @@
       <!-- FAB toggle button -->
       <button class="fab" :class="{ 'fab-pulse': !open }" @click="open = !open">
         <span v-if="!open" class="bot-icon">
-          <i class="fa-solid fa-comments"></i>
+          <i class="fa-solid fa-message-bot"></i>
         </span>
         <span v-else class="close-icon">
           <i class="fa-solid fa-times"></i>
@@ -53,9 +53,17 @@
               </div>
               <div v-else class="bot-message">
                 <div class="bot-avatar">
-                  <i class="fa-solid fa-robot"></i>
+                  <i class="fa-solid fa-message-bot"></i>
                 </div>
-                <div class="bot-content" v-html="md(m.text)" />
+                <!-- Show loading indicator if message is empty and busy, otherwise show content -->
+                <div v-if="!m.text && busy" class="loading-message">
+                  <div class="loading-spinner"></div>
+                  <div class="loading-text">
+                    <span class="loading-title">Reboot Democracy Bot is thinking...</span>
+                    <span class="loading-subtitle">Searching through research and crafting a response</span>
+                  </div>
+                </div>
+                <div v-else class="bot-content" v-html="md(m.text)" />
                 <div v-if="m.sources?.length" class="sources">
                   <h4 class="sources-title">Sources:</h4>
                   <ul class="sources-list">
@@ -612,6 +620,67 @@ function useSample(q: string) {
   }
   40% {
     opacity: 1;
+  }
+}
+
+/* Loading Message Styles */
+.loading-message {
+  background: white;
+  padding: 16px;
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 4px solid #003366;
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #003366;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+.loading-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.loading-title {
+  font-family: var(--font-inria);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #003366;
+  line-height: 1.2;
+}
+
+.loading-subtitle {
+  font-family: var(--font-habibi);
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.01);
   }
 }
 
