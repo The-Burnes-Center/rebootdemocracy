@@ -1,77 +1,92 @@
-<!-- components/ChatWidget.vue new styles update -->
+<!-- components/ChatWidget.vue - Redesigned to match site design system -->
 <template>
   <ClientOnly>
     <div class="chat-container chatbot-app" :class="{ open }">
-      <!-- FAB toggle  -->
+      <!-- FAB toggle button -->
       <button class="fab" :class="{ 'fab-pulse': !open }" @click="open = !open">
-        <span v-if="!open"
-          ><div class="bot-icon">
-            <i class="fa-solid fa-message-bot"></i></div></span
-        ><span v-else
-          ><i class="fa-regular fa-circle-xmark bot-close"></i
-        ></span>
+        <span v-if="!open" class="bot-icon">
+          <i class="fa-solid fa-comments"></i>
+        </span>
+        <span v-else class="close-icon">
+          <i class="fa-solid fa-times"></i>
+        </span>
       </button>
 
-      <!-- Panel -->
+      <!-- Chat Panel -->
       <transition name="slide-up">
         <div v-if="open" class="panel">
-          <header class="welcome">
-            <h2>Reboot Democracy Bot</h2>
-            <p>
-              Enhanced by research from the GovLab and the Reboot Blog. Ask
-              about AI, governance and democracy.
-            </p>
-          </header>
-
-          <section class="messages" ref="msgList">
-            <div class="welcome-message">
-              <p>
-                Welcome to the Reboot Democracy Bot. Trained on research and
-                writing from the GovLab and the Reboot Blog, I answer your
-                questions about technology, governance and democracy.
-              </p>
-              <p>
-                Type a question you have about AI, democracy and governance in
-                the box below. Here are some sample prompts to get you started!
+          <!-- Header -->
+          <header class="chat-header">
+            <div class="header-content">
+              <h2 class="header-title">Reboot Democracy Bot</h2>
+              <p class="header-subtitle">
+                Enhanced by research from the GovLab and the Reboot Blog. Ask about AI, governance and democracy.
               </p>
             </div>
-            <div class="bot-message">
-              <div v-for="(q, i) in sample" :key="i">
-                <button class="prompt-button" @click="useSample(q)">
+          </header>
+
+          <!-- Messages Container -->
+          <section class="messages" ref="msgList">
+            <!-- Welcome Message -->
+            <div class="welcome-message">
+              <p class="welcome-text">
+                Welcome to the Reboot Democracy Bot. Trained on research and writing from the GovLab and the Reboot Blog, I answer your questions about technology, governance and democracy.
+              </p>
+              <p class="welcome-text">
+                Type a question you have about AI, democracy and governance in the box below. Here are some sample prompts to get you started!
+              </p>
+            </div>
+            
+            <!-- Sample Questions -->
+            <div class="sample-questions">
+              <div v-for="(q, i) in sample" :key="i" class="sample-question">
+                <button class="sample-button" @click="useSample(q)">
                   {{ q }}
                 </button>
               </div>
             </div>
-            <div v-for="(m, i) in msgs" :key="i" :class="['msg', m.sender]">
-              <p v-if="m.sender === 'user'" class="user-message">
+            
+            <!-- Chat Messages -->
+            <div v-for="(m, i) in msgs" :key="i" :class="['message', m.sender]">
+              <div v-if="m.sender === 'user'" class="user-message">
                 {{ m.text }}
-              </p>
-              <div v-else v-html="md(m.text)" />
-              <div v-if="m.sources?.length" class="sources">
-                <strong>Sources:</strong>
-                <ul>
-                  <li v-for="(s, j) in m.sources" :key="j">
-                    <a :href="s.url" target="_blank">{{ s.title }}</a>
-                  </li>
-                </ul>
+              </div>
+              <div v-else class="bot-message">
+                <div class="bot-avatar">
+                  <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="bot-content" v-html="md(m.text)" />
+                <div v-if="m.sources?.length" class="sources">
+                  <h4 class="sources-title">Sources:</h4>
+                  <ul class="sources-list">
+                    <li v-for="(s, j) in m.sources" :key="j" class="source-item">
+                      <a :href="s.url" target="_blank" class="source-link">{{ s.title }}</a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </section>
 
-          <footer class="input-bar">
+          <!-- Input Area -->
+          <footer class="input-area">
             <div class="input-container">
               <input
                 v-model="draft"
                 @keyup.enter="send"
                 :disabled="busy"
-                placeholder="Type your question…"
+                placeholder="Type your question about AI, democracy, or governance..."
+                class="message-input"
               />
-              <button class="send-icon-btn" @click="send" :disabled="busy">
-                <span v-if="busy" class="loading-dots-small">
-                  <span class="dot">.</span><span class="dot">.</span
-                  ><span class="dot">.</span>
+              <button class="send-button" @click="send" :disabled="busy">
+                <span v-if="busy" class="loading-dots">
+                  <span class="dot">.</span>
+                  <span class="dot">.</span>
+                  <span class="dot">.</span>
                 </span>
-                <span v-else><i class="fas fa-paper-plane"></i></span>
+                <span v-else class="send-icon">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </span>
               </button>
             </div>
           </footer>
@@ -80,6 +95,7 @@
     </div>
   </ClientOnly>
 </template>
+
 <script setup lang="ts">
 import { marked } from "marked";
 import DOMPurify from "dompurify";
@@ -96,7 +112,7 @@ const sample = [
   "How can AI help address misinformation during election campaigns?",
 ];
 
-const md = (t: string) => DOMPurify.sanitize(marked.parse(t));
+const md = (t: string) => DOMPurify.sanitize(marked.parse(t) as string);
 
 /** Scroll chat to bottom each update */
 const msgList = ref<HTMLDivElement>();
@@ -172,7 +188,7 @@ async function send() {
     await nextTick();
     setTimeout(() => {
       const botMessageElement = msgList.value?.querySelector(
-        ".msg.bot:last-child"
+        ".message.bot:last-child"
       );
       if (botMessageElement) {
         botMessageElement.scrollIntoView({
@@ -201,35 +217,312 @@ function useSample(q: string) {
 
 <style scoped>
 .chatbot-app {
-  display: flex;
-  flex-direction: row;
   position: fixed;
   right: 30px;
   bottom: 30px;
-  justify-content: flex-end;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
   align-items: flex-end;
-
-  z-index: 200;
 }
 
-/* Hide the chat container when not open */
-.chat-container {
-  margin: 0 auto;
+/* FAB Button */
+.fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: #0d63eb;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 4px 12px rgba(13, 99, 235, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1001;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 16px rgba(13, 99, 235, 0.4);
+}
+
+.fab-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0px 4px 12px rgba(13, 99, 235, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 20px rgba(13, 99, 235, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0px 4px 12px rgba(13, 99, 235, 0.3);
+  }
+}
+
+.close-icon {
+  font-size: 1.2rem;
+}
+
+/* Chat Panel */
+.panel {
+  width: 400px;
+  height: 600px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* Header */
+.chat-header {
+  background: linear-gradient(135deg, #003266 0%, #004080 50%, #005999 100%);
+  color: white;
   padding: 20px;
+  border-radius: 12px 12px 0 0;
+}
 
-  border-radius: 5px;
-
+.header-title {
   font-family: var(--font-inria);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
 
-  /* Remove scroll here, move to .messages */
-  /* overflow-y: scroll; */
+.header-subtitle {
+  font-family: var(--font-habibi);
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* Messages Container */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+/* Welcome Message */
+.welcome-message {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-left: 4px solid #0d63eb;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.welcome-text {
+  font-family: var(--font-habibi);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.welcome-text:last-child {
+  margin-bottom: 0;
+}
+
+/* Sample Questions */
+.sample-questions {
+  margin-bottom: 20px;
+}
+
+.sample-question {
+  margin-bottom: 8px;
+}
+
+.sample-button {
+  width: 100%;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-habibi);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.sample-button:hover {
+  border-color: #0d63eb;
+  background: #f0f7ff;
+  color: #0d63eb;
+}
+
+/* Messages */
+.message {
+  margin-bottom: 16px;
+}
+
+.user-message {
+  background: #0d63eb;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 18px 18px 4px 18px;
+  max-width: 80%;
+  margin-left: auto;
+  font-family: var(--font-habibi);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.bot-message {
   display: flex;
+  gap: 12px;
+  max-width: 90%;
   flex-direction: column;
 }
-.input-bar {
+
+.bot-avatar {
+  width: 32px;
+  height: 32px;
+  background: #f3f4f6;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
-  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.bot-content {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
+  flex: 1;
+}
+
+.bot-content :deep(p) {
+  font-family: var(--font-habibi);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+  color: #374151;
+}
+
+.bot-content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.bot-content :deep(h1),
+.bot-content :deep(h2),
+.bot-content :deep(h3),
+.bot-content :deep(h4),
+.bot-content :deep(h5),
+.bot-content :deep(h6) {
+  font-family: var(--font-inria);
+  font-weight: 600;
+  margin: 12px 0 8px 0;
+  color: #111827;
+}
+
+.bot-content :deep(ul),
+.bot-content :deep(ol) {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.bot-content :deep(li) {
+  font-family: var(--font-habibi);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.bot-content :deep(code) {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-inria);
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.bot-content :deep(pre) {
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.bot-content :deep(blockquote) {
+  border-left: 4px solid #e5e7eb;
+  margin: 8px 0;
+  padding-left: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Sources */
+.sources {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sources-title {
+  font-family: var(--font-inria);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sources-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.source-item {
+  margin-bottom: 4px;
+}
+
+.source-link {
+  font-family: var(--font-habibi);
+  font-size: 0.75rem;
+  color: #0d63eb;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.source-link:hover {
+  text-decoration: underline;
+}
+
+/* Input Area */
+.input-area {
+  padding: 20px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
 }
 
 .input-container {
@@ -238,396 +531,143 @@ function useSample(q: string) {
   align-items: center;
 }
 
-/* Make the messages section scrollable */
-.messages {
-  flex: 1 1 auto;
-  max-height: 55vh;
-  overflow-y: auto;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: white !important;
-  border: 1px solid #ccc;
-}
-
-/* Panel layout */
-.panel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-/* FAB button always visible */
-.fab {
-  position: absolute;
-  top: 20px;
-  z-index: 1001;
-  width: 35px;
-  height: 35px;
-  outline: none;
-  background: none;
-  color: rgba(1, 42, 55, 1);
-  font-size: 1.2em;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Add these properties to ensure it stays circular */
-  min-width: 40px;
-  min-height: 40px;
-  max-width: 40px;
-  max-height: 40px;
-  overflow: hidden;
-}
-.fab:focus,
-.fab:active {
-  outline: none;
-  border: none;
-  box-shadow: none;
-}
-.fab-pulse {
-  top: 5px !important;
-  width: 50px !important;
-  height: 50px !important;
-  border-radius: 50% !important;
-
-  min-width: 50px !important;
-  min-height: 50px !important;
-  max-width: 50px !important;
-  max-height: 50px !important;
-  background: rgba(1, 42, 55, 1) !important;
-  color: white !important;
-  border: none !important;
-  font-size: 1.4em !important;
-  transform: scale(1);
-  animation: pulse 2s infinite;
-}
-
-/* Add styling for the bot icon to ensure it doesn't stretch the button */
-.bot-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.message-input {
   width: 100%;
-  height: 100%;
-  font-size: 1em;
-}
-
-.bot-close {
-  color: var(--teal-rich);
-  cursor: pointer;
-  right: 10px;
-  position: absolute;
-  font-size: 1.2em;
-  top: 2px;
-}
-
-.welcome-message {
-  padding: 0.8rem;
-  font-size: 14px;
-  font-weight: 300;
-  background-color: rgba(224, 248, 255, 1);
-}
-.welcome h2 {
-  font-weight: 600;
-  font-size: 1.5rem;
-  margin: 0;
-}
-.welcome p {
-  font-weight: 300;
-  font-size: 14px;
-  margin: 0;
-  line-height: 1.5;
-  padding: 0.5rem 0rem;
-}
-/* Hide the chat window and background when not open */
-.open {
-  width: 100%;
-  max-width: 800px;
-  height: 85%;
-  border: 1px solid #ccc;
-  background: rgba(224, 248, 255, 1);
-  width: 30%;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 768px) {
-  .open {
-    width: 100%;
-    max-width: 340px;
-    height: 85%;
-    border: 1px solid #ccc;
-    background: white;
-    bottom: 5em;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.welcome {
-  border-bottom: 1px solid #ccc;
-}
-
-.welcome-message {
-  margin-bottom: 5px;
+  padding: 12px 50px 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 24px;
   font-family: var(--font-habibi);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.msg.bot {
-  padding: 0.8rem;
-}
-
-.msg.bot :deep(p),
-.msg.bot :deep(h1),
-.msg.bot :deep(h2),
-.msg.bot :deep(h3),
-.msg.bot :deep(h4),
-.msg.bot :deep(ul),
-.msg.bot :deep(ol),
-.msg.bot :deep(li) {
-  font-family: var(--font-habibi);
-  font-size: 15px;
-}
-
-.sample-questions {
-  list-style-type: none;
-  padding: 0;
-}
-
-.sample-question-btn {
-  background: none;
-  border: none;
-  color: #007bff;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 5px 0;
-  text-align: left;
-  font-size: 1em;
-}
-
-.message-list {
-  max-height: 500px;
-  overflow-y: auto;
-  margin-bottom: 20px;
-}
-
-.message {
-  margin-bottom: 15px;
-}
-
-.user-message {
-  background-color: #f4f4f4;
-  font-weight: 600;
-  padding: 20px 15px;
-  color: #000000;
-  border-radius: 10px;
-  max-width: 90%;
-  margin-left: auto;
-  font-size: 16px;
-  font-family: var(--font-habibi);
-}
-
-.bot-message {
-  /* background-color: #f0f0f0; */
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 90%;
-}
-
-.prompt-button {
-  background: none;
-  border: 2px solid rgb(11, 202, 196);
-  color: #04787f;
-  padding: 20px 10px;
-  margin: 10px 0;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 2px;
-  line-height: 1.25;
-  transition: background-color 0.3s, color 0.3s;
-  font-size: 16px;
-  font-family: var(--font-inria);
-  font-weight: 600;
-}
-
-.prompt-button:hover {
-  background-color: rgba(11, 202, 196, 0.1);
-  border-color: rgb(11, 202, 196);
-}
-
-.bot-message :deep(p) {
-  margin: 0 0 10px 0;
-}
-
-.bot-message :deep(ul),
-.bot-message :deep(ol) {
-  margin: 0 0 10px 0;
-  padding-left: 20px;
-}
-
-.bot-message :deep(h1),
-.bot-message :deep(h2),
-.bot-message :deep(h3),
-.bot-message :deep(h4),
-.bot-message :deep(h5),
-.bot-message :deep(h6) {
-  margin: 10px 0;
-}
-
-.bot-message :deep(code) {
-  background-color: #f8f8f8;
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-family: var(--font-inria);
-}
-
-.bot-message :deep(pre) {
-  background-color: #f8f8f8;
-  padding: 10px;
-  border-radius: 4px;
-  overflow-x: auto;
-}
-
-.bot-message :deep(blockquote) {
-  border-left: 4px solid #ccc;
-  margin: 0;
-  padding-left: 10px;
-  color: #666;
-}
-
-.sources {
-  margin-top: 10px;
-  font-size: 0.9em;
-}
-
-.sources h4 {
-  margin-bottom: 5px;
-}
-
-.sources ul {
-  padding-left: 20px;
-}
-
-.input-area {
-  display: flex;
-}
-
-input {
-  width: 100%;
-  padding: 15px 50px 15px 20px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  height: 80px;
-  background-color: #fff;
-  font-size: 14px;
-  line-height: 20px;
-  margin-bottom: 0;
-  resize: none;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  background: white;
   outline: none;
+  transition: border-color 0.2s ease;
 }
 
-input:focus {
-  border-color: rgba(1, 42, 55, 0.5);
-  box-shadow: 0 0 0 2px rgba(1, 42, 55, 0.1);
+.message-input:focus {
+  border-color: #0d63eb;
+  box-shadow: 0 0 0 3px rgba(13, 99, 235, 0.1);
 }
 
-.send-icon-btn {
+.message-input::placeholder {
+  color: #9ca3af;
+}
+
+.send-button {
   position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #0bcac4;
-  color: #000000;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  background: #0d63eb;
+  color: white;
   border: none;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  outline: none;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
-.send-icon-btn:hover:not(:disabled) {
-  background: rgba(107, 173, 193, 0.8);
+.send-button:hover:not(:disabled) {
+  background: #0056cc;
+  transform: scale(1.05);
 }
 
-.send-icon-btn:disabled {
-  background-color: #cccccc;
+.send-button:disabled {
+  background: #d1d5db;
   cursor: not-allowed;
+  transform: none;
 }
 
-.loading-dots-small {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8em;
+.send-icon {
+  font-size: 0.875rem;
 }
 
-.loading-dots-small .dot {
-  animation: blink 1.4s infinite both;
-  font-size: 1.2em;
-  color: white;
-  line-height: 1;
-  display: inline-block;
-}
-
+/* Loading Animation */
 .loading-dots {
   display: flex;
   align-items: center;
   justify-content: center;
-  letter-spacing: 2px;
-  height: 100%;
-  width: 100%;
+  gap: 2px;
 }
 
-.loading-dots .dot {
+.dot {
   animation: blink 1.4s infinite both;
-  font-size: 1.8em;
-  color: #007bff;
-  line-height: 1;
-  display: inline-block;
-  height: 1em; /* Fixed height */
+  font-size: 1rem;
+  color: white;
 }
 
-.loading-dots .dot:nth-child(2) {
+.dot:nth-child(2) {
   animation-delay: 0.2s;
 }
-.loading-dots .dot:nth-child(3) {
+
+.dot:nth-child(3) {
   animation-delay: 0.4s;
 }
 
 @keyframes blink {
-  0%,
-  80%,
-  100% {
+  0%, 80%, 100% {
     opacity: 0;
-    color: #007bff; /* Blue when visible */
   }
   40% {
     opacity: 1;
-    color: #ffffff; /* White when fully visible */
   }
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
-  }
+/* Slide Up Animation */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
 
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
-  }
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
 
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .chatbot-app {
+    right: 20px;
+    bottom: 20px;
+  }
+  
+  .panel {
+    width: calc(100vw - 40px);
+    max-width: 400px;
+    height: 70vh;
+  }
+  
+  .fab {
+    width: 56px;
+    height: 56px;
+    font-size: 1.25rem;
+  }
+  
+  .messages {
+    padding: 16px;
+  }
+  
+  .input-area {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel {
+    width: calc(100vw - 20px);
+    height: 80vh;
+  }
+  
+  .user-message {
+    max-width: 85%;
+  }
+  
+  .bot-message {
+    max-width: 95%;
   }
 }
 </style>
+

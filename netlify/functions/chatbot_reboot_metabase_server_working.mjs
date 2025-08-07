@@ -8,31 +8,22 @@ import { OpenAI } from 'openai';
 /*************************
  *  Client initialisation *
  *************************/
-// Debug environment variables
-console.log('Environment variables:', {
-  VITE_WEAVIATE_HTTP_SCHEME: process.env.VITE_WEAVIATE_HTTP_SCHEME,
-  VITE_WEAVIATE_HOST: process.env.VITE_WEAVIATE_HOST,
-  VITE_WEAVIATE_APIKEY: process.env.VITE_WEAVIATE_APIKEY ? 'SET' : 'NOT SET',
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'SET' : 'NOT SET'
-});
-
-// Use local Weaviate instance
 const weaviateClient = weaviate.client({
-  scheme: process.env.VITE_WEAVIATE_HTTP_SCHEME || 'http',
-  host: process.env.VITE_WEAVIATE_HOST?.replace(/^https?:\/\//, '').replace(/\/$/, '') || '45.55.162.220:8888',
-  apiKey: new weaviate.ApiKey(process.env.VITE_WEAVIATE_APIKEY || 'APIKEY'),
-  headers: { 'X-OpenAI-Api-Key': process.env.OPENAI_API_KEY }
+  scheme: process.env.VITE_WEAVIATE_HTTP_SCHEME || 'https',
+  host: process.env.VITE_WEAVIATE_HOST || 'your-weaviate-cluster-url.weaviate.network',
+  apiKey: new weaviate.ApiKey(process.env.VITE_WEAVIATE_APIKEY),
+  headers: { 'X-OpenAI-Api-Key': process.env.VITE_OPENAI_API_KEY }
 });
 
 const openaiClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.VITE_OPENAI_API_KEY
 });
 
 /**********************
  *  GraphQL fieldsets *
  **********************/
-// Updated field sets to match the actual migrated schema
 const weeklyNewsItemFields = `
+  directusId
   objectId
   title
   summary
@@ -51,6 +42,7 @@ const weeklyNewsItemFields = `
 `;
 
 const blogPostChunkFields = `
+  directusId
   objectId
   title
   excerpt
@@ -64,43 +56,6 @@ const blogPostChunkFields = `
   audioFilename
   imageFilename
   imageId
-  _additional { id distance certainty }
-`;
-
-// Add fields for the additional collections that exist in the migrated instance
-const ragDocumentFields = `
-  title
-  description
-  shortDescription
-  fullDescriptionOfAllContents
-  compressedFullDescriptionOfAllContents
-  url
-  date
-  lastModified
-  primaryCategory
-  secondaryCategory
-  contentType
-  _additional { id distance certainty }
-`;
-
-const ragDocumentChunkFields = `
-  title
-  uncompressedContent
-  compressedContent
-  shortSummary
-  fullSummary
-  mainExternalUrlFound
-  metaData
-  metaDataFields
-  _additional { id distance certainty }
-`;
-
-const chatbotAnswerFields = `
-  question
-  answer
-  retrievalContext
-  evaluationResults
-  timestamp
   _additional { id distance certainty }
 `;
 
@@ -151,16 +106,11 @@ async function searchWeaviate(className, fields, query) {
  *********************************************/
 export async function searchContent(query) {
   try {
-    // Search across all available collections in the migrated instance
-    const [newsHits, blogHits, ragDocHits, ragChunkHits, chatbotHits] = await Promise.all([
+    const [newsHits, blogHits] = await Promise.all([
       searchWeaviate('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
-      searchWeaviate('RebootBlogPostChunk',  blogPostChunkFields,  query),
-      searchWeaviate('RagDocument',          ragDocumentFields,    query),
-      searchWeaviate('RagDocumentChunk',     ragDocumentChunkFields, query),
-      searchWeaviate('RDChatbotAnswer',      chatbotAnswerFields,  query)
+      searchWeaviate('RebootBlogPostChunk',  blogPostChunkFields,  query)
     ]);
-    
-    const allResults = [...newsHits, ...blogHits, ...ragDocHits, ...ragChunkHits, ...chatbotHits];
+    const allResults = [...newsHits, ...blogHits];
 
     // 1. Filter for exact matches in relevant fields
     const lowerQuery = query.toLowerCase();
@@ -168,15 +118,7 @@ export async function searchContent(query) {
       return (
         (hit.content && hit.content.toLowerCase().includes(lowerQuery)) ||
         (hit.title && hit.title.toLowerCase().includes(lowerQuery)) ||
-        (hit.itemDescription && hit.itemDescription.toLowerCase().includes(lowerQuery)) ||
-        (hit.description && hit.description.toLowerCase().includes(lowerQuery)) ||
-        (hit.shortDescription && hit.shortDescription.toLowerCase().includes(lowerQuery)) ||
-        (hit.fullDescriptionOfAllContents && hit.fullDescriptionOfAllContents.toLowerCase().includes(lowerQuery)) ||
-        (hit.uncompressedContent && hit.uncompressedContent.toLowerCase().includes(lowerQuery)) ||
-        (hit.shortSummary && hit.shortSummary.toLowerCase().includes(lowerQuery)) ||
-        (hit.fullSummary && hit.fullSummary.toLowerCase().includes(lowerQuery)) ||
-        (hit.question && hit.question.toLowerCase().includes(lowerQuery)) ||
-        (hit.answer && hit.answer.toLowerCase().includes(lowerQuery))
+        (hit.itemDescription && hit.itemDescription.toLowerCase().includes(lowerQuery))
       );
     };
     const exactMatches = allResults.filter(isExactMatch);
@@ -191,7 +133,7 @@ export async function searchContent(query) {
       topChunks = allResults.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
     }
 
-    return topChunks.slice(0, 5);
+    return topChunks;
   } catch (error) {
     console.error('Error while querying Weaviate:', error);
     return [];
@@ -212,12 +154,6 @@ function formatSearchResults(results) {
         return `\n**${r.itemTitle || r.title || 'Untitled'}**\n- *Publication*: ${r.itemPublication || 'N/A'}\n- *Author*: ${r.itemAuthor || r.author || 'N/A'}\n- *Date*: ${(r.itemDate || r.date || 'N/A').toString().substring(0, 10)}\n- *Content*: ${r.itemDescription || r.summary || ''}\n- *URL*: ${r.itemUrl || 'N/A'}`.trim();
       case 'RebootBlogPostChunk':
         return `\n**${r.title || 'Untitled'}**\n- *Authors*: ${(r.authors || []).join(', ') || 'N/A'}\n- *Date*: ${(r.date || 'N/A').toString().substring(0, 10)}\n- *Content*: ${r.content || ''}\n- *URL*: ${r.fullUrl || 'N/A'}`.trim();
-      case 'RagDocument':
-        return `\n**${r.title || 'Untitled'}**\n- *Category*: ${r.primaryCategory || r.secondaryCategory || 'N/A'}\n- *Date*: ${(r.date || r.lastModified || 'N/A').toString().substring(0, 10)}\n- *Content*: ${r.shortDescription || r.description || r.fullDescriptionOfAllContents || ''}\n- *URL*: ${r.url || 'N/A'}`.trim();
-      case 'RagDocumentChunk':
-        return `\n**${r.title || 'Untitled'}**\n- *Content*: ${r.shortSummary || r.fullSummary || r.uncompressedContent || r.compressedContent || ''}\n- *URL*: ${r.mainExternalUrlFound || 'N/A'}`.trim();
-      case 'RDChatbotAnswer':
-        return `\n**Q: ${r.question || 'Untitled'}**\n- *Answer*: ${r.answer || ''}\n- *Context*: ${r.retrievalContext || ''}`.trim();
       default:
         return '';
     }
@@ -314,15 +250,6 @@ Instructions:
       }
       if (r._className === 'RebootBlogPostChunk') {
         return r.fullUrl ? [{ title: r.title, url: r.fullUrl }] : [];
-      }
-      if (r._className === 'RagDocument') {
-        return r.url ? [{ title: r.title, url: r.url }] : [];
-      }
-      if (r._className === 'RagDocumentChunk') {
-        return r.mainExternalUrlFound ? [{ title: r.title, url: r.mainExternalUrlFound }] : [];
-      }
-      if (r._className === 'RDChatbotAnswer') {
-        return r.retrievalContext && r.retrievalContext.length > 0 ? [{ title: r.question, url: r.retrievalContext }] : [];
       }
       return [];
     });
