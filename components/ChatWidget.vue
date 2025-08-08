@@ -1228,10 +1228,10 @@ function useSample(q: string) {
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .chatbot-app {
-    right: 0;
-    left: 0;
-    bottom: 0;
-    align-items: flex-end; /* prevent children (FAB) from stretching full width */
+    right: 12px;
+    left: auto;
+    bottom: 12px;
+    align-items: flex-end; 
   }
   
   .fab {
@@ -1254,15 +1254,18 @@ function useSample(q: string) {
 
   .panel {
     position: fixed;
-    inset: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100vw;
     max-width: none;
-    height: 100vh;
+    height: 78vh; /* comfortable height */
     margin: 0;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-    z-index: 10000;
+    border-radius: 16px 16px 0 0;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.12);
+    z-index: 10005;
+    overflow: hidden;
   }
   
   .fab {
@@ -1273,10 +1276,11 @@ function useSample(q: string) {
   
   .messages {
     padding: 16px;
+    padding-bottom: 8px; 
   }
   
   .input-area {
-    padding: 16px;
+    padding: 12px 12px 16px 12px;
   }
 }
 
