@@ -321,7 +321,7 @@
           <h2
             id="categories-heading"
             style="
-              font-family: var(--font-habibi);
+              font-family: var(--font-sora);
               font-size: 1.125rem;
               color: #000;
               font-weight: bold;
@@ -370,7 +370,7 @@
           <h2
             id="authors-heading"
             style="
-              font-family: var(--font-habibi);
+              font-family: var(--font-sora);
               font-size: 1.125rem;
               color: #000;
               font-weight: bold;

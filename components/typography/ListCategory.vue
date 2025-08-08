@@ -2,7 +2,7 @@
   <div class="list-category">
      <Text
         as="span"
-        fontFamily="habibi"
+        fontFamily="sora"
         size="lg"
         color="link-primary"
         weight="bold"
@@ -12,7 +12,7 @@
       </Text>
       <Text
         as="span"
-        fontFamily="habibi"
+        fontFamily="sora"
         size="lg"
         color="link-primary"
         weight="medium"
