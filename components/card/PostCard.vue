@@ -285,3 +285,11 @@ const handleKeydown = (event: KeyboardEvent) => {
   emit('keydown', event);
 };
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .postcard__text-content .tag-container {
+    margin-bottom: 6px; 
+  }
+}
+</style>
