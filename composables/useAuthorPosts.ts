@@ -29,11 +29,11 @@ function extractBlogAuthors(post: BlogPost): string[] {
 function extractStringAuthors(authorString: string): string[] {
   if (!authorString || typeof authorString !== 'string') return [];
   
-  // Split by common separators and clean up
+  // Split by common separators and clean up. Avoid capturing groups to prevent undefined entries.
   return authorString
-    .split(/[,&]|(\sand\s)/i)
-    .map(author => author.trim())
-    .filter(author => author && author.toLowerCase() !== 'and');
+    .split(/[,&]|\sand\s/i)
+    .map(part => (typeof part === 'string' ? part.trim() : ''))
+    .filter(part => part && part.toLowerCase() !== 'and');
 }
 
 /**
