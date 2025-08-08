@@ -394,7 +394,7 @@ useSeoMeta({
   z-index: 100;
   color: #ffffff;
   font-size: 40px;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .weeklynews-img {
@@ -426,18 +426,18 @@ useSeoMeta({
 .toc a {
   color: #0d63eb;
   text-decoration: none;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .toc p {
   font-size: 18px;
   line-height: 1.8;
   margin-left: 1em;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .toc .news-heading {
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .toc-description {
@@ -450,7 +450,7 @@ useSeoMeta({
   color: #0d63eb;
   border-bottom: 1px solid #0d63eb;
   padding-bottom: 5px;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 /* News Items */
@@ -480,7 +480,7 @@ useSeoMeta({
 
 .item-meta {
   margin: 0;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .item-excerpt {
@@ -496,7 +496,7 @@ useSeoMeta({
   padding: 0.25rem 0.25rem;
   width: fit-content;
   font-size: 12px;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-weight: 600;
 }
 
@@ -510,7 +510,7 @@ useSeoMeta({
 
 .weekly-news-related-articles p {
   margin: 0 0 0.5rem 0;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles ul {
@@ -525,7 +525,7 @@ useSeoMeta({
 .weekly-news-related-articles a {
   color: #0d63eb;
   text-decoration: none;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles a:hover {

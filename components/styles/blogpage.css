@@ -102,13 +102,13 @@
 .category-tag {
   font-size: 1rem;
   font-weight: 700;
-  color: #f06e3a;
-  background-color: #feebe3;
+  color:  #cddff3;
+  background-color: rgb(0, 51, 102);
   padding: 0.4rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-family: var(--font-inria);
+  font-family: var(--font-sora);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }

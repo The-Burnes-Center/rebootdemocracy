@@ -184,7 +184,7 @@
             <div class="results-count" role="status" aria-live="polite">
               <Text
                 as="h2"
-                fontFamily="inria"
+                fontFamily="habibi"
                 size="lg"
                 color="text-primary"
                 weight="bold"
@@ -321,7 +321,7 @@
           <h2
             id="categories-heading"
             style="
-              font-family: var(--font-inria);
+              font-family: var(--font-habibi);
               font-size: 1.125rem;
               color: #000;
               font-weight: bold;
@@ -370,7 +370,7 @@
           <h2
             id="authors-heading"
             style="
-              font-family: var(--font-inria);
+              font-family: var(--font-habibi);
               font-size: 1.125rem;
               color: #000;
               font-weight: bold;

@@ -35,7 +35,7 @@
 }
 
 .mailing-list-section h3 {
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-size: 24px;
   margin: 0;
 }
@@ -65,7 +65,7 @@ a.btn {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   color: #ffffff;
   border: none;
 }

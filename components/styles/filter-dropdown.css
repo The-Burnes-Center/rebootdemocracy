@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .filter-dropdown__label {

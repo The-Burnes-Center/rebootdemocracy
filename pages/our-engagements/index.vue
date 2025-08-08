@@ -200,7 +200,7 @@ useSeoMeta({
 
 .our-engagements-page p,
 .our-engagements-page li {
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-weight: 500;
   margin: 0;
   padding: 0;
@@ -251,7 +251,7 @@ useSeoMeta({
 .our-engagements-page .no-content {
   padding: 2rem;
   text-align: center;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-weight: 500;
   width: 100%;
 }

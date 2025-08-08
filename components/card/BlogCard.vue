@@ -13,7 +13,7 @@
         color="tag-primary"
         class="blogcard-tag"
         transform="uppercase"
-        fontFamily="inria"
+        fontFamily="habibi"
       >
         {{ tag }}
       </Text>
@@ -23,7 +23,7 @@
         as="h3"
         size="xl"
         weight="bold"
-        fontFamily="inria"
+        fontFamily="habibi"
         color="text-dark"
         lineHeight="relaxed"
         class="blogcard-title"

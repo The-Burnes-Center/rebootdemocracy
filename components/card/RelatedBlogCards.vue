@@ -4,7 +4,7 @@
     class="related-posts-section blog-related-posts"
   >
     <Text
-      fontFamily="inria"
+      fontFamily="habibi"
       size="4xl"
       weight="bold"
       class="section-heading"
@@ -37,12 +37,12 @@
                     weight="extrabold"
                     size="xs"
                     :index="index"
-                    fontFamily="inria"
+                    fontFamily="habibi"
                     class="featured-card__tag"
                   >
                     {{ post.Tags[0] }}
                   </Tag>
-                  <TitleText size="xl" weight="bold" fontFamily="inria"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
+                  <TitleText size="xl" weight="bold" fontFamily="habibi"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
                     post.title
                   }}</TitleText>
                 <div class="postcard__details">
@@ -100,11 +100,11 @@
                     weight="extrabold"
                     size="xs"
                     :index="index"
-                    fontFamily="inria"
+                    fontFamily="habibi"
                     class="featured-card__tag"
                     >{{ post.Tags[0] }}</Tag
                   >
-                  <TitleText size="xl" weight="bold" fontFamily="inria"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
+                  <TitleText size="xl" weight="bold" fontFamily="habibi"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
                     post.title
                   }}</TitleText>
                 </div>

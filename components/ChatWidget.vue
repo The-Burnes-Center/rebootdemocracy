@@ -557,7 +557,7 @@ function useSample(q: string) {
 
 /* Chat Panel */
 .panel {
-  width: 400px;
+  width: 600px;
   height: 600px;
   background: rgba(255, 255, 255, 0.82);
   -webkit-backdrop-filter: blur(10px);
@@ -570,6 +570,12 @@ function useSample(q: string) {
   overflow: hidden;
   margin-bottom: 20px;
   position: relative;
+}
+
+/* When open, stretch panel close to full viewport height with a small margin */
+.chatbot-app.open .panel {
+  height: calc(100vh - 40px);
+  margin-bottom: 0;
 }
 
 .panel-close {
@@ -1217,14 +1223,38 @@ function useSample(q: string) {
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .chatbot-app {
-    right: 20px;
-    bottom: 20px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    align-items: flex-end; /* prevent children (FAB) from stretching full width */
   }
   
+  .fab {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(13, 99, 235, 0.28), 0 1px 4px rgba(0,0,0,0.06);
+    align-self: flex-end; /* ensure the FAB stays sized to content */
+  }
+
+  .bot-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .bot-icon i {
+    font-size: 1.05rem;
+  }
+
   .panel {
-    width: calc(100vw - 40px);
-    max-width: 400px;
-    height: 70vh;
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
   }
   
   .fab {
@@ -1244,8 +1274,8 @@ function useSample(q: string) {
 
 @media (max-width: 480px) {
   .panel {
-    width: calc(100vw - 20px);
-    height: 80vh;
+    width: 100vw;
+    height: 100vh;
   }
   
   .user-message {
