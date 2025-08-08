@@ -128,7 +128,7 @@ const formattedDate = props.date
 }
 
 .blogcard-tag:hover {
-  background-color: #c3d9f2;
+  background-color: #bcd2ec;
 }
 
 .blogcard-title {
