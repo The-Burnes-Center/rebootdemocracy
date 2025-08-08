@@ -151,7 +151,7 @@
                 size="xs"
                 weight="bold"
                 transform="uppercase"
-                fontFamily="habibi"
+                fontFamily="sora"
                 class="featured-card__tag"
                 :color="'tag-primary'"
                 :index="tagIndex"
@@ -163,7 +163,7 @@
                 lineHeight="normal"
                 margin="none"
                 size="xs"
-                fontFamily="habibi"
+                fontFamily="sora"
                 :index="0"
                 >Featured</Tag
               >
@@ -176,7 +176,7 @@
                 :lineClamp="2"
                 :level="'h3'"
                 weight="bold"
-                fontFamily="habibi"
+                fontFamily="sora"
                 color="text-dark"
             >
               {{ titleText }}

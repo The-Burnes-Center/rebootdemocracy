@@ -443,6 +443,11 @@ function useSample(q: string) {
   align-items: flex-end;
 }
 
+/* When open, ensure the chatbot overlays site header/menus */
+.chatbot-app.open {
+  z-index: 9999;
+}
+
 /* Backdrop */
 .backdrop {
   position: fixed;
@@ -1248,6 +1253,8 @@ function useSample(q: string) {
   }
 
   .panel {
+    position: fixed;
+    inset: 0;
     width: 100vw;
     max-width: none;
     height: 100vh;
@@ -1255,6 +1262,7 @@ function useSample(q: string) {
     border-radius: 0;
     border: none;
     box-shadow: none;
+    z-index: 10000;
   }
   
   .fab {

@@ -13,7 +13,7 @@
         color="tag-primary"
         class="blogcard-tag"
         transform="uppercase"
-        fontFamily="habibi"
+        fontFamily="sora"
       >
         {{ tag }}
       </Text>
@@ -23,7 +23,7 @@
         as="h3"
         size="xl"
         weight="bold"
-        fontFamily="habibi"
+        fontFamily="sora"
         color="text-dark"
         lineHeight="relaxed"
         class="blogcard-title"
@@ -120,7 +120,7 @@ const formattedDate = props.date
 }
 
 .blogcard-tag {
-  background-color: #feebe3;
+  background-color: #cddff3;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   display: inline-block;
