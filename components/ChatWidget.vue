@@ -1,7 +1,7 @@
 <!-- components/ChatWidget.vue - Redesigned to match site design system -->
 <template>
   <ClientOnly>
-    <div class="chat-container chatbot-app" :class="{ open: isOpen }">
+    <div class="chat-container chatbot-app" :class="{ open: isOpen, sending: busy }">
       <!-- FAB toggle button -->
       <button
         v-if="!isOpen"
@@ -135,7 +135,7 @@
                 @input="autoGrow"
                 :disabled="busy"
                 placeholder="Type your question about AI, democracy, or governance..."
-                class="message-textarea"
+                :class="['message-textarea', { sending: busy }]"
               />
               <button class="send-button" @click="send" :disabled="busy">
                 <span v-if="busy" class="loading-dots">
@@ -261,6 +261,20 @@ async function downloadDocx(message: { text: string; sources?: any[] }, index: n
 }
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const chatSessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+const userMessageCount = ref<number>(0);
+const botMessageCount = ref<number>(0);
+const exchangeCount = ref<number>(0);
+const hasEmittedConversationStart = ref<boolean>(false);
+
+function gtagSafe(eventName: string, params: Record<string, any> = {}) {
+  if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", eventName, {
+      chat_session_id: chatSessionId,
+      ...params,
+    });
+  }
+}
 const showMenu = ref<boolean>(false);
 const menuRef = ref<HTMLElement | null>(null);
 
@@ -273,6 +287,15 @@ function autoGrow() {
 
 function toggleOpen() {
   isOpen.value = !isOpen.value;
+  if (isOpen.value) {
+    gtagSafe("chatbot_open", { ui: "fab" });
+  } else {
+    gtagSafe("chatbot_close", {
+      user_messages: userMessageCount.value,
+      bot_messages: botMessageCount.value,
+      exchanges: exchangeCount.value,
+    });
+  }
 }
 
 function clearChat() {
@@ -349,6 +372,12 @@ async function send() {
 
   // 1. push user line
   msgs.value.push({ sender: "user", text: draft.value });
+  userMessageCount.value += 1;
+  if (!hasEmittedConversationStart.value) {
+    hasEmittedConversationStart.value = true;
+    gtagSafe("chatbot_conversation_started", {});
+  }
+  gtagSafe("chatbot_message_user", { user_messages: userMessageCount.value });
   await nextTick();
   msgList.value?.scrollTo({ top: msgList.value.scrollHeight + 60 });
 
@@ -403,6 +432,13 @@ async function send() {
 
     // 4. Scroll to show beginning of the answer
     await nextTick();
+    // Count completed bot reply and emit exchange
+    if ((bot.text || "").trim().length > 0) {
+      botMessageCount.value += 1;
+      exchangeCount.value = Math.min(userMessageCount.value, botMessageCount.value);
+      gtagSafe("chatbot_message_bot", { bot_messages: botMessageCount.value });
+      gtagSafe("chatbot_exchange", { exchanges: exchangeCount.value });
+    }
     setTimeout(() => {
       const botMessageElement = msgList.value?.querySelector(
         ".message.bot:last-child"
@@ -889,11 +925,56 @@ function useSample(q: string) {
 }
 
 .bot-content {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px 16px;
-  border-radius: 18px 18px 18px 4px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 14px 14px 14px 6px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   flex: 1;
+  position: relative;
+}
+
+/* Subtle speech-bubble pointer */
+.bot-content::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 16px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid #ffffff; /* match bubble bg */
+}
+
+.bot-content::after {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 16px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-right: 9px solid #e5e7eb; 
+}
+
+/* Tighter, readable typography inside the bot bubble */
+.bot-content :deep(p),
+.bot-content :deep(li) {
+  color: #1f2937;
+}
+
+.bot-content :deep(a) {
+  color: #0d63eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.bot-content :deep(hr) {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 12px 0;
 }
 
 .bot-content :deep(p) {
@@ -1066,6 +1147,30 @@ function useSample(q: string) {
 
 .message-textarea::placeholder {
   color: #9ca3af;
+}
+
+/* While sending/disabled */
+.message-textarea.sending,
+.message-textarea:disabled {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Visual feedback while sending */
+.message-textarea.sending,
+.message-textarea:disabled {
+  border-color: #0d63eb;
+  box-shadow: 0 0 0 3px rgba(13, 99, 235, 0.12);
+  background-image: linear-gradient(90deg, rgba(13,99,235,0.05), rgba(13,99,235,0.0));
+  background-size: 200% 100%;
+  animation: sendingPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sendingPulse {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 0%; }
 }
 
 .message-input {
