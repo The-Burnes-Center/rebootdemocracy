@@ -96,13 +96,14 @@
 .blog-category-eyebrow {
   display: flex;
   gap: 8px;
+  /* primary spacing between tags (modern browsers) */
   flex-wrap: wrap;
 }
 
 .category-tag {
   font-size: 1rem;
   font-weight: 700;
-  color:  #cddff3;
+  color: #cddff3;
   background-color: rgb(0, 51, 102);
   padding: 0.4rem 0.5rem;
   border-radius: 4px;
@@ -111,6 +112,15 @@
   font-family: var(--font-sora);
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+.blog-category-eyebrow .category-tag {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.blog-category-eyebrow .category-tag:last-child {
+  margin-right: 0;
 }
 
 .category-tag:hover {
@@ -253,7 +263,7 @@ p a,
 }
 
 /* Strong Text */
-p > strong {
+p>strong {
   color: #003366;
   font-weight: 700;
   font-size: 1em;
@@ -375,6 +385,7 @@ p > strong {
 
 /* Mobile - Up to 768px */
 @media (max-width: 768px) {
+
   /* Layout adjustments */
   .page-layout-blog {
     grid-template-columns: 1fr;
@@ -382,8 +393,9 @@ p > strong {
   }
 
   .blog-top-section {
-    gap:1rem;
+    gap: 1rem;
   }
+
   .blog-content p iframe {
     max-width: 100%;
     width: 100%;
@@ -426,7 +438,7 @@ p > strong {
   .tag-share-category {
     flex-direction: column;
     justify-content: flex-start;
-    gap:1rem;
+    gap: 1rem;
     margin: 0rem;
     align-items: flex-start;
     padding-left: 1rem;
