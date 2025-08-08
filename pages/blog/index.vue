@@ -744,12 +744,11 @@ const hasMorePosts = computed(
 );
 
 // Helper functions for handling both blog posts and news items
-const getPostKey = (post: BlogPost | NewsItem): string => {
-  if ("id" in post) {
-    return `blog-${post.id}`;
-  } else {
-    return `news-${post.url}`;
+const getPostKey = (post: any): string => {
+  if (post?.type === "news") {
+    return `news-${post.id ?? post.edition ?? Math.random().toString(36).slice(2)}`;
   }
+  return `blog-${post.id ?? post.slug ?? Math.random().toString(36).slice(2)}`;
 };
 
 const getPostTag = (post: BlogPost | NewsItem): string => {
@@ -790,15 +789,23 @@ const getPostDate = (post: BlogPost | NewsItem): Date => {
 };
 
 // Navigation and event handlers
-const handlePostClick = (post: BlogPost | NewsItem): void => {
-  if ("slug" in post && post.slug) {
+const handlePostClick = (post: any): void => {
+  if (post?.type === "news" && (post?.edition || post?.id)) {
+    const edition = post.edition ?? post.id;
+    resetSearch();
+    router.push(`/newsthatcaughtoureye/${edition}`);
+    return;
+  }
+  if (post?.slug) {
     resetSearch();
     router.push(`/blog/${post.slug}`);
-  } else if ("url" in post && post.url) {
-    window.location.href = post.url;
-  } else {
-    console.error("Cannot navigate: Post has no slug or URL", post);
+    return;
   }
+  if (post?.url) {
+    window.location.href = post.url;
+    return;
+  }
+  console.error("Cannot navigate: Post has no route info", post);
 };
 
 const handleEventClick = (event: Event | null) => {
