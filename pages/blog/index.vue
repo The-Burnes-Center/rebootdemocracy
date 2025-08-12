@@ -524,7 +524,24 @@ const getAuthorName = (post: BlogPost | NewsItem): string => {
   return getAuthorNameUtil(post);
 };
 
-// Data processing functions
+const normalizeTagLabel = (name: string): string => {
+  if (!name) return name;
+  const normalized = name.trim().toLowerCase();
+  if (normalized === "news that caught our eye") {
+    return "News that Caught Our Eye";
+  }
+  return name;
+};
+
+const getOriginalTag = (post: BlogPost | NewsItem): string => {
+  if ("Tags" in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
+    return post.Tags[0];
+  } else if ("category" in post && post.category) {
+    return post.category;
+  }
+  return "";
+};
+
 const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
   if (!posts || posts.length === 0) return [];
 
@@ -533,10 +550,12 @@ const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
   posts.forEach((post) => {
     if ("Tags" in post && Array.isArray(post.Tags)) {
       post.Tags.forEach((tag) => {
-        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+        const canonical = normalizeTagLabel(tag);
+        tagCounts.set(canonical, (tagCounts.get(canonical) || 0) + 1);
       });
     } else if ("category" in post && post.category) {
-      tagCounts.set(post.category, (tagCounts.get(post.category) || 0) + 1);
+      const canonical = normalizeTagLabel(post.category);
+      tagCounts.set(canonical, (tagCounts.get(canonical) || 0) + 1);
     }
   });
 
@@ -705,12 +724,32 @@ const filteredPosts = computed(() => {
   if (selectedCategory.value) {
     filtered = filtered.filter((post) => {
       if ("Tags" in post && Array.isArray(post.Tags)) {
-        return post.Tags.includes(selectedCategory.value as string);
+        return post.Tags.some((t: string) => normalizeTagLabel(t) === selectedCategory.value);
       } else if ("category" in post && post.category) {
-        return post.category === selectedCategory.value;
+        return normalizeTagLabel(post.category) === selectedCategory.value;
       }
       return false;
     });
+
+    // For merged tags, sort capitalized variant first, then by date within each group
+    if (selectedCategory.value === "News that Caught Our Eye") {
+      filtered = filtered.sort((a, b) => {
+        const tagA = getOriginalTag(a);
+        const tagB = getOriginalTag(b);
+        
+        // Prioritize "News that Caught Our Eye" (capitalized) over "news that caught our eye" (lowercase)
+        const isCapitalizedA = tagA === "News that Caught Our Eye";
+        const isCapitalizedB = tagB === "News that Caught Our Eye";
+        
+        if (isCapitalizedA && !isCapitalizedB) return -1; // A comes first
+        if (!isCapitalizedA && isCapitalizedB) return 1;  // B comes first
+        
+        // If both same variant, sort by date (newest first)
+        const dateA = new Date((a as any).date || 0).getTime();
+        const dateB = new Date((b as any).date || 0).getTime();
+        return dateB - dateA;
+      });
+    }
   }
 
   if (selectedAuthor.value) {
@@ -753,9 +792,9 @@ const getPostKey = (post: any): string => {
 
 const getPostTag = (post: BlogPost | NewsItem): string => {
   if ("Tags" in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
-    return post.Tags[0];
+    return normalizeTagLabel(post.Tags[0]);
   } else if ("category" in post && post.category) {
-    return post.category;
+    return normalizeTagLabel(post.category);
   }
   return "Blog";
 };
