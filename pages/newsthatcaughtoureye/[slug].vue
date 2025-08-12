@@ -134,7 +134,7 @@
             </p>
             <a
               :href="item.reboot_democracy_weekly_news_items_id.url"
-              class="read-article btn-primary btn"
+              class="btn-primary btn read-article"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -521,10 +521,10 @@ useSeoMeta({
 }
 
 .category-badge span {
-  background-color: rgb(0, 51, 102);
+  background-color: #cddff3;
   font-size: 1rem;
   font-weight: 600;
-  color: #cddff3;
+  color: rgb(0, 51, 102);
   padding: 0.4rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -557,13 +557,13 @@ useSeoMeta({
 }
 
 .read-article {
-  background-color: rgb(0, 51, 102);
+  background-color: #fc6423;
   color: #ffffff;
   text-decoration: none;
   text-transform: uppercase;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.5rem;
   width: fit-content;
-  font-size: 12px;
+  font-size: 16px;
   font-family: var(--font-habibi);
   font-weight: 600;
   border-radius: 4px;
