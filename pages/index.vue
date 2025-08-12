@@ -71,8 +71,8 @@
                 size="4xl"
                 weight="bold"
                 color="text-primary-light"
-                fontFamily="habibi"
-                lineHeight="loose"
+                fontFamily="sora"
+                lineHeight="extra-loose"
                 class="subscription-title"
               >
                 Subscribe for Updates
@@ -264,7 +264,7 @@
               id="collaborators-heading"
               size="2xl"
               weight="bold"
-              fontFamily="habibi"
+              fontFamily="sora"
               lineHeight="extra-loose"
               color="text-dark"
               class="new-blog-collab"

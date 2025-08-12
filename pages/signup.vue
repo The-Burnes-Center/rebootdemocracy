@@ -162,7 +162,7 @@ export default {
 }
 
 .signup-form h3 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 2rem;
