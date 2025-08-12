@@ -233,7 +233,7 @@
             role="region"
             aria-label="Blog posts"
           >
-            <div class="blogcard-grid-wrapper" role="list">
+            <div id = "blogcard-grid-wrapper" class="blogcard-grid-wrapper" role="list">
               <article
                 v-for="post in displayedPosts"
                 :key="getPostKey(post)"
@@ -422,7 +422,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
@@ -865,14 +865,48 @@ const selectCategory = (category: string) => {
   authorFilteredPosts.value = [];
   selectedCategory.value = category;
   currentPage.value = 1;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!isMobile.value) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    // Wait for posts to finish rendering before scrolling to grid
+    const stop = watch(
+      () => ({ loading: isPostsLoading.value, length: displayedPosts.value.length }),
+      (state) => {
+        if (!state.loading && state.length > 0) {
+          nextTick(() => {
+            const grid = document.getElementById("blogcard-grid-wrapper");
+            grid?.scrollIntoView({ behavior: "smooth", block: "start" });
+            stop();
+          });
+        }
+      },
+      { immediate: true }
+    );
+  }
 };
 
 const selectAuthor = (author: string) => {
   selectedCategory.value = null;
   selectedAuthor.value = author;
   currentPage.value = 1;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!isMobile.value) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    // Wait for posts to finish rendering before scrolling to grid
+    const stop = watch(
+      () => ({ loading: isPostsLoading.value || isFilteringByAuthor.value, length: displayedPosts.value.length }),
+      (state) => {
+        if (!state.loading && state.length > 0) {
+          nextTick(() => {
+            const grid = document.getElementById("blogcard-grid-wrapper");
+            grid?.scrollIntoView({ behavior: "smooth", block: "start" });
+            stop();
+          });
+        }
+      },
+      { immediate: true }
+    );
+  }
 };
 
 const clearFilters = () => {
