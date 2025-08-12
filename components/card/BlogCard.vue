@@ -85,7 +85,8 @@ const formattedDate = props.date
 <style scoped>
 .blogcard-container {
   cursor: pointer;
-  width: 300px;
+  width: 100%;
+  height: 100%;
   border: 1px solid #ddd;
   border-radius: 12px;
   overflow: hidden;
@@ -117,6 +118,7 @@ const formattedDate = props.date
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex: 1;
 }
 
 .blogcard-tag {
@@ -135,6 +137,7 @@ const formattedDate = props.date
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: calc(1.4em * 3);
@@ -144,6 +147,7 @@ const formattedDate = props.date
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: calc(1.5em * 4);
@@ -152,5 +156,6 @@ const formattedDate = props.date
 .blogcard-meta {
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
+  margin-top: auto;
 }
 </style>

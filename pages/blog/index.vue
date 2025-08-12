@@ -296,7 +296,7 @@
           <div v-if="!isPostsLoading && hasMorePosts" class="btn-mid">
             <Button
               variant="secondary"
-              width="150px"
+              width="160px"
               height="40px"
               @click="loadMorePosts"
               @keydown="handleKeydown($event, loadMorePosts)"
