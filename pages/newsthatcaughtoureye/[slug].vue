@@ -14,8 +14,18 @@
 
     <template v-else-if="postData && postData.length > 0">
       <div class="weeklynews-hero">
-        <img v-if="!postData[0].image" class="weeklynews-img" src="/images/newsheader.png" />
-        <img v-if="postData[0].image" class="weeklynews-img" :src="'https://content.thegovlab.com/assets/' + postData[0].image.id" />
+        <img
+          v-if="!postData[0].image"
+          class="weeklynews-img"
+          src="/images/newsheader.png"
+          alt="Weekly News header"
+        />
+        <img
+          v-if="postData[0].image"
+          class="weeklynews-img"
+          :src="'https://content.thegovlab.com/assets/' + postData[0].image.id"
+          :alt="postData[0].title"
+        />
         <div class="weeklynews-details">
           <h1>{{ postData[0].title }}</h1>
           <p>
@@ -25,7 +35,8 @@
         </div>
       </div>
 
-      <!-- Table of Contents -->
+      <!-- Table of Contents + Content Wrapper -->
+      <div class="weeklynews-container">
       <div class="toc">
         <p class="excerpt">{{ postData[0].summary }}</p>
         <br />
@@ -89,11 +100,7 @@
             {{ cat }}
           </h2>
           <div
-            v-for="item in postData[0].items.filter(
-              (item) =>
-                (item.reboot_democracy_weekly_news_items_id.category ||
-                  'News that caught our eye') === cat
-            )"
+            v-for="item in getItemsByCategory(cat)"
             :key="item.reboot_democracy_weekly_news_items_id.id"
             class="news-item"
           >
@@ -104,9 +111,9 @@
               }}</span>
             </p>
             <h4 class="item-title">
-              <strong>{{
+              <span>{{
                 item.reboot_democracy_weekly_news_items_id.title
-              }}</strong>
+              }}</span>
             </h4>
             <div class="item-meta">
               <p>
@@ -127,8 +134,9 @@
             </p>
             <a
               :href="item.reboot_democracy_weekly_news_items_id.url"
-              class="read-article"
+              class="read-article btn-primary btn"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Read article
             </a>
@@ -144,6 +152,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
     </template>
   </div>
@@ -319,6 +328,17 @@ const uniqueCategories = computed(() => {
   return [...new Set(cats)];
 });
 
+// Typed helper to get items by category (prevents implicit any in template)
+const getItemsByCategory = (category: string): WeeklyNewsItemWrapper[] => {
+  const items = postData.value?.[0]?.items ?? [];
+  return items.filter((wrapper: WeeklyNewsItemWrapper) => {
+    const itemCategory =
+      wrapper.reboot_democracy_weekly_news_items_id.category ||
+      "News that caught our eye";
+    return itemCategory === category;
+  });
+};
+
 // Set up meta tags with reactive values
 const post = computed(() => postData.value?.[0]);
 
@@ -381,60 +401,85 @@ useSeoMeta({
 
 <style>
 
+/* Page wrapper width control */
+.weeklynews-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
 .weeklynews-hero {
+  position: relative;
   width: 100%;
   display: flex;
   padding: 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .weeklynews-hero h1 {
-  margin-top: -8rem;
-  z-index: 100;
+  position: relative;
+  z-index: 2;
   color: #ffffff;
   font-size: 40px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
+  margin: 0;
 }
 
 .weeklynews-img {
-  height: 200px;
+  height: 230px;
   width: 100%;
-  object-fit: fill;
+  object-fit: cover;
+}
+
+.weeklynews-details {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  text-align: center;
 }
 
 .weeklynews-details p {
   color: #ffffff;
   font-weight: 600;
+  margin-top: 0.5rem;
+  font-family: var(--font-habibi);
+  font-size: 18px;
 }
 
 /* Table of Contents Section */
 .toc {
-  padding: 1rem 10rem;
+  padding: 1.5rem;
 }
 
 .toc ul {
-  padding-left: 0;
+  padding-left: 1em;
   margin-top: 1em;
 }
 
 .toc li {
-  color: #0d63eb;
+  color: rgb(0, 51, 102);
   margin-bottom: 0.5em;
+  font-family: var(--font-sora);
+  font-size: 18px;
 }
 
 .toc a {
-  color: #0d63eb;
+  color: rgb(0, 51, 102);
   text-decoration: none;
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
 }
 
 .toc p {
-  font-size: 18px;
-  line-height: 1.8;
-  margin-left: 1em;
+  font-size: 20px;
   font-family: var(--font-habibi);
+  line-height: 40px;
+  margin: 0;
 }
 
 .toc .news-heading {
@@ -448,57 +493,80 @@ useSeoMeta({
 
 /* Group Heading */
 .group-heading {
-  color: #0d63eb;
-  border-bottom: 1px solid #0d63eb;
-  padding-bottom: 5px;
-  font-family: var(--font-habibi);
+  color: rgb(0, 51, 102);
+  border-bottom: 1px solid rgb(0, 51, 102);
+  padding-bottom: 6px;
+  margin: 0 0 1rem 0;
+  font-family: var(--font-sora);
 }
 
 /* News Items */
 .news-items {
-  padding: 0rem 10rem;
+  padding: 0 1.5rem;
 }
 
 .news-item {
-  background-color: #fafafa;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin-bottom: 1rem;
+  margin: 1rem 0;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-family: var(--font-habibi);
+  font-size: 18px;
+  line-height: 30px;
 }
 
 .category-badge span {
-  background-color: #519e8a;
-  color: #ffffff;
-  font-size: 10px;
-  padding: 0.5em;
+  background-color: rgb(0, 51, 102);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #cddff3;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: var(--font-sora);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .item-title {
-  color: #0d63eb;
-  font-family: var(--font-habibi);
+  color: rgb(0, 51, 102);
+  font-family: var(--font-sora);
+  font-size: 20px;
+  margin: 0;
 }
 
 .item-meta {
   margin: 0;
   font-family: var(--font-habibi);
+  font-size: 17px;
+  line-height: 20px;
+
 }
 
 .item-excerpt {
+  font-size: 20px;
   font-family: var(--font-habibi);
-  line-height: 32px;
+  line-height: 40px;
+  margin: 0;
 }
 
 .read-article {
-  background-color: #0d63eb;
+  background-color: rgb(0, 51, 102);
   color: #ffffff;
   text-decoration: none;
   text-transform: uppercase;
-  padding: 0.25rem 0.25rem;
+  padding: 0.5rem 0.75rem;
   width: fit-content;
   font-size: 12px;
   font-family: var(--font-habibi);
   font-weight: 600;
+  border-radius: 4px;
 }
 
 /* Related Articles Section */
@@ -506,7 +574,6 @@ useSeoMeta({
   margin-top: 1rem;
   padding: 1rem;
   background-color: #f5f5f5;
-  border-left: 3px solid #0d63eb;
 }
 
 .weekly-news-related-articles p {
@@ -521,10 +588,11 @@ useSeoMeta({
 
 .weekly-news-related-articles li {
   margin-bottom: 0.25rem;
+  font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles a {
-  color: #0d63eb;
+  color: rgb(0, 51, 102);
   text-decoration: none;
   font-family: var(--font-habibi);
 }
@@ -548,7 +616,7 @@ useSeoMeta({
   width: 48px;
   height: 48px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #0d63eb;
+  border-top: 5px solid rgb(0, 51, 102);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -563,27 +631,26 @@ useSeoMeta({
 }
 
 /* Responsive Adjustments */
-@media (max-width: 768px) {
-
-  .weeklynews-hero h1 {
-    font-size: 24px;
-    margin-top: -8rem;
-    margin-left: 1rem;
-    margin-right: 1rem;
-  }
-  .weeklynews-details p {
-    margin-left: 1rem;
-    margin-right: 1rem;
-  }
-
+@media (min-width: 768px) {
+ 
   .weeklynews-img {
-    height: 150px;
+    height: 230px;
   }
-
-  .weeklynews-header,
   .toc,
   .news-items {
-    padding: 1rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .weeklynews-img {
+    height: 230px;
+  }
+  .weeklynews-container .toc,
+  .weeklynews-container .news-items {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 </style>
