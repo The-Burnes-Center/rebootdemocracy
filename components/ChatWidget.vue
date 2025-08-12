@@ -657,7 +657,7 @@ function useSample(q: string) {
 
 .header-title {
   font-family: var(--font-sora);
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   line-height: 1.2;
@@ -665,7 +665,7 @@ function useSample(q: string) {
 
 .header-subtitle {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 400;
   margin: 0;
   line-height: 1.4;
@@ -719,7 +719,7 @@ function useSample(q: string) {
   border: 1px solid rgba(255, 255, 255, 0.35);
   font-family: var(--font-habibi);
   font-weight: 700;
-  font-size: 0.7rem;
+  font-size: 1rem;
   padding: 4px 8px;
   border-radius: 9999px;
   letter-spacing: 0.06em;
@@ -791,13 +791,13 @@ function useSample(q: string) {
   margin: 0;
   font-family: var(--font-sora);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.25rem;
 }
 
 .welcome-subtitle {
   margin: 0;
   font-family: var(--font-habibi);
-  font-size: 0.8rem;
+  font-size: 1rem;
   opacity: 0.9;
 }
 
@@ -827,7 +827,7 @@ function useSample(q: string) {
 
 .welcome-text {
   font-family: var(--font-habibi);
-  font-size: 0.85rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin: 0 0 8px 0;
   color: #1f2937;
@@ -857,7 +857,7 @@ function useSample(q: string) {
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
   font-family: var(--font-sora);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 1rem;
   line-height: 1.45;
   color: #0f1e3a;
   position: relative;
@@ -899,7 +899,7 @@ function useSample(q: string) {
   max-width: 80%;
   margin-left: auto;
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.4;
   word-wrap: break-word;
 }
@@ -979,7 +979,7 @@ function useSample(q: string) {
 
 .bot-content :deep(p) {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin: 0 0 8px 0;
   color: #374151;
@@ -1016,7 +1016,7 @@ function useSample(q: string) {
 
 .bot-content :deep(li) {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin-bottom: 4px;
 }
@@ -1026,7 +1026,7 @@ function useSample(q: string) {
   padding: 2px 6px;
   border-radius: 4px;
   font-family: var(--font-habibi);
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: #dc2626;
 }
 
@@ -1059,7 +1059,7 @@ function useSample(q: string) {
   border-radius: 6px;
   padding: 6px 10px;
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1082,7 +1082,7 @@ function useSample(q: string) {
 
 .sources-title {
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   color: #6b7280;
@@ -1102,7 +1102,7 @@ function useSample(q: string) {
 
 .source-link {
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: #0d63eb;
   text-decoration: none;
   line-height: 1.4;
@@ -1132,7 +1132,7 @@ function useSample(q: string) {
   border: 2px solid #e5e7eb;
   border-radius: 14px;
   font-family: var(--font-habibi);
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.45;
   background: white;
   outline: none;
@@ -1179,7 +1179,7 @@ function useSample(q: string) {
   border: 2px solid #e5e7eb;
   border-radius: 24px;
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.4;
   background: white;
   outline: none;
@@ -1289,7 +1289,7 @@ function useSample(q: string) {
 
 .loading-title {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #003366;
   line-height: 1.2;
@@ -1297,7 +1297,7 @@ function useSample(q: string) {
 
 .loading-subtitle {
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: #6b7280;
   line-height: 1.3;
 }
