@@ -380,6 +380,7 @@ useSeoMeta({
 </script>
 
 <style>
+
 .weeklynews-hero {
   width: 100%;
   display: flex;
@@ -563,9 +564,10 @@ useSeoMeta({
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+
   .weeklynews-hero h1 {
     font-size: 24px;
-    margin-top: -7rem;
+    margin-top: -8rem;
     margin-left: 1rem;
     margin-right: 1rem;
   }
