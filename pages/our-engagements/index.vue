@@ -177,7 +177,7 @@ useSeoMeta({
 
 /* Typography Styles */
 .our-engagements-page h1 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -186,7 +186,7 @@ useSeoMeta({
 }
 
 .our-engagements-page h4 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
   font-size: 18px;
   margin: 0;
   padding: 0;
@@ -209,7 +209,7 @@ useSeoMeta({
 .our-engagements-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
   letter-spacing: 2.4px;
 }
 
@@ -457,7 +457,7 @@ useSeoMeta({
 @media (max-width: 768px) {
   .our-engagements-page h1 {
     font-size: 30px;
-    font-family: var(--font-habibi);
+    font-family: var(--font-sora);
   }
 
   .resource-page {
