@@ -428,11 +428,7 @@ import type { BlogPost, Event } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
 import { fetchAllBlogPosts } from "~/composables/fetchBlogData";
 import { fetchWeeklyNewsItems } from "~/composables/fetchWeeklyNews";
-import {
-  fetchPostsByAuthor,
-  getAuthorName as getAuthorNameUtil,
-  getAllAuthors,
-} from "~/composables/useAuthorPosts";
+import { getAuthorName as getAuthorNameUtil } from "~/composables/useAuthorPosts";
 
 const props = defineProps<{ initialCategory?: string }>();
 
@@ -692,18 +688,24 @@ const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count >= 1)
 );
 
-watch(selectedAuthor, async (newAuthor) => {
+watch(selectedAuthor, (newAuthor) => {
   if (newAuthor && !selectedCategory.value) {
+    // Client-side filter from preloaded posts; no extra Directus calls
     isFilteringByAuthor.value = true;
-    try {
-      const posts = await fetchPostsByAuthor(newAuthor);
-      authorFilteredPosts.value = posts;
-    } catch (error) {
-      console.error("Error fetching posts by author:", error);
-      authorFilteredPosts.value = [];
-    } finally {
-      isFilteringByAuthor.value = false;
-    }
+    const posts = (allPosts.value || []).filter((post: any) => {
+      const name = getAuthorName(post);
+      if (!name) return false;
+      if (name.includes(",") || name.includes(" and ")) {
+        const split = name
+          .split(/[,]|(\sand\s)/i)
+          .map((a) => (typeof a === "string" ? a.trim() : ""))
+          .filter((a) => a && a.toLowerCase() !== "and");
+        return split.some((n) => n === newAuthor);
+      }
+      return name === newAuthor;
+    });
+    authorFilteredPosts.value = posts;
+    isFilteringByAuthor.value = false;
   } else {
     authorFilteredPosts.value = [];
   }
@@ -711,11 +713,7 @@ watch(selectedAuthor, async (newAuthor) => {
 
 // Filtered posts based on selected category/author
 const filteredPosts = computed(() => {
-  if (
-    selectedAuthor.value &&
-    !selectedCategory.value &&
-    authorFilteredPosts.value.length > 0
-  ) {
+  if (selectedAuthor.value && !selectedCategory.value) {
     return authorFilteredPosts.value;
   }
 
