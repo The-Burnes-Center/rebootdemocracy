@@ -1380,13 +1380,16 @@ function useSample(q: string) {
     bottom: 0;
     width: 100vw;
     max-width: none;
-    height: 78vh; /* comfortable height */
+    height: 78vh; 
     margin: 0;
     border-radius: 16px 16px 0 0;
     border: 1px solid #e5e7eb;
     box-shadow: 0 -8px 24px rgba(0,0,0,0.12);
     z-index: 10005;
     overflow: hidden;
+  }
+  .chat-header {
+    padding-top: calc(14px + env(safe-area-inset-top));
   }
   
   .fab {
@@ -1408,7 +1411,12 @@ function useSample(q: string) {
 @media (max-width: 480px) {
   .panel {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
+    top: 0;
+    bottom: 0;
+  }
+  .chat-header {
+    padding-top: calc(14px + env(safe-area-inset-top));
   }
   
   .user-message {
