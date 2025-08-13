@@ -794,4 +794,15 @@ html {
   }
 }
 
+@media (max-width: 375px) {
+  .toc-scroll {
+  padding: 1.5rem 1rem;
+}
+}
+
+@media (min-width: 390px) and (max-width: 800px) {
+  .toc-scroll {
+    padding: 1.5rem 1rem;}
+}
+
 </style>
