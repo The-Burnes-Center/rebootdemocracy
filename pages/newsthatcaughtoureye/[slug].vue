@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="top">
     <div v-if="isLoading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Loading content...</p>
@@ -35,124 +35,107 @@
         </div>
       </div>
 
-      <!-- Table of Contents + Content Wrapper -->
-      <div class="weeklynews-container">
-      <div class="toc">
-        <p class="excerpt">{{ postData[0].summary }}</p>
-        <br />
-        <p><strong>In the news this week</strong></p>
-        <ul>
-          <li v-for="cat in uniqueCategories" :key="cat">
-            <a :href="'#' + cat.toLowerCase().replace(/\s+/g, '')">
-              <strong>{{ cat }}:</strong>
+      <!-- Sticky TOC Bar -->
+      <nav class="toc-bar" aria-label="In this edition">
+        <div class="weeklynews-container">
+          <div class="toc-scroll">
+            <a
+              v-for="cat in uniqueCategories"
+              :key="cat"
+              class="toc-chip"
+              :href="'#' + cat.toLowerCase().replace(/\s+/g, '')"
+            >
+              {{ cat }} <span class="toc-count">({{ getItemsByCategory(cat).length }})</span>
             </a>
-            <span class="toc-description">
-              {{
-                cat === "AI and Elections"
-                  ? "Free, fair and frequent"
-                  : cat === "Governing AI"
-                  ? "Setting the rules for a fast-moving technology."
-                  : cat === "AI for Governance"
-                  ? "Smarter public institutions through machine intelligence."
-                  : cat === "AI and Public Engagement"
-                  ? "Bolstering participation"
-                  : cat === "AI and Problem Solving"
-                  ? "Research, applications, technical breakthroughs"
-                  : cat === "AI Infrastructure"
-                  ? "Computing resources, data systems and energy use"
-                  : cat === "AI and International Relations (IR)"
-                  ? "Global cooperation—or competition—over AI's future"
-                  : cat === "AI and Education"
-                  ? "Preparing people for an AI-driven world"
-                  : cat === "AI and Public Safety"
-                  ? "Law enforcement, disaster prevention and preparedness"
-                  : cat === "AI and Labor"
-                  ? "Worker rights, safety and opportunity"
-                  : "News that caught our eye"
-              }}
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Upcoming Events Section -->
-      <div class="news-items" v-if="postData[0].events">
-        <h2 class="group-heading">
-          Upcoming Events
-        </h2>
-        <div class="news-item" v-html="postData[0].events">
+          </div>
         </div>
-      </div>
+      </nav>
 
-      <!-- Special Announcements Section -->
-      <div class="news-items" v-if="postData[0].announcements">
-        <h2 class="group-heading">
-          Special Announcements
-        </h2>
-        <div class="news-item" v-html="postData[0].announcements">
-        </div>
-      </div>
+      <!-- Content -->
+      <div class="weeklynews-container">
+        <!-- Summary Card -->
+        <section class="news-items">
+          <div class="summary-card news-item">
+            <p class="excerpt">{{ postData[0].summary }}</p>
+          </div>
+        </section>
 
-      <!-- Grouped News Items by Category -->
-      <div class="news-items">
-        <div v-for="cat in uniqueCategories" :key="cat">
+        <!-- Upcoming Events Section -->
+        <section class="news-items" v-if="postData[0].events">
+          <h2 class="group-heading">Upcoming Events</h2>
+          <div class="news-item" v-html="postData[0].events"></div>
+        </section>
+
+        <!-- Special Announcements Section -->
+        <section class="news-items" v-if="postData[0].announcements">
+          <h2 class="group-heading">Special Announcements</h2>
+          <div class="news-item" v-html="postData[0].announcements"></div>
+        </section>
+
+        <!-- Grouped News Items by Category -->
+        <section
+          v-for="cat in uniqueCategories"
+          :key="cat"
+          class="news-items category-group"
+        >
           <h2 :id="cat.toLowerCase().replace(/\s+/g, '')" class="group-heading">
             {{ cat }}
           </h2>
-          <div
-            v-for="item in getItemsByCategory(cat)"
-            :key="item.reboot_democracy_weekly_news_items_id.id"
-            class="news-item"
-          >
-            <p class="category-badge">
-              <span>{{
-                item.reboot_democracy_weekly_news_items_id.category ||
-                "News that caught our eye"
-              }}</span>
-            </p>
-            <h4 class="item-title">
-              <span>{{
-                item.reboot_democracy_weekly_news_items_id.title
-              }}</span>
-            </h4>
-            <div class="item-meta">
-              <p>
-                <em>
-                  {{ item.reboot_democracy_weekly_news_items_id.author }} on
-                  {{
-                    formatDateOnly(
-                      new Date(item.reboot_democracy_weekly_news_items_id.date)
-                    )
-                  }}
-                  in
-                  {{ item.reboot_democracy_weekly_news_items_id.publication }}
-                </em>
-              </p>
-            </div>
-            <p class="item-excerpt">
-              {{ item.reboot_democracy_weekly_news_items_id.excerpt }}
-            </p>
-            <a
-              :href="item.reboot_democracy_weekly_news_items_id.url"
-              class="btn-primary btn read-article"
-              target="_blank"
-              rel="noopener noreferrer"
+          <div class="items-grid">
+            <article
+              v-for="item in getItemsByCategory(cat)"
+              :key="item.reboot_democracy_weekly_news_items_id.id"
+              class="news-item"
             >
-              Read article
-            </a>
+              <p class="category-badge">
+                <span>{{
+                  item.reboot_democracy_weekly_news_items_id.category ||
+                  "News that caught our eye"
+                }}</span>
+              </p>
+              <h4 class="item-title">
+                <span>{{ item.reboot_democracy_weekly_news_items_id.title }}</span>
+              </h4>
+              <div class="item-meta">
+                <p>
+                  <em>
+                    {{ item.reboot_democracy_weekly_news_items_id.author }} on
+                    {{
+                      formatDateOnly(
+                        new Date(item.reboot_democracy_weekly_news_items_id.date)
+                      )
+                    }}
+                    in
+                    {{ item.reboot_democracy_weekly_news_items_id.publication }}
+                  </em>
+                </p>
+              </div>
+              <p class="item-excerpt">
+                {{ item.reboot_democracy_weekly_news_items_id.excerpt }}
+              </p>
+              <a
+                :href="item.reboot_democracy_weekly_news_items_id.url"
+                class="btn-primary btn read-article"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Read article
+              </a>
 
-            <!-- Related Links Section -->
-            <div v-if="item.reboot_democracy_weekly_news_items_id.related_links != ''" class="weekly-news-related-articles">
-              <p><b>Related Articles:</b></p>
-              <ul>
-                <li v-for="related_item in item.reboot_democracy_weekly_news_items_id.related_links">
-                  <a :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
-                </li>
-              </ul>
-            </div>
+              <!-- Related Links Section -->
+              <div v-if="item.reboot_democracy_weekly_news_items_id.related_links != ''" class="weekly-news-related-articles">
+                <p><b>Related Articles:</b></p>
+                <ul>
+                  <li v-for="related_item in item.reboot_democracy_weekly_news_items_id.related_links">
+                    <a :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
+                  </li>
+                </ul>
+              </div>
+            </article>
           </div>
-        </div>
-      </div>
+        </section>
+
+        <a href="#top" class="back-to-top" aria-label="Back to top">▲</a>
       </div>
     </template>
   </div>
@@ -401,10 +384,41 @@ useSeoMeta({
 
 <style>
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Page wrapper width control */
 .weeklynews-container {
   max-width: 960px;
   margin: 0 auto;
+}
+
+.toc-scroll {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 1rem 1rem;
+  margin: 1rem;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.toc-chip {
+  white-space: nowrap;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #cddff3;
+  border-radius: 999px;
+  color: rgb(0, 51, 102);
+  text-decoration: none;
+  font-family: var(--font-sora);
+  font-weight: 600;
+  line-height: 20px;
+  font-size: 14px;
+  background: linear-gradient(to left, #f8fafc, #f1f5f9);
+}
+
+.toc-chip:hover {
+  text-decoration: underline;
 }
 
 .weeklynews-hero {
@@ -452,44 +466,7 @@ useSeoMeta({
   font-size: 18px;
 }
 
-/* Table of Contents Section */
-.toc {
-  padding: 1.5rem;
-}
-
-.toc ul {
-  padding-left: 1em;
-  margin-top: 1em;
-}
-
-.toc li {
-  color: rgb(0, 51, 102);
-  margin-bottom: 0.5em;
-  font-family: var(--font-sora);
-  font-size: 18px;
-}
-
-.toc a {
-  color: rgb(0, 51, 102);
-  text-decoration: none;
-  font-family: var(--font-sora);
-}
-
-.toc p {
-  font-size: 20px;
-  font-family: var(--font-habibi);
-  line-height: 40px;
-  margin: 0;
-}
-
-.toc .news-heading {
-  font-family: var(--font-habibi);
-}
-
-.toc-description {
-  color: #3d3d3d;
-  margin-left: 0.5em;
-}
+/* legacy toc styles removed in favor of toc-bar */
 
 /* Group Heading */
 .group-heading {
@@ -498,6 +475,7 @@ useSeoMeta({
   padding-bottom: 6px;
   margin: 0 0 1rem 0;
   font-family: var(--font-sora);
+  border-bottom: 1px solid #e6e6e6;
 }
 
 /* News Items */
@@ -516,13 +494,32 @@ useSeoMeta({
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   font-family: var(--font-habibi);
-  font-size: 18px;
+  font-size: 20px;
   line-height: 30px;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.news-item:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06), 0 0 0 2px #cddff3 inset;
+}
+
+.category-group {
+  margin-top: 0.25rem;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9); 
 }
 
 .category-badge span {
   background-color: #cddff3;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 600;
   color: rgb(0, 51, 102);
   padding: 0.4rem 0.5rem;
@@ -552,7 +549,7 @@ useSeoMeta({
 .item-excerpt {
   font-size: 20px;
   font-family: var(--font-habibi);
-  line-height: 40px;
+  line-height: 32px;
   margin: 0;
 }
 
@@ -567,6 +564,8 @@ useSeoMeta({
   font-family: var(--font-habibi);
   font-weight: 600;
   border-radius: 4px;
+  margin-top: 0.25rem;
+  display: inline-block;
 }
 
 /* Related Articles Section */
@@ -599,6 +598,24 @@ useSeoMeta({
 
 .weekly-news-related-articles a:hover {
   text-decoration: underline;
+}
+
+.back-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(0, 51, 102);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: rgb(0, 51, 102);
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 /* Loading and Error Styles */
@@ -636,21 +653,24 @@ useSeoMeta({
   .weeklynews-img {
     height: 230px;
   }
-  .toc,
-  .news-items {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
 }
 
 @media (min-width: 1024px) {
   .weeklynews-img {
     height: 230px;
   }
-  .weeklynews-container .toc,
   .weeklynews-container .news-items {
-    padding-left: 0;
-    padding-right: 0;
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .back-to-top {
+    right: 16px;
+    bottom: 16px;
+  }
+  .items-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
