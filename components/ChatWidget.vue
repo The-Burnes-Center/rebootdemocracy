@@ -1,7 +1,7 @@
 <!-- components/ChatWidget.vue - Redesigned to match site design system -->
 <template>
   <ClientOnly>
-    <div class="chat-container chatbot-app" :class="{ open: isOpen }">
+    <div class="chat-container chatbot-app" :class="{ open: isOpen, sending: busy }">
       <!-- FAB toggle button -->
       <button
         v-if="!isOpen"
@@ -135,7 +135,7 @@
                 @input="autoGrow"
                 :disabled="busy"
                 placeholder="Type your question about AI, democracy, or governance..."
-                class="message-textarea"
+                :class="['message-textarea', { sending: busy }]"
               />
               <button class="send-button" @click="send" :disabled="busy">
                 <span v-if="busy" class="loading-dots">
@@ -261,6 +261,20 @@ async function downloadDocx(message: { text: string; sources?: any[] }, index: n
 }
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const chatSessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+const userMessageCount = ref<number>(0);
+const botMessageCount = ref<number>(0);
+const exchangeCount = ref<number>(0);
+const hasEmittedConversationStart = ref<boolean>(false);
+
+function gtagSafe(eventName: string, params: Record<string, any> = {}) {
+  if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", eventName, {
+      chat_session_id: chatSessionId,
+      ...params,
+    });
+  }
+}
 const showMenu = ref<boolean>(false);
 const menuRef = ref<HTMLElement | null>(null);
 
@@ -273,6 +287,15 @@ function autoGrow() {
 
 function toggleOpen() {
   isOpen.value = !isOpen.value;
+  if (isOpen.value) {
+    gtagSafe("chatbot_open", { ui: "fab" });
+  } else {
+    gtagSafe("chatbot_close", {
+      user_messages: userMessageCount.value,
+      bot_messages: botMessageCount.value,
+      exchanges: exchangeCount.value,
+    });
+  }
 }
 
 function clearChat() {
@@ -349,6 +372,12 @@ async function send() {
 
   // 1. push user line
   msgs.value.push({ sender: "user", text: draft.value });
+  userMessageCount.value += 1;
+  if (!hasEmittedConversationStart.value) {
+    hasEmittedConversationStart.value = true;
+    gtagSafe("chatbot_conversation_started", {});
+  }
+  gtagSafe("chatbot_message_user", { user_messages: userMessageCount.value });
   await nextTick();
   msgList.value?.scrollTo({ top: msgList.value.scrollHeight + 60 });
 
@@ -403,6 +432,13 @@ async function send() {
 
     // 4. Scroll to show beginning of the answer
     await nextTick();
+    // Count completed bot reply and emit exchange
+    if ((bot.text || "").trim().length > 0) {
+      botMessageCount.value += 1;
+      exchangeCount.value = Math.min(userMessageCount.value, botMessageCount.value);
+      gtagSafe("chatbot_message_bot", { bot_messages: botMessageCount.value });
+      gtagSafe("chatbot_exchange", { exchanges: exchangeCount.value });
+    }
     setTimeout(() => {
       const botMessageElement = msgList.value?.querySelector(
         ".message.bot:last-child"
@@ -441,6 +477,11 @@ function useSample(q: string) {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+}
+
+/* When open, ensure the chatbot overlays site header/menus */
+.chatbot-app.open {
+  z-index: 9999;
 }
 
 /* Backdrop */
@@ -496,21 +537,40 @@ function useSample(q: string) {
 }
 
 .fab-pulse {
-  animation: pulse 2s infinite;
+  animation: fabBreath 1.8s ease-in-out infinite;
 }
 
-@keyframes pulse {
+.fab-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(1, 56, 114, 0.46); 
+  animation: fabRing 1.8s ease-out infinite;
+}
+
+@keyframes fabBreath {
   0% {
-    transform: scale(1);
-    box-shadow: 0px 4px 12px rgba(13, 99, 235, 0.3);
+    transform: scale(0.95);
   }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0px 6px 20px rgba(13, 99, 235, 0.5);
+  70% {
+    transform: scale(1);
   }
   100% {
-    transform: scale(1);
-    box-shadow: 0 6px 14px rgba(13, 99, 235, 0.32), 0 2px 6px rgba(0, 0, 0, 0.06);
+    transform: scale(0.95);
+  }
+}
+
+@keyframes fabRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(1, 56, 114, 0.46);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(1, 56, 114, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(1, 56, 114, 0);
   }
 }
 
@@ -520,8 +580,6 @@ function useSample(q: string) {
     0 8px 18px rgba(13, 99, 235, 0.42),
     0 3px 10px rgba(0, 0, 0, 0.08);
 }
-
-/* remove halo animation for a confident look */
 
 .close-icon {
   display: inline-flex;
@@ -572,7 +630,6 @@ function useSample(q: string) {
   position: relative;
 }
 
-/* When open, stretch panel close to full viewport height with a small margin */
 .chatbot-app.open .panel {
   height: calc(100vh - 40px);
   margin-bottom: 0;
@@ -616,7 +673,7 @@ function useSample(q: string) {
 
 .header-title {
   font-family: var(--font-sora);
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   line-height: 1.2;
@@ -624,7 +681,7 @@ function useSample(q: string) {
 
 .header-subtitle {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 400;
   margin: 0;
   line-height: 1.4;
@@ -678,7 +735,7 @@ function useSample(q: string) {
   border: 1px solid rgba(255, 255, 255, 0.35);
   font-family: var(--font-habibi);
   font-weight: 700;
-  font-size: 0.7rem;
+  font-size: 1rem;
   padding: 4px 8px;
   border-radius: 9999px;
   letter-spacing: 0.06em;
@@ -750,13 +807,13 @@ function useSample(q: string) {
   margin: 0;
   font-family: var(--font-sora);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.25rem;
 }
 
 .welcome-subtitle {
   margin: 0;
   font-family: var(--font-habibi);
-  font-size: 0.8rem;
+  font-size: 1rem;
   opacity: 0.9;
 }
 
@@ -786,7 +843,7 @@ function useSample(q: string) {
 
 .welcome-text {
   font-family: var(--font-habibi);
-  font-size: 0.85rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin: 0 0 8px 0;
   color: #1f2937;
@@ -816,7 +873,7 @@ function useSample(q: string) {
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
   font-family: var(--font-sora);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 1rem;
   line-height: 1.45;
   color: #0f1e3a;
   position: relative;
@@ -858,7 +915,7 @@ function useSample(q: string) {
   max-width: 80%;
   margin-left: auto;
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.4;
   word-wrap: break-word;
 }
@@ -884,16 +941,61 @@ function useSample(q: string) {
 }
 
 .bot-content {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px 16px;
-  border-radius: 18px 18px 18px 4px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 14px 14px 14px 6px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   flex: 1;
+  position: relative;
+}
+
+/* Subtle speech-bubble pointer */
+.bot-content::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 16px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid #ffffff; /* match bubble bg */
+}
+
+.bot-content::after {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 16px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-right: 9px solid #e5e7eb; 
+}
+
+/* Tighter, readable typography inside the bot bubble */
+.bot-content :deep(p),
+.bot-content :deep(li) {
+  color: #1f2937;
+}
+
+.bot-content :deep(a) {
+  color: #0d63eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.bot-content :deep(hr) {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 12px 0;
 }
 
 .bot-content :deep(p) {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin: 0 0 8px 0;
   color: #374151;
@@ -930,7 +1032,7 @@ function useSample(q: string) {
 
 .bot-content :deep(li) {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin-bottom: 4px;
 }
@@ -940,7 +1042,7 @@ function useSample(q: string) {
   padding: 2px 6px;
   border-radius: 4px;
   font-family: var(--font-habibi);
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: #dc2626;
 }
 
@@ -973,7 +1075,7 @@ function useSample(q: string) {
   border-radius: 6px;
   padding: 6px 10px;
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -996,7 +1098,7 @@ function useSample(q: string) {
 
 .sources-title {
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   color: #6b7280;
@@ -1016,7 +1118,7 @@ function useSample(q: string) {
 
 .source-link {
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: #0d63eb;
   text-decoration: none;
   line-height: 1.4;
@@ -1046,7 +1148,7 @@ function useSample(q: string) {
   border: 2px solid #e5e7eb;
   border-radius: 14px;
   font-family: var(--font-habibi);
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.45;
   background: white;
   outline: none;
@@ -1063,13 +1165,37 @@ function useSample(q: string) {
   color: #9ca3af;
 }
 
+/* While sending/disabled */
+.message-textarea.sending,
+.message-textarea:disabled {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Visual feedback while sending */
+.message-textarea.sending,
+.message-textarea:disabled {
+  border-color: #0d63eb;
+  box-shadow: 0 0 0 3px rgba(13, 99, 235, 0.12);
+  background-image: linear-gradient(90deg, rgba(13,99,235,0.05), rgba(13,99,235,0.0));
+  background-size: 200% 100%;
+  animation: sendingPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sendingPulse {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 0%; }
+}
+
 .message-input {
   width: 100%;
   padding: 12px 50px 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 24px;
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.4;
   background: white;
   outline: none;
@@ -1179,7 +1305,7 @@ function useSample(q: string) {
 
 .loading-title {
   font-family: var(--font-habibi);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #003366;
   line-height: 1.2;
@@ -1187,7 +1313,7 @@ function useSample(q: string) {
 
 .loading-subtitle {
   font-family: var(--font-habibi);
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: #6b7280;
   line-height: 1.3;
 }
@@ -1223,10 +1349,10 @@ function useSample(q: string) {
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .chatbot-app {
-    right: 0;
-    left: 0;
-    bottom: 0;
-    align-items: flex-end; /* prevent children (FAB) from stretching full width */
+    right: 12px;
+    left: auto;
+    bottom: 12px;
+    align-items: flex-end; 
   }
   
   .fab {
@@ -1248,13 +1374,19 @@ function useSample(q: string) {
   }
 
   .panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100vw;
     max-width: none;
-    height: 100vh;
+    height: 78vh; /* comfortable height */
     margin: 0;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
+    border-radius: 16px 16px 0 0;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.12);
+    z-index: 10005;
+    overflow: hidden;
   }
   
   .fab {
@@ -1265,10 +1397,11 @@ function useSample(q: string) {
   
   .messages {
     padding: 16px;
+    padding-bottom: 8px; 
   }
   
   .input-area {
-    padding: 16px;
+    padding: 12px 12px 16px 12px;
   }
 }
 

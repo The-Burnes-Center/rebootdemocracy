@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="top">
     <div v-if="isLoading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Loading content...</p>
@@ -14,136 +14,140 @@
 
     <template v-else-if="postData && postData.length > 0">
       <div class="weeklynews-hero">
-        <img v-if="!postData[0].image" class="weeklynews-img" src="/images/newsheader.png" />
-        <img v-if="postData[0].image" class="weeklynews-img" :src="'https://content.thegovlab.com/assets/' + postData[0].image.id" />
+        <img
+          v-if="!postData[0].image"
+          class="weeklynews-img"
+          src="/images/newsheader.png"
+          alt="Weekly News header"
+        />
+        <img
+          v-if="postData[0].image"
+          class="weeklynews-img"
+          :src="'https://content.thegovlab.com/assets/' + postData[0].image.id"
+          :alt="postData[0].title"
+        />
+        <div class="weeklynews-overlay" aria-hidden="true"></div>
         <div class="weeklynews-details">
           <h1>{{ postData[0].title }}</h1>
           <p>
-            Published by {{ postData[0].author }} on
+            Published on
             {{ formatDateOnly(new Date(postData[0].date)) }}
           </p>
         </div>
       </div>
 
-      <!-- Table of Contents -->
-      <div class="toc">
-        <p class="excerpt">{{ postData[0].summary }}</p>
-        <br />
-        <p><strong>In the news this week</strong></p>
-        <ul>
-          <li v-for="cat in uniqueCategories" :key="cat">
-            <a :href="'#' + cat.toLowerCase().replace(/\s+/g, '')">
-              <strong>{{ cat }}:</strong>
+      <!-- Sticky TOC Bar -->
+      <nav class="toc-bar" aria-label="In this edition">
+        <div class="weeklynews-container">
+          <div class="toc-scroll">
+            <a
+              v-for="cat in uniqueCategories"
+              :key="cat"
+              class="toc-chip"
+              :href="'#' + cat.toLowerCase().replace(/\s+/g, '')"
+            >
+              {{ cat }} <span class="toc-count">({{ getItemsByCategory(cat).length }})</span>
             </a>
-            <span class="toc-description">
-              {{
-                cat === "AI and Elections"
-                  ? "Free, fair and frequent"
-                  : cat === "Governing AI"
-                  ? "Setting the rules for a fast-moving technology."
-                  : cat === "AI for Governance"
-                  ? "Smarter public institutions through machine intelligence."
-                  : cat === "AI and Public Engagement"
-                  ? "Bolstering participation"
-                  : cat === "AI and Problem Solving"
-                  ? "Research, applications, technical breakthroughs"
-                  : cat === "AI Infrastructure"
-                  ? "Computing resources, data systems and energy use"
-                  : cat === "AI and International Relations (IR)"
-                  ? "Global cooperation—or competition—over AI's future"
-                  : cat === "AI and Education"
-                  ? "Preparing people for an AI-driven world"
-                  : cat === "AI and Public Safety"
-                  ? "Law enforcement, disaster prevention and preparedness"
-                  : cat === "AI and Labor"
-                  ? "Worker rights, safety and opportunity"
-                  : "News that caught our eye"
-              }}
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Upcoming Events Section -->
-      <div class="news-items" v-if="postData[0].events">
-        <h2 class="group-heading">
-          Upcoming Events
-        </h2>
-        <div class="news-item" v-html="postData[0].events">
+          </div>
         </div>
-      </div>
+      </nav>
 
-      <!-- Special Announcements Section -->
-      <div class="news-items" v-if="postData[0].announcements">
-        <h2 class="group-heading">
-          Special Announcements
-        </h2>
-        <div class="news-item" v-html="postData[0].announcements">
-        </div>
-      </div>
+      <!-- Content -->
+      <div class="weeklynews-container">
+        <!-- Summary Accordion -->
+        <section class="news-items">
+          <details class="summary-card accordion" open>
+            <summary class="accordion-summary">Summary</summary>
+            <div class="accordion-content news-item" style="margin: 0;">
+              <p class="excerpt" style="margin: 0;">{{ postData[0].summary }}</p>
+            </div>
+          </details>
+        </section>
 
-      <!-- Grouped News Items by Category -->
-      <div class="news-items">
-        <div v-for="cat in uniqueCategories" :key="cat">
+        <!-- Upcoming Events Section (Accordion) -->
+        <section class="news-items" v-if="postData[0].events">
+          <details class="accordion">
+            <summary class="accordion-summary group-heading">Upcoming Events</summary>
+            <div class="accordion-content">
+              <div class="news-item" v-html="postData[0].events"></div>
+            </div>
+          </details>
+        </section>
+
+        <!-- Special Announcements Section (Accordion) -->
+        <section class="news-items" v-if="postData[0].announcements">
+          <details class="accordion">
+            <summary class="accordion-summary group-heading">Special Announcements</summary>
+            <div class="accordion-content">
+              <div class="news-item" v-html="postData[0].announcements"></div>
+            </div>
+          </details>
+        </section>
+
+        <!-- Grouped News Items by Category -->
+        <section
+          v-for="cat in uniqueCategories"
+          :key="cat"
+          class="news-items category-group"
+        >
           <h2 :id="cat.toLowerCase().replace(/\s+/g, '')" class="group-heading">
             {{ cat }}
           </h2>
-          <div
-            v-for="item in postData[0].items.filter(
-              (item) =>
-                (item.reboot_democracy_weekly_news_items_id.category ||
-                  'News that caught our eye') === cat
-            )"
-            :key="item.reboot_democracy_weekly_news_items_id.id"
-            class="news-item"
-          >
-            <p class="category-badge">
-              <span>{{
-                item.reboot_democracy_weekly_news_items_id.category ||
-                "News that caught our eye"
-              }}</span>
-            </p>
-            <h4 class="item-title">
-              <strong>{{
-                item.reboot_democracy_weekly_news_items_id.title
-              }}</strong>
-            </h4>
-            <div class="item-meta">
-              <p>
-                <em>
-                  {{ item.reboot_democracy_weekly_news_items_id.author }} on
-                  {{
-                    formatDateOnly(
-                      new Date(item.reboot_democracy_weekly_news_items_id.date)
-                    )
-                  }}
-                  in
-                  {{ item.reboot_democracy_weekly_news_items_id.publication }}
-                </em>
-              </p>
-            </div>
-            <p class="item-excerpt">
-              {{ item.reboot_democracy_weekly_news_items_id.excerpt }}
-            </p>
-            <a
-              :href="item.reboot_democracy_weekly_news_items_id.url"
-              class="read-article"
-              target="_blank"
+          <div class="items-grid">
+            <article
+              v-for="item in getItemsByCategory(cat)"
+              :key="item.reboot_democracy_weekly_news_items_id.id"
+              class="news-item"
             >
-              Read article
-            </a>
+              <p class="category-badge">
+                <span>{{
+                  item.reboot_democracy_weekly_news_items_id.category ||
+                  "News that caught our eye"
+                }}</span>
+              </p>
+              <h4 class="item-title">
+                <span>{{ item.reboot_democracy_weekly_news_items_id.title }}</span>
+              </h4>
+              <div class="item-meta">
+                <p>
+                  <em>
+                    {{ item.reboot_democracy_weekly_news_items_id.author }} on
+                    {{
+                      formatDateOnly(
+                        new Date(item.reboot_democracy_weekly_news_items_id.date)
+                      )
+                    }}
+                    in
+                    {{ item.reboot_democracy_weekly_news_items_id.publication }}
+                  </em>
+                </p>
+              </div>
+              <p class="item-excerpt">
+                {{ item.reboot_democracy_weekly_news_items_id.excerpt }}
+              </p>
+              <a
+                :href="item.reboot_democracy_weekly_news_items_id.url"
+                class="btn-primary btn read-article"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Read article
+              </a>
 
-            <!-- Related Links Section -->
-            <div v-if="item.reboot_democracy_weekly_news_items_id.related_links != ''" class="weekly-news-related-articles">
-              <p><b>Related Articles:</b></p>
-              <ul>
-                <li v-for="related_item in item.reboot_democracy_weekly_news_items_id.related_links">
-                  <a :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
-                </li>
-              </ul>
-            </div>
+              <!-- Related Links Section -->
+              <div v-if="item.reboot_democracy_weekly_news_items_id.related_links != ''" class="weekly-news-related-articles">
+                <p><b>Related Articles:</b></p>
+                <ul>
+                  <li v-for="related_item in item.reboot_democracy_weekly_news_items_id.related_links">
+                    <a :href="related_item.reboot_weekly_news_related_news_id.link">{{related_item.reboot_weekly_news_related_news_id.title}}</a>
+                  </li>
+                </ul>
+              </div>
+            </article>
           </div>
-        </div>
+        </section>
+
+        <a href="#top" class="back-to-top" aria-label="Back to top">▲</a>
       </div>
     </template>
   </div>
@@ -319,6 +323,17 @@ const uniqueCategories = computed(() => {
   return [...new Set(cats)];
 });
 
+// Typed helper to get items by category (prevents implicit any in template)
+const getItemsByCategory = (category: string): WeeklyNewsItemWrapper[] => {
+  const items = postData.value?.[0]?.items ?? [];
+  return items.filter((wrapper: WeeklyNewsItemWrapper) => {
+    const itemCategory =
+      wrapper.reboot_democracy_weekly_news_items_id.category ||
+      "News that caught our eye";
+    return itemCategory === category;
+  });
+};
+
 // Set up meta tags with reactive values
 const post = computed(() => postData.value?.[0]);
 
@@ -376,128 +391,285 @@ useSeoMeta({
   twitterImage: () => metaImageUrl.value,
   twitterCard: () => 'summary_large_image',
 });
-
 </script>
 
 <style>
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+/* Page wrapper width control */
+.weeklynews-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.toc-scroll {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 0.2rem;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.toc-chip {
+  white-space: nowrap;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #cddff3;
+  border-radius: 999px;
+  color: rgb(0, 51, 102);
+  text-decoration: none;
+  font-family: var(--font-sora);
+  font-weight: 600;
+  line-height: 20px;
+  font-size: 14px;
+  background: linear-gradient(to left, #f8fafc, #f1f5f9);
+}
+
+.toc-chip:hover {
+  text-decoration: underline;
+}
+
 .weeklynews-hero {
+  position: relative;
   width: 100%;
   display: flex;
   padding: 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .weeklynews-hero h1 {
-  margin-top: -8rem;
-  z-index: 100;
+  position: relative;
+  z-index: 2;
   color: #ffffff;
   font-size: 40px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
+  margin: 0;
 }
 
 .weeklynews-img {
-  height: 200px;
+  height: 250px;
   width: 100%;
-  object-fit: fill;
+  object-fit: cover;
+}
+
+.weeklynews-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
+  background: rgba(0, 50, 102, 0.35);
+  z-index: 1;
+}
+
+.weeklynews-details {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  z-index: 2;
+  width: 100%;
+}
+
+.weeklynews-details h1 {
+  color: #ffffff;
+  font-size: 40px;
+  font-family: var(--font-sora);
+  margin: 0 auto 0.5rem auto;
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .weeklynews-details p {
   color: #ffffff;
   font-weight: 600;
-}
-
-/* Table of Contents Section */
-.toc {
-  padding: 1rem 10rem;
-}
-
-.toc ul {
-  padding-left: 0;
-  margin-top: 1em;
-}
-
-.toc li {
-  color: #0d63eb;
-  margin-bottom: 0.5em;
-}
-
-.toc a {
-  color: #0d63eb;
-  text-decoration: none;
+  margin: 0.5rem auto 0 auto;
   font-family: var(--font-habibi);
+  font-size: 20px;
+  text-align: center;
+  width: 100%;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.toc p {
-  font-size: 18px;
-  line-height: 1.8;
-  margin-left: 1em;
-  font-family: var(--font-habibi);
-}
-
-.toc .news-heading {
-  font-family: var(--font-habibi);
-}
-
-.toc-description {
-  color: #3d3d3d;
-  margin-left: 0.5em;
-}
 
 /* Group Heading */
 .group-heading {
-  color: #0d63eb;
-  border-bottom: 1px solid #0d63eb;
-  padding-bottom: 5px;
-  font-family: var(--font-habibi);
+  color: rgb(0, 51, 102);
+  border-bottom: 1px solid rgb(0, 51, 102);
+  padding-bottom: 0.8rem;
+  margin: 0;
+  font-family: var(--font-sora);
+  border-bottom: 1px solid #e6e6e6;
 }
 
 /* News Items */
 .news-items {
-  padding: 0rem 10rem;
+  padding: 1rem 1.5rem;
 }
 
 .news-item {
-  background-color: #fafafa;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-family: var(--font-habibi);
+  font-size: 18px;
+  line-height: 1.4;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+.news-item p{
+  margin: 0;
+}
+
+.news-item:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06), 0 0 0 2px #cddff3 inset;
+}
+
+.category-group {
+  margin-top: 0.25rem;
+}
+
+.items-grid {
+  display: block;
+  width: 100%;
+}
+
+.items-grid .news-item:nth-child(odd) {
+  background: transparent;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #e6f2ff 0%, #cddff3 100%);
+  margin: 0 auto;
+}
+
+/* Accordion styles */
+.accordion {
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0;
+}
+
+.accordion-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-sora);
+  font-weight: 600;
+  color: rgb(0, 51, 102);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  border-bottom: none;
+  background: linear-gradient(135deg, #e6f2ff 0%, #cddff3 100%);
+}
+
+.accordion[open] .accordion-summary {
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.accordion-content {
+  padding: 0.75rem 1rem;
+}
+
+.accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+
+.accordion-summary::after {
+  content: '▾';
+  margin-left: auto;
+  color: rgb(0, 51, 102);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.accordion[open] .accordion-summary::after {
+  content: '▴';
+}
+
+.accordion[open] .accordion-summary::before {
+  transform: rotate(90deg);
+}
+
+.accordion-summary:hover {
+  background: #f8fafc;
 }
 
 .category-badge span {
-  background-color: #519e8a;
-  color: #ffffff;
-  font-size: 10px;
-  padding: 0.5em;
+  background-color: #cddff3;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgb(0, 51, 102);
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: var(--font-sora);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .item-title {
-  color: #0d63eb;
-  font-family: var(--font-habibi);
+  color: rgb(0, 51, 102);
+  font-family: var(--font-sora);
+  font-size: 18px;
+  margin: 0;
 }
 
 .item-meta {
   margin: 0;
   font-family: var(--font-habibi);
+  font-size: 16px;
+  line-height: 18px;
+
 }
 
 .item-excerpt {
+  font-size: 18px;
   font-family: var(--font-habibi);
-  line-height: 32px;
+  line-height: 28px;
+  margin: 0;
 }
 
 .read-article {
-  background-color: #0d63eb;
+  background-color: #013872;
   color: #ffffff;
   text-decoration: none;
   text-transform: uppercase;
-  padding: 0.25rem 0.25rem;
+  padding: 0.5rem 0.5rem;
   width: fit-content;
-  font-size: 12px;
+  font-size: 15px;
   font-family: var(--font-habibi);
   font-weight: 600;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+  display: inline-block;
 }
 
 /* Related Articles Section */
@@ -505,7 +677,6 @@ useSeoMeta({
   margin-top: 1rem;
   padding: 1rem;
   background-color: #f5f5f5;
-  border-left: 3px solid #0d63eb;
 }
 
 .weekly-news-related-articles p {
@@ -520,16 +691,35 @@ useSeoMeta({
 
 .weekly-news-related-articles li {
   margin-bottom: 0.25rem;
+  font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles a {
-  color: #0d63eb;
+  color: rgb(0, 51, 102);
   text-decoration: none;
   font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles a:hover {
   text-decoration: underline;
+}
+
+.back-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(0, 51, 102);
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: rgb(0, 51, 102);
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 /* Loading and Error Styles */
@@ -547,7 +737,7 @@ useSeoMeta({
   width: 48px;
   height: 48px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #0d63eb;
+  border-top: 5px solid rgb(0, 51, 102);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -562,26 +752,57 @@ useSeoMeta({
 }
 
 /* Responsive Adjustments */
-@media (max-width: 768px) {
-  .weeklynews-hero h1 {
-    font-size: 24px;
-    margin-top: -7rem;
-    margin-left: 1rem;
-    margin-right: 1rem;
-  }
-  .weeklynews-details p {
-    margin-left: 1rem;
-    margin-right: 1rem;
-  }
-
+@media (min-width: 768px) {
   .weeklynews-img {
-    height: 150px;
+    height: 250px;
   }
-
-  .weeklynews-header,
-  .toc,
-  .news-items {
-    padding: 1rem;
+  .weeklynews-overlay,
+  .weeklynews-details {
+    height: 250px;
+  }
+  
+  .weeklynews-details h1 {
+    font-size: 48px;
+  }
+  
+  .weeklynews-details p {
+    font-size: 20px;
   }
 }
+
+@media (min-width: 1024px) {
+  .weeklynews-img {
+    height: 250px;
+  }
+  .weeklynews-overlay,
+  .weeklynews-details {
+    height: 250px;
+  }
+  .weeklynews-container .news-items {
+    padding: 0.8rem 0.5rem;
+    border-top: 1px solid #e6e6e6;
+  }
+}
+
+@media (max-width: 1023px) {
+  .back-to-top {
+    right: 16px;
+    bottom: 16px;
+  }
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 375px) {
+  .toc-scroll {
+  padding: 1.5rem 1rem;
+}
+}
+
+@media (min-width: 390px) and (max-width: 800px) {
+  .toc-scroll {
+    padding: 1.5rem 1rem;}
+}
+
 </style>

@@ -29,7 +29,7 @@
 }
 
 /* Button text and arrow */
-.meet-our-team-button > * {
+.meet-our-team-button>* {
   position: relative;
   z-index: 1;
 }
@@ -53,6 +53,7 @@
   max-width: 1200px;
   margin: 0 auto;
 }
+
 /* Enhanced Curator Badge */
 .curator-badge {
   display: flex;
@@ -185,8 +186,9 @@
   }
 
   .collaborators-fixed-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    grid-template-columns: minmax(0, 300px);
+    gap: 1.5rem;
+    justify-content: center;
   }
 
   .curator-badge {
@@ -227,7 +229,8 @@
 
 @media (max-width: 480px) {
   .collaborators-fixed-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 300px);
     gap: 1.5rem;
+    justify-content: center;
   }
 }

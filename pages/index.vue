@@ -71,8 +71,8 @@
                 size="4xl"
                 weight="bold"
                 color="text-primary-light"
-                fontFamily="habibi"
-                lineHeight="loose"
+                fontFamily="sora"
+                lineHeight="extra-loose"
                 class="subscription-title"
               >
                 Subscribe for Updates
@@ -255,7 +255,7 @@
       </section>
 
       <!-- COLLABORATORS SECTION -->
-      <section class="home-section home-collaborators" aria-labelledby="collaborators-heading">
+      <section v-if="false" class="home-section home-collaborators" aria-labelledby="collaborators-heading">
         <div class="blog-collab-container">
           <!-- BLOG COLLABORATORS HEADING -->
           <div class="curator-and-button">
@@ -264,7 +264,7 @@
               id="collaborators-heading"
               size="2xl"
               weight="bold"
-              fontFamily="habibi"
+              fontFamily="sora"
               lineHeight="extra-loose"
               color="text-dark"
               class="new-blog-collab"
@@ -520,7 +520,7 @@ function handleTabChange(_: number, name: string): void {
 }
 
 const onClick = (): void => {
-  window.location.href = "/signup";
+  router.push("/signup");
 };
 
 async function applyFilters(): Promise<void> {

@@ -35,7 +35,7 @@
 }
 
 .mailing-list-section h3 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-sora);
   font-size: 24px;
   margin: 0;
 }

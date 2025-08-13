@@ -4,7 +4,7 @@
     class="related-posts-section blog-related-posts"
   >
     <Text
-      fontFamily="habibi"
+      fontFamily="sora"
       size="4xl"
       weight="bold"
       class="section-heading"
@@ -37,12 +37,12 @@
                     weight="extrabold"
                     size="xs"
                     :index="index"
-                    fontFamily="habibi"
+                    fontFamily="sora"
                     class="featured-card__tag"
                   >
                     {{ post.Tags[0] }}
                   </Tag>
-                  <TitleText size="xl" weight="bold" fontFamily="habibi"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
+                  <TitleText size="xl" weight="bold" fontFamily="sora"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
                     post.title
                   }}</TitleText>
                 <div class="postcard__details">
@@ -100,11 +100,11 @@
                     weight="extrabold"
                     size="xs"
                     :index="index"
-                    fontFamily="habibi"
+                    fontFamily="sora"
                     class="featured-card__tag"
                     >{{ post.Tags[0] }}</Tag
                   >
-                  <TitleText size="xl" weight="bold" fontFamily="habibi"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
+                  <TitleText size="xl" weight="bold" fontFamily="sora"  color="text-dark" lineHeight="relaxed" class="blogcard-title" :lineClamp="2" :level="'h3'">{{
                     post.title
                   }}</TitleText>
                 </div>
@@ -184,3 +184,13 @@ function getAuthorName(author: any): string {
   return `${author.First_Name || ""} ${author.Last_Name || ""}`.trim();
 }
 </script>
+
+<style scoped>
+@media (min-width: 769px) {
+  .postcard__text-content > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px; 
+  }
+}
+</style>

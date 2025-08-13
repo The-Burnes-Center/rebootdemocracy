@@ -138,6 +138,16 @@ export async function fetchRelatedBlogsByTags(tags: string[], excludeSlug: strin
   }
 }
 
+// Normalize tag labels to merge similar variants
+const normalizeTagLabel = (name: string): string => {
+  if (!name) return name;
+  const normalized = name.trim().toLowerCase();
+  if (normalized === "news that caught our eye") {
+    return "News that Caught Our Eye";
+  }
+  return name;
+};
+
 export async function fetchAllUniqueTags(): Promise<string[]> {
   try {
     const blogPosts = await fetchAllBlogPosts();
@@ -147,14 +157,14 @@ export async function fetchAllUniqueTags(): Promise<string[]> {
     blogPosts.forEach((post) => {
       if (post.Tags && Array.isArray(post.Tags)) {
         post.Tags.forEach((tag) => {
-          uniqueTags.add(tag);
+          uniqueTags.add(normalizeTagLabel(tag));
         });
       }
     });
 
     weeklyNewsItems.forEach((newsItem) => {
       if (newsItem.category) {
-        uniqueTags.add(newsItem.category);
+        uniqueTags.add(normalizeTagLabel(newsItem.category));
       }
     });
 

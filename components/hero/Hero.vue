@@ -74,3 +74,13 @@ const props = withDefaults(defineProps<HeroProps>(), {
   subtitle: "Insights on AI, Governance and Democracy",
 });
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  :deep(.custom-searchbox .ais-SearchBox-input),
+  :deep(.custom-searchbox input[type="search"]),
+  :deep(.custom-searchbox input) {
+    font-size: 16px !important;
+  }
+}
+</style>

@@ -550,6 +550,7 @@ onBeforeUnmount(() => {
 
 .category-tag:hover {
   background-color: rgba(13, 99, 235, 0.1);
+  color: rgb(0, 51, 102);
 }
 
 /* Enhanced link accessibility */

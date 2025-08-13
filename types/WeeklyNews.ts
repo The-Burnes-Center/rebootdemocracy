@@ -5,6 +5,6 @@ export interface WeeklyNews {
   edition:number;
   status?: string;
   title?: string;
-  summary?: boolean;
+  summary?: string;
   author?: string;
 }
