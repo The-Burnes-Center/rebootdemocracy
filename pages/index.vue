@@ -255,7 +255,7 @@
       </section>
 
       <!-- COLLABORATORS SECTION -->
-      <section class="home-section home-collaborators" aria-labelledby="collaborators-heading">
+      <section v-if="false" class="home-section home-collaborators" aria-labelledby="collaborators-heading">
         <div class="blog-collab-container">
           <!-- BLOG COLLABORATORS HEADING -->
           <div class="curator-and-button">
