@@ -520,7 +520,7 @@ function handleTabChange(_: number, name: string): void {
 }
 
 const onClick = (): void => {
-  window.location.href = "/signup";
+  router.push("/signup");
 };
 
 async function applyFilters(): Promise<void> {

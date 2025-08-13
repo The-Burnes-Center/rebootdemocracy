@@ -218,7 +218,7 @@ const baseMenuItems = computed<MenuItem[]>(() => {
         { label: "More Resources", name: "resources", to: "/more-resources" },
       ],
     },
-    { label: "Sign up", name: "signup", to: "/signup", external: true },
+    { label: "Sign up", name: "signup", to: "/signup" },
   ];
 });
 
@@ -229,7 +229,7 @@ const menuItems = computed<MenuItem[]>(() =>
 );
 
 const onClick = (): void => {
-  window.location.href = "/signup";
+  router.push("/signup");
 };
 
 const checkIfMobile = (): void => {

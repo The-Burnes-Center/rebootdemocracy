@@ -448,7 +448,7 @@ useHead({
     {
       property: "og:image",
       content:
-        "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
+        "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
     },
     {
       property: "twitter:title",
@@ -461,7 +461,7 @@ useHead({
     {
       property: "twitter:image",
       content:
-        "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
+        "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
     },
     { property: "twitter:card", content: "summary_large_image" },
   ],
