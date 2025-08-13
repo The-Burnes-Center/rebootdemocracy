@@ -537,21 +537,40 @@ function useSample(q: string) {
 }
 
 .fab-pulse {
-  animation: pulse 2s infinite;
+  animation: fabBreath 1.8s ease-in-out infinite;
 }
 
-@keyframes pulse {
+.fab-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(1, 56, 114, 0.46); 
+  animation: fabRing 1.8s ease-out infinite;
+}
+
+@keyframes fabBreath {
   0% {
-    transform: scale(1);
-    box-shadow: 0px 4px 12px rgba(13, 99, 235, 0.3);
+    transform: scale(0.95);
   }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0px 6px 20px rgba(13, 99, 235, 0.5);
+  70% {
+    transform: scale(1);
   }
   100% {
-    transform: scale(1);
-    box-shadow: 0 6px 14px rgba(13, 99, 235, 0.32), 0 2px 6px rgba(0, 0, 0, 0.06);
+    transform: scale(0.95);
+  }
+}
+
+@keyframes fabRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(1, 56, 114, 0.46);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(1, 56, 114, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(1, 56, 114, 0);
   }
 }
 
@@ -561,8 +580,6 @@ function useSample(q: string) {
     0 8px 18px rgba(13, 99, 235, 0.42),
     0 3px 10px rgba(0, 0, 0, 0.08);
 }
-
-/* remove halo animation for a confident look */
 
 .close-icon {
   display: inline-flex;
@@ -613,7 +630,6 @@ function useSample(q: string) {
   position: relative;
 }
 
-/* When open, stretch panel close to full viewport height with a small margin */
 .chatbot-app.open .panel {
   height: calc(100vh - 40px);
   margin-bottom: 0;

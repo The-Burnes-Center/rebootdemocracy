@@ -26,10 +26,11 @@
           :src="'https://content.thegovlab.com/assets/' + postData[0].image.id"
           :alt="postData[0].title"
         />
+        <div class="weeklynews-overlay" aria-hidden="true"></div>
         <div class="weeklynews-details">
           <h1>{{ postData[0].title }}</h1>
           <p>
-            Published by {{ postData[0].author }} on
+            Published on
             {{ formatDateOnly(new Date(postData[0].date)) }}
           </p>
         </div>
@@ -53,23 +54,34 @@
 
       <!-- Content -->
       <div class="weeklynews-container">
-        <!-- Summary Card -->
+        <!-- Summary Accordion -->
         <section class="news-items">
-          <div class="summary-card news-item">
-            <p class="excerpt">{{ postData[0].summary }}</p>
-          </div>
+          <details class="summary-card accordion" open>
+            <summary class="accordion-summary">Summary</summary>
+            <div class="accordion-content news-item" style="margin: 0;">
+              <p class="excerpt" style="margin: 0;">{{ postData[0].summary }}</p>
+            </div>
+          </details>
         </section>
 
-        <!-- Upcoming Events Section -->
+        <!-- Upcoming Events Section (Accordion) -->
         <section class="news-items" v-if="postData[0].events">
-          <h2 class="group-heading">Upcoming Events</h2>
-          <div class="news-item" v-html="postData[0].events"></div>
+          <details class="accordion">
+            <summary class="accordion-summary group-heading">Upcoming Events</summary>
+            <div class="accordion-content">
+              <div class="news-item" v-html="postData[0].events"></div>
+            </div>
+          </details>
         </section>
 
-        <!-- Special Announcements Section -->
+        <!-- Special Announcements Section (Accordion) -->
         <section class="news-items" v-if="postData[0].announcements">
-          <h2 class="group-heading">Special Announcements</h2>
-          <div class="news-item" v-html="postData[0].announcements"></div>
+          <details class="accordion">
+            <summary class="accordion-summary group-heading">Special Announcements</summary>
+            <div class="accordion-content">
+              <div class="news-item" v-html="postData[0].announcements"></div>
+            </div>
+          </details>
         </section>
 
         <!-- Grouped News Items by Category -->
@@ -379,13 +391,13 @@ useSeoMeta({
   twitterImage: () => metaImageUrl.value,
   twitterCard: () => 'summary_large_image',
 });
-
 </script>
 
 <style>
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 96px;
 }
 
 /* Page wrapper width control */
@@ -398,8 +410,7 @@ html {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  padding: 1rem 1rem;
-  margin: 1rem;
+  padding: 1.5rem 0.2rem;
   border-bottom: 1px solid #e6e6e6;
 }
 
@@ -442,61 +453,93 @@ html {
 }
 
 .weeklynews-img {
-  height: 230px;
+  height: 250px;
   width: 100%;
   object-fit: cover;
 }
 
+.weeklynews-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
+  background: rgba(0, 50, 102, 0.35);
+  z-index: 1;
+}
+
 .weeklynews-details {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 1rem;
+  padding: 3rem 1rem;
   text-align: center;
+  z-index: 2;
+  width: 100%;
+}
+
+.weeklynews-details h1 {
+  color: #ffffff;
+  font-size: 40px;
+  font-family: var(--font-sora);
+  margin: 0 auto 0.5rem auto;
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .weeklynews-details p {
   color: #ffffff;
   font-weight: 600;
-  margin-top: 0.5rem;
+  margin: 0.5rem auto 0 auto;
   font-family: var(--font-habibi);
-  font-size: 18px;
+  font-size: 20px;
+  text-align: center;
+  width: 100%;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* legacy toc styles removed in favor of toc-bar */
 
 /* Group Heading */
 .group-heading {
   color: rgb(0, 51, 102);
   border-bottom: 1px solid rgb(0, 51, 102);
-  padding-bottom: 6px;
-  margin: 0 0 1rem 0;
+  padding-bottom: 0.8rem;
+  margin: 0;
   font-family: var(--font-sora);
   border-bottom: 1px solid #e6e6e6;
 }
 
 /* News Items */
 .news-items {
-  padding: 0 1.5rem;
+  padding: 1rem 1.5rem;
 }
 
 .news-item {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.75rem;
   margin: 1rem 0;
   border: 1px solid #e6e6e6;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 0.75rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   font-family: var(--font-habibi);
-  font-size: 20px;
-  line-height: 30px;
+  font-size: 18px;
+  line-height: 1.4;
   transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+.news-item p{
+  margin: 0;
 }
 
 .news-item:hover {
@@ -508,17 +551,74 @@ html {
 }
 
 .items-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  display: block;
+  width: 100%;
 }
 
 .items-grid .news-item:nth-child(odd) {
-  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  background: transparent;
 }
 
 .summary-card {
-  background: linear-gradient(to bottom, #f8fafc, #f1f5f9); 
+  background: linear-gradient(135deg, #e6f2ff 0%, #cddff3 100%);
+  margin: 0 auto;
+}
+
+/* Accordion styles */
+.accordion {
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0;
+}
+
+.accordion-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-sora);
+  font-weight: 600;
+  color: rgb(0, 51, 102);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  border-bottom: none;
+  background: linear-gradient(135deg, #e6f2ff 0%, #cddff3 100%);
+}
+
+.accordion[open] .accordion-summary {
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.accordion-content {
+  padding: 0.75rem 1rem;
+}
+
+.accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+
+.accordion-summary::after {
+  content: '▾';
+  margin-left: auto;
+  color: rgb(0, 51, 102);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.accordion[open] .accordion-summary::after {
+  content: '▴';
+}
+
+.accordion[open] .accordion-summary::before {
+  transform: rotate(90deg);
+}
+
+.accordion-summary:hover {
+  background: #f8fafc;
 }
 
 .category-badge span {
@@ -538,33 +638,33 @@ html {
 .item-title {
   color: rgb(0, 51, 102);
   font-family: var(--font-sora);
-  font-size: 20px;
+  font-size: 18px;
   margin: 0;
 }
 
 .item-meta {
   margin: 0;
   font-family: var(--font-habibi);
-  font-size: 17px;
-  line-height: 20px;
+  font-size: 16px;
+  line-height: 18px;
 
 }
 
 .item-excerpt {
-  font-size: 20px;
+  font-size: 18px;
   font-family: var(--font-habibi);
-  line-height: 32px;
+  line-height: 28px;
   margin: 0;
 }
 
 .read-article {
-  background-color: #fc6423;
+  background-color: #013872;
   color: #ffffff;
   text-decoration: none;
   text-transform: uppercase;
   padding: 0.5rem 0.5rem;
   width: fit-content;
-  font-size: 16px;
+  font-size: 15px;
   font-family: var(--font-habibi);
   font-weight: 600;
   border-radius: 4px;
@@ -653,18 +753,34 @@ html {
 
 /* Responsive Adjustments */
 @media (min-width: 768px) {
- 
   .weeklynews-img {
-    height: 230px;
+    height: 250px;
+  }
+  .weeklynews-overlay,
+  .weeklynews-details {
+    height: 250px;
+  }
+  
+  .weeklynews-details h1 {
+    font-size: 48px;
+  }
+  
+  .weeklynews-details p {
+    font-size: 20px;
   }
 }
 
 @media (min-width: 1024px) {
   .weeklynews-img {
-    height: 230px;
+    height: 250px;
+  }
+  .weeklynews-overlay,
+  .weeklynews-details {
+    height: 250px;
   }
   .weeklynews-container .news-items {
-    padding: 0.5rem;
+    padding: 0.8rem 0.5rem;
+    border-top: 1px solid #e6e6e6;
   }
 }
 
@@ -677,4 +793,5 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
 </style>
