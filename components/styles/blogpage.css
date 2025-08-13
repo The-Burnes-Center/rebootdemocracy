@@ -123,10 +123,6 @@
   margin-right: 0;
 }
 
-.category-tag:hover {
-  background-color: #f5d1c2;
-}
-
 .card-tag {
   text-transform: uppercase !important;
 }
@@ -304,7 +300,7 @@ p>strong {
   background-color: #ffffff;
   max-width: 960px;
   margin: 0 auto;
-  padding: 2rem 0rem;
+  padding: 1rem 0rem;
 }
 
 .related-posts-list {

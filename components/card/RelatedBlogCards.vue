@@ -4,7 +4,7 @@
     class="related-posts-section blog-related-posts"
   >
     <Text
-      fontFamily="habibi"
+      fontFamily="sora"
       size="4xl"
       weight="bold"
       class="section-heading"
