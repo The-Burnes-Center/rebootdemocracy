@@ -513,6 +513,10 @@ html {
   gap: 1rem;
 }
 
+.items-grid .news-item:nth-child(odd) {
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+}
+
 .summary-card {
   background: linear-gradient(to bottom, #f8fafc, #f1f5f9); 
 }
