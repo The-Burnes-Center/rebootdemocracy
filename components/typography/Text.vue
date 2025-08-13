@@ -75,7 +75,7 @@ const textColors = {
   "text-primary-light": "#FFFFFF",
   "text-secondary": "#0D63EB",
   "text-tertiary": "#062C51",
-  "tag-primary": "#f06e3a",
+  "tag-primary": "rgb(0, 51, 102)",
   "tag-secondary": "#0D63EB",
   "link-primary": "#0D63EB",
 };
@@ -94,7 +94,7 @@ const fontStyleMap = {
 
 const fontFamilyMap = {
   habibi: "var( --font-habibi)",
-  inria: "var(--font-inria)",
+  // inria: "var(--font-inria)",
   sora: "var(--font-sora)",
   "habibi-bold": "var(--font-habibi-bold)",
 };

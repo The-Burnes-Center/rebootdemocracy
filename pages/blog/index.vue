@@ -184,7 +184,7 @@
             <div class="results-count" role="status" aria-live="polite">
               <Text
                 as="h2"
-                fontFamily="inria"
+                fontFamily="habibi"
                 size="lg"
                 color="text-primary"
                 weight="bold"
@@ -233,7 +233,7 @@
             role="region"
             aria-label="Blog posts"
           >
-            <div class="blogcard-grid-wrapper" role="list">
+            <div id = "blogcard-grid-wrapper" class="blogcard-grid-wrapper" role="list">
               <article
                 v-for="post in displayedPosts"
                 :key="getPostKey(post)"
@@ -296,7 +296,7 @@
           <div v-if="!isPostsLoading && hasMorePosts" class="btn-mid">
             <Button
               variant="secondary"
-              width="150px"
+              width="160px"
               height="40px"
               @click="loadMorePosts"
               @keydown="handleKeydown($event, loadMorePosts)"
@@ -321,7 +321,7 @@
           <h2
             id="categories-heading"
             style="
-              font-family: var(--font-inria);
+              font-family: var(--font-sora);
               font-size: 1.125rem;
               color: #000;
               font-weight: bold;
@@ -370,7 +370,7 @@
           <h2
             id="authors-heading"
             style="
-              font-family: var(--font-inria);
+              font-family: var(--font-sora);
               font-size: 1.125rem;
               color: #000;
               font-weight: bold;
@@ -422,17 +422,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import type { BlogPost, Event } from "@/types/index.ts";
 import type { NewsItem } from "@/types/RawSearchResultItem";
 import { fetchAllBlogPosts } from "~/composables/fetchBlogData";
 import { fetchWeeklyNewsItems } from "~/composables/fetchWeeklyNews";
-import {
-  fetchPostsByAuthor,
-  getAuthorName as getAuthorNameUtil,
-  getAllAuthors,
-} from "~/composables/useAuthorPosts";
+import { getAuthorName as getAuthorNameUtil } from "~/composables/useAuthorPosts";
 
 const props = defineProps<{ initialCategory?: string }>();
 
@@ -452,7 +448,7 @@ useHead({
     {
       property: "og:image",
       content:
-        "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
+        "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
     },
     {
       property: "twitter:title",
@@ -465,7 +461,7 @@ useHead({
     {
       property: "twitter:image",
       content:
-        "https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
+        "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3.png",
     },
     { property: "twitter:card", content: "summary_large_image" },
   ],
@@ -524,7 +520,24 @@ const getAuthorName = (post: BlogPost | NewsItem): string => {
   return getAuthorNameUtil(post);
 };
 
-// Data processing functions
+const normalizeTagLabel = (name: string): string => {
+  if (!name) return name;
+  const normalized = name.trim().toLowerCase();
+  if (normalized === "news that caught our eye") {
+    return "News that Caught Our Eye";
+  }
+  return name;
+};
+
+const getOriginalTag = (post: BlogPost | NewsItem): string => {
+  if ("Tags" in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
+    return post.Tags[0];
+  } else if ("category" in post && post.category) {
+    return post.category;
+  }
+  return "";
+};
+
 const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
   if (!posts || posts.length === 0) return [];
 
@@ -533,10 +546,12 @@ const extractTagsWithCounts = (posts: (BlogPost | NewsItem)[]): Category[] => {
   posts.forEach((post) => {
     if ("Tags" in post && Array.isArray(post.Tags)) {
       post.Tags.forEach((tag) => {
-        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+        const canonical = normalizeTagLabel(tag);
+        tagCounts.set(canonical, (tagCounts.get(canonical) || 0) + 1);
       });
     } else if ("category" in post && post.category) {
-      tagCounts.set(post.category, (tagCounts.get(post.category) || 0) + 1);
+      const canonical = normalizeTagLabel(post.category);
+      tagCounts.set(canonical, (tagCounts.get(canonical) || 0) + 1);
     }
   });
 
@@ -673,18 +688,24 @@ const filteredAuthors = computed(() =>
   authors.value.filter((author) => author.count >= 1)
 );
 
-watch(selectedAuthor, async (newAuthor) => {
+watch(selectedAuthor, (newAuthor) => {
   if (newAuthor && !selectedCategory.value) {
+    // Client-side filter from preloaded posts; no extra Directus calls
     isFilteringByAuthor.value = true;
-    try {
-      const posts = await fetchPostsByAuthor(newAuthor);
-      authorFilteredPosts.value = posts;
-    } catch (error) {
-      console.error("Error fetching posts by author:", error);
-      authorFilteredPosts.value = [];
-    } finally {
-      isFilteringByAuthor.value = false;
-    }
+    const posts = (allPosts.value || []).filter((post: any) => {
+      const name = getAuthorName(post);
+      if (!name) return false;
+      if (name.includes(",") || name.includes(" and ")) {
+        const split = name
+          .split(/[,]|(\sand\s)/i)
+          .map((a) => (typeof a === "string" ? a.trim() : ""))
+          .filter((a) => a && a.toLowerCase() !== "and");
+        return split.some((n) => n === newAuthor);
+      }
+      return name === newAuthor;
+    });
+    authorFilteredPosts.value = posts;
+    isFilteringByAuthor.value = false;
   } else {
     authorFilteredPosts.value = [];
   }
@@ -692,11 +713,7 @@ watch(selectedAuthor, async (newAuthor) => {
 
 // Filtered posts based on selected category/author
 const filteredPosts = computed(() => {
-  if (
-    selectedAuthor.value &&
-    !selectedCategory.value &&
-    authorFilteredPosts.value.length > 0
-  ) {
+  if (selectedAuthor.value && !selectedCategory.value) {
     return authorFilteredPosts.value;
   }
 
@@ -705,12 +722,32 @@ const filteredPosts = computed(() => {
   if (selectedCategory.value) {
     filtered = filtered.filter((post) => {
       if ("Tags" in post && Array.isArray(post.Tags)) {
-        return post.Tags.includes(selectedCategory.value as string);
+        return post.Tags.some((t: string) => normalizeTagLabel(t) === selectedCategory.value);
       } else if ("category" in post && post.category) {
-        return post.category === selectedCategory.value;
+        return normalizeTagLabel(post.category) === selectedCategory.value;
       }
       return false;
     });
+
+    // For merged tags, sort capitalized variant first, then by date within each group
+    if (selectedCategory.value === "News that Caught Our Eye") {
+      filtered = filtered.sort((a, b) => {
+        const tagA = getOriginalTag(a);
+        const tagB = getOriginalTag(b);
+        
+        // Prioritize "News that Caught Our Eye" (capitalized) over "news that caught our eye" (lowercase)
+        const isCapitalizedA = tagA === "News that Caught Our Eye";
+        const isCapitalizedB = tagB === "News that Caught Our Eye";
+        
+        if (isCapitalizedA && !isCapitalizedB) return -1; // A comes first
+        if (!isCapitalizedA && isCapitalizedB) return 1;  // B comes first
+        
+        // If both same variant, sort by date (newest first)
+        const dateA = new Date((a as any).date || 0).getTime();
+        const dateB = new Date((b as any).date || 0).getTime();
+        return dateB - dateA;
+      });
+    }
   }
 
   if (selectedAuthor.value) {
@@ -744,19 +781,18 @@ const hasMorePosts = computed(
 );
 
 // Helper functions for handling both blog posts and news items
-const getPostKey = (post: BlogPost | NewsItem): string => {
-  if ("id" in post) {
-    return `blog-${post.id}`;
-  } else {
-    return `news-${post.url}`;
+const getPostKey = (post: any): string => {
+  if (post?.type === "news") {
+    return `news-${post.id ?? post.edition ?? Math.random().toString(36).slice(2)}`;
   }
+  return `blog-${post.id ?? post.slug ?? Math.random().toString(36).slice(2)}`;
 };
 
 const getPostTag = (post: BlogPost | NewsItem): string => {
   if ("Tags" in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
-    return post.Tags[0];
+    return normalizeTagLabel(post.Tags[0]);
   } else if ("category" in post && post.category) {
-    return post.category;
+    return normalizeTagLabel(post.category);
   }
   return "Blog";
 };
@@ -790,15 +826,23 @@ const getPostDate = (post: BlogPost | NewsItem): Date => {
 };
 
 // Navigation and event handlers
-const handlePostClick = (post: BlogPost | NewsItem): void => {
-  if ("slug" in post && post.slug) {
+const handlePostClick = (post: any): void => {
+  if (post?.type === "news" && (post?.edition || post?.id)) {
+    const edition = post.edition ?? post.id;
+    resetSearch();
+    router.push(`/newsthatcaughtoureye/${edition}`);
+    return;
+  }
+  if (post?.slug) {
     resetSearch();
     router.push(`/blog/${post.slug}`);
-  } else if ("url" in post && post.url) {
-    window.location.href = post.url;
-  } else {
-    console.error("Cannot navigate: Post has no slug or URL", post);
+    return;
   }
+  if (post?.url) {
+    window.location.href = post.url;
+    return;
+  }
+  console.error("Cannot navigate: Post has no route info", post);
 };
 
 const handleEventClick = (event: Event | null) => {
@@ -819,14 +863,48 @@ const selectCategory = (category: string) => {
   authorFilteredPosts.value = [];
   selectedCategory.value = category;
   currentPage.value = 1;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!isMobile.value) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    // Wait for posts to finish rendering before scrolling to grid
+    const stop = watch(
+      () => ({ loading: isPostsLoading.value, length: displayedPosts.value.length }),
+      (state) => {
+        if (!state.loading && state.length > 0) {
+          nextTick(() => {
+            const grid = document.getElementById("blogcard-grid-wrapper");
+            grid?.scrollIntoView({ behavior: "smooth", block: "start" });
+            stop();
+          });
+        }
+      },
+      { immediate: true }
+    );
+  }
 };
 
 const selectAuthor = (author: string) => {
   selectedCategory.value = null;
   selectedAuthor.value = author;
   currentPage.value = 1;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!isMobile.value) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    // Wait for posts to finish rendering before scrolling to grid
+    const stop = watch(
+      () => ({ loading: isPostsLoading.value || isFilteringByAuthor.value, length: displayedPosts.value.length }),
+      (state) => {
+        if (!state.loading && state.length > 0) {
+          nextTick(() => {
+            const grid = document.getElementById("blogcard-grid-wrapper");
+            grid?.scrollIntoView({ behavior: "smooth", block: "start" });
+            stop();
+          });
+        }
+      },
+      { immediate: true }
+    );
+  }
 };
 
 const clearFilters = () => {

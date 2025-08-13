@@ -291,12 +291,10 @@
   flex-direction: column;
   gap: 0.8rem;
 }
-
 .subscription-description {
   opacity: 0.95;
   max-width: 600px;
 }
-
 /* Subscription Button - Override btn-header hiding on mobile */
 .subscription-content-wrapper .btn-header {
   display: flex !important;
@@ -327,6 +325,14 @@
 
 /* Mobile - Up to 768px */
 @media (max-width: 768px) {
+  .subscription-title{
+    text-align: center;
+    font-size: 1.5rem;
+  }
+
+.subscription-description {
+  text-align: center;
+}
   .home-container {
     padding: 0.2rem;
   }

@@ -97,7 +97,14 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
-            { title: { _contains: 'News that Caught Our Eye' } }
+            {
+              _or: [
+                { title: { _contains: 'News that Caught Our Eye' } },
+                { title: { _contains: 'News That Caught Our Eye' } },
+                { title: { _contains: 'News that caught our eye' } },
+                { title: { _contains: 'news that caught our eye' } }
+              ]
+            }
           ]
         }
       })

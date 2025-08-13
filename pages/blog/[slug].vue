@@ -76,7 +76,7 @@
                         fill="currentColor"
                       />
                     </svg>
-                    <Text as="span" weight="bold" marginLeft="sm" fontFamily="inria">
+                    <Text as="span" weight="bold" marginLeft="sm" fontFamily="habibi">
                       Blog
                     </Text>
                   </button>
@@ -98,7 +98,7 @@
                   size="5xl"
                   weight="bold"
                   class="blog-title"
-                  fontFamily="inria"
+                  fontFamily="sora"
                   lineHeight="super-loose"
                   style="letter-spacing: normal"
                   id="article-title"
@@ -540,8 +540,9 @@ onBeforeUnmount(() => {
 
 .category-tag {
   cursor: pointer;
+  color:  #cddff3;
+  background-color: rgb(0, 51, 102);
   border: none;
-  background: none;
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.2s ease-in-out;
@@ -549,6 +550,7 @@ onBeforeUnmount(() => {
 
 .category-tag:hover {
   background-color: rgba(13, 99, 235, 0.1);
+  color: rgb(0, 51, 102);
 }
 
 /* Enhanced link accessibility */

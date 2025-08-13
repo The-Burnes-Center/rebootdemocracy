@@ -10,11 +10,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
+  background: linear-gradient(135deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.1) 100%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
@@ -47,7 +45,7 @@
 }
 
 .featured-card__tag {
-  background-color: #feebe3;
+  background-color: #cddff3;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   display: inline-block;
@@ -55,7 +53,7 @@
 }
 
 .featured-card__tag:hover {
-  background-color: #f5d1c2;
+  background-color: #9fc3ed;
 }
 
 /* Content body */
@@ -173,12 +171,12 @@
   .featured-card {
     animation: fadeInUp 0.6s ease-out;
     box-shadow: 0 5px 20px -5px rgba(0, 0, 0, 0.08);
-  
+
   }
-  
+
   .featured-card__body {
     padding: 20px 10px;
-    gap: 16px; 
+    gap: 16px;
   }
 }
 
@@ -188,6 +186,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -197,4 +196,3 @@
 .featured-card {
   animation: fadeInUp 0.6s ease-out;
 }
-

@@ -34,7 +34,7 @@ command = "npm run dev"
 targetPort = 3000
 
 [images]
-remote_images = ["https://thegovlab-files.nyc3.cdn.digitaloceanspaces.com/thegovlab-directus9/uploads/.*"]
+remote_images = ["https://burnes-center.directus.app/assets/.*"]
 
 [[headers]]
   for = "/"

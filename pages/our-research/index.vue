@@ -255,7 +255,7 @@ useSeoMeta({
 .our-research-page p,
 .our-research-page ul,
 .our-research-page li {
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-weight: 500;
   margin: 0;
   padding: 0;
@@ -311,7 +311,7 @@ useSeoMeta({
 .our-research-page .no-content {
   padding: 2rem;
   text-align: center;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-weight: 500;
   width: 100%;
 }
@@ -471,7 +471,7 @@ useSeoMeta({
 
 .research-questions-description p {
   line-height: 1.5;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
 }
 
 .research-questions-content {
@@ -484,7 +484,7 @@ useSeoMeta({
   border: 1px solid #000000;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   gap: 20px;
   padding: 2rem 4rem;
   line-height: 2;

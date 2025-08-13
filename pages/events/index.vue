@@ -294,7 +294,7 @@ useSeoMeta({
 
 /* Typography */
 .events-page h1 {
-  font-family: var(--font-inria);
+  font-family: var(--font-sora);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -305,12 +305,12 @@ useSeoMeta({
 }
 
 .events-page h2 {
-  font-family: var(--font-inria);
+  font-family: var(--font-sora);
   margin: 0;
 }
 
 .events-page h3 {
-  font-family: var(--font-inria);
+  font-family: var(--font-sora);
   font-size: 24px;
   margin: 0;
   margin: 0;
@@ -333,7 +333,7 @@ useSeoMeta({
 .events-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-family: var(--font-inria);
+  font-family: var(--font-sora);
   letter-spacing: 2.4px;
 }
 
@@ -348,7 +348,7 @@ useSeoMeta({
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   color: #FFFFFF;
 }
 
@@ -410,7 +410,7 @@ useSeoMeta({
 }
 
 .events-hero h1 {
-  font-family: var(--font-inria);
+  font-family: var(--font-sora);
 }
 
 .events-row {
@@ -475,7 +475,7 @@ h2.red-subtitle span:after {
 }
 
 .event-information h1 {
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   font-style: normal;
   font-weight: 700;
   line-height: normal;
@@ -528,7 +528,7 @@ h2.event-selector {
 h2.event-selector.Eactive {
   font-size: 1.4em;
   opacity: 100%;
-  font-family: var(--font-inria);
+  font-family: var(--font-sora);
 }
 
 p.event-date {
@@ -761,7 +761,7 @@ img.partner-logo-img {
 @media (max-width: 768px) {
   .events-page h1 {
     font-size: 30px;
-    font-family: var(--font-inria);
+    font-family: var(--font-habibi);
   }
 
   h2.red-subtitle span:before {
@@ -831,8 +831,8 @@ img.partner-logo-img {
     flex-direction: column;
     justify-content: center;
     gap: 40px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
     width: 100%;
   }
 

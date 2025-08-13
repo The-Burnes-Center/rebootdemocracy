@@ -71,8 +71,8 @@
                 size="4xl"
                 weight="bold"
                 color="text-primary-light"
-                fontFamily="inria"
-                lineHeight="loose"
+                fontFamily="sora"
+                lineHeight="extra-loose"
                 class="subscription-title"
               >
                 Subscribe for Updates
@@ -148,7 +148,7 @@
                         size="xs"
                         weight="bold"
                         transform="uppercase"
-                        fontFamily="inria"
+                        fontFamily="sora"
                         class="featured-card__tag"
                         :color="'tag-primary'"
                         role="text"
@@ -160,7 +160,7 @@
                         as="h3"
                         size="xl"
                         weight="bold"
-                        fontFamily="inria"
+                        fontFamily="sora"
                         lineHeight="relaxed"
                         class="card-title"
                       >
@@ -255,7 +255,7 @@
       </section>
 
       <!-- COLLABORATORS SECTION -->
-      <section class="home-section home-collaborators" aria-labelledby="collaborators-heading">
+      <section v-if="false" class="home-section home-collaborators" aria-labelledby="collaborators-heading">
         <div class="blog-collab-container">
           <!-- BLOG COLLABORATORS HEADING -->
           <div class="curator-and-button">
@@ -264,7 +264,7 @@
               id="collaborators-heading"
               size="2xl"
               weight="bold"
-              fontFamily="inria"
+              fontFamily="sora"
               lineHeight="extra-loose"
               color="text-dark"
               class="new-blog-collab"
@@ -520,7 +520,7 @@ function handleTabChange(_: number, name: string): void {
 }
 
 const onClick = (): void => {
-  window.location.href = "/signup";
+  router.push("/signup");
 };
 
 async function applyFilters(): Promise<void> {

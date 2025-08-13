@@ -30,7 +30,7 @@
                 size="xs"
                 weight="bold"
                 transform="uppercase"
-                fontFamily="inria"
+                fontFamily="sora"
                 class="featured-card__tag"
                 :color="'tag-primary'"
                 role="text"
@@ -53,7 +53,7 @@
                 :lineClamp="2"
                 :level="'h3'"
                 weight="bold"
-                fontFamily="inria"
+                fontFamily="sora"
                 color="text-dark"
               >
                 {{ titleText }}
@@ -151,7 +151,7 @@
                 size="xs"
                 weight="bold"
                 transform="uppercase"
-                fontFamily="inria"
+                fontFamily="sora"
                 class="featured-card__tag"
                 :color="'tag-primary'"
                 :index="tagIndex"
@@ -163,7 +163,7 @@
                 lineHeight="normal"
                 margin="none"
                 size="xs"
-                fontFamily="inria"
+                fontFamily="sora"
                 :index="0"
                 >Featured</Tag
               >
@@ -176,7 +176,7 @@
                 :lineClamp="2"
                 :level="'h3'"
                 weight="bold"
-                fontFamily="inria"
+                fontFamily="sora"
                 color="text-dark"
             >
               {{ titleText }}
@@ -285,3 +285,11 @@ const handleKeydown = (event: KeyboardEvent) => {
   emit('keydown', event);
 };
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .postcard__text-content .tag-container {
+    margin-bottom: 6px; 
+  }
+}
+</style>

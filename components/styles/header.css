@@ -107,7 +107,7 @@ a {
 /* Base Search Input */
 .header__search,
 .search-container input {
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   transition: all 0.3s ease;
 }
 
@@ -136,7 +136,7 @@ a {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.9);
   transition: all 0.3s ease;
-  font-family: var(--font-inria);
+  font-family: var(--font-habibi);
   width: 250px;
 }
 
@@ -198,7 +198,7 @@ a {
 
   /* Mobile header adjustments */
   .header-content__section {
-    z-index: 10001;
+    z-index: 999;
     gap: 1rem;
     padding: 0.9rem 2rem;
   }

@@ -1,12 +1,12 @@
 <template>
   <div class="about-container">
-    <TitleText level="h1" weight="bold" fontFamily="var(--font-inria)">About Us</TitleText>
+    <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">About Us</TitleText>
     <Text margin="md" fontFamily="habibi">We use artificial intelligence to help institutions and communities solve problems together. We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
       Better governance, Better outcomes, Increased trust in institutions And in one another. As researchers we want to understand how best to “do democracy” in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.
     </Text>
     
     <div class="team-section">
-      <TitleText level="h1" weight="bold" fontFamily="var(--font-inria)">Our Team</TitleText>
+      <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">Our Team</TitleText>
       
       <div v-if="loading">
         <Text>Loading team data...</Text>
@@ -23,7 +23,7 @@
           :key="member.id" 
           class="team-member"
         >
-          <div class="member-photo" fontFamily="var(--font-inria)">
+          <div class="member-photo" fontFamily="var(--font-habibi)">
             <img
               v-if="member.Headshot"
               :src="getImageUrl(member.Headshot, 512)"
