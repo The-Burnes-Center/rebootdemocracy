@@ -99,7 +99,6 @@ const chatbotAnswerFields = `
   question
   answer
   retrievalContext
-  evaluationResults
   timestamp
   _additional { id distance certainty }
 `;
