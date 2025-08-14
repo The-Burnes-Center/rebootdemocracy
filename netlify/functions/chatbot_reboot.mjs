@@ -175,7 +175,10 @@ export async function searchContent(query) {
         (hit.shortSummary && hit.shortSummary.toLowerCase().includes(lowerQuery)) ||
         (hit.fullSummary && hit.fullSummary.toLowerCase().includes(lowerQuery)) ||
         (hit.question && hit.question.toLowerCase().includes(lowerQuery)) ||
-        (hit.answer && hit.answer.toLowerCase().includes(lowerQuery))
+        (hit.answer && hit.answer.toLowerCase().includes(lowerQuery)) ||
+        (hit.itemAuthor && hit.itemAuthor.toLowerCase().includes(lowerQuery)) ||
+        (hit.author && hit.author.toLowerCase().includes(lowerQuery)) ||
+        (hit.authors && Array.isArray(hit.authors) && hit.authors.some(author => author.toLowerCase().includes(lowerQuery)))
       );
     };
     const exactMatches = allResults.filter(isExactMatch);
@@ -248,6 +251,7 @@ Instructions:
 - Never provide information that is not backed by your context or is common knowledge.
 - Look carefully at all in your context before you present the information to the user.
 - **If the context contains a direct mention of the user’s query (e.g., a person’s name), focus your answer on that information first.**
+- **When searching for a person's name, check both the content and the author fields in the search results. If you find articles written by that person or mentioning that person, highlight this information prominently.**
 - Be optimistic and cheerful but keep a professional nordic style of voice.
 - For longer outputs use bullet points and markdown to make the information easy to read.
 - Do not reference your contexts and the different document sources—just provide the information based on those sources.
