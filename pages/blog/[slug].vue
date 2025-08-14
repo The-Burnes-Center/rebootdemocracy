@@ -313,6 +313,14 @@ if (import.meta.server) {
         ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
         : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
     ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
+    ogType: 'article',
+    twitterTitle: () => blog.value?.title || "RebootDemocracy.AI",
+    twitterDescription: () =>
+      blog.value?.excerpt || "RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.",
+    twitterImage: () =>
+      blog.value?.image
+        ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
+        : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
     twitterCard: "summary_large_image",
   });
 }
@@ -342,9 +350,25 @@ As researchers, we want to understand how best to "do democracy" in practice. Em
 As researchers, we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
   ogImage: () =>
     blog.value?.image
-      ? getImageUrl(blog.value.image)
+      ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
       : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
   ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
+  ogType: 'article',
+  twitterTitle: () => blog.value?.title || "RebootDemocracy.AI",
+  twitterDescription: () =>
+    blog.value?.excerpt ||
+    `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to:
+
+1. Better governance
+2. Better outcomes
+3. Increased trust in institutions
+4. And in one another
+
+As researchers, we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
+  twitterImage: () =>
+    blog.value?.image
+      ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
+      : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
   twitterCard: "summary_large_image",
 });
 
