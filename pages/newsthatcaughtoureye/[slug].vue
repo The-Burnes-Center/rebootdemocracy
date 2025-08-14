@@ -66,7 +66,7 @@
 
         <!-- Upcoming Events Section (Accordion) -->
         <section class="news-items" v-if="postData[0].events">
-          <details class="accordion">
+          <details class="accordion" open>
             <summary class="accordion-summary group-heading">Upcoming Events</summary>
             <div class="accordion-content">
               <div class="news-item" v-html="postData[0].events"></div>
