@@ -275,6 +275,7 @@ Instructions:
       content: `<LATEST_USER_QUESTION>\nQuestion: ${message}\n</LATEST_USER_QUESTION>\n\n<CONTEXT_TO_ANSWER_USERS_QUESTION_FROM>\n${formattedResults}\n</CONTEXT_TO_ANSWER_USERS_QUESTION_FROM>\n\nYour thoughtful answer in markdown:`
     });
 
+    
     /*************************
      *  Stream GPT response  *
      *************************/
