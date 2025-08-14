@@ -300,6 +300,13 @@ const {
 const blog = computed(() => blogData.value?.blog || null);
 const relatedBlogs = computed(() => blogData.value?.relatedBlogs || []);
 
+function getSocialImageUrl(image: any): string {
+  const imageId = image?.id || image?.filename_disk;
+  return imageId
+    ? `https://burnes-center.directus.app/assets/${imageId}?width=1200&height=630&fit=cover&format=jpg`
+    : "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3";
+}
+
 if (import.meta.server) {
   useSeoMeta({
     title: () => blog.value?.title || "RebootDemocracy.AI",
@@ -308,19 +315,15 @@ if (import.meta.server) {
     ogTitle: () => blog.value?.title || "RebootDemocracy.AI",
     ogDescription: () =>
       blog.value?.excerpt || "RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.",
-    ogImage: () =>
-      blog.value?.image
-        ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
-        : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+    ogImage: () => getSocialImageUrl(blog.value?.image),
+    ogImageWidth: '1200',
+    ogImageHeight: '630',
     ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
     ogType: 'article',
     twitterTitle: () => blog.value?.title || "RebootDemocracy.AI",
     twitterDescription: () =>
       blog.value?.excerpt || "RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.",
-    twitterImage: () =>
-      blog.value?.image
-        ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
-        : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+    twitterImage: () => getSocialImageUrl(blog.value?.image),
     twitterCard: "summary_large_image",
   });
 }
@@ -348,10 +351,9 @@ As researchers, we want to understand how best to "do democracy" in practice. Em
 4. And in one another
 
 As researchers, we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
-  ogImage: () =>
-    blog.value?.image
-      ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
-      : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+  ogImage: () => getSocialImageUrl(blog.value?.image),
+  ogImageWidth: '1200',
+  ogImageHeight: '630',
   ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
   ogType: 'article',
   twitterTitle: () => blog.value?.title || "RebootDemocracy.AI",
@@ -365,11 +367,14 @@ As researchers, we want to understand how best to "do democracy" in practice. Em
 4. And in one another
 
 As researchers, we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
-  twitterImage: () =>
-    blog.value?.image
-      ? `https://burnes-center.directus.app/assets/${blog.value.image.id}`
-      : "https://burnes-center.directus.app/assets/41462f51-d8d6-4d54-9fec-5f56fa2ef05b",
+  twitterImage: () => getSocialImageUrl(blog.value?.image),
   twitterCard: "summary_large_image",
+});
+
+useHead({
+  link: [
+    { rel: 'canonical', href: `https://rebootdemocracy.ai/blog/${route.params.slug}` }
+  ]
 });
 
 const isLoading = ref(true);

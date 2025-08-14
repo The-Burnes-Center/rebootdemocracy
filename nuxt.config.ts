@@ -87,11 +87,13 @@ export default defineNuxtConfig({
         { property: 'og:title', content: 'RebootDemocracy.AI' },
         { property: 'og:description', content: 'RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.' },
         { property: 'og:type', content: 'website' },
-        { property: 'og:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' },
+        { property: 'og:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3?width=1200&height=630&fit=cover&format=jpg' },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: 'RebootDemocracy.AI' },
         { name: 'twitter:description', content: 'RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.' },
-        { name: 'twitter:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3' }
+        { name: 'twitter:image', content: 'https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3?width=1200&height=630&fit=cover&format=jpg' }
       ],
       link: [
         { rel: 'shortcut icon', type: 'images/newsheader.png', href: '/images/newsheader.png' },
