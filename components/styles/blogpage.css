@@ -11,14 +11,14 @@
 }
 
 .blog-gradient-inner {
-  max-width: 960px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
 /* Blog Detail Container */
 .blog-detail {
-  max-width: 960px;
+  max-width: 720px;
   margin: auto;
   padding: 2rem;
 }
@@ -190,7 +190,7 @@
 /* Excerpt */
 p.excerpt-paragraph {
   font-size: 20px;
-  line-height: 40px;
+  line-height: 30px;
   font-family: var(--font-habibi);
   font-weight: 400;
   margin: 0;
@@ -199,7 +199,7 @@ p.excerpt-paragraph {
 /* Main Content */
 .blog-content {
   font-family: var(--font-habibi);
-  line-height: 40px;
+  line-height: 30px;
 }
 
 .blog-content h1 {

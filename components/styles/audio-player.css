@@ -13,7 +13,7 @@
 
 .audio-player {
   display: flex;
-  width: 852px;
+  width: 700px;
   height: 56px;
   background-color: #ffffff;
   border-radius: 6px;
@@ -48,7 +48,7 @@
 
 .audio-player__controls {
   display: flex;
-  width: 710px;
+  width: 550px;
   height: 24px;
   align-items: center;
   gap: 16px;
