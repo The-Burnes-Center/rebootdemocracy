@@ -135,7 +135,7 @@
                     @keydown="handleKeyboardNavigation($event, () => handlePostClick(post))"
                     :aria-label="`Blog post: ${post.title} by ${getAuthorName(post)}, published ${formatDate(post.date)}`"
                   >
-                    <div class="card-image">
+                    <div class="card-image" :style="{ '--bg-image': `url(${getImageUrl(post.image)})` }">
                       <img 
                         :src="getImageUrl(post.image)" 
                         :alt="`Featured image for ${post.title}`"
@@ -463,6 +463,8 @@ function getTag(item: any): string {
 function getAuthorName(post: any): string {
   return getAuthorNameUtil(post);
 }
+
+
 
 // Navigation functions
 function navigateToBlogPost(post: any): void {

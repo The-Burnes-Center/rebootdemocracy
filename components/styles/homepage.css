@@ -102,13 +102,37 @@
   height: 200px;
   overflow: hidden;
   background: #f8f9fa;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(4px);
+  opacity: 0.7;
+  z-index: 1;
 }
 
 .card-image img {
-  width: 100%;
-  height: auto;
-  object-fit: fill;
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
   transition: transform 0.4s ease;
+  position: relative;
+  z-index: 2;
 }
 
 .custom-card:hover .card-image img {
@@ -291,10 +315,12 @@
   flex-direction: column;
   gap: 0.8rem;
 }
+
 .subscription-description {
   opacity: 0.95;
   max-width: 600px;
 }
+
 /* Subscription Button - Override btn-header hiding on mobile */
 .subscription-content-wrapper .btn-header {
   display: flex !important;
@@ -312,6 +338,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -325,62 +352,63 @@
 
 /* Mobile - Up to 768px */
 @media (max-width: 768px) {
-  .subscription-title{
+  .subscription-title {
     text-align: center;
     font-size: 1.5rem;
   }
 
-.subscription-description {
-  text-align: center;
-}
+  .subscription-description {
+    text-align: center;
+  }
+
   .home-container {
     padding: 0.2rem;
   }
-  
+
   .page-layout {
     grid-template-columns: 1fr;
     padding: 1rem 0.5rem;
   }
-  
+
   .left-content {
     margin-bottom: 5rem;
     padding: 0rem;
   }
-  
+
   .right-content {
     margin-bottom: 1rem;
   }
-  
+
   .postcards-column {
     gap: 1rem;
     padding: 0.5rem;
   }
-  
+
   .blog-card-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
     padding: 0 1rem;
   }
-  
+
   .card-content {
     padding: 20px;
   }
-  
+
   .card-title {
     font-size: 1.125rem;
   }
-  
+
   .card-image {
     height: 180px;
   }
-  
+
   .home-featured-wrapper {
     grid-template-columns: 1fr;
     gap: 2rem;
     padding: 1rem 0.5rem;
     padding-bottom: 2rem;
   }
-  
+
   .home-featured-row {
     margin-top: 1rem;
     padding-bottom: 1rem;
@@ -403,7 +431,7 @@
     grid-template-columns: 1fr;
     padding: 1rem;
   }
-  
+
   .home-featured-wrapper {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -431,7 +459,7 @@
   .page-layout {
     width: 95%;
   }
-  
+
   .blog-card-grid {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
@@ -460,7 +488,7 @@
     text-align: center;
     padding: 1rem;
   }
-  
+
   .subscription-content-wrapper .btn-header {
     width: 100%;
     max-width: 300px;
