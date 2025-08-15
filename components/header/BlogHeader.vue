@@ -213,18 +213,18 @@ const menuItems = computed<MenuItem[]>(() => {
       children: [
         { label: "About Us", name: "about", to: "/about" },
         { label: "Our Team", name: "team", to: "/about#team-grid" },
-      ],
-    },
-    {
-      label: "Our Work",
-      name: "work",
-      children: [
         {
           label: "About Beth Noveck",
           name: "research",
           to: "https://thegovlab.org/beth-simone-noveck.html",
           external: true,
         },
+      ],
+    },
+    {
+      label: "Our Work",
+      name: "work",
+      children: [
         {
           label: "InnovateUS",
           name: "teachings",

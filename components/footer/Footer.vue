@@ -41,15 +41,12 @@
             and should be harnessed to strengthen participatory democracy. Done
             well, participation and engagement lead to Better governance, Better
             outcomes, Increased trust in institutions and in one another.
-          </p>
-        </div>
-        <div class="footer__text-block">
-          <p>
-            As researchers we want to understand how best to "do democracy" in
+            </p>
+            <br></br>
+            <p>As researchers we want to understand how best to "do democracy" in
             practice. Emboldened by the advent of generative AI, we are excited
             about the future possibilities for reimagining democracy in practice
-            and at scale.
-          </p>
+            and at scale.</p>
         </div>
       </div>
 

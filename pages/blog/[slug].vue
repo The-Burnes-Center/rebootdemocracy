@@ -617,6 +617,10 @@ onBeforeUnmount(() => {
   scroll-margin-top: 20px; /* For anchor link navigation */
 }
 
+.blog-content p {
+  margin-bottom: 20px;
+}
+
 .blog-content img {
   max-width: 100%;
   height: auto;
