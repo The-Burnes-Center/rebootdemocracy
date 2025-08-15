@@ -707,7 +707,7 @@ html {
 .back-to-top {
   position: fixed;
   right: 24px;
-  bottom: 24px;
+  bottom: 120px;
   width: 40px;
   height: 40px;
   display: flex;
@@ -720,6 +720,7 @@ html {
   text-decoration: none;
   font-weight: 700;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
 }
 
 /* Loading and Error Styles */
@@ -787,7 +788,7 @@ html {
 @media (max-width: 1023px) {
   .back-to-top {
     right: 16px;
-    bottom: 16px;
+    bottom: 80px;
   }
   .items-grid {
     grid-template-columns: 1fr;
