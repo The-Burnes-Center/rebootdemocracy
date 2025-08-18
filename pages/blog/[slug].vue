@@ -328,6 +328,7 @@ if (import.meta.server) {
   });
 }
 
+
 useSeoMeta({
   title: () => blog.value?.title || "RebootDemocracy.AI",
   description: () =>
