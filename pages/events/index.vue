@@ -176,9 +176,7 @@ useSeoMeta({
                   <p class="event-type">
                     <i class="fa-solid fa-video"></i> Online
                   </p>
-                  <p v-if="workshop.registrants" class="event-registrants">
-                    {{ workshop.registrants }} registrants already. Sign up now!
-                  </p>
+
                   <a
                     :href="workshop.sign_up_link"
                     target="_blank"
@@ -348,7 +346,7 @@ useSeoMeta({
 
 .events-page .register-btn {
   color: #ffffff;
-  background: #003266 !important;
+  background: #fc6423 !important;
   height: 100% !important;
   margin-top: 20px !important;
 }
@@ -547,13 +545,7 @@ p.event-date {
   height: 50px;
 }
 
-/* Event Registrants */
-.event-registrants {
-  font-weight: 600 !important;
-  color: #fc6423;
-  font-size: 0.9rem;
-  padding-top: 5px;
-}
+
 
 .event-grid-row {
   display: flex;
@@ -600,6 +592,7 @@ p.event-date {
   flex-direction: row;
   gap: 10px;
   margin-top: 1rem;
+  color: #003266;
 }
 
 .event-speakers a {
