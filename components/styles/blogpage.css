@@ -86,41 +86,12 @@
   color: #003266 !important;
 }
 
-/* Category & Tags */
-.tag-share-category {
+/* Share Section */
+.share-section {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-}
-
-.blog-category-eyebrow {
-  display: flex;
-  gap: 8px;
-  /* primary spacing between tags (modern browsers) */
-  flex-wrap: wrap;
-}
-
-.category-tag {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #cddff3;
-  background-color: rgb(0, 51, 102);
-  padding: 0.4rem 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: var(--font-sora);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.blog-category-eyebrow .category-tag {
-  margin-right: 8px;
-  margin-bottom: 8px;
-}
-
-.blog-category-eyebrow .category-tag:last-child {
-  margin-right: 0;
+  margin: 1rem 0;
 }
 
 .card-tag {
@@ -451,18 +422,10 @@ p>strong {
     padding: 0rem 0.2rem;
   }
 
-  /* Category and tags */
-  .blog-category-eyebrow {
-    margin: 0.2rem 0rem;
-  }
-
-  .tag-share-category {
-    flex-direction: column;
+  /* Share section */
+  .share-section {
     justify-content: flex-start;
-    gap: 1rem;
-    margin: 0rem;
-    align-items: flex-start;
-    padding-left: 1rem;
+    margin: 1rem;
   }
 
   /* Content adjustments */

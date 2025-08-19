@@ -124,7 +124,7 @@ useSeoMeta({
     </div>
     <div class="event-selection-row">
       <h2 class="event-selector Eactive" @click="scrollMeTo('upcoming')">
-        Upcoming Events
+        Upcoming Workshops
       </h2>
       <h2 class="event-selector" @click="scrollMeTo('past-events')">
         Past Events

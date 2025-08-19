@@ -22,10 +22,10 @@
 }
 
 .footer__link {
-  font-family: var(--font-habibi);
-  font-size: 16px;
+  font-family: var(--font-sora);
+  font-size: 18px;
   font-weight: 700;
-  line-height: 20px;
+  line-height: 22px;
   color: #1e1e1e;
   text-decoration: none;
   transition: color 0.3s ease;
