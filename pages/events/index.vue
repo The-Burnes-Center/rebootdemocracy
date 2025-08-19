@@ -161,10 +161,10 @@ useSeoMeta({
                   </p>
               <div class="event-item-row">
                 <div class="event-text">
-                  <p
+                  <div
                     class="event-description"
                     v-html="workshop.description"
-                  ></p>
+                  ></div>
                   <div class="event-speakers">
                     <div v-if="workshop.instructor && workshop.instructor.length > 0">
                       Instructor:&nbsp;
@@ -581,10 +581,12 @@ p.event-date {
 .event-grid-item p.event-description {
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 5;
-  height: 8rem;
-  line-clamp: 5;
+  -webkit-line-clamp: 4;
+  height: 11rem;
+  line-clamp: 4;
+  padding: 1rem;
   -webkit-box-orient: vertical;
+  border: 2px solid #003266 !important;
 }
 
 .event-speakers{
@@ -655,7 +657,7 @@ p.event-date {
   padding: 0;
 }
 .event-description {
-  padding: 10px 0;
+  padding: 10px 0px;
   line-height: 1.5;
 }
 
@@ -784,6 +786,9 @@ img.partner-logo-img {
 
   .event-grid-item {
     height: auto;
+  }
+  .event-type{
+    width: 50%;
   }
 
   .event-item-row {
