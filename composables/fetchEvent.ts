@@ -1,6 +1,6 @@
 // composables/fetchEvent.ts
 import { createDirectus, rest, readItems } from '@directus/sdk';
-import type { EventItem, GeneralEventsSeries } from '../types/Event.ts';
+import type { EventItem, GeneralEventsSeries, Workshop } from '../types/Event.ts';
 import type { Event } from '../types/Event.ts';
 
 const API_URL = 'https://burnes-center.directus.app/';
@@ -67,6 +67,37 @@ export async function fetchEventsData(): Promise<EventItem[]> {
     }));
   } catch (error) {
     console.error('Error fetching events data:', error);
+    return [];
+  }
+}
+
+export async function fetchUpcomingWorkshops(): Promise<Workshop[]> {
+  try {
+    const currentDate = new Date().toISOString();
+    
+    const response = await directus.request(
+      readItems('innovate_us_workshops', {
+        filter: {
+          date: {
+            _gte: currentDate,
+          },
+        },
+        meta: 'total_count',
+        limit: 5,
+        sort: ['date'], // ascending order - earliest first
+        fields: [
+          '*.*',
+          'thumbnail.*',
+          'partner_logo.*',
+          'instructor.innovate_us_instructors_id.*',
+          'instructor.innovate_us_instructors_id.headshot.*',
+        ],
+      })
+    );
+
+    return response as Workshop[];
+  } catch (error) {
+    console.error('Error fetching upcoming workshops:', error);
     return [];
   }
 }
