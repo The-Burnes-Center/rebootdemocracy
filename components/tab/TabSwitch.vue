@@ -15,21 +15,21 @@
           </span>
         </button>
       </div>
-      
-      <div class="filter-container" v-if="showFilter && activeTab === 0">
+    </div>
+    
+    <div class="filter-container" v-if="showFilter && activeTab === 0">
+      <FilterDropdown
+        :options="tagOptions"
+        :defaultSelected="selectedTag || 'All Topics'"
+        label="Filter by Topics:"
+        @option-selected="handleTagFilter"
+      />
         <FilterDropdown
-          :options="tagOptions"
-          :defaultSelected="selectedTag || 'All Topics'"
-          label="Filter by Topics:"
-          @option-selected="handleTagFilter"
+          :options="authorOptions"
+          :defaultSelected="selectedAuthor || 'All Authors'"
+          label="Filter by Author:"
+          @option-selected="handleAuthorFilter"
         />
-          <FilterDropdown
-            :options="authorOptions"
-            :defaultSelected="selectedAuthor || 'All Authors'"
-            label="Filter by Author:"
-            @option-selected="handleAuthorFilter"
-          />
-      </div>
     </div>
 
     <div v-if="showContent" class="tab-content">
