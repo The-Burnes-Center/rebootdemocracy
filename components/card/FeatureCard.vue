@@ -22,6 +22,7 @@
     <div class="featured-card__body">
       <div class="featured-card__content">
         <Text
+          v-if="tag"
           size="xs"
           weight="extrabold"
           class="featured-card__tag"

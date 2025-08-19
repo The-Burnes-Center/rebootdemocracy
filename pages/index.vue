@@ -144,6 +144,7 @@
                     </div>
                     <div class="card-content">
                       <Text
+                        v-if="getTag(post)"
                         as="span"
                         size="xs"
                         weight="bold"
@@ -411,7 +412,7 @@ const weeklyNewsUrl = computed(() => {
 const tabOptions = computed(() => [
   { title: "Latest Posts", name: "latest-posts" },
   {
-    title: "News that caught our eye",
+    title: "News That Caught Our Eye",
     name: "news",
     url: weeklyNewsUrl.value,
     external: true,
@@ -456,7 +457,7 @@ function getTag(item: any): string {
   if (item.Tags?.[0]) return item.Tags[0];
   if (item.category) return item.category;
   if (item.type === "news") return "News that caught our eye";
-  return "Blog";
+  return "";
 }
 
 // Use the utility function from the composable

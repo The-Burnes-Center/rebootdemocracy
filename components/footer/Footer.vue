@@ -34,7 +34,7 @@
 
       <!-- Middle - Text content -->
       <div class="footer__content">
-        <div class="footer__text-block">
+        <!-- <div class="footer__text-block">
           <p>
             We use artificial intelligence to help institutions and communities
             solve problems together. We believe that artificial intelligence can
@@ -47,7 +47,7 @@
             practice. Emboldened by the advent of generative AI, we are excited
             about the future possibilities for reimagining democracy in practice
             and at scale.</p>
-        </div>
+        </div> -->
       </div>
 
       <!-- Right side - Logos -->

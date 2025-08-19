@@ -5,6 +5,8 @@
         <a
           href="https://burnes.northeastern.edu/"
           class="logo-link"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Visit Burnes Center for Social Change website"
         >
           <img
@@ -21,6 +23,8 @@
         <a
           href="https://thegovlab.org/"
           class="logo-link"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Visit The GovLab website"
         >
           <img

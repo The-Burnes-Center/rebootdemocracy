@@ -794,7 +794,7 @@ const getPostTag = (post: BlogPost | NewsItem): string => {
   } else if ("category" in post && post.category) {
     return normalizeTagLabel(post.category);
   }
-  return "Blog";
+  return "";
 };
 
 const getPostTitle = (post: BlogPost | NewsItem): string => {
