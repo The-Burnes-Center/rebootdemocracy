@@ -789,6 +789,22 @@ const getPostKey = (post: any): string => {
 };
 
 const getPostTag = (post: BlogPost | NewsItem): string => {
+  // If a specific category is selected and the post contains that category, show it
+  if (selectedCategory.value && "Tags" in post && Array.isArray(post.Tags)) {
+    const hasSelectedCategory = post.Tags.some(tag => normalizeTagLabel(tag) === selectedCategory.value);
+    if (hasSelectedCategory) {
+      return selectedCategory.value;
+    }
+  }
+  
+  // If a specific category is selected and the post's category matches, show it
+  if (selectedCategory.value && "category" in post && post.category) {
+    if (normalizeTagLabel(post.category) === selectedCategory.value) {
+      return selectedCategory.value;
+    }
+  }
+  
+  // Otherwise fall back to the original logic
   if ("Tags" in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
     return normalizeTagLabel(post.Tags[0]);
   } else if ("category" in post && post.category) {

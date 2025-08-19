@@ -454,6 +454,12 @@ function getImageUrl(image: any): string {
 }
 
 function getTag(item: any): string {
+  // If a specific tag is selected and the item contains that tag, show it
+  if (selectedTag.value !== "All Topics" && item.Tags?.includes(selectedTag.value)) {
+    return selectedTag.value;
+  }
+  
+  // Otherwise fall back to the original logic
   if (item.Tags?.[0]) return item.Tags[0];
   if (item.category) return item.category;
   if (item.type === "news") return "News that caught our eye";
