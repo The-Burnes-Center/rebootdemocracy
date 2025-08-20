@@ -160,7 +160,7 @@
 }
 
 .card-title:hover {
-  color: #315895;
+  color: #315895 !important;
 }
 
 .card-description {
