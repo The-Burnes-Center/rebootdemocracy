@@ -36,7 +36,7 @@
   --font-sora: "Sora", sans-serif;
   --font-lexend: "Lexend", sans-serif;
   --font-habibi: "Habibi", serif;
-  
+
   /* Font Weights */
   --font-light: 300;
   --font-regular: 400;
@@ -46,10 +46,38 @@
 * {
   box-sizing: border-box;
 }
-body{
+
+body {
   margin: 0;
   padding: 0;
 }
+
+a {
+  color: #1A73E8;
+  font-family: var(--font-habibi);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 30px;
+  text-decoration: underline;
+  text-decoration-color: #fc6423;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 3px;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: #0d47a1;
+  text-decoration-color: #e55100;
+  text-shadow:
+    0.1px 0 0 #01541f,
+    -0.1px 0 0 #01541f,
+    0 0.1px 0 #01541f,
+    0 -0.1px 0 #01541f;
+  text-underline-offset: 6px;
+}
+
+
 /* Rubik Font Classes */
 .rubik-light {
   font-family: "Rubik", sans-serif;
@@ -294,7 +322,7 @@ body{
 
 .habibi-bold {
   font-family: "Habibi", serif;
-  font-weight: bold; 
+  font-weight: bold;
   font-style: normal;
 }
 
@@ -323,6 +351,7 @@ body{
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -332,4 +361,13 @@ body{
   text-align: center;
   padding: 2rem;
   color: #666;
+}
+
+.date-text {
+  font-family: var(--font-sora);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 28px;
+  font-style: normal;
+
 }

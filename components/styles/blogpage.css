@@ -212,28 +212,17 @@ p.excerpt-paragraph {
   font-weight: 400;
 }
 
-/* Content Links */
-p a,
-.blog-content p a {
-  color: #0d63eb;
-  font-family: var(--font-habibi);
+p {
   font-size: 20px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 150%;
-  text-decoration-line: underline;
-  text-decoration-style: solid;
-  text-decoration-skip-ink: none;
-  text-decoration-color: rgba(209, 73, 91, 0.25);
-  text-decoration-thickness: 50%;
-  text-underline-offset: -40%;
+  line-height: 30px;
 }
 
 /* Strong Text */
 p>strong {
   color: #003366;
-  font-weight: 700;
-  font-size: 1em;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 30px;
 }
 
 /* Media Embeds */

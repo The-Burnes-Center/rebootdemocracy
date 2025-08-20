@@ -36,22 +36,6 @@
         </div>
       </div>
 
-      <!-- Sticky TOC Bar -->
-      <nav class="toc-bar" aria-label="In this edition">
-        <div class="weeklynews-container">
-          <div class="toc-scroll">
-            <a
-              v-for="cat in uniqueCategories"
-              :key="cat"
-              class="toc-chip"
-              :href="'#' + cat.toLowerCase().replace(/\s+/g, '')"
-            >
-              {{ cat }} <span class="toc-count">({{ getItemsByCategory(cat).length }})</span>
-            </a>
-          </div>
-        </div>
-      </nav>
-
       <!-- Content -->
       <div class="weeklynews-container">
         <!-- Summary Accordion -->
@@ -67,7 +51,10 @@
         <!-- Upcoming Events Section (Accordion) -->
         <section class="news-items" v-if="postData[0].events">
           <details class="accordion" open>
-            <summary class="accordion-summary group-heading">Upcoming Events</summary>
+            <summary class="accordion-summary group-heading">Upcoming InnovateUS Workshops</summary>
+            <p style="font-size: 22px; line-height: 32px; padding:1rem; margin: 0rem">
+              InnovateUS delivers no-cost, at-your-own-pace, and live learning on data, digital, innovation, and AI skills. Designed for civic and public sector, programs are free and open to all.
+            </p>
             <div class="accordion-content">
               <div class="news-item" v-html="postData[0].events"></div>
             </div>
@@ -146,6 +133,20 @@
             </article>
           </div>
         </section>
+
+        <!-- TOC Bar at bottom -->
+        <nav class="toc-bar" aria-label="In this edition">
+          <div class="toc-scroll">
+            <a
+              v-for="cat in uniqueCategories"
+              :key="cat"
+              class="toc-chip"
+              :href="'#' + cat.toLowerCase().replace(/\s+/g, '')"
+            >
+              {{ cat }} <span class="toc-count">({{ getItemsByCategory(cat).length }})</span>
+            </a>
+          </div>
+        </nav>
 
         <a href="#top" class="back-to-top" aria-label="Back to top">▲</a>
       </div>
@@ -500,10 +501,8 @@ html {
   font-weight: 600;
   margin: 0.5rem auto 0 auto;
   font-family: var(--font-habibi);
-  font-size: 20px;
   text-align: center;
   width: 100%;
-  line-height: 1.4;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
@@ -527,19 +526,14 @@ html {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin: 1rem 0;
+  gap:1.5rem;
+  padding: 1rem;
   border: 1px solid #e6e6e6;
   border-radius: 8px;
-  padding: 0.75rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   font-family: var(--font-habibi);
-  font-size: 18px;
   line-height: 1.4;
   transition: box-shadow 0.2s ease, transform 0.1s ease;
-}
-.news-item p{
-  margin: 0;
 }
 
 .news-item:hover {
@@ -583,6 +577,7 @@ html {
   align-items: center;
   gap: 0.5rem;
   margin: 0;
+  font-size: 20px;
   border-bottom: none;
   background: linear-gradient(135deg, #e6f2ff 0%, #cddff3 100%);
 }
@@ -599,12 +594,17 @@ html {
   display: none;
 }
 
-
+.item-meta em{
+  font-size: 16px;
+  line-height: 28px;  
+  font-family: var(--font-sora);  
+  font-style: normal;
+  font-weight: 500;
+}
 .accordion-summary::after {
   content: '▾';
   margin-left: auto;
   color: rgb(0, 51, 102);
-  font-size: 0.9rem;
   line-height: 1;
   transition: transform 0.2s ease;
 }
@@ -638,7 +638,8 @@ html {
 .item-title {
   color: rgb(0, 51, 102);
   font-family: var(--font-sora);
-  font-size: 18px;
+  font-size: 22px;
+  line-height: 30px;
   margin: 0;
 }
 
@@ -651,9 +652,7 @@ html {
 }
 
 .item-excerpt {
-  font-size: 18px;
   font-family: var(--font-habibi);
-  line-height: 28px;
   margin: 0;
 }
 
@@ -766,9 +765,7 @@ html {
     font-size: 48px;
   }
   
-  .weeklynews-details p {
-    font-size: 20px;
-  }
+  
 }
 
 @media (min-width: 1024px) {
@@ -780,7 +777,7 @@ html {
     height: 250px;
   }
   .weeklynews-container .news-items {
-    padding: 0.8rem 0.5rem;
+    padding: 2rem 0.5rem;
     border-top: 1px solid #e6e6e6;
   }
 }
@@ -806,4 +803,9 @@ html {
     padding: 1.5rem 1rem;}
 }
 
+p{
+  font-size: 20px;
+  line-height: 30px;
+  margin: 0;
+}
 </style>
