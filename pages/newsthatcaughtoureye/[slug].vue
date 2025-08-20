@@ -641,6 +641,7 @@ html {
   font-size: 22px;
   line-height: 30px;
   margin: 0;
+  font-weight: 600;
 }
 
 .item-meta {

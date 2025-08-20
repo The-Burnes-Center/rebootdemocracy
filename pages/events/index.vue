@@ -6,16 +6,14 @@ import {
   fetchIndexData,
   fetchEventsData,
   fetchSeriesData,
-  fetchUpcomingWorkshops,
 } from "@/composables/fetchEvent";
 import { getImageUrl } from "@/composables/useImageUrl.js";
-import type { EventItem, GeneralEventsSeries, Workshop, WorkshopInstructor } from "@/types/Event";
+import type { EventItem, GeneralEventsSeries } from "@/types/Event";
 import { useSeoMeta } from "#imports";
 
 const route = useRoute();
 const iniLoad = ref(0);
 const showingFullText = ref(true);
-const activeSection = ref('upcoming');
 
 // Rest of your component code remains the same...
 const { data: indexData } = await useAsyncData("reboot-index", fetchIndexData);
@@ -27,13 +25,6 @@ const { data: seriesData } = await useAsyncData(
   "reboot-series",
   fetchSeriesData
 );
-const { data: workshopsData } = await useAsyncData(
-  "upcoming-workshops",
-  fetchUpcomingWorkshops
-);
-
-// Console log the workshops data
-console.log('Workshops data from useAsyncData:', workshopsData.value);
 
 const eventsData = ref(allEventsRaw.value || []);
 eventsData.value.sort(
@@ -71,13 +62,12 @@ const accordionContent = computed(() => {
 const pageslug = ref(route.query);
 const path = ref(route.fullPath);
 
-const scrollMeTo = (elementId: string) => {
+const scrollMeTo = (refName: string) => {
   if (process.client) {
-    const element = document.getElementById(elementId) as HTMLElement;
+    const element = document.querySelector(`[ref="${refName}"]`) as HTMLElement;
     if (element) {
       const top = element.offsetTop - 80;
-      window.scrollTo({ top, behavior: 'smooth' });
-      activeSection.value = elementId;
+      window.scrollTo(0, top);
     }
   }
 };
@@ -133,52 +123,86 @@ useSeoMeta({
       </div>
     </div>
     <div class="event-selection-row">
-      <h2 :class="['event-selector', { 'Eactive': activeSection === 'upcoming' }]" @click="scrollMeTo('upcoming')">
+      <h2 class="event-selector Eactive" @click="scrollMeTo('upcoming')">
         Upcoming Workshops
       </h2>
-      <h2 :class="['event-selector', { 'Eactive': activeSection === 'past-events' }]" @click="scrollMeTo('past-events')">
+      <h2 class="event-selector" @click="scrollMeTo('past-events')">
         Past Events
       </h2>
     </div>
-    <div id="upcoming" class="event-grid-section">
-      <h3 @click="scrollMeTo('upcoming')" class="section-header">Upcoming Workshops</h3>
+    <div ref="upcoming" class="event-grid-section">
       <div class="event-grid-row">
         <div
           class="event-grid-col"
-          v-for="workshop in workshopsData"
-          :key="workshop.id"
+          v-for="event_item in eventsData"
+          :key="event_item.event_element.id"
+          v-show="isFutureDate(new Date(event_item.event_element.date))"
         >
           <div class="event-grid-item">
             <div class="event-grid-padding">
               <div class="event-title">
-                <h3>{{ workshop.title }}</h3>
+                <h3>{{ event_item.event_element.title }}</h3>
               </div>
-              <p class="event-date">
+              <div class="event-item-row">
+                <div class="event-image">
+                  <img
+                    v-if="
+                      !event_item.event_element.instructor &&
+                      event_item.event_element.thumbnail
+                    "
+                    :src="getImageUrl(event_item.event_element.thumbnail)"
+                  />
+                  <div
+                    v-for="(instructor_item, index) in event_item.event_element
+                      .instructor"
+                    v-show="index < 1"
+                    :key="index"
+                  >
+                    <img
+                      :src="
+                        getImageUrl({
+                          filename_disk:
+                            instructor_item.innovate_us_instructors_id.headshot
+                              ?.filename_disk,
+                        })
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="event-text">
+                  <div class="event-speakers">
+                    <p v-if="event_item.event_element.speakers">
+                      Speaker(s):&nbsp;
+                    </p>
+                    <div v-html="event_item.event_element.speakers"></div>
+                  </div>
+                  <p
+                    class="event-description"
+                    v-html="event_item.event_element.description"
+                  ></p>
+                  <p
+                    class="event-type"
+                    v-if="
+                      event_item.event_element.online_event &&
+                      !event_item.event_element.inperson_event
+                    "
+                  >
+                    <i class="fa-solid fa-video"></i> Online
+                  </p>
+                  <p
+                    class="event-type"
+                    v-if="event_item.event_element.inperson_event"
+                  >
+                    <i class="fa-solid fa-building-user"></i> Hybrid
+                  </p>
+                  <p class="event-date">
                     {{
-                      formatDateTime(new Date(workshop.date))
+                      formatDateTime(new Date(event_item.event_element.date))
                     }}
                     ET
                   </p>
-              <div class="event-item-row">
-                <div class="event-text">
-                  <div
-                    class="event-description"
-                    v-html="workshop.description"
-                  ></div>
-                  <div class="event-speakers">
-                    <div v-if="workshop.instructor && workshop.instructor.length > 0">
-                      Instructor:&nbsp;
-                    </div>
-                    <div v-for="instructor in workshop.instructor" :key="instructor.id">
-                      {{ instructor.innovate_us_instructors_id.name }}, {{ instructor.innovate_us_instructors_id.title_and_affiliation }}
-                    </div>
-                  </div>
-                  <p class="event-type">
-                    <i class="fa-solid fa-video"></i> Online
-                  </p>
-
                   <a
-                    :href="workshop.sign_up_link"
+                    :href="event_item.event_element.link"
                     target="_blank"
                     class="btn btn-primary btn-dark btn-medium register-btn"
                     >Register</a
@@ -186,20 +210,25 @@ useSeoMeta({
                 </div>
               </div>
             </div>
+            <div
+              class="event-item-partnership-row"
+              v-if="event_item.event_element.partner_logo"
+            >
+              <div class="partner-logo-section">
+                <p class="partnership-label">In Partnership with:</p>
+                <img
+                  class="partner-logo-img"
+                  v-if="event_item.event_element.partner_logo"
+                  :src="getImageUrl(event_item.event_element.partner_logo)"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="view-all-workshops-row">
-        <a
-          href="https://innovate-us.org/workshops/"
-          target="_blank"
-          class="btn btn-secondary btn-dark btn-large view-all-btn"
-          >View All Workshops</a
-        >
-      </div>
     </div>
-    <div id="past-events" class="event-grid-section">
-      <h3 @click="scrollMeTo('past-events')" class="section-header">Past Events</h3>
+    <div ref="past-events" class="event-grid-section">
+      <h3>Past Events</h3>
       <div class="past-event-grid-row">
         <div
           class="past-event-grid-item"
@@ -284,19 +313,8 @@ useSeoMeta({
   font-family: var(--font-sora);
   font-size: 24px;
   margin: 0;
-}
-
-.section-header {
-  cursor: pointer;
-  padding: 1.5rem 0;
-  margin: 1rem 0;
-  text-decoration: underline;
-  text-align: center;
-  transition: opacity 0.3s ease;
-}
-
-.section-header:hover {
-  opacity: 0.7;
+  margin: 0;
+  padding: 0;
 }
 
 .events-page h5.eyebrow {
@@ -530,23 +548,6 @@ p.event-date {
   width: 100%;
 }
 
-/* View All Workshops Button */
-.view-all-workshops-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-top: 2rem;
-}
-
-.view-all-btn {
-  font-size: 1.1rem;
-  padding: 0 2rem;
-  height: 50px;
-}
-
-
-
 .event-grid-row {
   display: flex;
   -webkit-flex-flow: row wrap;
@@ -559,10 +560,10 @@ p.event-date {
 .event-grid-col {
   display: flex;
   flex-direction: column;
-  -webkit-flex: 0 0 100%;
-  -ms-flex: 0 0 100%;
-  flex: 0 0 100%;
-  max-width: 100%;
+  -webkit-flex: 0 0 49%;
+  -ms-flex: 0 0 49%;
+  flex: 0 0 49%;
+  max-width: 49%;
 }
 
 .event-grid-item {
@@ -581,20 +582,9 @@ p.event-date {
 .event-grid-item p.event-description {
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
-  height: 11rem;
-  line-clamp: 4;
-  padding: 1rem;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
   -webkit-box-orient: vertical;
-  border: 2px solid #003266 !important;
-}
-
-.event-speakers{
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  margin-top: 1rem;
-  color: #003266;
 }
 
 .event-speakers a {
@@ -602,13 +592,13 @@ p.event-date {
   font-weight: 500 !important;
 }
 
-.event-speakersp strong {
+.event-speakers p strong {
   font-weight: 500 !important;
 }
 
 .event-speakers {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   padding-top: 0px;
 }
 
@@ -657,7 +647,7 @@ p.event-date {
   padding: 0;
 }
 .event-description {
-  padding: 10px 0px;
+  padding: 10px 0;
   line-height: 1.5;
 }
 
@@ -793,9 +783,6 @@ img.partner-logo-img {
 
   .event-item-row {
     flex-direction: column;
-    align-items: center !important;
-    gap: 0;
-    height: auto;
   }
 
   .event-title {
