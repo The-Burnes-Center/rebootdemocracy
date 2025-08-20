@@ -17,7 +17,7 @@
       </div>
     </div>
     
-    <div class="filter-container" v-if="showFilter && activeTab === 0">
+    <div class="filter-container" v-if="showFilter && (activeTab === 0 || activeTab === 1)">
       <FilterDropdown
         :options="tagOptions"
         :defaultSelected="selectedTag || 'All Topics'"
@@ -103,7 +103,7 @@ function handleTabClick(tab: TabItem, index: number) {
   activeTab.value = index;
   emit("tab-changed", index, tab.name);
 
-  if (tab.url) {
+  if (tab.url && !(index === 1 && props.showFilter)) {
     if (tab.external) {
       window.location.href = tab.url;
     } else {

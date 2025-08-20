@@ -513,6 +513,7 @@ html {
   border-bottom: 1px solid rgb(0, 51, 102);
   padding-bottom: 0.8rem;
   margin: 0;
+  font-size:22px;
   font-family: var(--font-sora);
   border-bottom: 1px solid #e6e6e6;
 }

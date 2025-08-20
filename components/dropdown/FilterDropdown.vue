@@ -66,7 +66,7 @@
           :aria-selected="isSelected(option)"
           :tabindex="focusedIndex === index ? 0 : -1"
           @keydown="handleOptionKeydown($event, option, index)"
-          :ref="(el) => setOptionRef(el, index)"
+          :ref="(el) => setOptionRef(el as HTMLElement | null, index)"
         >
           {{ typeof option === "string" ? option : option.name }}
         </div>
@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from "vue";
 
 interface TagItem {
   id?: string;
@@ -131,6 +131,13 @@ onMounted(() => {
   }
 
   document.addEventListener("click", closeDropdown);
+});
+
+// Watch for changes in defaultSelected prop and update the selected value
+watch(() => props.defaultSelected, (newDefaultSelected) => {
+  if (newDefaultSelected) {
+    selected.value = newDefaultSelected;
+  }
 });
 
 onUnmounted(() => {
