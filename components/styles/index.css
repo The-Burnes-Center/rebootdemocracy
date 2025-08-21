@@ -365,6 +365,7 @@ a:hover {
 
 .date-text {
   font-family: var(--font-sora);
+  color: #666666;
   font-weight: 600;
   font-size: 1rem;
   line-height: 28px;

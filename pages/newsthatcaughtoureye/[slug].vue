@@ -50,13 +50,17 @@
 
         <!-- Upcoming Events Section (Accordion) -->
         <section class="news-items" v-if="postData[0].events">
-          <details class="accordion" open>
-            <summary class="accordion-summary group-heading">Upcoming InnovateUS Workshops</summary>
-            <p style="font-size: 22px; line-height: 32px; padding:1rem; margin: 0rem">
-              InnovateUS delivers no-cost, at-your-own-pace, and live learning on data, digital, innovation, and AI skills. Designed for civic and public sector, programs are free and open to all.
-            </p>
+          <details class="accordion innovate-accordion" open>
+            <summary class="accordion-summary group-heading">
+              Upcoming InnovateUS Workshops
+            </summary>
+            <div class="innovate-description">
+              <p class="innovate-intro">
+                InnovateUS delivers no-cost, at-your-own-pace, and live learning on data, digital, innovation, and AI skills. Designed for civic and public sector, programs are free and open to all.
+              </p>
+            </div>
             <div class="accordion-content">
-              <div class="news-item" v-html="postData[0].events"></div>
+              <div class="innovate-events-content" v-html="postData[0].events"></div>
             </div>
           </details>
         </section>
@@ -809,5 +813,166 @@ p{
   font-size: 20px;
   line-height: 30px;
   margin: 0;
+}
+
+/* InnovateUS Workshops Specific Styling */
+.innovate-accordion {
+  border: 2px solid #cddff3;
+  background: linear-gradient(135deg, #f8fafc 0%, #e6f2ff 100%);
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.08);
+}
+
+.innovate-accordion .accordion-summary {
+  background: linear-gradient(135deg, #2b75c7 0%, #124d8f 100%);
+  color: #ffffff;
+  font-size: 20px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.innovate-accordion .accordion-summary:hover{
+  background: linear-gradient(135deg, #124d8f 0%, #2b75c7 100%);
+}
+
+.innovate-icon {
+  font-size: 24px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.innovate-description {
+  background: linear-gradient(135deg, #e6f2ff 0%, #cddff3 100%);
+  padding: 0;
+  border-bottom: 1px solid #b8d4f0;
+}
+
+.innovate-intro {
+  font-size: 18px !important;
+  line-height: 28px !important;
+  font-family: var(--font-habibi);
+  color: rgb(0, 51, 102);
+  margin: 0 !important;
+  padding: 1.25rem 1.5rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.innovate-events-content {
+  background: #ffffff;
+  padding: 0;
+}
+
+/* Style the events content to break up text blocks */
+.innovate-events-content h3,
+.innovate-events-content h4 {
+  color: rgb(0, 51, 102);
+  font-family: var(--font-sora);
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem 0;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid #e6f2ff;
+  font-size: 22px !important;
+}
+
+.innovate-events-content p {
+  font-family: var(--font-habibi);
+  font-size: 20px !important;
+  line-height: 30px !important;
+  color: #333333;
+  margin: 0.75rem 0 !important;
+  padding: 0.5rem 1rem;
+}
+
+.innovate-events-content strong {
+  font-size: 20px !important;
+  color: rgb(0, 51, 102);
+  font-weight: 600;
+}
+
+.innovate-events-content h3{
+  font-size: 20px !important;
+  color: rgb(0, 51, 102);
+  font-weight: 600;
+}
+
+.innovate-events-content ul,
+.innovate-events-content ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.innovate-events-content li {
+  font-family: var(--font-habibi);
+  font-size: 20px !important;
+  line-height: 30px !important;
+  color: #333333;
+  margin: 0.5rem 0;
+  padding: 0.25rem 0;
+}
+
+
+
+/* Add some spacing for better readability */
+.innovate-events-content > *:first-child {
+  margin-top: 1rem;
+}
+
+.innovate-events-content > *:last-child {
+  margin-bottom: 1rem;
+}
+
+/* Responsive adjustments for InnovateUS section */
+@media (max-width: 768px) {
+  .innovate-accordion .accordion-summary {
+    font-size: 20px;
+    padding: 0.875rem 1rem;
+    gap: 0.5rem;
+  }
+  
+  .innovate-icon {
+    font-size: 20px;
+  }
+  
+  .innovate-intro {
+    font-size: 16px !important;
+    line-height: 24px !important;
+    padding: 1rem;
+  }
+  
+  .innovate-events-content h3,
+  .innovate-events-content h4 {
+    font-size: 20px !important;
+    margin: 1rem 0 0.5rem 0;
+  }
+  
+  .innovate-events-content p {
+    font-size: 20px !important;
+    line-height: 28px !important;
+    padding: 0.5rem;
+  }
+  
+  .innovate-events-content a {
+    font-size: 20px !important;
+  }
+  
+  .innovate-events-content strong {
+    font-size: 20px !important;
+  }
+  
+  .innovate-events-content em,
+  .innovate-events-content .date-text {
+    font-size: 20px !important;
+  }
+  
+  .innovate-events-content li {
+    font-size: 20px !important;
+    line-height: 28px !important;
+  }
 }
 </style>
