@@ -853,8 +853,8 @@ p{
 }
 
 .innovate-intro {
-  font-size: 18px !important;
-  line-height: 28px !important;
+  font-size: 20px !important;
+  line-height: 32px !important;
   font-family: var(--font-habibi);
   color: rgb(0, 51, 102);
   margin: 0 !important;
@@ -940,8 +940,8 @@ p{
   }
   
   .innovate-intro {
-    font-size: 16px !important;
-    line-height: 24px !important;
+    font-size: 20px !important;
+    line-height: 32px !important;
     padding: 1rem;
   }
   
