@@ -874,8 +874,8 @@ p{
   color: rgb(0, 51, 102);
   font-family: var(--font-sora);
   font-weight: 600;
-  margin: 1.5rem 0 0.75rem 0;
-  padding: 0.5rem 1rem;
+  margin: 1rem 0 0.5rem 0;
+  padding: 0.5rem 0.5rem;
   border-bottom: 2px solid #e6f2ff;
   font-size: 22px !important;
 }
@@ -893,12 +893,7 @@ p{
   font-size: 20px !important;
   color: rgb(0, 51, 102);
   font-weight: 600;
-}
-
-.innovate-events-content h3{
-  font-size: 20px !important;
-  color: rgb(0, 51, 102);
-  font-weight: 600;
+  padding: 0.5rem;
 }
 
 .innovate-events-content ul,
@@ -947,8 +942,8 @@ p{
   
   .innovate-events-content h3,
   .innovate-events-content h4 {
-    font-size: 20px !important;
-    margin: 1rem 0 0.5rem 0;
+    font-size: 22px !important;
+    margin: 0.5rem 0 0.5rem 0;
   }
   
   .innovate-events-content p {
