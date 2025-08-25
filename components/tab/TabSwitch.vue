@@ -15,21 +15,21 @@
           </span>
         </button>
       </div>
-      
-      <div class="filter-container" v-if="showFilter && activeTab === 0">
+    </div>
+    
+    <div class="filter-container" v-if="showFilter && (activeTab === 0 || activeTab === 1)">
+      <FilterDropdown
+        :options="tagOptions"
+        :defaultSelected="selectedTag || 'All Topics'"
+        label="Filter by Topics:"
+        @option-selected="handleTagFilter"
+      />
         <FilterDropdown
-          :options="tagOptions"
-          :defaultSelected="selectedTag || 'All Topics'"
-          label="Filter by Topics:"
-          @option-selected="handleTagFilter"
+          :options="authorOptions"
+          :defaultSelected="selectedAuthor || 'All Authors'"
+          label="Filter by Author:"
+          @option-selected="handleAuthorFilter"
         />
-          <FilterDropdown
-            :options="authorOptions"
-            :defaultSelected="selectedAuthor || 'All Authors'"
-            label="Filter by Author:"
-            @option-selected="handleAuthorFilter"
-          />
-      </div>
     </div>
 
     <div v-if="showContent" class="tab-content">
@@ -103,7 +103,7 @@ function handleTabClick(tab: TabItem, index: number) {
   activeTab.value = index;
   emit("tab-changed", index, tab.name);
 
-  if (tab.url) {
+  if (tab.url && !(index === 1 && props.showFilter)) {
     if (tab.external) {
       window.location.href = tab.url;
     } else {

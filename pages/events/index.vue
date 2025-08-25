@@ -124,7 +124,7 @@ useSeoMeta({
     </div>
     <div class="event-selection-row">
       <h2 class="event-selector Eactive" @click="scrollMeTo('upcoming')">
-        Upcoming Events
+        Upcoming Workshops
       </h2>
       <h2 class="event-selector" @click="scrollMeTo('past-events')">
         Past Events
@@ -510,7 +510,7 @@ h2.red-subtitle span:after {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  background-color: var(--blue-light);
+  background: linear-gradient(135deg, #e6efff 0%, #e6efff 100%);
   gap: 2rem;
   padding: 1rem 0;
   border-bottom: 1px solid #000000;
@@ -538,7 +538,7 @@ p.event-date {
 
 /* Event Grid Section */
 .event-grid-section {
-  background-color: var(--blue-light);
+  background: linear-gradient(135deg, #e6efff 0%, #e6efff 100%);
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -592,7 +592,7 @@ p.event-date {
   font-weight: 500 !important;
 }
 
-.event-speakersp strong {
+.event-speakers p strong {
   font-weight: 500 !important;
 }
 
@@ -777,12 +777,12 @@ img.partner-logo-img {
   .event-grid-item {
     height: auto;
   }
+  .event-type{
+    width: 50%;
+  }
 
   .event-item-row {
     flex-direction: column;
-    align-items: center !important;
-    gap: 0;
-    height: auto;
   }
 
   .event-title {

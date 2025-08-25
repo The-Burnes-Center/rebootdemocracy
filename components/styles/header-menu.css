@@ -13,7 +13,6 @@
   --color-icon: white;
   font-style: normal;
   font-weight: 800;
-  line-height: 125%;
   cursor: pointer;
 }
 
@@ -95,9 +94,11 @@
     padding: 1rem;
     width: 100%;
   }
+
   .header-menu__label svg {
     --color-icon: #000;
   }
+
   .menu__section {
     flex-direction: column;
     width: 100%;

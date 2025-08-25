@@ -50,10 +50,60 @@ export interface GeneralEventsSeries {
 }
 
 export interface Instructor {
+  id: number;
   innovate_us_instructors_id: {
+    id: number;
+    name: string;
+    title_and_affiliation: string;
+    bio: string;
+    link_to_bio: string;
     headshot: {
       id: string;
+      filename_disk: string;
     };
+  };
+}
+
+export interface WorkshopInstructor {
+  id: number;
+  innovate_us_workshops_id: number;
+  innovate_us_instructors_id: {
+    id: number;
+    name: string;
+    title_and_affiliation: string;
+    bio: string;
+    link_to_bio: string;
+    headshot: {
+      id: string;
+      filename_disk: string;
+      storage: string;
+      uploaded_on: string;
+    };
+  };
+}
+
+export interface Workshop {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  link: string;
+  sign_up_link: string;
+  registrants?: string;
+  thumbnail?: {
+    id: string;
+    storage: string;
+    filename_disk: string;
+    uploaded_on: string;
+  };
+  instructor?: WorkshopInstructor[];
+  online_event?: boolean;
+  inperson_event?: boolean;
+  speakers?: string;
+  partner_logo?: {
+    id: string;
+    storage: string;
+    filename_disk: string;
   };
 }
 

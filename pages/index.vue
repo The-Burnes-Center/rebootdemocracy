@@ -113,6 +113,7 @@
             :tagOptions="tagOptions"
             :authorOptions="authorOptions"
             :selectedTag="selectedTag"
+            :selectedAuthor="selectedAuthor"
             @tab-changed="handleTabChange"
             @tag-filter="handleTagFilter"
             @author-filter="handleAuthorFilter"
@@ -122,7 +123,7 @@
                 v-if="!isLoading && displayPosts.length"
                 class="blog-posts-section"
                 role="region"
-                aria-label="Latest blog posts"
+                aria-label="Posts and news"
               >
                 <div class="blog-card-grid" role="list">
                   <article
@@ -133,7 +134,7 @@
                     tabindex="0"
                     @click="handlePostClick(post)"
                     @keydown="handleKeyboardNavigation($event, () => handlePostClick(post))"
-                    :aria-label="`Blog post: ${post.title} by ${getAuthorName(post)}, published ${formatDate(post.date)}`"
+                    :aria-label="`${post.type === 'news' ? 'News item' : 'Blog post'}: ${post.title} by ${getAuthorName(post)}, published ${formatDate(post.date)}`"
                   >
                     <div class="card-image" :style="{ '--bg-image': `url(${getImageUrl(post.image)})` }">
                       <img 
@@ -144,6 +145,7 @@
                     </div>
                     <div class="card-content">
                       <Text
+                        v-if="getTag(post)"
                         as="span"
                         size="xs"
                         weight="bold"
@@ -221,7 +223,7 @@
                     class="base__button base__button--secondary"
                     @click="navigateToAllPosts"
                     @keydown="handleKeyboardNavigation($event, navigateToAllPosts)"
-                    aria-label="View all blog posts"
+                    aria-label="View all posts"
                   >
                     <span class="base__btn-slot">View All Posts</span>
                   </button>
@@ -234,10 +236,10 @@
                 class="loading-state"
                 role="status"
                 aria-live="polite"
-                aria-label="Loading blog posts"
+                aria-label="Loading posts"
               >
                 <div class="loading-spinner" aria-hidden="true"></div>
-                <span class="sr-only">Loading blog posts, please wait</span>
+                <span class="sr-only">Loading posts, please wait</span>
               </div>
 
               <!-- Empty state -->
@@ -247,7 +249,7 @@
                 role="status"
                 aria-live="polite"
               >
-                <p>No blog posts available at this time.</p>
+                <p>No posts available at this time.</p>
               </div>
             </template>
           </TabSwitch>
@@ -393,28 +395,11 @@ const authorOptions = computed(() => [
 ]);
 const isLoading = computed(() => isLoadingState.value);
 
-const weeklyNewsUrl = computed(() => {
-  const newsItems =
-    latestCombinedPosts.value?.filter((post) => post.type === "news") || [];
-  const latestNews = newsItems.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  )[0];
-
-  if (latestNews?.edition) {
-    const cleanEdition = String(latestNews.edition).replace(/\D/g, "");
-    return `/newsthatcaughtoureye/${cleanEdition}`;
-  }
-
-  return `/newsthatcaughtoureye/51`;
-});
-
 const tabOptions = computed(() => [
   { title: "Latest Posts", name: "latest-posts" },
   {
-    title: "News that caught our eye",
-    name: "news",
-    url: weeklyNewsUrl.value,
-    external: true,
+    title: "News That Caught Our Eye",
+    name: "latest-posts", // Use the same template as Latest Posts
   },
   { title: "Events", name: "events", url: "/events", external: true },
 ]);
@@ -453,10 +438,16 @@ function getImageUrl(image: any): string {
 }
 
 function getTag(item: any): string {
+  // If a specific tag is selected and the item contains that tag, show it
+  if (selectedTag.value !== "All Topics" && item.Tags?.includes(selectedTag.value)) {
+    return selectedTag.value;
+  }
+  
+  // Otherwise fall back to the original logic
   if (item.Tags?.[0]) return item.Tags[0];
   if (item.category) return item.category;
-  if (item.type === "news") return "News that caught our eye";
-  return "Blog";
+  if (item.type === "news") return "News That Caught Our Eye";
+  return "";
 }
 
 // Use the utility function from the composable
@@ -519,8 +510,18 @@ function navigateToAllPosts(): void {
   });
 }
 
-function handleTabChange(_: number, name: string): void {
-  if (name === "latest-posts") resetSearch();
+async function handleTabChange(index: number, name: string): Promise<void> {
+  resetSearch();
+  
+  if (index === 1) {
+    selectedTag.value = "News That Caught Our Eye";
+    selectedAuthor.value = "All Authors"; // Reset author filter
+    await applyFilters();
+  } else if (index === 0) {
+    selectedTag.value = "All Topics";
+    selectedAuthor.value = "All Authors";
+    await applyFilters();
+  }
 }
 
 const onClick = (): void => {
@@ -541,6 +542,9 @@ async function applyFilters(): Promise<void> {
           if (post.type === 'blog') {
             return post.Tags?.includes(selectedTag.value);
           } else if (post.type === 'news') {
+            if (selectedTag.value === "News That Caught Our Eye") {
+              return true;
+            }
             return post.category === selectedTag.value || 
                    post.Tags?.includes(selectedTag.value);
           }
@@ -560,19 +564,36 @@ async function applyFilters(): Promise<void> {
       );
 
       const filteredNews = newsItems
-        .filter((n) => n.category === selectedTag.value)
+        .filter((n) => {
+                      if (selectedTag.value === "News That Caught Our Eye") {
+              return true;
+            }
+          return n.category === selectedTag.value;
+        })
         .map((n) => ({
           ...n,
           id: n.id || `news-${Date.now()}`,
-          Tags: n.category ? [n.category] : [],
+          Tags: n.category ? [n.category] : ["News That Caught Our Eye"],
         }));
 
+      // Combine blogs and news
       filteredPosts = [...filteredBlogs, ...filteredNews];
     } else {
-      displayPosts.value = allBlogPosts.value || [];
-      return;
+      const [blogs, newsItems] = await Promise.all([
+        allBlogPosts.value || [],
+        fetchWeeklyNewsItems(),
+      ]);
+      
+      const formattedNews = newsItems.map((n) => ({
+        ...n,
+        id: n.id || `news-${Date.now()}`,
+        Tags: n.category ? [n.category] : ["News That Caught Our Eye"],
+      }));
+
+      filteredPosts = [...blogs, ...formattedNews];
     }
 
+    // Sort by date
     filteredPosts.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
@@ -597,9 +618,31 @@ async function handleAuthorFilter(author: string): Promise<void> {
 }
 
 // Initialize
-onMounted(() => {
+onMounted(async () => {
   resetSearch();
-  displayPosts.value = allBlogPosts.value || [];
+  
+  // Load all posts (blogs + news) together
+  try {
+    const [blogs, newsItems] = await Promise.all([
+      allBlogPosts.value || [],
+      fetchWeeklyNewsItems(),
+    ]);
+    
+    const formattedNews = newsItems.map((n) => ({
+      ...n,
+      id: n.id || `news-${Date.now()}`,
+      Tags: n.category ? [n.category] : ["News That Caught Our Eye"],
+    }));
+
+    // Combine and sort by date
+    const allPosts = [...blogs, ...formattedNews];
+    allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    displayPosts.value = allPosts;
+  } catch (error) {
+    console.error("Error loading posts:", error);
+    displayPosts.value = allBlogPosts.value || [];
+  }
 });
 </script>
 

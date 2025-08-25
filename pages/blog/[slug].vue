@@ -106,42 +106,13 @@
                   {{ blog.title }}
                 </TitleText>
 
-                <!-- Tags + share section -->
-                <div class="tag-share-category" role="region" aria-label="Article categories and sharing options">
-                  <div class="blog-category-eyebrow">
-                    <nav aria-label="Article categories">
-                      <button
-                        v-if="blog.Tags && blog.Tags.length > 0"
-                        v-for="(tag, index) in blog.Tags"
-                        :key="index"
-                        class="category-tag"
-                        @click="navigateToCategory(tag)"
-                        @keydown="handleKeydown($event, () => navigateToCategory(tag))"
-                        :aria-label="`View all articles in category: ${tag}`"
-                        type="button"
-                      >
-                        {{ tag }}
-                      </button>
-                      <button
-                        v-else
-                        class="category-tag"
-                        @click="navigateToCategory('Blog')"
-                        @keydown="handleKeydown($event, () => navigateToCategory('Blog'))"
-                        aria-label="View all blog articles"
-                        type="button"
-                      >
-                        Blog
-                      </button>
-                    </nav>
-                  </div>
-
-                  <div class="share-widget-desktop" role="region" aria-label="Share this article">
-                    <ShareWidget
-                      :url="`https://rebootdemocracy.ai/blog/${blog.slug}`"
-                      :title="blog.title"
-                      :description="blog.excerpt || 'A Reboot Democracy article.'"
-                    />
-                  </div>
+                <!-- Share section -->
+                <div class="share-section" role="region" aria-label="Share this article">
+                  <ShareWidget
+                    :url="`https://rebootdemocracy.ai/blog/${blog.slug}`"
+                    :title="blog.title"
+                    :description="blog.excerpt || 'A Reboot Democracy article.'"
+                  />
                 </div>
 
                 <!-- Article excerpt -->
@@ -238,6 +209,42 @@
         role="article"
         aria-labelledby="article-title"
       ></article>
+    </div>
+  </section>
+
+  <!-- Tags section -->
+  <section 
+    v-if="blog && blog.Tags && blog.Tags.length > 0" 
+    class="blog-tags-section" 
+    role="region" 
+    aria-label="Article tags"
+  >
+    <div class="blog-tags-container">
+      <TitleText
+        :level="'h2'"
+        size="2xl"
+        weight="bold"
+        fontFamily="sora"
+        class="tags-heading"
+      >
+        Tags
+      </TitleText>
+      
+      <div class="blog-tags-list">
+        <nav aria-label="Article tags">
+          <button
+            v-for="(tag, index) in blog.Tags"
+            :key="index"
+            class="tag-button"
+            @click="navigateToCategory(tag)"
+            @keydown="handleKeydown($event, () => navigateToCategory(tag))"
+            :aria-label="`View all articles in category: ${tag}`"
+            type="button"
+          >
+            {{ tag }}
+          </button>
+        </nav>
+      </div>
     </div>
   </section>
 
@@ -582,6 +589,127 @@ onBeforeUnmount(() => {
   color: rgb(0, 51, 102);
 }
 
+/* Tags section at bottom of page */
+.blog-tags-section {
+ 
+  padding: 0.5rem 0;
+  margin: 0.1rem 0rem 2rem 0rem;
+}
+
+.blog-tags-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem;
+  background-color: #f8fafc;
+}
+
+.tags-heading {
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.blog-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.blog-tags-list nav{
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin: 1.5rem 0rem;
+}
+
+.tag-button {
+  cursor: pointer;
+  background-color: #cddff3;
+  color: #1e293b;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0rem 0.2rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-sora);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease-in-out;
+}
+
+.tag-button:hover {
+  background-color: #9fc3ed;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tag-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #4a6b8a;
+  border-radius: 6px;
+}
+
+/* Responsive adjustments for tags section */
+@media (max-width: 768px) {
+  .blog-tags-section {
+    padding: 2rem 0;
+    margin-top: 2rem;
+  }
+  
+  .blog-tags-container {
+    padding: 1rem 2rem;
+  }
+  
+  .tags-heading {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+  
+  .blog-tags-list {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .blog-tags-list nav{
+  flex-direction: column;
+}
+  
+  .tag-button {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .blog-tags-section {
+    padding: 1.5rem 0;
+    margin-top: 1.5rem;
+  }
+  
+  .blog-tags-container {
+    padding: 1rem 2rem;
+  }
+  
+  .tags-heading {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .blog-tags-list {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .blog-tags-list nav{
+  flex-direction: column;
+}
+  
+  .tag-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
 /* Enhanced link accessibility */
 .read-bio-link {
   text-decoration: underline;
@@ -647,6 +775,7 @@ onBeforeUnmount(() => {
 @media (prefers-contrast: high) {
   .blog-back-btn:focus,
   .category-tag:focus,
+  .tag-button:focus,
   .read-bio-link:focus {
     box-shadow: 0 0 0 3px #000000;
   }
@@ -656,10 +785,16 @@ onBeforeUnmount(() => {
 @media (prefers-reduced-motion: reduce) {
   .blog-back-btn,
   .category-tag,
+  .tag-button,
   .read-bio-link,
   .loading-spinner {
     transition: none;
     animation: none;
+    transform: none;
+  }
+  
+  .tag-button:hover {
+    transform: none;
   }
 }
 

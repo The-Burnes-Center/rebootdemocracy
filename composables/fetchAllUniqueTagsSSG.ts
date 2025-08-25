@@ -32,21 +32,17 @@ export async function fetchAllUniqueTagsForSSG(): Promise<string[]> {
         })
       )
     ]);
-
-    // --- Extract tags ---
     const uniqueTags = new Set<string>();
 
-    // Add tags from blog posts
     blogPosts.forEach((post: any) => {
       if (post.Tags && Array.isArray(post.Tags)) {
-        post.Tags.forEach(tag => uniqueTags.add(tag));
+        post.Tags.forEach((tag: string) => {
+          const normalizedTag = tag.trim();
+          uniqueTags.add(normalizedTag);
+        });
       }
     });
 
-    // Add "News that caught our eye" tag if we have any weekly news entries
-    if (weeklyNewsEntries && weeklyNewsEntries.length > 0) {
-      uniqueTags.add('News that caught our eye');
-    }
 
     return Array.from(uniqueTags).sort((a, b) => a.localeCompare(b));
   } catch (error) {
