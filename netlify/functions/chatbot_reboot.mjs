@@ -157,33 +157,42 @@ export async function searchContent(query) {
     // 1. Filter for exact matches in relevant fields
     const lowerQuery = query.toLowerCase();
     const isExactMatch = (hit) => {
-      return (
-        (hit.content && hit.content.toLowerCase().includes(lowerQuery)) ||
-        (hit.title && hit.title.toLowerCase().includes(lowerQuery)) ||
-        (hit.itemDescription && hit.itemDescription.toLowerCase().includes(lowerQuery)) ||
-        (hit.description && hit.description.toLowerCase().includes(lowerQuery)) ||
-        (hit.shortDescription && hit.shortDescription.toLowerCase().includes(lowerQuery)) ||
-        (hit.fullDescriptionOfAllContents && hit.fullDescriptionOfAllContents.toLowerCase().includes(lowerQuery)) ||
-        (hit.uncompressedContent && hit.uncompressedContent.toLowerCase().includes(lowerQuery)) ||
-        (hit.shortSummary && hit.shortSummary.toLowerCase().includes(lowerQuery)) ||
-        (hit.fullSummary && hit.fullSummary.toLowerCase().includes(lowerQuery)) ||
-        (hit.question && hit.question.toLowerCase().includes(lowerQuery)) ||
-        (hit.answer && hit.answer.toLowerCase().includes(lowerQuery)) ||
-        (hit.itemAuthor && hit.itemAuthor.toLowerCase().includes(lowerQuery)) ||
-        (hit.author && hit.author.toLowerCase().includes(lowerQuery)) ||
-        (hit.authors && Array.isArray(hit.authors) && hit.authors.some(author => author.toLowerCase().includes(lowerQuery)))
+      // Check if any field contains the query (case-insensitive)
+      const searchableFields = [
+        hit.content,
+        hit.title,
+        hit.itemDescription,
+        hit.description,
+        hit.shortDescription,
+        hit.fullDescriptionOfAllContents,
+        hit.uncompressedContent,
+        hit.shortSummary,
+        hit.fullSummary,
+        hit.question,
+        hit.answer,
+        hit.itemAuthor,
+        hit.author,
+        ...(Array.isArray(hit.authors) ? hit.authors : [])
+      ].filter(Boolean); // Remove null/undefined values
+
+      return searchableFields.some(field => 
+        field.toLowerCase().includes(lowerQuery)
       );
     };
     const exactMatches = allResults.filter(isExactMatch);
+    console.log('Total results:', allResults.length);
+    console.log('Exact matches:', exactMatches.length);
 
     // 2. Take up to 5, prioritizing exact matches
     let topChunks = [];
     if (exactMatches.length > 0) {
       // Sort exact matches by distance/certainty
       topChunks = exactMatches.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
+      console.log('Using exact matches');
     } else {
       // If no exact matches, use top 5 by distance/certainty
       topChunks = allResults.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
+      console.log('Using all results (no exact matches)');
     }
 
     return topChunks.slice(0, 5);
@@ -231,7 +240,9 @@ export async function handler(event, context) {
   try {
     const searchResults = await searchContent(message);
     const formattedResults = formatSearchResults(searchResults);
-    console.log(formattedResults)
+    console.log('Search query:', message);
+    console.log('Number of search results:', searchResults.length);
+    console.log('Formatted results:', formattedResults);
     /********************************
      * Build messages for GPT model *
      ********************************/
@@ -244,6 +255,7 @@ Instructions:
 - Look carefully at all in your context before you present the information to the user.
 - **If the context contains a direct mention of the user’s query (e.g., a person’s name), focus your answer on that information first.**
 - **When searching for a person's name, check both the content and the author fields in the search results. If you find articles written by that person or mentioning that person, highlight this information prominently.**
+- **CRITICAL: If the search results show information about the person (even if it's not the first result), you must include that information in your response.**
 - Be optimistic and cheerful but keep a professional nordic style of voice.
 - For longer outputs use bullet points and markdown to make the information easy to read.
 - Do not reference your contexts and the different document sources—just provide the information based on those sources.
