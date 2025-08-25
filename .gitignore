@@ -1,27 +1,27 @@
+# Nuxt dev/build outputs
+.output
+ssg
+.data
+.nuxt
+.nitro
+.cache
+dist
+.netlify/functions-internal
+
+# Node dependencies
+node_modules
+
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-dist/
-node_modules/
-package-lock.json*
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Misc
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.env
+.fleet
+.idea
 
-# Local Netlify folder
+# Local env files
+.env
+.env.*
+!.env.example
 .netlify

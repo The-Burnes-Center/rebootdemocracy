@@ -1,0 +1,171 @@
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-justify {
+  text-align: justify;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title-line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title-line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title-line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Margin classes */
+.paragraph-margin-none {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.paragraph-margin-xs {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.paragraph-margin-sm {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.paragraph-margin-md {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.paragraph-margin-lg {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.paragraph-margin-xl {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Margin top specific classes */
+.paragraph-margin-top-none {
+  margin-top: 0;
+}
+.paragraph-margin-top-xs {
+  margin-top: 0.25rem;
+}
+.paragraph-margin-top-sm {
+  margin-top: 0.5rem;
+}
+.paragraph-margin-top-md {
+  margin-top: 1rem;
+}
+.paragraph-margin-top-lg {
+  margin-top: 1.5rem;
+}
+.paragraph-margin-top-xl {
+  margin-top: 2rem;
+}
+
+/* Margin bottom specific classes */
+.paragraph-margin-bottom-none {
+  margin-bottom: 0;
+}
+.paragraph-margin-bottom-xs {
+  margin-bottom: 0.25rem;
+}
+.paragraph-margin-bottom-sm {
+  margin-bottom: 0.5rem;
+}
+.paragraph-margin-bottom-md {
+  margin-bottom: 1rem;
+}
+.paragraph-margin-bottom-lg {
+  margin-bottom: 1.5rem;
+}
+.paragraph-margin-bottom-xl {
+  margin-bottom: 2rem;
+}
+
+/* Line height classes */
+.paragraph-line-height-tight {
+  line-height: 1.25px;
+}
+.paragraph-line-height-normal {
+  line-height: 24px;
+}
+.paragraph-line-height-relaxed {
+  line-height: 28px;
+}
+.paragraph-line-height-loose {
+  line-height: 32px;
+}
+.paragraph-line-height-more-loose {
+  line-height: 36px;
+}
+
+.paragraph-line-height-extra-loose {
+  line-height: 40px;
+}
+.paragraph-line-height-super-loose{
+  line-height: 45px;
+}
+/* Line clamp classes */
+.paragraph-line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paragraph-line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paragraph-line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paragraph-line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paragraph-line-clamp-5 {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

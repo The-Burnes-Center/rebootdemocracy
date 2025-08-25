@@ -1,0 +1,133 @@
+// Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
+import { createDirectus, rest, readItems } from '@directus/sdk';
+import he from 'he';
+
+const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
+
+export const handler = async function (event, context) {
+  try {
+    const jstoxml = await import('jstoxml');
+    const toXML = jstoxml.toXML || jstoxml.default || jstoxml;
+    const publicData = await directus.request(
+      readItems('reboot_democracy_weekly_news', {
+        filter: {
+          _and: [
+            {
+              status: { _eq: 'published' }
+            }
+          ]
+        },
+        limit: -1,
+        sort: ['-id'],
+        fields: ['*.*,items.reboot_democracy_weekly_news_items_id.*']
+      })
+    );
+
+    let newsData;
+    if (publicData && Array.isArray(publicData)) {
+      newsData = publicData;
+    } else if (publicData && publicData.data) {
+      newsData = publicData.data;
+    }
+
+    if (!newsData || newsData.length === 0) {
+      return {
+        statusCode: 404,
+        body: 'No news data found.'
+      };
+    }
+
+    const channel = [
+      { title: newsData[0].title },
+      { description: newsData[0].summary },
+      { link: 'https://rebootdemocracy.ai' },
+      { lastBuildDate: () => new Date().toUTCString() },
+      { pubDate: () => new Date().toUTCString() },
+      { language: 'en' },
+      {
+        _name: 'atom:link',
+        _attrs: {
+          href: 'https://rebootdemocracy.ai/feed/rss',
+          rel: 'self',
+          type: 'application/rss+xml'
+        }
+      }
+    ];
+
+    newsData.map((e) => {
+      const item = {};
+      item['item'] = {};
+      item['item']['title'] = e.title;
+      item['item']['description'] = {
+        _cdata: decodeEntities(e.events || '')
+      };
+      item['item']['source'] = {
+        _cdata: decodeEntities(e.announcements || '')
+      };
+      item['item']['pubDate'] = e.date;
+      item['item']['GUID'] = e.id;
+      channel.push(item);
+    });
+
+    const xmlOptions = {
+      header: true,
+      indent: '  '
+    };
+
+    const rssFeed = toXML(
+      {
+        _name: 'rss',
+        _attrs: {
+          version: '2.0',
+          ['xmlns:atom']: 'http://www.w3.org/2005/Atom',
+          ['xmlns:media']: 'http://search.yahoo.com/mrss/'
+        },
+        _content: {
+          channel: channel
+        }
+      },
+      xmlOptions
+    );
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8'
+      },
+      body: rssFeed
+    };
+  } catch (error) {
+    console.error('Error generating RSS:', error);
+    return {
+      statusCode: 500,
+      body: 'Internal Server Error: ' + error.message + '\n\nStack: ' + error.stack
+    };
+  }
+};
+
+function addLeadingZero(num) {
+  num = num.toString();
+  while (num.length < 2) num = '0' + num;
+  return num;
+}
+
+function decodeEntities(encodedString) {
+  return he.decode(encodedString || '');
+}
+
+function buildRFC822Date(dateString) {
+  const dayStrings = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthStrings = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const timeStamp = Date.parse(dateString);
+  const date = new Date(timeStamp);
+
+  const day = dayStrings[date.getDay()];
+  const dayNumber = addLeadingZero(date.getDate());
+  const month = monthStrings[date.getMonth()];
+  const year = date.getFullYear();
+  const time = `${addLeadingZero(date.getHours())}:${addLeadingZero(date.getMinutes())}:00`;
+  const timezone = date.getTimezoneOffset() === 0 ? 'GMT' : 'BST';
+
+  return `${day}, ${dayNumber} ${month} ${year} ${time} ${timezone}`;
+}

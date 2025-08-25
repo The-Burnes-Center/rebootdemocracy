@@ -1,0 +1,10 @@
+.blog-collaborators-container {
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+  
+  .collaborators-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }

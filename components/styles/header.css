@@ -1,0 +1,244 @@
+/* ===================================
+   VARIABLES & GLOBAL STYLES
+   =================================== */
+
+/* Global Focus States */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #e3d9d9;
+}
+
+/* Link Transitions */
+a {
+  transition: color 0.2s ease;
+}
+
+/* Prevent Layout Shift */
+.header-content__section * {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===================================
+   BASE HEADER STYLES
+   =================================== */
+
+.header-content__section {
+  padding: 0.9rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  background-color: #003266;
+}
+
+/* Enhanced shadow when scrolled */
+.header-content__section.scrolled {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header spacer for fixed positioning */
+.header-spacer {
+  height: 50px;
+}
+
+/* ===================================
+   LOGO STYLES
+   =================================== */
+
+.header__logo {
+  display: flex;
+  flex-direction: row;
+  gap: 0.8rem;
+}
+
+.header__logo a:focus-visible {
+  outline: 0.5px solid #4a6b8a;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.hero__first-partner img {
+  padding: 1px;
+  width: 135px;
+  height: auto;
+  object-fit: contain;
+}
+
+.hero__second-partner img {
+  width: 130px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ===================================
+   MOBILE MENU TOGGLE
+   =================================== */
+
+.mobile-menu-toggle {
+  cursor: pointer;
+  z-index: 10002;
+  padding: 0.5rem;
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.mobile-menu-toggle:hover {
+  transform: scale(1.1);
+}
+
+.mobile-menu-toggle svg {
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover svg path {
+  stroke-width: 3;
+}
+
+/* ===================================
+   SEARCH STYLES
+   =================================== */
+
+.search-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Base Search Input */
+.header__search,
+.search-container input {
+  font-family: var(--font-habibi);
+  transition: all 0.3s ease;
+}
+
+.header__search {
+  padding: 2px;
+  border-radius: 4px;
+  border: 1px solid var(--Color, #000);
+  width: 16rem;
+  height: 1.75rem;
+}
+
+/* Search Icon */
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Algolia Search Box Styles */
+.search-container :deep(.ais-SearchBox-input) {
+  padding: 8px 12px;
+  border: 1px solid #000;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+  font-family: var(--font-habibi);
+  width: 250px;
+}
+
+.search-container :deep(.ais-SearchBox-input:hover) {
+  border-color: #6182a2;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 2px 8px rgba(97, 130, 162, 0.2);
+}
+
+.search-container :deep(.ais-SearchBox-input:focus) {
+  outline: none;
+  border-color: #4a6b8a;
+  box-shadow: 0 0 0 3px rgba(97, 130, 162, 0.15);
+  background: white;
+}
+
+/* Algolia Search Buttons */
+.search-container :deep(.ais-SearchBox-submit),
+.search-container :deep(.ais-SearchBox-reset) {
+  transition: all 0.2s ease;
+}
+
+.search-container :deep(.ais-SearchBox-submit:hover),
+.search-container :deep(.ais-SearchBox-reset:hover) {
+  opacity: 0.7;
+  transform: scale(1.1);
+}
+
+/* ===================================
+   BUTTON STYLES
+   =================================== */
+
+.btn-header {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ===================================
+   DESKTOP STYLES (1051px+)
+   =================================== */
+
+@media (min-width: 1051px) {
+  /* Sticky header for desktop */
+  .header-content__section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+  }
+}
+
+/* ===================================
+   MOBILE STYLES (max 1050px)
+   =================================== */
+
+@media (max-width: 1050px) {
+
+
+  /* Mobile header adjustments */
+  .header-content__section {
+    z-index: 999;
+    gap: 1rem;
+    padding: 0.9rem 2rem;
+  }
+
+  /* Remove header spacer on mobile */
+  .header-spacer {
+    height: 0;
+  }
+
+  /* Mobile navigation overlay */
+  .nav-mobile-open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 9999;
+    padding-top: 60px;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease;
+    width: 100%;
+    height: 100vh;
+  }
+
+  /* Hide header button on mobile */
+  .btn-header {
+    display: none;
+  }
+}
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

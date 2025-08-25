@@ -1,0 +1,55 @@
+blockquote.quote-block {
+  font-size: 2rem;
+  line-height: 38.4px;
+  padding-left: 2.3rem;
+  margin: 2rem 0;
+  position: relative;
+  border-left: 8px solid #2563eb;
+  color: #111827;
+  background-color: #fafafa;
+  font-weight: 400;
+  border-radius: 0.25rem;
+  font-family: var(--font-habibi);
+}
+
+blockquote.quote-block::before {
+  content: "\201C";
+  display: block;
+  color: #0d63eb;
+  font-family: "Geist Mono";
+  font-size: 80px;
+  font-style: normal;
+  position: relative;
+  font-weight: 400;
+  margin-right: 0.25rem;
+  top: 0;
+}
+
+blockquote.quote-block p {
+  font-family: var(--font-habibi);
+  font-weight: 400;
+  line-height: 120%;
+  color: #111827;
+  margin: 0;
+  display: inline;
+}
+
+.quote-block-content {
+  font-family: var(--font-habibi);
+  display: inline;
+}
+
+.quote-block-footer {
+  display: block;
+  margin-top: 1rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: var(--font-habibi);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+blockquote.quote-block p + .quote-block-footer {
+  margin-top: 1rem;
+}

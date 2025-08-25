@@ -1,0 +1,132 @@
+.footer {
+  width: 100%;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.1),
+    0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 2px 6px 0px rgba(0, 0, 0, 0.05);
+  padding: 60px 0;
+}
+
+.footer__container {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.footer__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 148px;
+}
+
+.footer__link {
+  font-family: var(--font-habibi);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  color: #1e1e1e;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer__link:hover {
+  color: #0d63eb;
+}
+
+.footer__content {
+  display: flex;
+  gap: 40px;
+}
+
+.footer__text-block {
+  width: 700px;
+}
+
+.footer__text-block p {
+  font-family: var(--font-habibi);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #000000;
+  margin: 0;
+}
+
+.footer__logos {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.footer__logo img {
+  object-fit: contain;
+}
+
+.footer__logo:first-child img {
+  width: 197px;
+  height: 35px;
+  padding-left: 3rem;
+}
+
+.footer__logo:last-child img {
+  width: 141px;
+  height: 25px;
+  padding: 1px;
+}
+
+/* Responsive styles for tablets */
+@media (max-width: 1024px) {
+  .footer__container {
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+
+  .footer__content {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .footer__text-block {
+    width: 45%;
+  }
+
+  .footer__nav {
+    order: 1;
+  }
+
+  .footer__logos {
+    order: 2;
+    flex-direction: row;
+    gap: 5px;
+  }
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+  .footer__container {
+    flex-direction: column;
+    gap: 40px;
+    padding: 0 20px;
+  }
+
+  .footer__content {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .footer__text-block {
+    width: 100%;
+  }
+
+  .footer__logos {
+    align-items: flex-start;
+  }
+
+  .footer__logo:first-child img {
+    padding-left: 0rem;
+    width: 180px;
+  }
+}

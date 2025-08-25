@@ -1,0 +1,40 @@
+
+  
+  .share-widget__icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .share-widget__icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+  
+  .share-widget__icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 480px) {
+    .share-widget {
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      height: auto;
+      gap: 12px;
+    }
+  
+    
+    .share-widget__icons {
+      width: 100%;
+      justify-content: center;
+    }
+  }
