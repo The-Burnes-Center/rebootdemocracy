@@ -95,13 +95,7 @@ const ragDocumentChunkFields = `
   _additional { id distance certainty }
 `;
 
-const chatbotAnswerFields = `
-  question
-  answer
-  retrievalContext
-  timestamp
-  _additional { id distance certainty }
-`;
+
 
 /*********************************************
  *  Search helper – BM25 then nearText       *
@@ -151,15 +145,14 @@ async function searchWeaviate(className, fields, query) {
 export async function searchContent(query) {
   try {
     // Search across all available collections in the migrated instance
-    const [newsHits, blogHits, ragDocHits, ragChunkHits, chatbotHits] = await Promise.all([
+    const [newsHits, blogHits, ragDocHits, ragChunkHits] = await Promise.all([
       searchWeaviate('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
       searchWeaviate('RebootBlogPostChunk',  blogPostChunkFields,  query),
       searchWeaviate('RagDocument',          ragDocumentFields,    query),
-      searchWeaviate('RagDocumentChunk',     ragDocumentChunkFields, query),
-      searchWeaviate('RDChatbotAnswer',      chatbotAnswerFields,  query)
+      searchWeaviate('RagDocumentChunk',     ragDocumentChunkFields, query)
     ]);
     
-    const allResults = [...newsHits, ...blogHits, ...ragDocHits, ...ragChunkHits, ...chatbotHits];
+    const allResults = [...newsHits, ...blogHits, ...ragDocHits, ...ragChunkHits];
 
     // 1. Filter for exact matches in relevant fields
     const lowerQuery = query.toLowerCase();
@@ -218,8 +211,7 @@ function formatSearchResults(results) {
         return `\n**${r.title || 'Untitled'}**\n- *Category*: ${r.primaryCategory || r.secondaryCategory || 'N/A'}\n- *Date*: ${(r.date || r.lastModified || 'N/A').toString().substring(0, 10)}\n- *Content*: ${r.shortDescription || r.description || r.fullDescriptionOfAllContents || ''}\n- *URL*: ${r.url || 'N/A'}`.trim();
       case 'RagDocumentChunk':
         return `\n**${r.title || 'Untitled'}**\n- *Content*: ${r.shortSummary || r.fullSummary || r.uncompressedContent || r.compressedContent || ''}\n- *URL*: ${r.mainExternalUrlFound || 'N/A'}`.trim();
-      case 'RDChatbotAnswer':
-        return `\n**Q: ${r.question || 'Untitled'}**\n- *Answer*: ${r.answer || ''}\n- *Context*: ${r.retrievalContext || ''}`.trim();
+
       default:
         return '';
     }
@@ -325,9 +317,7 @@ Instructions:
       if (r._className === 'RagDocumentChunk') {
         return r.mainExternalUrlFound ? [{ title: r.title, url: r.mainExternalUrlFound }] : [];
       }
-      if (r._className === 'RDChatbotAnswer') {
-        return r.retrievalContext && r.retrievalContext.length > 0 ? [{ title: r.question, url: r.retrievalContext }] : [];
-      }
+
       return [];
     });
 
