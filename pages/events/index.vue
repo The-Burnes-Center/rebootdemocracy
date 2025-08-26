@@ -198,7 +198,7 @@ useSeoMeta({
                   :href="event_item.sign_up_link"
                   target="_blank"
                   class="btn btn-primary btn-dark btn-medium register-btn"
-                >Register Now</a>
+                >REGISTER NOW</a>
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ useSeoMeta({
           target="_blank"
           class="view-more-btn"
         >
-          View more workshops
+           VIEW MORE WORKSHOPS
         </a>
       </div>
     </div>
@@ -258,7 +258,7 @@ useSeoMeta({
               :href="event_item.event_element.link"
               target="_blank"
               class="btn btn-secondary btn-dark btn-medium"
-              >Watch</a
+              >WATCH</a
             >
           </div>
         </div>
@@ -382,7 +382,7 @@ useSeoMeta({
   padding: 0.75rem 1.5rem;
   background-color: #003366;
   color: #ffffff;
-  font-family: var(--font-sora);
+  font-family: var(--font-habibi);
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
