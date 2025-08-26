@@ -14,12 +14,17 @@ import { useSeoMeta } from "#imports";
 const route = useRoute();
 const iniLoad = ref(0);
 const showingFullText = ref(true);
+const activeSection = ref('upcoming');
 
 // Rest of your component code remains the same...
 const { data: indexData } = await useAsyncData("reboot-index", fetchIndexData);
 const { data: allEventsRaw } = await useAsyncData(
   "reboot-events",
   fetchEventsData
+);
+const { data: workshopsData } = await useAsyncData(
+  "reboot-workshops",
+  fetchUpcomingWorkshops
 );
 const { data: seriesData } = await useAsyncData(
   "reboot-series",
@@ -62,12 +67,16 @@ const accordionContent = computed(() => {
 const pageslug = ref(route.query);
 const path = ref(route.fullPath);
 
-const scrollMeTo = (refName: string) => {
+const scrollToSection = (sectionId: string) => {
   if (process.client) {
-    const element = document.querySelector(`[ref="${refName}"]`) as HTMLElement;
+    const element = document.getElementById(sectionId);
     if (element) {
-      const top = element.offsetTop - 80;
-      window.scrollTo(0, top);
+      const top = element.offsetTop - 100; // Adjust offset for header
+      window.scrollTo({
+        top,
+        behavior: 'smooth'
+      });
+      activeSection.value = sectionId;
     }
   }
 };
@@ -123,112 +132,64 @@ useSeoMeta({
       </div>
     </div>
     <div class="event-selection-row">
-      <h2 class="event-selector Eactive" @click="scrollMeTo('upcoming')">
+      <h2 class="event-selector" :class="{ 'Eactive': activeSection === 'upcoming' }" @click="scrollToSection('upcoming')">
         Upcoming Workshops
       </h2>
-      <h2 class="event-selector" @click="scrollMeTo('past-events')">
+      <h2 class="event-selector" :class="{ 'Eactive': activeSection === 'past-events' }" @click="scrollToSection('past-events')">
         Past Events
       </h2>
     </div>
     <div ref="upcoming" class="event-grid-section">
       <div class="event-grid-row">
+        <h3 id="upcoming">Upcoming Workshops</h3>
         <div
           class="event-grid-col"
-          v-for="event_item in eventsData"
-          :key="event_item.event_element.id"
-          v-show="isFutureDate(new Date(event_item.event_element.date))"
+          v-for="event_item in workshopsData"
+          :key="event_item.id"
+          v-show="isFutureDate(new Date(event_item.date))"
         >
           <div class="event-grid-item">
             <div class="event-grid-padding">
               <div class="event-title">
-                <h3>{{ event_item.event_element.title }}</h3>
+                <h3>{{ event_item.title}}</h3>
+                <div class="workshop-meta">
+                  <p class="workshop-series-tag">{{ event_item.workshop_series }}</p>
+                  <p class="workshop-date">{{ formatDateTime(new Date(event_item.date)) }} ET</p>
+                </div>
               </div>
               <div class="event-item-row">
-                <div class="event-image">
-                  <img
-                    v-if="
-                      !event_item.event_element.instructor &&
-                      event_item.event_element.thumbnail
-                    "
-                    :src="getImageUrl(event_item.event_element.thumbnail)"
-                  />
-                  <div
-                    v-for="(instructor_item, index) in event_item.event_element
-                      .instructor"
-                    v-show="index < 1"
-                    :key="index"
-                  >
-                    <img
-                      :src="
-                        getImageUrl({
-                          filename_disk:
-                            instructor_item.innovate_us_instructors_id.headshot
-                              ?.filename_disk,
-                        })
-                      "
-                    />
-                  </div>
-                </div>
                 <div class="event-text">
-                  <div class="event-speakers">
-                    <p v-if="event_item.event_element.speakers">
-                      Speaker(s):&nbsp;
-                    </p>
-                    <div v-html="event_item.event_element.speakers"></div>
-                  </div>
-                  <p
+                  <div
                     class="event-description"
-                    v-html="event_item.event_element.description"
-                  ></p>
-                  <p
-                    class="event-type"
-                    v-if="
-                      event_item.event_element.online_event &&
-                      !event_item.event_element.inperson_event
-                    "
-                  >
-                    <i class="fa-solid fa-video"></i> Online
-                  </p>
-                  <p
-                    class="event-type"
-                    v-if="event_item.event_element.inperson_event"
-                  >
-                    <i class="fa-solid fa-building-user"></i> Hybrid
-                  </p>
-                  <p class="event-date">
-                    {{
-                      formatDateTime(new Date(event_item.event_element.date))
-                    }}
-                    ET
-                  </p>
+                    v-html="event_item.description"
+                  ></div>
+                  <div class="event-speakers" v-if="event_item.instructor && event_item.instructor.length > 0">
+                    <p>Instructor(s):&nbsp;</p>
+                    <div>
+                      <span v-for="(instructor, index) in event_item.instructor" :key="instructor.innovate_us_instructors_id.name">
+                        {{ instructor.innovate_us_instructors_id.name }}
+                        <span v-if="instructor.innovate_us_instructors_id.title_and_affiliation">
+                          ({{ instructor.innovate_us_instructors_id.title_and_affiliation }})
+                        </span>
+                        <span v-if="index < event_item.instructor.length - 1">, </span>
+                      </span>
+                    </div>
+                  </div>
                   <a
-                    :href="event_item.event_element.link"
+                    v-if="event_item.sign_up_link"
+                    :href="event_item.sign_up_link"
                     target="_blank"
                     class="btn btn-primary btn-dark btn-medium register-btn"
-                    >Register</a
-                  >
+                  >Register Now</a>
                 </div>
-              </div>
-            </div>
-            <div
-              class="event-item-partnership-row"
-              v-if="event_item.event_element.partner_logo"
-            >
-              <div class="partner-logo-section">
-                <p class="partnership-label">In Partnership with:</p>
-                <img
-                  class="partner-logo-img"
-                  v-if="event_item.event_element.partner_logo"
-                  :src="getImageUrl(event_item.event_element.partner_logo)"
-                />
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div ref="past-events" class="event-grid-section">
-      <h3>Past Events</h3>
+    <div class="event-grid-section">
+      <h3 id="past-events">Past Events</h3>
       <div class="past-event-grid-row">
         <div
           class="past-event-grid-item"
@@ -364,9 +325,22 @@ useSeoMeta({
 
 .events-page .register-btn {
   color: #ffffff;
-  background: #fc6423 !important;
-  height: 100% !important;
-  margin-top: 20px !important;
+  background: #003366 !important;
+  height: auto !important;
+  margin-top: 1rem !important;
+  padding: 0.5rem 1.5rem !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9375rem !important;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  border: none !important;
+}
+
+.register-btn:hover {
+  background: #004480 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .events-page .btn-dark {
@@ -560,19 +534,29 @@ p.event-date {
 .event-grid-col {
   display: flex;
   flex-direction: column;
-  -webkit-flex: 0 0 49%;
-  -ms-flex: 0 0 49%;
-  flex: 0 0 49%;
-  max-width: 49%;
+  -webkit-flex: 0 0 100%;
+  -ms-flex: 0 0 100%;
+  flex: 0 0 100%;
+  max-width: 100%;
+  margin-bottom: 1.5rem;
 }
 
 .event-grid-item {
   width: 100%;
-  min-height: 400px;
-  background-color: #ffffff;
-  border: 1px solid #000000;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+.event-grid-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
 }
 
 .event-grid-item p {
@@ -598,18 +582,35 @@ p.event-date {
 
 .event-speakers {
   display: flex;
-  flex-direction: row;
-  padding-top: 0px;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+  background: linear-gradient(135deg, #e6efff 0%, #f0f5ff 100%);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 51, 102, 0.1);
+}
+
+.event-speakers p {
+  font-weight: 600;
+  color: #003366;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.event-speakers div {
+  color: #444;
+  line-height: 1.4;
+  font-size: 0.9375rem;
 }
 
 .event-grid-padding {
-  padding: 1rem 2rem;
-  border-bottom: 0px solid #000000;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  height: 100%;
+  gap: 1rem;
 }
 
 .event-tag-row {
@@ -647,8 +648,15 @@ p.event-date {
   padding: 0;
 }
 .event-description {
-  padding: 10px 0;
+  font-size: 0.9375rem;
   line-height: 1.5;
+  color: #444;
+  margin: 0.5rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 img.partner-logo-img {
@@ -693,8 +701,51 @@ img.partner-logo-img {
 }
 
 .event-title {
-  margin-bottom: 1rem;
+  width: 100%;
   line-height: 1.5;
+}
+
+.event-title h3 {
+  font-size: 1.25rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.workshop-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.workshop-series-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, #e6efff 0%, #e6efff 100%);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: fit-content;
+}
+
+.workshop-date {
+  color: #003366;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.workshop-date::before {
+  content: "📅";
+  font-size: 1.5em;
+  opacity: 0.8;
 }
 
 .event-type {
