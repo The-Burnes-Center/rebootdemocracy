@@ -204,6 +204,15 @@ useSeoMeta({
           </div>
         </div>
       </div>
+      <div class="view-more-container">
+        <a 
+          href="https://innovate-us.org/workshops?series=Democratic+Engagement"
+          target="_blank"
+          class="view-more-btn"
+        >
+          View more workshops
+        </a>
+      </div>
     </div>
     <div class="event-grid-section">
       <h3 id="past-events">Past Events</h3>
@@ -358,6 +367,42 @@ useSeoMeta({
   background: #004480 !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.view-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.view-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background-color: #003366;
+  color: #ffffff;
+  font-family: var(--font-sora);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 51, 102, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 51, 102, 0.05);
+  transition: all 0.2s ease;
+}
+
+.view-more-btn:hover {
+  background: linear-gradient(135deg, #f0f5ff 0%, #f5f8ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.1);
+}
+
+@media (max-width: 768px) {
+  .view-more-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
 }
 
 .events-page .btn-dark {
