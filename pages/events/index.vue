@@ -16,6 +16,13 @@ const iniLoad = ref(0);
 const showingFullText = ref(true);
 const activeSection = ref('upcoming');
 
+// For accordion functionality
+const expandedWorkshop = ref<number | null>(null);
+
+const toggleAccordion = (workshopId: number) => {
+  expandedWorkshop.value = expandedWorkshop.value === workshopId ? null : workshopId;
+};
+
 // Rest of your component code remains the same...
 const { data: indexData } = await useAsyncData("reboot-index", fetchIndexData);
 const { data: allEventsRaw } = await useAsyncData(
@@ -26,6 +33,11 @@ const { data: workshopsData } = await useAsyncData(
   "reboot-workshops",
   fetchUpcomingWorkshops
 );
+
+// Set first workshop as expanded by default
+if (workshopsData.value && workshopsData.value.length > 0) {
+  expandedWorkshop.value = workshopsData.value[0].id;
+}
 const { data: seriesData } = await useAsyncData(
   "reboot-series",
   fetchSeriesData
@@ -148,40 +160,45 @@ useSeoMeta({
           :key="event_item.id"
           v-show="isFutureDate(new Date(event_item.date))"
         >
-          <div class="event-grid-item">
-            <div class="event-grid-padding">
-              <div class="event-title">
-                <h3>{{ event_item.title}}</h3>
-                <div class="workshop-meta">
-                  <p class="workshop-series-tag">{{ event_item.workshop_series }}</p>
-                  <p class="workshop-date">{{ formatDateTime(new Date(event_item.date)) }} ET</p>
-                </div>
+          <div class="workshop-accordion">
+            <div 
+              class="workshop-header" 
+              @click="toggleAccordion(event_item.id)"
+              :class="{ 'is-active': expandedWorkshop === event_item.id }"
+            >
+              <div class="workshop-header-left">
+                <h3>{{ event_item.title }}</h3>
+                <p class="workshop-series-tag">{{ event_item.workshop_series }}</p>
               </div>
-              <div class="event-item-row">
-                <div class="event-text">
-                  <div
-                    class="event-description"
-                    v-html="event_item.description"
-                  ></div>
-                  <div class="event-speakers" v-if="event_item.instructor && event_item.instructor.length > 0">
-                    <p>Instructor(s):&nbsp;</p>
-                    <div>
-                      <span v-for="(instructor, index) in event_item.instructor" :key="instructor.innovate_us_instructors_id.name">
-                        {{ instructor.innovate_us_instructors_id.name }}
-                        <span v-if="instructor.innovate_us_instructors_id.title_and_affiliation">
-                          ({{ instructor.innovate_us_instructors_id.title_and_affiliation }})
-                        </span>
-                        <span v-if="index < event_item.instructor.length - 1">, </span>
+              <div class="workshop-header-right">
+                <p class="workshop-date">{{ formatDateTime(new Date(event_item.date)) }} ET</p>
+                <span class="accordion-arrow" :class="{ 'is-expanded': expandedWorkshop === event_item.id }">▼</span>
+              </div>
+            </div>
+            <div class="workshop-content" :class="{ 'is-expanded': expandedWorkshop === event_item.id }">
+              <div class="workshop-content-inner">
+                <div
+                  class="event-description"
+                  v-html="event_item.description"
+                ></div>
+                <div class="event-speakers" v-if="event_item.instructor && event_item.instructor.length > 0">
+                  <p>Instructor(s):&nbsp;</p>
+                  <div>
+                    <span v-for="(instructor, index) in event_item.instructor" :key="instructor.innovate_us_instructors_id.name">
+                      {{ instructor.innovate_us_instructors_id.name }}
+                      <span v-if="instructor.innovate_us_instructors_id.title_and_affiliation">
+                        ({{ instructor.innovate_us_instructors_id.title_and_affiliation }})
                       </span>
-                    </div>
+                      <span v-if="index < event_item.instructor.length - 1">, </span>
+                    </span>
                   </div>
-                  <a
-                    v-if="event_item.sign_up_link"
-                    :href="event_item.sign_up_link"
-                    target="_blank"
-                    class="btn btn-primary btn-dark btn-medium register-btn"
-                  >Register Now</a>
                 </div>
+                <a
+                  v-if="event_item.sign_up_link"
+                  :href="event_item.sign_up_link"
+                  target="_blank"
+                  class="btn btn-primary btn-dark btn-medium register-btn"
+                >Register Now</a>
               </div>
             </div>
           </div>
@@ -500,7 +517,7 @@ h2.event-selector {
 }
 
 h2.event-selector.Eactive {
-  font-size: 1.4em;
+  font-size: 1.2em;
   opacity: 100%;
   font-family: var(--font-sora);
 }
@@ -541,22 +558,117 @@ p.event-date {
   margin-bottom: 1.5rem;
 }
 
-.event-grid-item {
+.workshop-accordion {
   width: 100%;
-  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
-  position: relative;
+  margin-bottom: 1rem;
   overflow: hidden;
+}
+
+.workshop-header {
+  padding: 1rem 1.5rem;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e6efff;
+}
+
+@media (max-width: 768px) {
+  .workshop-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.workshop-header:hover {
+  background: #fafbff;
+}
+
+.workshop-header.is-active {
+  background: #fafbff;
+}
+
+.workshop-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.workshop-header-left h3 {
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .workshop-header-left {
+    width: 100%;
+  }
+  
+  .workshop-header-left h3 {
+    font-size: 1.125rem;
+    text-wrap: wrap;
+
+  }
 }
 
 
 
-.event-grid-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+.workshop-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .event-selection-row{
+    gap:1rem;
+    padding:0.5rem;
+  }
+  .workshop-header-right {
+    width: 100%;
+    gap:0.2rem;
+    justify-content: space-between;
+  }
+}
+
+.accordion-arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+  color: #666;
+}
+
+.accordion-arrow.is-expanded {
+  transform: rotate(180deg);
+}
+
+.workshop-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.workshop-content.is-expanded {
+  max-height: 1000px;
+}
+
+.workshop-content-inner {
+  padding: 1.5rem;
+  background: #fafbff;
+}
+
+@media (max-width: 768px) {
+  .workshop-content-inner {
+    padding: 1rem;
+  }
 }
 
 .event-grid-item p {
@@ -719,16 +831,23 @@ img.partner-logo-img {
 }
 
 .workshop-series-tag {
-  display: inline-block;
-  background: linear-gradient(135deg, #e6efff 0%, #e6efff 100%);
-  padding: 0.5rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sora);
+  background: linear-gradient(135deg, #e6efff 0%, #f0f5ff 100%);
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  width: fit-content;
+  letter-spacing: 0.03em;
+  color: #003366;
+  border: 1px solid rgba(0, 51, 102, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 51, 102, 0.05);
+  transition: all 0.2s ease;
+  line-height: 1;
 }
+
 
 .workshop-date {
   color: #003366;
@@ -810,6 +929,10 @@ img.partner-logo-img {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
+
+  .workshop-date{
+    padding: 0rem;
+  }
   .events-page h1 {
     font-size: 30px;
     font-family: var(--font-habibi);
