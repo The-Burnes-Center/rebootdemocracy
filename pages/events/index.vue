@@ -153,7 +153,7 @@ useSeoMeta({
           <div class="workshop-card">
             <div class="workshop-card-header">
               <p class="workshop-series-tag">{{ event_item.workshop_series }}</p>
-              <p class="workshop-date">{{ formatDateTime(new Date(event_item.date)) }} ET</p>
+              <p class="workshop-date"><span class="material-symbols-outlined">event</span>{{ formatDateTime(new Date(event_item.date)) }} ET</p>
             </div>
             <div class="workshop-card-content">
               <h3>{{ event_item.title }}</h3>
@@ -868,22 +868,18 @@ img.partner-logo-img {
 }
 
 .workshop-series-tag {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-sora);
-  background: linear-gradient(135deg, #e6efff 0%, #f0f5ff 100%);
-  padding: 0.25rem 0.75rem;
-  border-radius: 100px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: #003366;
-  border: 1px solid rgba(0, 51, 102, 0.1);
-  box-shadow: 0 1px 2px rgba(0, 51, 102, 0.05);
-  transition: all 0.2s ease;
-  line-height: 1;
-  width: fit-content;
+  white-space: nowrap;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #cddff3;
+    border-radius: 8px;
+    color: rgb(0, 51, 102);
+    text-decoration: none;
+    font-family: var(--font-sora);
+    font-weight: 600;
+    line-height: 20px;
+    font-size: 14px;
+    width: fit-content;
+    background: linear-gradient(to left, #f8fafc, #f1f5f9)
 }
 
 .workshop-card {
@@ -1014,20 +1010,25 @@ img.partner-logo-img {
 
 .workshop-date {
   color: #003366;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
   border-radius: 4px;
   width: fit-content;
 }
 
-.workshop-date::before {
-  content: "📅";
-  font-size: 1.5em;
-  opacity: 0.8;
+.workshop-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.workshop-date .material-symbols-outlined {
+  font-size: 20px;
+  color: #003366;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .event-type {
