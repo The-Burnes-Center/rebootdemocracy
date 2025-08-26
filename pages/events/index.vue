@@ -954,7 +954,7 @@ img.partner-logo-img {
   line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: calc(0.875rem * 1.5 * 4);
+  height: calc(1rem * 1.5 * 4);
 }
 
 .event-speakers {
