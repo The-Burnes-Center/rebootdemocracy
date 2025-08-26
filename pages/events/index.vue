@@ -152,7 +152,6 @@ useSeoMeta({
         >
           <div class="workshop-card">
             <div class="workshop-card-header">
-              <p class="workshop-series-tag">{{ event_item.workshop_series }}</p>
               <p class="workshop-date"><span class="material-symbols-outlined">event</span>{{ formatDateTime(new Date(event_item.date)) }} ET</p>
             </div>
             <div class="workshop-card-content">
@@ -162,7 +161,7 @@ useSeoMeta({
                 v-html="event_item.description"
               ></div>
               <div class="event-speakers" v-if="event_item.instructor && event_item.instructor.length > 0">
-                <p>Instructor(s):&nbsp;</p>
+                <span>Instructor(s):&nbsp;</span>
                 <div>
                   <span v-for="(instructor, index) in event_item.instructor" :key="instructor.innovate_us_instructors_id.name">
                     {{ instructor.innovate_us_instructors_id.name }}
@@ -291,6 +290,8 @@ useSeoMeta({
   font-family: var(--font-habibi);
   font-weight: 500;
   margin: 0;
+  font-size: 1rem;
+  line-height: 25px;
 }
 
 .events-page .eyebrow {
@@ -727,6 +728,7 @@ p.event-date {
 
 .event-speakers p strong {
   font-weight: 500 !important;
+  font-family: var(--font-sora) !important;
 }
 
 .event-speakers {
@@ -734,10 +736,10 @@ p.event-date {
   flex-direction: column;
   gap: 0.25rem;
   margin: 0.75rem 0;
-  background: linear-gradient(135deg, #e6efff 0%, #f0f5ff 100%);
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 51, 102, 0.1);
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 51, 102, 0.1);
+  font-family: var(--font-sora) !important;
+  font-weight: 500 !important;
 }
 
 .event-speakers p {
@@ -748,9 +750,15 @@ p.event-date {
 }
 
 .event-speakers div {
-  color: #444;
+  color: #003366 !important;
   line-height: 1.4;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: calc(0.95rem * 1.4 * 2);
 }
 
 .event-grid-padding {
@@ -792,20 +800,22 @@ p.event-date {
   width: 75%;
   height: 75%;
 }
+
 .past-event-col-2 p {
   margin: 0;
   padding: 0;
 }
+
 .event-description {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   color: #444;
-  margin: 0.5rem 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  height: calc(1rem * 1.5 * 4);
 }
 
 img.partner-logo-img {
@@ -867,23 +877,10 @@ img.partner-logo-img {
   margin-top: 0.5rem;
 }
 
-.workshop-series-tag {
-  white-space: nowrap;
-    padding: 0.5rem 0.6rem;
-    border: 1px solid #cddff3;
-    border-radius: 8px;
-    color: rgb(0, 51, 102);
-    text-decoration: none;
-    font-family: var(--font-sora);
-    font-weight: 600;
-    line-height: 20px;
-    font-size: 14px;
-    width: fit-content;
-    background: linear-gradient(to left, #f8fafc, #f1f5f9)
-}
-
 .workshop-card {
   width: 100%;
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
@@ -891,21 +888,6 @@ img.partner-logo-img {
   overflow: hidden;
   transition: all 0.2s ease;
   border: 1px solid rgba(0, 51, 102, 0.1);
-}
-
-.workshop-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 51, 102, 0.1);
-}
-
-.workshop-card {
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
-  border: 1px solid rgba(0, 51, 102, 0.1);
-  overflow: hidden;
-  transition: all 0.2s ease;
 }
 
 .workshop-card:hover {
@@ -961,10 +943,8 @@ img.partner-logo-img {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  background: linear-gradient(135deg, #e6efff 0%, #f0f5ff 100%);
-  padding: 0.75rem;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 51, 102, 0.1);
+  font-family: var(--font-sora) !important;
+  font-weight: 500 !important;
   margin: 0;
 }
 
@@ -976,7 +956,7 @@ img.partner-logo-img {
 }
 
 .event-speakers div {
-  color: #444;
+  color: #003366 !important;
   line-height: 1.4;
   font-size: 1rem;
   display: -webkit-box;
@@ -1012,18 +992,16 @@ img.partner-logo-img {
   color: #003366;
   font-size: 1rem;
   font-weight: 600;
+  font-family: var(--font-sora) !important;
+  font-weight: 700 !important;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   border-radius: 4px;
   width: fit-content;
+  line-height: 1.4;
 }
 
-.workshop-date {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
 
 .workshop-date .material-symbols-outlined {
   font-size: 20px;
