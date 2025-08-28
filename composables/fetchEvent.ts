@@ -81,10 +81,11 @@ export async function fetchUpcomingWorkshops(): Promise<Workshop[]> {
           date: {
             _gte: currentDate,
           },
+          workshop_series: { _eq: "Democratic Engagement" }
         },
         meta: 'total_count',
-        limit: 5,
-        sort: ['date'], // ascending order - earliest first
+        limit: -1,
+        sort: ['date'], 
         fields: [
           '*.*',
           'thumbnail.*',

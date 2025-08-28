@@ -14,6 +14,7 @@ import { useSeoMeta } from "#imports";
 const route = useRoute();
 const iniLoad = ref(0);
 const showingFullText = ref(true);
+const activeSection = ref('upcoming');
 
 // Rest of your component code remains the same...
 const { data: indexData } = await useAsyncData("reboot-index", fetchIndexData);
@@ -21,6 +22,12 @@ const { data: allEventsRaw } = await useAsyncData(
   "reboot-events",
   fetchEventsData
 );
+const { data: workshopsData } = await useAsyncData(
+  "reboot-workshops",
+  fetchUpcomingWorkshops
+);
+
+
 const { data: seriesData } = await useAsyncData(
   "reboot-series",
   fetchSeriesData
@@ -62,12 +69,16 @@ const accordionContent = computed(() => {
 const pageslug = ref(route.query);
 const path = ref(route.fullPath);
 
-const scrollMeTo = (refName: string) => {
+const scrollToSection = (sectionId: string) => {
   if (process.client) {
-    const element = document.querySelector(`[ref="${refName}"]`) as HTMLElement;
+    const element = document.getElementById(sectionId);
     if (element) {
-      const top = element.offsetTop - 80;
-      window.scrollTo(0, top);
+      const top = element.offsetTop - 100; // Adjust offset for header
+      window.scrollTo({
+        top,
+        behavior: 'smooth'
+      });
+      activeSection.value = sectionId;
     }
   }
 };
@@ -123,112 +134,63 @@ useSeoMeta({
       </div>
     </div>
     <div class="event-selection-row">
-      <h2 class="event-selector Eactive" @click="scrollMeTo('upcoming')">
+      <h2 class="event-selector" :class="{ 'Eactive': activeSection === 'upcoming' }" @click="scrollToSection('upcoming')">
         Upcoming Workshops
       </h2>
-      <h2 class="event-selector" @click="scrollMeTo('past-events')">
+      <h2 class="event-selector" :class="{ 'Eactive': activeSection === 'past-events' }" @click="scrollToSection('past-events')">
         Past Events
       </h2>
     </div>
     <div ref="upcoming" class="event-grid-section">
-      <div class="event-grid-row">
-        <div
+      <h3 id="upcoming">Upcoming Workshops</h3>
+
+      <div class="event-grid-row">        <div
           class="event-grid-col"
-          v-for="event_item in eventsData"
-          :key="event_item.event_element.id"
-          v-show="isFutureDate(new Date(event_item.event_element.date))"
+          v-for="event_item in workshopsData"
+          :key="event_item.id"
+          v-show="isFutureDate(new Date(event_item.date))"
         >
-          <div class="event-grid-item">
-            <div class="event-grid-padding">
-              <div class="event-title">
-                <h3>{{ event_item.event_element.title }}</h3>
-              </div>
-              <div class="event-item-row">
-                <div class="event-image">
-                  <img
-                    v-if="
-                      !event_item.event_element.instructor &&
-                      event_item.event_element.thumbnail
-                    "
-                    :src="getImageUrl(event_item.event_element.thumbnail)"
-                  />
-                  <div
-                    v-for="(instructor_item, index) in event_item.event_element
-                      .instructor"
-                    v-show="index < 1"
-                    :key="index"
-                  >
-                    <img
-                      :src="
-                        getImageUrl({
-                          filename_disk:
-                            instructor_item.innovate_us_instructors_id.headshot
-                              ?.filename_disk,
-                        })
-                      "
-                    />
-                  </div>
-                </div>
-                <div class="event-text">
-                  <div class="event-speakers">
-                    <p v-if="event_item.event_element.speakers">
-                      Speaker(s):&nbsp;
-                    </p>
-                    <div v-html="event_item.event_element.speakers"></div>
-                  </div>
-                  <p
-                    class="event-description"
-                    v-html="event_item.event_element.description"
-                  ></p>
-                  <p
-                    class="event-type"
-                    v-if="
-                      event_item.event_element.online_event &&
-                      !event_item.event_element.inperson_event
-                    "
-                  >
-                    <i class="fa-solid fa-video"></i> Online
-                  </p>
-                  <p
-                    class="event-type"
-                    v-if="event_item.event_element.inperson_event"
-                  >
-                    <i class="fa-solid fa-building-user"></i> Hybrid
-                  </p>
-                  <p class="event-date">
-                    {{
-                      formatDateTime(new Date(event_item.event_element.date))
-                    }}
-                    ET
-                  </p>
-                  <a
-                    :href="event_item.event_element.link"
-                    target="_blank"
-                    class="btn btn-primary btn-dark btn-medium register-btn"
-                    >Register</a
-                  >
-                </div>
-              </div>
+          <div class="workshop-card">
+            <div class="workshop-card-header">
+              <p class="workshop-date"><span class="material-symbols-outlined">event</span>{{ formatDateTime(new Date(event_item.date)) }} ET</p>
             </div>
-            <div
-              class="event-item-partnership-row"
-              v-if="event_item.event_element.partner_logo"
-            >
-              <div class="partner-logo-section">
-                <p class="partnership-label">In Partnership with:</p>
-                <img
-                  class="partner-logo-img"
-                  v-if="event_item.event_element.partner_logo"
-                  :src="getImageUrl(event_item.event_element.partner_logo)"
-                />
+            <div class="workshop-card-content">
+              <h3>{{ event_item.title }}</h3>
+              <div
+                class="event-description"
+                v-html="event_item.description"
+              ></div>
+              <div class="event-speakers" v-if="event_item.instructor && event_item.instructor.length > 0">
+                <span>Instructor(s):&nbsp;</span>
+                <div>
+                  <span v-for="(instructor, index) in event_item.instructor" :key="instructor.innovate_us_instructors_id.name">
+                    {{ instructor.innovate_us_instructors_id.name }}
+                    <span v-if="index < event_item.instructor.length - 1">, </span>
+                  </span>
+                </div>
               </div>
+              <a
+                v-if="event_item.sign_up_link"
+                :href="event_item.sign_up_link"
+                target="_blank"
+                class="btn btn-primary btn-dark btn-medium register-btn"
+              >REGISTER NOW</a>
             </div>
           </div>
         </div>
       </div>
+      <div class="view-more-container">
+        <a 
+          href="https://innovate-us.org/workshops?series=Democratic+Engagement"
+          target="_blank"
+          class="view-more-btn"
+        >
+           VIEW MORE WORKSHOPS
+        </a>
+      </div>
     </div>
-    <div ref="past-events" class="event-grid-section">
-      <h3>Past Events</h3>
+    <div class="event-grid-section">
+      <h3 id="past-events">Past Events</h3>
       <div class="past-event-grid-row">
         <div
           class="past-event-grid-item"
@@ -271,7 +233,7 @@ useSeoMeta({
               :href="event_item.event_element.link"
               target="_blank"
               class="btn btn-secondary btn-dark btn-medium"
-              >Watch</a
+              >WATCH</a
             >
           </div>
         </div>
@@ -328,6 +290,8 @@ useSeoMeta({
   font-family: var(--font-habibi);
   font-weight: 500;
   margin: 0;
+  font-size: 1rem;
+  line-height: 25px;
 }
 
 .events-page .eyebrow {
@@ -342,7 +306,6 @@ useSeoMeta({
   font-size: 1rem;
   margin: 0;
   font-weight: 700;
-  letter-spacing: 0.09em;
   text-decoration: none;
   display: flex;
   flex-direction: row;
@@ -364,9 +327,55 @@ useSeoMeta({
 
 .events-page .register-btn {
   color: #ffffff;
-  background: #fc6423 !important;
-  height: 100% !important;
-  margin-top: 20px !important;
+  background: #003366 !important;
+  height: auto !important;
+  margin-top: 1rem !important;
+  padding: 0.5rem 0.5rem !important;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem !important;
+  border: none !important;
+}
+
+.register-btn:hover {
+  background: #004480 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.view-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.view-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background-color: #003366;
+  color: #ffffff;
+  font-family: var(--font-habibi);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 51, 102, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 51, 102, 0.05);
+  transition: all 0.2s ease;
+}
+
+.view-more-btn:hover {
+  background: linear-gradient(135deg, #f0f5ff 0%, #f5f8ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.1);
+}
+
+@media (max-width: 768px) {
+  .view-more-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
 }
 
 .events-page .btn-dark {
@@ -526,7 +535,7 @@ h2.event-selector {
 }
 
 h2.event-selector.Eactive {
-  font-size: 1.4em;
+  font-size: 1.2em;
   opacity: 100%;
   font-family: var(--font-sora);
 }
@@ -554,25 +563,150 @@ p.event-date {
   -ms-flex-flow: row wrap;
   flex-flow: row wrap;
   width: 100% !important;
-  gap: 20px;
+  margin: 0 -0.75rem;
 }
 
 .event-grid-col {
   display: flex;
   flex-direction: column;
-  -webkit-flex: 0 0 49%;
-  -ms-flex: 0 0 49%;
-  flex: 0 0 49%;
-  max-width: 49%;
+  -webkit-flex: 0 0 33.333%;
+  -ms-flex: 0 0 33.333%;
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
+  padding: 0 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
-.event-grid-item {
+@media (max-width: 1200px) {
+  .event-grid-col {
+    -webkit-flex: 0 0 50%;
+    -ms-flex: 0 0 50%;
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .event-grid-col {
+    -webkit-flex: 0 0 100%;
+    -ms-flex: 0 0 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+}
+
+.workshop-accordion {
   width: 100%;
-  min-height: 400px;
-  background-color: #ffffff;
-  border: 1px solid #000000;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.workshop-header {
+  padding: 1rem 1.5rem;
+  background: #ffffff;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e6efff;
+}
+
+@media (max-width: 768px) {
+  .workshop-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.workshop-header:hover {
+  background: #fafbff;
+}
+
+.workshop-header.is-active {
+  background: #fafbff;
+}
+
+.workshop-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.workshop-header-left h3 {
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .workshop-header-left {
+    width: 100%;
+  }
+  
+  .workshop-header-left h3 {
+    font-size: 1.125rem;
+    text-wrap: wrap;
+
+  }
+}
+
+
+
+.workshop-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .event-selection-row{
+    gap:1rem;
+    padding:0.5rem;
+  }
+  .workshop-header-right {
+    width: 100%;
+    gap:0.2rem;
+    justify-content: space-between;
+  }
+}
+
+.accordion-arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+  color: #666;
+}
+
+.accordion-arrow.is-expanded {
+  transform: rotate(180deg);
+}
+
+.workshop-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.workshop-content.is-expanded {
+  max-height: 1000px;
+}
+
+.workshop-content-inner {
+  padding: 1.5rem;
+  background: #fafbff;
+}
+
+@media (max-width: 768px) {
+  .workshop-content-inner {
+    padding: 1rem;
+  }
 }
 
 .event-grid-item p {
@@ -594,22 +728,46 @@ p.event-date {
 
 .event-speakers p strong {
   font-weight: 500 !important;
+  font-family: var(--font-sora) !important;
 }
 
 .event-speakers {
   display: flex;
-  flex-direction: row;
-  padding-top: 0px;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 51, 102, 0.1);
+  font-family: var(--font-sora) !important;
+  font-weight: 500 !important;
+}
+
+.event-speakers p {
+  font-weight: 600;
+  color: #003366;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.event-speakers div {
+  color: #003366 !important;
+  line-height: 1.4;
+  font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: calc(0.95rem * 1.4 * 2);
 }
 
 .event-grid-padding {
-  padding: 1rem 2rem;
-  border-bottom: 0px solid #000000;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  height: 100%;
+  gap: 1rem;
 }
 
 .event-tag-row {
@@ -642,13 +800,22 @@ p.event-date {
   width: 75%;
   height: 75%;
 }
+
 .past-event-col-2 p {
   margin: 0;
   padding: 0;
 }
+
 .event-description {
-  padding: 10px 0;
+  font-size: 0.875rem;
   line-height: 1.5;
+  color: #444;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: calc(1rem * 1.5 * 4);
 }
 
 img.partner-logo-img {
@@ -693,8 +860,153 @@ img.partner-logo-img {
 }
 
 .event-title {
-  margin-bottom: 1rem;
+  width: 100%;
   line-height: 1.5;
+}
+
+.event-title h3 {
+  font-size: 1.25rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.workshop-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.workshop-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 51, 102, 0.1);
+}
+
+.workshop-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 51, 102, 0.1);
+}
+
+.workshop-card-header {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #fafbff 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(0, 51, 102, 0.1);
+}
+
+.workshop-card-content {
+  padding: 1rem;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  padding-bottom: 4.5rem;
+}
+
+.workshop-card-content h3 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  color: #003366;
+  margin: 0;
+  font-family: var(--font-sora);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: calc(1.125rem * 1.4 * 2);
+}
+
+.event-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #444;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: calc(1rem * 1.5 * 4);
+}
+
+.event-speakers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: var(--font-sora) !important;
+  font-weight: 500 !important;
+  margin: 0;
+}
+
+.event-speakers p {
+  font-weight: 600;
+  color: #003366;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.event-speakers div {
+  color: #003366 !important;
+  line-height: 1.4;
+  font-size: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: calc(1rem * 1.4 * 2);
+}
+
+.register-btn {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  margin: 0 !important;
+  margin-top: 1rem !important;
+}
+
+@media (max-width: 768px) {
+  .workshop-card-header {
+    padding: 0.75rem;
+  }
+
+  .workshop-card-content {
+    padding: 0.75rem;
+    padding-bottom: 5rem;
+  }
+}
+
+
+.workshop-date {
+  color: #003366;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-sora) !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 4px;
+  width: fit-content;
+  line-height: 1.4;
+}
+
+
+.workshop-date .material-symbols-outlined {
+  font-size: 20px;
+  color: #003366;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .event-type {
@@ -759,6 +1071,10 @@ img.partner-logo-img {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
+
+  .workshop-date{
+    padding: 0rem;
+  }
   .events-page h1 {
     font-size: 30px;
     font-family: var(--font-habibi);
@@ -830,12 +1146,14 @@ img.partner-logo-img {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     gap: 40px;
-    padding-left: 30px;
-    padding-right: 30px;
-    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
   }
-
+.event-information{
+  padding: 1rem;
+}
   .register-btn {
     color: #ffffff;
     background: var(--yellow-action) !important;
