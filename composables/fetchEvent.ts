@@ -78,10 +78,10 @@ export async function fetchUpcomingWorkshops(): Promise<Workshop[]> {
     const response = await directus.request(
       readItems('innovate_us_workshops', {
         filter: {
-          date: {
-            _gte: currentDate,
-          },
-          workshop_series: { _eq: "Democratic Engagement" }
+            date: {
+              _gte: currentDate,
+            },
+            workshop_series: { _eq: "Democratic Engagement" }
         },
         meta: 'total_count',
         limit: -1,

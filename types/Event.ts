@@ -83,6 +83,7 @@ export interface WorkshopInstructor {
 }
 
 export interface Workshop {
+  workshop_series: any;
   id: number;
   title: string;
   description: string;
