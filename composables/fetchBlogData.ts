@@ -50,7 +50,7 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
     const filter = {
       _and: [
         { status: { _eq: 'published' } },
-         { date: { _lte: '$NOW' } }
+        { date: { _lte: '$NOW' } }
       ]
     };
 
