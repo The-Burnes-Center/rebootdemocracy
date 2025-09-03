@@ -209,7 +209,7 @@ const menuItems = computed<MenuItem[]>(() => {
   return [
     { label: "Topic", name: "topic", children: topicChildren },
     { label: "Home", name: "home", to: "/" },
-    { label: "Blog", name: "blog", to: "/blog" },
+    // { label: "Blog", name: "blog", to: "/blog" },
     { label: "Events", name: "events", to: "/events" },
     {
       label: "About",
