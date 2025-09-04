@@ -40,7 +40,7 @@
         lineHeight="normal"
         class="blogcard-excerpt"
       >
-        {{ excerpt }}
+        {{ one_liner || excerpt }}
       </Text>
 
       <!-- Blog card meta -->
@@ -70,6 +70,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   title: string;
+  one_liner: string;
   excerpt: string;
   imageUrl: string;
   tag?: string;

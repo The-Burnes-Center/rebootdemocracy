@@ -46,7 +46,7 @@
                     post.title
                   }}</TitleText>
                 <div class="postcard__details">
-                  <BodyText size="base" :lineClamp="3">{{ post.excerpt }}</BodyText>
+                  <BodyText size="base" :lineClamp="3">{{ post.one_liner || post.excerpt }}</BodyText>
                   <div class="postcard__meta">
                     <Text size="xs" weight="normal" fontStyle="italic" fontFamily="habibi" >
                       <template v-if="post.date && post.authors?.[0]?.team_id">
@@ -109,9 +109,8 @@
                   }}</TitleText>
                 </div>
                 <div class="postcard__details">
-                  <BodyText size="base" :lineClamp="3">{{
-                    post.excerpt
-                  }}</BodyText>
+                  <BodyText size="base" :lineClamp="3">{{ post.one_liner || post.excerpt }}
+                   </BodyText>
                   <div class="postcard__meta">
                     <Text size="xs" weight="normal" fontStyle="italic" fontFamily="habibi">
                       <template v-if="post.date && post.authors?.[0]?.team_id">

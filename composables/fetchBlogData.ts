@@ -226,12 +226,12 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
       }))
     ]);
 
-    // Before combining, tag each item with type
     const blogWithType = (blogResult || []).map(item => ({
       type: 'blog',
       id: item.id,
       title: item.title,
       excerpt: item.excerpt,
+      one_liner: item.one_liner,
       authors: item.authors,
       date: item.date,
       slug: item.slug,
@@ -239,13 +239,13 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
       status: item.status,
       Tags: item.Tags,
       content: item.content,
-      // Add any other blog-specific fields you need
     }));
 
     const newsWithType = (newsResult || []).map(item => ({
       type: 'news',
       id: item.id,
       title: item.title,
+      one_liner: item.one_liner,
       excerpt: item.summary, 
       authors: item.author, 
       date: item.date,

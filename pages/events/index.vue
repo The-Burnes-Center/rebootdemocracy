@@ -284,7 +284,9 @@ useSeoMeta({
   padding: 0.2em 0.5em;
   font-size: 0.7em;
 }
-
+.event-long-description p{
+  font-size: 20px !important;
+}
 .events-page p,
 .events-page li {
   font-family: var(--font-habibi);

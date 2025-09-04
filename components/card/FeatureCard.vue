@@ -52,7 +52,7 @@
           weight="medium"
           fontFamily="habibi"
           color="text-primary-light"
-          class="featured-card__description clamp-4"
+          class="featured-card__description clamp-5"
           lineHeight="loose"
           aria-describedby="featured-title"
         >

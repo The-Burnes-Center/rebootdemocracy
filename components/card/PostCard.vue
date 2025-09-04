@@ -72,7 +72,7 @@
               role="text"
               :aria-label="`Article excerpt: ${excerpt}`"
             >
-              {{ excerpt }}
+              {{ one_liner || excerpt }}
             </BodyText>
 
             <div v-if="date || author" class="postcard__meta">
@@ -193,7 +193,7 @@
               weight="medium"
               fontFamily="habibi"
             >
-              {{ excerpt }}
+              {{ one_liner || excerpt }}
             </BodyText>
 
             <!--meta info-->
@@ -243,6 +243,7 @@ interface PostCardProps {
   titleText?: string;
   author?: string;
   excerpt?: string;
+  one_liner?: string;
   imageUrl?: string;
   date?: Date | string;
   tagIndex?: number;
