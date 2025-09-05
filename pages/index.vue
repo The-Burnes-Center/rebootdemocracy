@@ -275,8 +275,8 @@
             </Text>
             <button
               class="base__button base__button--secondary"
-              @click="router.push('/about#team-grid')"
-              @keydown="handleKeyboardNavigation($event, () => router.push('/about#team-grid'))"
+              @click="router.push('/about#team-editorial-section')"
+              @keydown="handleKeyboardNavigation($event, () => router.push('/about#team-editorial-section'))"
               aria-label="Learn more about our team members"
             >
               <span class="base__btn-slot">Meet Our Team</span>

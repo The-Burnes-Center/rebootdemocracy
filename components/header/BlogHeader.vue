@@ -183,7 +183,7 @@ const handleMenuClick = (item: MenuItem, event: MouseEvent): void => {
   event.preventDefault();
 
   if (item.name === "team") {
-    router.push({ path: "/about", hash: "#team-grid" });
+    router.push({ path: "/about", hash: "#team-editorial-section" });
   } else if (item.external && item.to) {
     window.location.href = item.to;
   } else if (item.to) {
@@ -216,7 +216,7 @@ const menuItems = computed<MenuItem[]>(() => {
       name: "about",
       children: [
         { label: "About Us", name: "about", to: "/about" },
-        { label: "Our Team", name: "team", to: "/about#team-grid" },
+        { label: "Our Team", name: "team", to: "/about#team-editorial-section" },
         {
           label: "About Beth Simone Noveck",
           name: "research",

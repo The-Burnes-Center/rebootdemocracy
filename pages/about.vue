@@ -1,25 +1,28 @@
 <template>
   <div class="about-container">
-    <!-- <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">About Us</TitleText>
-    <Text margin="md" fontFamily="habibi">We use artificial intelligence to help institutions and communities solve problems together. We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to 
-      Better governance, Better outcomes, Increased trust in institutions And in one another. As researchers we want to understand how best to “do democracy” in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.
-    </Text> -->
+    <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">About Us</TitleText>
+    <Text margin="md" fontFamily="habibi">
+      <p>Democracy is in crisis, but not beyond repair. At Reboot, we explore how artificial intelligence—if designed and governed wisely—can help strengthen our democratic institutions rather than weaken them.</p>
+      <p>Where commercial AI often optimizes for profit or control, we are interested in Democratic AI: tools, policies and practices that expand our collective ability to gather knowledge, deliberate choices, and deliver public action.</p>
+              <p>This blog is edited by <strong>Beth Simone Noveck,</strong> with contributions from <a href="/about#team-editorial-section">colleagues</a> at the <strong>GovLab and the Burnes Center for Social Change. The Reboot Blog</strong> is a partner project of <strong>InnovateUS</strong>.</p>
+      <p>Here we publish:</p>
+      <ul>
+      <li>Timely analysis of how governments and communities are experimenting with AI in practice to solve problems.</li>
+
+      <li>Critical reflection on how AI can address democracy’s crises—of truth, legitimacy, participation, and governance.</li>
+
+      <li>Case studies and interviews that show how institutions are using AI to listen better, learn faster, and deliver more fairly.</li>
+      </ul>
+      <p>Repairing and improving our democratic institutions is a political imperative and a design challenge—one that demands the same urgency and ambition we devote to climate or public health. By sharing insights here, we aim to build the conversation—and the practical know-how—that will allow us to treat democracy with the same seriousness we bring to our greatest scientific challenges. </p>
+      <p>Want to write for us? Email <a href="mailto:beth@thegovlab.org">here</a></p>
+    </Text>
     
-    <div class="team-section">
-      <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">Our Team</TitleText>
-      
-      <div v-if="loading">
-        <Text>Loading team data...</Text>
-      </div>
-      
-      <div v-else-if="error">
-        <Text color="text-secondary">Error loading team data. Please try again later.</Text>
-      </div>
-      
-      <div v-else class="team-grid" id="team-grid">
-        <!-- Only render team members that have at least name and either headshot or bio -->
+    <div class="team-section" id="team-editorial-section">
+      <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">Editorial Team</TitleText>
+  
+      <div class="team-editorial-grid" id="team-editorial-grid">
         <div 
-          v-for="member in validTeamMembers" 
+          v-for="member in validEditorialTeamMembers" 
           :key="member.id" 
           class="team-member"
         >
@@ -53,47 +56,137 @@
             </a>
           </div>
         </div>
+
+        
       </div>
     </div>
+
+    <div class="team-section">
+      <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">Production Team</TitleText>
+      
+      <div class="team-production-grid" id="team-production-grid">
+        <div 
+          v-for="member in validProductionTeamMembers" 
+          :key="member.id" 
+          class="team-member"
+        >
+          <div class="member-photo" fontFamily="var(--font-habibi)">
+            <img
+              v-if="member.Headshot"
+              :src="getImageUrl(member.Headshot, 512)"
+              :alt="`${member.First_Name} ${member.Last_Name}`"
+            />
+            <div v-else class="photo-placeholder"></div>
+          </div>
+          
+          <div class="member-info">
+            <TitleText level="h3" weight="bold" fontFamily="var(--font-sora)" color="text-dark">{{ member.First_Name }} {{ member.Last_Name }}</TitleText>
+            <Text 
+              as="p" 
+              class="member-title" 
+              color="text-tertiary" 
+              size="sm"
+              fontFamily="habibi"
+              marginBottom="md"
+            >{{ member.Title }}</Text>
+            
+            <a
+              v-if="member.Link_to_bio"
+              :href="member.Link_to_bio"
+              rel="noopener noreferrer"
+              class="bio-link"
+            >
+              <Text as="span" color="link-primary" weight="medium" size="sm" fontFamily="habibi">View Bio</Text>
+            </a>
+          </div>
+        </div>
+
+        
+      </div>
+    </div>
+    
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import type { Team } from '@/types/Team';
-import { fetchTeamData } from '~/composables/fetchAboutData';
+import { ref, onMounted, computed, watch } from 'vue';
+import { fetchEditorialTeamData, fetchProductionTeam } from '~/composables/fetchAboutData';
 import { useRoute } from 'vue-router';
 import { nextTick } from 'vue'; 
 
-const { data: teamData, pending, error } = await useAsyncData('team-data', fetchTeamData, {
-  server: true, 
-});
+const { data: teamData, pending, error } = await useAsyncData("team-data", async () => {
+  try {
+    const[Editorial, Production] = await Promise.all([fetchEditorialTeamData(), fetchProductionTeam()]);
+    return { Editorial, Production };
+  } catch (err) {
+    console.error('Error fetching team data:', err);
+    throw err;
+  }
+}, { server: true })
 
-const loading = computed(() => pending.value);
-const team = computed(() => teamData.value || []);
+const EditorialTeam = computed(() => teamData.value?.Editorial);
+
+const ProductionTeam = computed(() => teamData.value?.Production);
 
 const route = useRoute();
 
-
-// Filter out team members that don't have minimum required information
-const validTeamMembers = computed(() =>
-  team.value.filter((member) => {
+const validEditorialTeamMembers = computed(() => {
+  const team = EditorialTeam?.value;
+  if (!team || !Array.isArray(team)) {
+    return [];
+  }
+  
+  return team.filter((member) => {
     const hasName = member.First_Name && member.Last_Name;
     const hasHeadshot = member.Headshot?.id;
-    const hasBio = member.Link_to_bio?.trim().length > 0;
+    const hasBio = member.Link_to_bio?.trim && member.Link_to_bio.trim().length > 0;
     return hasName && (hasHeadshot || hasBio);
-  })
-);
+  });
+});
+
+const validProductionTeamMembers = computed(() => {
+  const team = ProductionTeam?.value;
+  if (!team || !Array.isArray(team)) {
+    return [];
+  }
+  
+  return team.filter((member) => {
+    const hasName = member.First_Name && member.Last_Name;
+    const hasHeadshot = member.Headshot?.id;
+    const hasBio = member.Link_to_bio?.trim && member.Link_to_bio.trim().length > 0;
+    return hasName && (hasHeadshot || hasBio);
+  });
+})
 
 //smooth scroll
-watch(pending, async (isLoading) => {
-  if (!isLoading && route.hash === '#team-grid') {
+watch(validEditorialTeamMembers, async (isLoading) => {
+  if (!isLoading && route.hash === '#team-editorial-section') {
     await nextTick();
-    const el = document.getElementById('team-grid');
+    const el = document.getElementById('team-editorial-section');
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      el.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest'
+      });
     }
   }
 });
 
 </script>
+
+<style>
+.about-container ul li{
+  font-size: 20px;
+  line-height: 30px;
+  font-family: var(--font-habibi);
+  color: #333333;
+  margin: 0.5rem 0;
+  padding: 0.25rem 0;
+}
+
+#team-editorial-section {
+  scroll-margin-top: 5rem;
+  padding-top: 2rem;
+}
+</style>

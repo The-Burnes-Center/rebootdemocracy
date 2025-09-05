@@ -5,6 +5,7 @@ export interface Team {
     Last_Name: string;
     Title: string;
     Link_to_bio: string;
+    collaborator_type: string | string[];
     Headshot?: {
       id: string;
       filename_disk: string;

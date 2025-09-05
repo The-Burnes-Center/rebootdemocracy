@@ -15,7 +15,18 @@
   margin-top: 2rem;
 }
 
-.team-grid {
+.team-section h1 {
+  border-bottom: 1px solid #000000;
+  padding-bottom: 1rem;
+}
+
+.team-editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+.team-production-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
