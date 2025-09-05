@@ -15,6 +15,10 @@
       </ul>
       <p>Repairing and improving our democratic institutions is a political imperative and a design challenge—one that demands the same urgency and ambition we devote to climate or public health. By sharing insights here, we aim to build the conversation—and the practical know-how—that will allow us to treat democracy with the same seriousness we bring to our greatest scientific challenges. </p>
       <p>Want to write for us? Email <a href="mailto:beth@thegovlab.org">here</a></p>
+      <p>Beth Simone Noveck is Professor at Northeastern University, 
+        where she directs the Burnes Center for Social Change and founded 
+        The Governance Lab. Former U.S. Deputy Chief Technology Officer and current New Jersey Chief AI Strategist,
+        her latest book is Reboot: The Race to Save Democracy with AI. Read more about her at <a href="http://thegovlab.org/beth-simone-noveck.html">LINK</a></p>
     </Text>
     
     <div class="team-section" id="team-editorial-section">

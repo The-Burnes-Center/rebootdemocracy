@@ -191,7 +191,7 @@ const baseMenuItems = computed<MenuItem[]>(() => {
       label: "About",
       name: "about",
       children: [
-        { label: "About Us", name: "about", to: "/about" },
+        { label: "About the Reboot Democracy Blog", name: "about", to: "/about" },
         { label: "Our Team", name: "team", to: "/about#team-editorial-section" },
         {
           label: "About Beth Simone Noveck",
