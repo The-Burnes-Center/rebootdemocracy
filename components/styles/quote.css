@@ -44,14 +44,3 @@ blockquote.quote-block a,
 blockquote:not(.quote-block) a {
   font-size: 24px;
 }
-
-blockquote p:last-child:not(:first-child) {
-  display: block;
-  margin-top: 1rem;
-  color: inherit;
-  font-family: var(--font-habibi);
-  font-size: 16px !important; /* Override the 24px from main blockquote p */
-  font-style: normal;
-  font-weight: 400;
-  line-height: 24px;
-}
