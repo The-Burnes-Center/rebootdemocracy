@@ -1,18 +1,22 @@
-blockquote.quote-block {
+/* Combined selector for both custom and regular blockquotes */
+blockquote.quote-block,
+blockquote:not(.quote-block) {
   font-size: 24px;
   line-height: 38.4px;
-  padding-left: 2.3rem;
+  padding: 2rem 2rem;
+  text-wrap: balance;
   margin: 2rem 0;
   position: relative;
   border-left: 8px solid #2563eb;
-  color: #111827;
+  color: inherit;
   background-color: #fafafa;
   font-weight: 400;
   border-radius: 0.25rem;
   font-family: var(--font-habibi);
 }
 
-blockquote.quote-block::before {
+blockquote.quote-block::before,
+blockquote:not(.quote-block)::before {
   content: "\201C";
   display: block;
   color: #0d63eb;
@@ -25,35 +29,29 @@ blockquote.quote-block::before {
   top: 0;
 }
 
-blockquote.quote-block p {
+blockquote.quote-block p,
+blockquote:not(.quote-block) p {
   font-family: var(--font-habibi);
   font-size: 24px;
   font-weight: 400;
   line-height: 120%;
-  color: #111827;
+  color: inherit;
   margin: 0;
   display: inline;
 }
-blockquote.quote-block a{
+
+blockquote.quote-block a,
+blockquote:not(.quote-block) a {
   font-size: 24px;
 }
 
-.quote-block-content {
-  font-family: var(--font-habibi);
-  display: inline;
-}
-
-.quote-block-footer {
+blockquote p:last-child:not(:first-child) {
   display: block;
   margin-top: 1rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: inherit;
   font-family: var(--font-habibi);
-  font-size: 16px;
+  font-size: 16px !important; /* Override the 24px from main blockquote p */
   font-style: normal;
   font-weight: 400;
   line-height: 24px;
-}
-
-blockquote.quote-block p + .quote-block-footer {
-  margin-top: 1rem;
 }
