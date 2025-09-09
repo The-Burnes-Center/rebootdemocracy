@@ -10,7 +10,7 @@
     @click="$emit('click')"
     @keydown="handleKeydown"
   >
-    <div class="featured-card__image-wrapper">
+    <div class="featured-card__image-wrapper" :style="{ '--bg-image': `url(${imageUrl})` }">
       <img 
         :src="imageUrl" 
         :alt="`Featured image for article: ${title}`" 
