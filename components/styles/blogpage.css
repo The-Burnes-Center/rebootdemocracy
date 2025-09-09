@@ -174,18 +174,21 @@ p.excerpt-paragraph {
 }
 
 .blog-content h1 {
+  font-family: var(--font-merriweather) !important;
   font-size: 24px;
   font-style: normal;
   font-weight: 700;
 }
 
 .blog-content h2 {
+  font-family: var(--font-merriweather) !important;
   font-size: 22px;
   font-style: normal;
   font-weight: 700;
 }
 
 .blog-content h3 {
+  font-family: var(--font-merriweather) !important;
   font-size: 20px;
   font-style: normal;
   font-weight: 700;
@@ -198,7 +201,21 @@ p.excerpt-paragraph {
   margin: 0;
 }
 
+.blog-content :is(h1, h2, h3, h4) span {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-style: inherit !important;
+  font-weight: inherit !important;
+}
+
 .blog-content span {
+  font-family: var(--font-habibi);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.blog-content li { 
   font-family: var(--font-habibi);
   font-size: 20px;
   font-style: normal;
