@@ -29,7 +29,7 @@
               :imageUrl="getImageUrl(featuredPost.image)"
               :tag="getTag(featuredPost)"
               :title="featuredPost.title || 'Untitled'"
-              :description="featuredPost.one_liner || featuredPost.excerpt"
+              :description="featuredPost.one_line || featuredPost.excerpt"
               :date="featuredPost.date || ''"
               :author="getAuthorName(featuredPost)"
               :aria-label="`Featured post: ${featuredPost.title || 'Untitled'} by ${getAuthorName(featuredPost)}`"
