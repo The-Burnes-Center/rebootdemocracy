@@ -617,6 +617,7 @@ onBeforeUnmount(() => {
 .blog-tags-list nav{
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 1rem;
   margin: 1.5rem 0rem;
 }
