@@ -6,6 +6,8 @@ import { fetchWeeklyNewsItems } from './fetchWeeklyNews';
 const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
+
+
 export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
   try {
     const filter = slug
@@ -47,6 +49,7 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
 
 export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
   try {
+
     const filter = {
       _and: [
         { status: { _eq: 'published' } },

@@ -1,6 +1,7 @@
 // scripts/fetchStaticRoutes.ts
 import { createDirectus, rest, readItems } from '@directus/sdk';
 
+
 export const getStaticBlogRoutes = async (): Promise<string[]> => {
   const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
 

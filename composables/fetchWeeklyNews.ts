@@ -5,8 +5,11 @@ import type { WeeklyNews } from '@/types/index.ts';
 const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
+
+
 export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
   try {
+
     const titleVariations = [
       'News that Caught Our Eye',  
       'News that caught our eye',  
@@ -42,10 +45,7 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
         filter: {
-          _and: [
-            { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
-          ]
+          status: { _eq: 'published' }
         },
         sort: ['-date', '-id'],
         limit: 20
