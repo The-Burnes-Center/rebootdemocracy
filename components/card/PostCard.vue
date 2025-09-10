@@ -66,7 +66,7 @@
               v-if="excerpt"
               size="base"
               lineHeight="normal"
-              :lineClamp="2"
+              :lineClamp="3"
               weight="medium"
               fontFamily="habibi"
               role="text"
@@ -189,7 +189,7 @@
               v-if="excerpt"
                size="base"
               lineHeight="normal"
-              :lineClamp="2"
+              :lineClamp="3"
               weight="medium"
               fontFamily="habibi"
             >
