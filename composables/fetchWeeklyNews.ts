@@ -132,8 +132,6 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
 export async function fetchWeeklyNewsItems(): Promise<any[]> {
   try {
     const weeklyNewsEntries = await fetchWeeklyNewsEntries();
-    console.log('🟠 fetchWeeklyNewsItems - returned entries:', weeklyNewsEntries);
-    // Transform weekly news entries to be compatible with the combined blog/news structure
     return weeklyNewsEntries.map((entry) => ({
       type: 'news',
       id: entry.id,
