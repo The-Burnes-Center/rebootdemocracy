@@ -220,8 +220,11 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         limit: 6,
         sort: ['-date'],
         filter: {
-          status: { _eq: 'published' },
-          date: { _nnull: true }
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _nnull: true } },
+            { date: { _lte: '$NOW' } }
+          ]
         }
       }))
     ]);

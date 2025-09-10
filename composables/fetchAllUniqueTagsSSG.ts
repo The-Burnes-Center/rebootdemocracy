@@ -25,7 +25,7 @@ export async function fetchAllUniqueTagsForSSG(): Promise<string[]> {
         readItems('reboot_democracy_weekly_news', {
           filter: {
             status: { _eq: 'published' },
-            date: { _nnull: true }
+            date: { _lte: '$NOW' },
           },
           fields: ['id', 'title'], // We just need to know they exist
           limit: -1,

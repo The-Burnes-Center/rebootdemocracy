@@ -8,7 +8,10 @@ export const getStaticNewsRoutes = async (): Promise<string[]> => {
     readItems('reboot_democracy_weekly_news', {
       fields: ['edition'],
       filter: {
-        status: { _eq: 'published' }
+        _and: [
+          { status: { _eq: 'published' } },
+          { date: { _lte: '$NOW' } }
+        ]
       },
       limit: -1,
     })

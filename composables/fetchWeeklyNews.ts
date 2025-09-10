@@ -17,13 +17,14 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
       const response = await directus.request<WeeklyNews[]>(
         readItems('reboot_democracy_weekly_news', {
           fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
-          filter: {
-            _and: [
-              { status: { _eq: 'published' } },
-              { date: { _nnull: true } },
-              { title: { _contains: titlePattern } }
-            ]
-          },
+        filter: {
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _nnull: true } },
+            { date: { _lte: '$NOW' } },
+            { title: { _contains: titlePattern } }
+          ]
+        },
           sort: ['-date', '-id'],
           limit: 1
         })
@@ -41,7 +42,10 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
         filter: {
-          status: { _eq: 'published' }
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _lte: '$NOW' } }
+          ]
         },
         sort: ['-date', '-id'],
         limit: 20
@@ -97,6 +101,7 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
+            { date: { _lte: '$NOW' } },
             {
               _or: [
                 { title: { _contains: 'News that Caught Our Eye' } },
@@ -116,6 +121,7 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
 
     // Return only the "News that caught our eye" entries
     return weeklyNewsEntries as WeeklyNews[];
+    
   } catch (error) {
     console.error('Error fetching weekly news entries:', error);
     return [];
@@ -126,7 +132,7 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
 export async function fetchWeeklyNewsItems(): Promise<any[]> {
   try {
     const weeklyNewsEntries = await fetchWeeklyNewsEntries();
-    
+    console.log('🟠 fetchWeeklyNewsItems - returned entries:', weeklyNewsEntries);
     // Transform weekly news entries to be compatible with the combined blog/news structure
     return weeklyNewsEntries.map((entry) => ({
       type: 'news',
