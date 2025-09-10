@@ -6,20 +6,45 @@ import { fetchWeeklyNewsItems } from './fetchWeeklyNews';
 const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
+// Helper function to determine if Eastern Time is in DST
+function isEasternDST(date: Date): boolean {
+  const year = date.getFullYear();
+
+  // Calculate DST start: Second Sunday in March at 2:00 AM ET
+  const march = new Date(year, 2, 1); // March 1st
+  const firstSundayMarch = 7 - march.getDay();
+  const secondSundayMarch = firstSundayMarch + 7;
+  const dstStart = new Date(year, 2, secondSundayMarch, 2); // 2:00 AM
+
+  // Calculate DST end: First Sunday in November at 2:00 AM ET
+  const november = new Date(year, 10, 1); // November 1st
+  const firstSundayNovember = november.getDay() === 0 ? 1 : (1 + (7 - november.getDay()));
+  const dstEnd = new Date(year, 10, firstSundayNovember, 2); // 2:00 AM
+
+  return date >= dstStart && date < dstEnd;
+}
+
+// Helper function to get the correct Directus NOW offset based on Eastern Time
+function getDirectusNowOffset(): string {
+  const now = new Date();
+  return isEasternDST(now) ? '$NOW(-4 hours)' : '$NOW(-5 hours)';
+}
+
 export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
   try {
+    const nowOffset = getDirectusNowOffset();
     const filter = slug
       ? {
           _and: [
             { slug: { _eq: slug } },
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: nowOffset } }
           ]
         }
       : {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: nowOffset } }
           ]
         };
 
@@ -47,10 +72,11 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
 
 export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
   try {
+    const nowOffset = getDirectusNowOffset();
     const filter = {
       _and: [
         { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW' } }
+        { date: { _lte: nowOffset } }
       ]
     };
 
@@ -77,11 +103,12 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
 
 export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
   try {
+    const nowOffset = getDirectusNowOffset();
     const filter = {
       _and: [
         { slug: { _eq: slug } },
         { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW' } }
+        { date: { _lte: nowOffset } }
       ]
     };
 
@@ -125,7 +152,7 @@ export async function fetchRelatedBlogsByTags(tags: string[], excludeSlug: strin
             { Tags: { _in: tags } },
             { slug: { _neq: excludeSlug } },
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: getDirectusNowOffset() } }
           ]
         }
       })
@@ -182,7 +209,7 @@ export async function fetchAllSlugs(): Promise<string[]> {
         fields: ['slug'],
         filter: {
           status: { _eq: 'published' },
-          date: { _lte: '$NOW' }
+          date: { _lte: getDirectusNowOffset() }
         },
         limit: -1
       })
@@ -211,7 +238,7 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: getDirectusNowOffset() } }
           ]
         }
       })),
@@ -220,8 +247,11 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         limit: 6,
         sort: ['-date'],
         filter: {
-          status: { _eq: 'published' },
-          date: { _nnull: true }
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _nnull: true } },
+            { date: { _lte: getDirectusNowOffset() } }
+          ]
         }
       }))
     ]);

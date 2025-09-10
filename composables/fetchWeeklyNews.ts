@@ -5,8 +5,33 @@ import type { WeeklyNews } from '@/types/index.ts';
 const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
 
+// Helper function to determine if Eastern Time is in DST
+function isEasternDST(date: Date): boolean {
+  const year = date.getFullYear();
+
+  // Calculate DST start: Second Sunday in March at 2:00 AM ET
+  const march = new Date(year, 2, 1); // March 1st
+  const firstSundayMarch = 7 - march.getDay();
+  const secondSundayMarch = firstSundayMarch + 7;
+  const dstStart = new Date(year, 2, secondSundayMarch, 2); // 2:00 AM
+
+  // Calculate DST end: First Sunday in November at 2:00 AM ET
+  const november = new Date(year, 10, 1); // November 1st
+  const firstSundayNovember = november.getDay() === 0 ? 1 : (1 + (7 - november.getDay()));
+  const dstEnd = new Date(year, 10, firstSundayNovember, 2); // 2:00 AM
+
+  return date >= dstStart && date < dstEnd;
+}
+
+// Helper function to get the correct Directus NOW offset based on Eastern Time
+function getDirectusNowOffset(): string {
+  const now = new Date();
+  return isEasternDST(now) ? '$NOW(-4 hours)' : '$NOW(-5 hours)';
+}
+
 export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
   try {
+    const nowOffset = getDirectusNowOffset();
     const titleVariations = [
       'News that Caught Our Eye',  
       'News that caught our eye',  
@@ -21,6 +46,7 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
             _and: [
               { status: { _eq: 'published' } },
               { date: { _nnull: true } },
+              { date: { _lte: nowOffset } },
               { title: { _contains: titlePattern } }
             ]
           },
@@ -41,7 +67,10 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
         filter: {
-          status: { _eq: 'published' }
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _lte: nowOffset } }
+          ]
         },
         sort: ['-date', '-id'],
         limit: 20
@@ -79,6 +108,7 @@ export async function fetchLatestWeeklyNewsId(): Promise<number | null> {
 // UPDATED: Fetches only "News that caught our eye" entries
 export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
   try {
+    const nowOffset = getDirectusNowOffset();
     const weeklyNewsEntries = await directus.request(
       readItems('reboot_democracy_weekly_news', {
         limit: -1,
@@ -97,6 +127,7 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
+            { date: { _lte: nowOffset } },
             {
               _or: [
                 { title: { _contains: 'News that Caught Our Eye' } },
