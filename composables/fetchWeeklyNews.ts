@@ -24,7 +24,7 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
-            { date: { _lte: '$NOW' } },
+           { date: { _lte: '$NOW(-4 hours)' } },
             { title: { _contains: titlePattern } }
           ]
         },
@@ -34,13 +34,10 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
       );
 
       if (response && response.length > 0) {
-        console.log(`Found news with pattern "${titlePattern}":`, response[0]);
         return response[0];
       }
     }
 
-    console.log('No matches with title filters, trying manual search...');
-    
     const allResponse = await directus.request<WeeklyNews[]>(
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
@@ -58,11 +55,9 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
     );
 
     if (newsEntry) {
-      console.log('Found news with manual search:', newsEntry);
       return newsEntry;
     }
 
-    console.log('No "News that caught our eye" found');
     return null;
   } catch (error) {
     console.error('Error fetching latest weekly news:', error);
@@ -101,7 +96,7 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
-            { date: { _lte: '$NOW' } },
+            { date: { _lte: '$NOW(-4 hours)' } },
             {
               _or: [
                 { title: { _contains: 'News that Caught Our Eye' } },
@@ -118,7 +113,6 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
     if (!Array.isArray(weeklyNewsEntries) || weeklyNewsEntries.length === 0) {
       return [];
     }
-
     // Return only the "News that caught our eye" entries
     return weeklyNewsEntries as WeeklyNews[];
     

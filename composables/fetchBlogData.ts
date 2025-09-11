@@ -15,13 +15,13 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
           _and: [
             { slug: { _eq: slug } },
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         }
       : {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         };
 
@@ -53,7 +53,7 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
     const filter = {
       _and: [
         { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW' } }
+        { date: { _lte: '$NOW(-4 hours)' } }
       ]
     };
 
@@ -84,7 +84,7 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
       _and: [
         { slug: { _eq: slug } },
         { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW' } }
+        { date: { _lte: '$NOW(-4 hours)' } }
       ]
     };
 
@@ -128,12 +128,11 @@ export async function fetchRelatedBlogsByTags(tags: string[], excludeSlug: strin
             { Tags: { _in: tags } },
             { slug: { _neq: excludeSlug } },
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         }
       })
     );
-
     return (response as BlogPost[]).slice(0, 3);
   } catch (error) {
     console.error('Error fetching related blogs:', error);
@@ -202,6 +201,7 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
   try {
     // Fetch both blog and weekly news in parallel
     const [blogResult, newsResult] = await Promise.all([
+          
       directus.request(readItems('reboot_democracy_blog', {
         fields: [
           '*.*',
@@ -214,7 +214,7 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         }
       })),
@@ -226,13 +226,15 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
-            { date: { _lte: '$NOW' } }
+            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         }
       }))
     ]);
 
+
     const blogWithType = (blogResult || []).map(item => ({
+     
       type: 'blog',
       id: item.id,
       title: item.title,
@@ -246,7 +248,7 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
       Tags: item.Tags,
       content: item.content,
     }));
-
+    
     const newsWithType = (newsResult || []).map(item => ({
       type: 'news',
       id: item.id,

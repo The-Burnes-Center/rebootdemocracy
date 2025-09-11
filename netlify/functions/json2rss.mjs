@@ -47,7 +47,7 @@ export const handler = async function (event, context) {
       readItems('reboot_democracy_blog', {
         filter: {
           _and: [
-            { date: { _lte: '$NOW' } },
+           { date: { _lte: '$NOW' - 4 } },
             {
               status: {
                 _eq: "published"
