@@ -1,7 +1,7 @@
 // No import needed for fetch in Node 18+
 export const handler = async () => {
   const buildHookUrl = process.env.NETLIFY_BUILD_HOOK_URL ||
-    'https://api.netlify.com/build_hooks/68111038a6ab1ce226fbf788';
+    'https://api.netlify.com/build_hooks/68a37704c986d01a0c654ce2';
 
   try {
     const response = await fetch(buildHookUrl, { method: 'POST' });
