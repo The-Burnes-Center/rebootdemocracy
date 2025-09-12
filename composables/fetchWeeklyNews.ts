@@ -24,7 +24,7 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
-           { date: { _lte: '$NOW(-4 hours)' } },
+           ,
             { title: { _contains: titlePattern } }
           ]
         },
@@ -95,8 +95,6 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _nnull: true } },
-            { date: { _lte: '$NOW(-4 hours)' } },
             {
               _or: [
                 { title: { _contains: 'News that Caught Our Eye' } },

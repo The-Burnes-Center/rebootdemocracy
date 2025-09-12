@@ -9,8 +9,7 @@ export const getStaticNewsRoutes = async (): Promise<string[]> => {
       fields: ['edition'],
       filter: {
         _and: [
-          { status: { _eq: 'published' } },
-           { date: { _lte: '$NOW(-4 hours)' } },
+          { status: { _eq: 'published' } }
         ]
       },
       limit: -1,

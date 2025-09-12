@@ -15,13 +15,13 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
           _and: [
             { slug: { _eq: slug } },
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW(-4 hours)' } }
+            
           ]
         }
       : {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW(-4 hours)' } }
+            
           ]
         };
 
@@ -53,7 +53,7 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
     const filter = {
       _and: [
         { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW(-4 hours)' } }
+        
       ]
     };
 
@@ -84,7 +84,6 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
       _and: [
         { slug: { _eq: slug } },
         { status: { _eq: 'published' } },
-        { date: { _lte: '$NOW(-4 hours)' } }
       ]
     };
 
@@ -128,7 +127,6 @@ export async function fetchRelatedBlogsByTags(tags: string[], excludeSlug: strin
             { Tags: { _in: tags } },
             { slug: { _neq: excludeSlug } },
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         }
       })
@@ -214,7 +212,6 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         }
       })),
@@ -225,8 +222,6 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _nnull: true } },
-            { date: { _lte: '$NOW(-4 hours)' } }
           ]
         }
       }))
