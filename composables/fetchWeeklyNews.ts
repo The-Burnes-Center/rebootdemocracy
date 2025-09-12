@@ -24,7 +24,6 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
           _and: [
             { status: { _eq: 'published' } },
             { date: { _nnull: true } },
-           { date: { _lte: '$NOW(-4 hours)' } },
             { title: { _contains: titlePattern } }
           ]
         },
@@ -42,7 +41,10 @@ export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
         filter: {
-          status: { _eq: 'published' }
+          _and: [
+            { status: { _eq: 'published' } },
+            { date: { _nnull: true } }  
+          ]
         },
         sort: ['-date', '-id'],
         limit: 20
@@ -95,8 +97,7 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _nnull: true } },
-            { date: { _lte: '$NOW(-4 hours)' } },
+            { date: { _nnull: true } }, 
             {
               _or: [
                 { title: { _contains: 'News that Caught Our Eye' } },

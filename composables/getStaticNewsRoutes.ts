@@ -10,7 +10,7 @@ export const getStaticNewsRoutes = async (): Promise<string[]> => {
       filter: {
         _and: [
           { status: { _eq: 'published' } },
-           { date: { _lte: '$NOW(-4 hours)' } },
+          { date: { _nnull: true } }  
         ]
       },
       limit: -1,
