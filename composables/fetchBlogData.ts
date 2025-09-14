@@ -21,7 +21,7 @@ export async function fetchBlogData(slug?: string): Promise<BlogPost[]> {
       : {
           _and: [
             { status: { _eq: 'published' } },
-            
+            { date: { _nnull: true } }  
           ]
         };
 
@@ -53,7 +53,7 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
     const filter = {
       _and: [
         { status: { _eq: 'published' } },
-        
+        { date: { _nnull: true } }  
       ]
     };
 
@@ -181,8 +181,11 @@ export async function fetchAllSlugs(): Promise<string[]> {
       readItems('reboot_democracy_blog', {
         fields: ['slug'],
         filter: {
-          status: { _eq: 'published' },
-          date: { _lte: '$NOW' }
+          _and: [
+            { status: { _eq: 'published' } },
+
+            { date: { _nnull: true } }  
+          ]
         },
         limit: -1
       })
@@ -212,6 +215,7 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
+            { date: { _nnull: true } }  
           ]
         }
       })),
@@ -222,6 +226,7 @@ export async function fetchLatestCombinedPosts(): Promise<any[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
+            { date: { _nnull: true } }  
           ]
         }
       }))
