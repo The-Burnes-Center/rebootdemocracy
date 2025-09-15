@@ -1,21 +1,131 @@
 [build]
-  command = "vite build"
-  functions = "netlify/functions"
-  publish = "dist"
+command = "npm run generate"
+publish = ".output/public/"
+functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20.12.2"
+  NPM_VERSION = "10.8.0"
+  NPM_FLAGS = "--no-audit --no-fund --verbose"
+  NETLIFY_BUILD_DEBUG = "true"
+
+[[plugins]]
+package = "netlify-plugin-cache"
+  [plugins.inputs]
+  paths = [".output/public"]
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
+  directory = "netlify/functions"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-  Access-Control-Allow-Origin = "*"
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/:splat"
+status = 200
+
+[[redirects]]
+from = "/newsoftheweek/feed/rss"
+to = "/.netlify/functions/newsoftheweek"
+status = 200
+force = true
 
 [dev]
-  # Replace '3000' with the port your Vue.js app is running on
-  targetPort = 3000
-  # This is the port Netlify Dev will use
-  port = 3001
-  # Other configurations...
+command = "npm run dev"
+targetPort = 3000
+
+[images]
+remote_images = ["https://burnes-center.directus.app/assets/.*"]
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    cache-control = "no-cache, no-store, must-revalidate"
+    pragma = "no-cache"
+    expires = "0"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    cache-control = "no-cache, no-store, must-revalidate"
+    pragma = "no-cache"
+    expires = "0"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/blog"
+  [headers.values]
+    cache-control = "no-cache, no-store, must-revalidate"
+    pragma = "no-cache"
+    expires = "0"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/blog/*"
+  [headers.values]
+    cache-control = "no-cache, no-store, must-revalidate"
+    pragma = "no-cache"
+    expires = "0"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/_nuxt/*.js"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+    access-control-allow-origin = "*"
+  
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    cache-control = "no-cache, no-store, must-revalidate"
+    pragma = "no-cache"
+    expires = "0"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    cache-control = "public, max-age=2592000, immutable"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/*.json"
+  [headers.values]
+    cache-control = "no-cache, no-store, must-revalidate"
+    pragma = "no-cache"
+    expires = "0"
+    access-control-allow-origin = "*"
+
+# CACHE for fonts (1 year - fonts rarely change)
+[[headers]]
+  for = "/*.woff"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/*.ttf"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+    access-control-allow-origin = "*"
+
+[[headers]]
+  for = "/*.eot"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+    access-control-allow-origin = "*"
+
+[functions.scheduled-build]
+schedule = "0 */12 * * *"
