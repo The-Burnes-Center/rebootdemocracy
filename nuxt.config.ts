@@ -50,11 +50,7 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
-    '/blog': { prerender: false,
-      headers: { 
-        'cache-control': 'no-cache, no-store, must-revalidate' 
-      }
-     },
+    '/blog': { prerender: true},
     '/blog/**': { prerender: false, 
       headers: { 
         'cache-control': 'no-cache, no-store, must-revalidate'  
