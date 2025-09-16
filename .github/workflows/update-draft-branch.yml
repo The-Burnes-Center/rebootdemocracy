@@ -1,4 +1,3 @@
-# .github/workflows/update-draft-branch.yml
 name: Update Draft Branch
 on:
   push:
@@ -22,7 +21,7 @@ jobs:
       - name: Fetch draft branch
         run: git fetch origin draft
       
-      - name: Merge main into draft without overwriting blogHelper.js
+      - name: Merge main into draft without overwriting blogHelper.ts
         run: |
           # Create a temporary branch from draft
           git checkout -B draft origin/draft
@@ -30,15 +29,15 @@ jobs:
           # Merge main into draft without committing
           git merge main --no-commit --no-ff || true
           
-          # Restore blogHelper.js from draft to prevent it from being overwritten
-          git checkout origin/draft -- src/helpers/blogHelper.js
+          # Restore blogHelper.ts from draft to prevent it from being overwritten
+          git checkout origin/draft -- src/helpers/blogHelper.ts
 
           
           # If nuxt.config.ts needs different settings for draft
           # git checkout origin/draft -- nuxt.config.ts
           
           # Commit the merge
-          git commit -m "Merge main into draft without overwriting blogHelper.js" || echo "No changes to commit"
+          git commit -m "Merge main into draft without overwriting blogHelper.ts" || echo "No changes to commit"
       
       - name: Push changes to draft branch
         run: git push origin draft

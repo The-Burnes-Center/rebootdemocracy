@@ -1,6 +1,6 @@
 // composables/blogHelper.js - DRAFT BRANCH VERSION (SIMPLIFIED - NO AUTH)
 import { createDirectus, rest, readItems } from '@directus/sdk';
-import { BlogPost } from '@/types/BlogPost';
+import type { BlogPost } from '@/types/BlogPost';
 
 const API_URL = 'https://burnes-center.directus.app/';
 const directus = createDirectus(API_URL).with(rest());
@@ -144,7 +144,7 @@ export async function fetchAllUniqueTags(): Promise<string[]> {
     const uniqueTags = new Set<string>();
     (response as any[]).forEach((post) => {
       if (post.Tags && Array.isArray(post.Tags)) {
-        post.Tags.forEach((tag) => uniqueTags.add(tag));
+        post.Tags.forEach((tag: string) => uniqueTags.add(tag));
       }
     });
     
