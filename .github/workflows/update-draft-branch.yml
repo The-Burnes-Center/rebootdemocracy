@@ -31,10 +31,8 @@ jobs:
           
           # Restore blogHelper.ts from draft to prevent it from being overwritten
           git checkout origin/draft -- src/helpers/blogHelper.ts
-
-          
-          # If nuxt.config.ts needs different settings for draft
-          # git checkout origin/draft -- nuxt.config.ts
+          git checkout origin/draft -- pages/blog/[slug].vue
+          git checkout origin/draft -- nuxt.config.ts
           
           # Commit the merge
           git commit -m "Merge main into draft without overwriting blogHelper.ts" || echo "No changes to commit"
