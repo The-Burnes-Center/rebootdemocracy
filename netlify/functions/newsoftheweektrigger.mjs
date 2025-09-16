@@ -11,9 +11,12 @@ export const handler = async function (event, context) {
     const publicData = await directus.request(
       readItems('reboot_democracy_weekly_news', {
         filter: {
-          _and: [
+          _or: [
             {
               status: { _eq: 'published' }
+            },
+            {
+              status: { _eq: 'Scheduled' }
             }
           ]
         },
