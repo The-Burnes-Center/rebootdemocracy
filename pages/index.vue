@@ -315,7 +315,6 @@ import type { BlogPost } from "@/types/index.ts";
 import { fetchAllBlogPosts } from "~/composables/fetchBlogData";
 import { fetchWeeklyNewsItems } from "~/composables/fetchWeeklyNews";
 import { 
-  fetchPostsByAuthor, 
   getAuthorName as getAuthorNameUtil,
   getAllAuthors 
 } from "~/composables/useAuthorPosts";
@@ -358,40 +357,46 @@ const isLoadingState = ref(false);
 
 const DIRECTUS_URL = "https://burnes-center.directus.app/";
 
-// Data fetching
-const { data: latestCombinedPosts } = await useAsyncData(
-  "latest-combined-posts",
-  fetchLatestCombinedPosts
-);
+// Data fetching - all in one
+const { data: homePageData } = await useAsyncData(
+  "homepage-all-data",
+  async () => {
+    const [
+      latestCombinedPosts,
+      allBlogPosts,
+      allTags,
+      authorListData,
+      featuredContributors,
+      weeklyNewsItems
+    ] = await Promise.all([
+      fetchLatestCombinedPosts(),
+      fetchAllBlogPosts(),
+      fetchAllUniqueTags(),
+      getAllAuthors(),
+      fetchFeaturedContributors(),
+      fetchWeeklyNewsItems()
+    ]);
 
-const { data: allBlogPosts } = await useAsyncData("homepage-blogs", () =>
-  fetchBlogData()
-);
-
-const { data: allTags } = await useAsyncData(
-  "homepage-tags",
-  fetchAllUniqueTags
-);
-
-const { data: authorListData } = await useAsyncData(
-  "homepage-author-list",
-  getAllAuthors
-);
-
-const { data: featuredContributors } = await useAsyncData(
-  "featured-contributors",
-  fetchFeaturedContributors
+    return {
+      latestCombinedPosts,
+      allBlogPosts,
+      allTags,
+      authorListData,
+      featuredContributors,
+      weeklyNewsItems
+    };
+  }
 );
 
 // Computed properties
-const featuredPost = computed(() => latestCombinedPosts.value?.[0] || null);
+const featuredPost = computed(() => homePageData.value?.latestCombinedPosts?.[0] || null);
 const latestThreePosts = computed(
-  () => latestCombinedPosts.value?.slice(1, 4) || []
+  () => homePageData.value?.latestCombinedPosts?.slice(1, 4) || []
 );
-const tagOptions = computed(() => ["All Topics", ...(allTags.value || [])]);
+const tagOptions = computed(() => ["All Topics", ...(homePageData.value?.allTags || [])]);
 const authorOptions = computed(() => [
   "All Authors",
-  ...(authorListData.value || []),
+  ...(homePageData.value?.authorListData || []),
 ]);
 const isLoading = computed(() => isLoadingState.value);
 
@@ -406,7 +411,7 @@ const tabOptions = computed(() => [
 
 const flattenedCollaborators = computed(
   () =>
-    featuredContributors.value?.map((member) => ({
+    homePageData.value?.featuredContributors?.map((member) => ({
       name: `${member.First_Name} ${member.Last_Name}`,
       title: member.Title,
       imageUrl: member.Headshot?.id
@@ -423,7 +428,47 @@ function handleKeyboardNavigation(event: KeyboardEvent, callback: () => void): v
   }
 }
 
-// Utility functions
+function filterPostsByAuthorFromCache(authorName: string): any[] {
+  if (!homePageData.value) return [];
+  
+  const normalizedSearch = authorName.toLowerCase().trim();
+  
+  // Filter blog posts
+  const matchingBlogs = (homePageData.value.allBlogPosts || []).filter(post => {
+    if (post.authors && Array.isArray(post.authors)) {
+      return post.authors.some((authorObj: any) => {
+        if (authorObj?.team_id?.First_Name && authorObj?.team_id?.Last_Name) {
+          const fullName = `${authorObj.team_id.First_Name} ${authorObj.team_id.Last_Name}`.toLowerCase();
+          return fullName.includes(normalizedSearch) || normalizedSearch.includes(fullName);
+        }
+        return false;
+      });
+    }
+    return false;
+  });
+  
+  // Filter weekly news
+  const matchingNews = (homePageData.value.weeklyNewsItems || []).filter(entry => {
+    const authorString = entry.author || entry.authorString || '';
+    if (!authorString || typeof authorString !== 'string') return false;
+    
+    // Split by common separators and check each author
+    const authors = authorString
+      .split(/[,&]|\sand\s/i)
+      .map((part: string) => part.trim())
+      .filter((part: string) => part && part.toLowerCase() !== 'and');
+    
+    return authors.some((author: string) => {
+      const normalizedAuthor = author.toLowerCase();
+      return normalizedAuthor.includes(normalizedSearch) || normalizedSearch.includes(normalizedAuthor);
+    });
+  });
+  
+  // Combine and sort by date
+  return [...matchingBlogs, ...matchingNews]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
 function formatDate(dateValue: Date | string): string {
   try {
     return format(new Date(dateValue), "MMMM d, yyyy");
@@ -535,7 +580,7 @@ async function applyFilters(): Promise<void> {
     let filteredPosts: any[] = [];
 
     if (selectedAuthor.value !== "All Authors") {
-      const authorPosts = await fetchPostsByAuthor(selectedAuthor.value);
+      const authorPosts = filterPostsByAuthorFromCache(selectedAuthor.value);
 
       if (selectedTag.value !== "All Topics") {
         filteredPosts = authorPosts.filter((post) => {
@@ -554,10 +599,8 @@ async function applyFilters(): Promise<void> {
         filteredPosts = authorPosts;
       }
     } else if (selectedTag.value !== "All Topics") {
-      const [blogs, newsItems] = await Promise.all([
-        fetchAllBlogPosts(),
-        fetchWeeklyNewsItems(),
-      ]);
+      const blogs = homePageData.value?.allBlogPosts || [];
+      const newsItems = homePageData.value?.weeklyNewsItems || [];
 
       const filteredBlogs = blogs.filter((post) =>
         post.Tags?.includes(selectedTag.value)
@@ -579,10 +622,8 @@ async function applyFilters(): Promise<void> {
       // Combine blogs and news
       filteredPosts = [...filteredBlogs, ...filteredNews];
     } else {
-      const [blogs, newsItems] = await Promise.all([
-        allBlogPosts.value || [],
-        fetchWeeklyNewsItems(),
-      ]);
+      const blogs = homePageData.value?.allBlogPosts || [];
+      const newsItems = homePageData.value?.weeklyNewsItems || [];
       
       const formattedNews = newsItems.map((n) => ({
         ...n,
@@ -623,10 +664,8 @@ onMounted(async () => {
   
   // Load all posts (blogs + news) together
   try {
-    const [blogs, newsItems] = await Promise.all([
-      allBlogPosts.value || [],
-      fetchWeeklyNewsItems(),
-    ]);
+    const blogs = homePageData.value?.allBlogPosts || [];
+    const newsItems = homePageData.value?.weeklyNewsItems || [];
     
     const formattedNews = newsItems.map((n) => ({
       ...n,
@@ -641,7 +680,7 @@ onMounted(async () => {
     displayPosts.value = allPosts;
   } catch (error) {
     console.error("Error loading posts:", error);
-    displayPosts.value = allBlogPosts.value || [];
+    displayPosts.value = homePageData.value?.allBlogPosts || [];
   }
 });
 </script>
