@@ -32,7 +32,6 @@ jobs:
           # Restore draft-specific files to prevent them from being overwritten
           git checkout origin/draft -- src/helpers/blogHelper.ts
           git checkout origin/draft -- src/helpers/weeklyNewsHelper.ts
-          git checkout origin/draft -- src/helpers/weeklyNewsHelper.js
           git checkout origin/draft -- pages/blog/[slug].vue
           git checkout origin/draft -- pages/newsthatcaughtoureye/[slug].vue
           git checkout origin/draft -- nuxt.config.ts
