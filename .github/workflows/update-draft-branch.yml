@@ -12,30 +12,32 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
-      
+
       - name: Set up Git
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
-      
+
       - name: Fetch draft branch
         run: git fetch origin draft
-      
-      - name: Merge main into draft without overwriting blogHelper.ts
+
+      - name: Merge main into draft without overwriting draft-specific files
         run: |
           # Create a temporary branch from draft
           git checkout -B draft origin/draft
-          
+
           # Merge main into draft without committing
           git merge main --no-commit --no-ff || true
-          
-          # Restore blogHelper.ts from draft to prevent it from being overwritten
+
+          # Restore draft-specific files to prevent them from being overwritten
           git checkout origin/draft -- src/helpers/blogHelper.ts
+          git checkout origin/draft -- src/helpers/weeklyNewsHelper.ts
           git checkout origin/draft -- pages/blog/[slug].vue
+          git checkout origin/draft -- pages/newsthatcaughtoureye/[slug].vue
           git checkout origin/draft -- nuxt.config.ts
-          
+
           # Commit the merge
-          git commit -m "Merge main into draft without overwriting blogHelper.ts" || echo "No changes to commit"
-      
+          git commit -m "Merge main into draft without overwriting draft-specific files" || echo "No changes to commit"
+
       - name: Push changes to draft branch
         run: git push origin draft
