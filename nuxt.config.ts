@@ -1,6 +1,5 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
-import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
 
@@ -30,14 +29,12 @@ export default defineNuxtConfig({
   },
   hooks: {
     async 'nitro:config'(nitroConfig) {
-      const blogRoutes = await getStaticBlogRoutes();
       const categoryRoutes = await getStaticCategoryRoutes();
       const newsRoutes = await getStaticNewsRoutes();
       
       nitroConfig.prerender = nitroConfig.prerender ?? {};
       nitroConfig.prerender.routes = [
         ...(nitroConfig.prerender.routes ?? []),
-        ...blogRoutes,
         ...categoryRoutes,
         ...newsRoutes
       ];
@@ -53,8 +50,12 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
-    '/blog': { prerender: true },
-    '/blog/**': { prerender: true },
+    '/blog': { prerender: true},
+    '/blog/**': { prerender: false, 
+      headers: { 
+        'cache-control': 'no-cache, no-store, must-revalidate'  
+      }
+    },
     '/events': { prerender: true },
     '/more-resources': { prerender: true },
     '/newsthatcaughtoureye/**': { prerender: true },
