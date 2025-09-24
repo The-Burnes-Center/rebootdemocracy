@@ -82,7 +82,7 @@ mkdir -p types
 mkdir -p netlify/functions
 ```
 
-**What are Composables?** Composables are reusable functions that leverage Vue's Composition API to encapsulate and share stateful logic, data fetching, or any functionality across your components - think of them as your project's utility functions that can use Vue's reactivity system and Nuxt's features.
+**What are Composables?** Composables are simple reusable functions in Vue that let you share logic (like data fetching or state) across components while using Vue’s reactivity and Nuxt’s features.
 
 ### Step 6: Create Essential Files
 
@@ -286,8 +286,6 @@ The `<slot />` component in the layout is where your page content gets inserted,
 1. **SSR Compatibility**: Data is fetched on the server during initial page load, improving SEO and performance
 2. **Automatic Caching**: Prevents duplicate requests when navigating between pages
 3. **Loading States**: Built-in pending, error, and refresh states
-4. **TypeScript Support**: Full type inference for your data
-5. **Hydration**: Seamlessly transfers data from server to client
 
 ### Basic useAsyncData Syntax
 
@@ -878,7 +876,7 @@ targetPort = 3000
 
 3. **Add Components**:
    - Start creating Vue components in the `components/` directory
-   - They will be auto-imported thanks to the Nuxt configuration
+   - They will be auto-imported.
 
 4. **Add Pages**:
    - Create additional pages in the `pages/` directory
