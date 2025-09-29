@@ -1,5 +1,5 @@
 [build]
-command = "npm run generate"
+command = "rm -rf .output .nuxt && npm ci && npm run generate"
 publish = ".output/public/"
 functions = "netlify/functions"
 
@@ -12,7 +12,7 @@ functions = "netlify/functions"
 [[plugins]]
 package = "netlify-plugin-cache"
   [plugins.inputs]
-  paths = [".output/public"]
+  paths = ["node_modules"]
 
 [functions]
   node_bundler = "esbuild"
