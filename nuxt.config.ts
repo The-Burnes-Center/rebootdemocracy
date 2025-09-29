@@ -28,6 +28,9 @@ export default defineNuxtConfig({
       serverDir: '.output/server'
     }
   },
+  generate: {
+    cache: false
+  },
   hooks: {
     async 'nitro:config'(nitroConfig) {
       const blogRoutes = await getStaticBlogRoutes();
