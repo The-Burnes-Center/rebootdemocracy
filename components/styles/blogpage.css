@@ -441,7 +441,7 @@ p>strong {
   }
 
   .blog-banner-image img.blog-image {
-    height: 15rem;
+    /* height: 15rem; */
     object-fit: fill;
   }
 
