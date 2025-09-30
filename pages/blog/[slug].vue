@@ -585,12 +585,19 @@ onBeforeUnmount(() => {
   top: 6px;
 }
 
-/* Search results fullpage styling */
 .search-results-fullpage {
   min-height: 70vh;
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: 2rem;
+  background: #f8fafc;
 }
 
+.search-results-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 1rem 2rem;
+}
 
 .search-results-title {
   margin-bottom: 1rem !important;
@@ -716,6 +723,24 @@ onBeforeUnmount(() => {
   outline: none;
   box-shadow: 0 0 0 2px #4a6b8a;
   border-radius: 6px;
+}
+
+/* Responsive adjustments for search results */
+@media (max-width: 768px) {
+  .search-results-fullpage {
+    padding: 1rem;
+    margin-left: calc(-50vw + 50%);
+  }
+  
+  .search-results-header {
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .search-results-content {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
 }
 
 /* Responsive adjustments for tags section */
