@@ -7,8 +7,42 @@
     <div class="blog-gradient-inner">
       <section class="blog-section">
         <main id="main-content" class="left-content-blog" role="main">
-          <div v-if="showSearchResults" role="search" aria-label="Search results">
-            <GlobalSearch />
+          <div v-if="showSearchResults" class="search-results-fullpage" role="search" aria-label="Search results">
+            <!-- Search Results Header -->
+            <div class="search-results-header">
+              <TitleText
+                :level="'h1'"
+                size="3xl"
+                weight="bold"
+                fontFamily="sora"
+                class="search-results-title"
+              >
+                Search Results
+              </TitleText>
+              <Text 
+                v-if="searchQuery" 
+                size="lg" 
+                weight="normal" 
+                fontFamily="habibi"
+                class="search-query-display"
+              >
+                Showing results for: <strong>"{{ searchQuery }}"</strong>
+              </Text>
+              <Text 
+                v-if="totalResults !== undefined" 
+                size="base" 
+                weight="normal" 
+                fontFamily="habibi"
+                class="search-count-display"
+              >
+                {{ totalResults }} {{ totalResults === 1 ? 'result' : 'results' }} found
+              </Text>
+            </div>
+            
+            <!-- Search Results Content -->
+            <div class="search-results-content">
+              <GlobalSearch />
+            </div>
           </div>
 
           <!-- Loading state -->
@@ -183,75 +217,77 @@
     </div>
   </div>
 
-  <!-- Blog main content: plain white background -->
-  <section class="blog-detail" role="region" aria-labelledby="article-title">
-    <div 
-      v-if="blog?.audio_version" 
-      class="audio-version"
-      role="region"
-      aria-label="Audio version of this article"
-    >
-      <p>
-        <em>Listen to the AI-generated audio version of this piece.</em>
-      </p>
-      <AudioPlayer
-        :audioSrc="`https://burnes-center.directus.app/assets/${blog.audio_version.id}`"
-        :aria-label="`Audio version of ${blog.title}`"
-      />
-    </div>
-
-    <!-- Main article content -->
-    <div class="blog-content-container">
-      <article 
-        v-if="blog?.content" 
-        class="blog-content" 
-        v-html="blog.content"
-        role="article"
-        aria-labelledby="article-title"
-      ></article>
-    </div>
-  </section>
-
-  <!-- Tags section -->
-  <section 
-    v-if="blog && blog.Tags && blog.Tags.length > 0" 
-    class="blog-tags-section" 
-    role="region" 
-    aria-label="Article tags"
-  >
-    <div class="blog-tags-container">
-      <TitleText
-        :level="'h2'"
-        size="2xl"
-        weight="bold"
-        fontFamily="sora"
-        class="tags-heading"
+  <!-- Blog main content: plain white background - Only show when NOT showing search results -->
+  <template v-if="!showSearchResults">
+    <section class="blog-detail" role="region" aria-labelledby="article-title">
+      <div 
+        v-if="blog?.audio_version" 
+        class="audio-version"
+        role="region"
+        aria-label="Audio version of this article"
       >
-        Tags
-      </TitleText>
-      
-      <div class="blog-tags-list">
-        <nav aria-label="Article tags">
-          <button
-            v-for="(tag, index) in blog.Tags"
-            :key="index"
-            class="tag-button"
-            @click="navigateToCategory(tag)"
-            @keydown="handleKeydown($event, () => navigateToCategory(tag))"
-            :aria-label="`View all articles in category: ${tag}`"
-            type="button"
-          >
-            {{ tag }}
-          </button>
-        </nav>
+        <p>
+          <em>Listen to the AI-generated audio version of this piece.</em>
+        </p>
+        <AudioPlayer
+          :audioSrc="`https://burnes-center.directus.app/assets/${blog.audio_version.id}`"
+          :aria-label="`Audio version of ${blog.title}`"
+        />
       </div>
-    </div>
-  </section>
 
-  <!-- Related articles -->
-  <aside role="complementary" aria-label="Related articles">
-    <RelatedBlogCards :relatedBlogs="relatedBlogs" />
-  </aside>
+      <!-- Main article content -->
+      <div class="blog-content-container">
+        <article 
+          v-if="blog?.content" 
+          class="blog-content" 
+          v-html="blog.content"
+          role="article"
+          aria-labelledby="article-title"
+        ></article>
+      </div>
+    </section>
+
+    <!-- Tags section -->
+    <section 
+      v-if="blog && blog.Tags && blog.Tags.length > 0" 
+      class="blog-tags-section" 
+      role="region" 
+      aria-label="Article tags"
+    >
+      <div class="blog-tags-container">
+        <TitleText
+          :level="'h2'"
+          size="2xl"
+          weight="bold"
+          fontFamily="sora"
+          class="tags-heading"
+        >
+          Tags
+        </TitleText>
+        
+        <div class="blog-tags-list">
+          <nav aria-label="Article tags">
+            <button
+              v-for="(tag, index) in blog.Tags"
+              :key="index"
+              class="tag-button"
+              @click="navigateToCategory(tag)"
+              @keydown="handleKeydown($event, () => navigateToCategory(tag))"
+              :aria-label="`View all articles in category: ${tag}`"
+              type="button"
+            >
+              {{ tag }}
+            </button>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related articles -->
+    <aside role="complementary" aria-label="Related articles">
+      <RelatedBlogCards :relatedBlogs="relatedBlogs" />
+    </aside>
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -264,7 +300,7 @@ import { useRoute, useRouter } from "vue-router";
 import type { BlogPost } from "@/types/BlogPost";
 import { format } from "date-fns";
 
-const { showSearchResults, setIndexNames, resetSearch } = useSearchState();
+const { showSearchResults, setIndexNames, resetSearch, searchQuery, totalResults } = useSearchState();
 
 const route = useRoute();
 const router = useRouter();
@@ -549,6 +585,45 @@ onBeforeUnmount(() => {
   top: 6px;
 }
 
+.search-results-fullpage {
+  min-height: 70vh;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: 2rem;
+  background: #f8fafc;
+}
+
+.search-results-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 1rem 2rem;
+}
+
+.search-results-title {
+  margin-bottom: 1rem !important;
+  color: rgb(0, 51, 102) !important;
+}
+
+.search-query-display {
+  margin-bottom: 0.5rem !important;
+  color: #475569 !important;
+}
+
+.search-query-display strong {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+.search-count-display {
+  color: #64748b;
+  font-style: italic;
+}
+
+.search-results-content {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
 /* Enhanced focus indicators using box-shadow */
 .blog-back-btn:focus,
 .category-tag:focus,
@@ -648,6 +723,24 @@ onBeforeUnmount(() => {
   outline: none;
   box-shadow: 0 0 0 2px #4a6b8a;
   border-radius: 6px;
+}
+
+/* Responsive adjustments for search results */
+@media (max-width: 768px) {
+  .search-results-fullpage {
+    padding: 1rem;
+    margin-left: calc(-50vw + 50%);
+  }
+  
+  .search-results-header {
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .search-results-content {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
 }
 
 /* Responsive adjustments for tags section */

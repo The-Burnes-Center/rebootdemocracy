@@ -32,8 +32,12 @@
 }
 
 .search-results-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  padding: 1rem;
+  margin:1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border-bottom: 1px solid #eee;
 }
 
