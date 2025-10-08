@@ -132,11 +132,6 @@ async function handleUpsert(collection, itemId) {
   const cfg = COLLECTION_CONFIG[collection];
   const item = await fetchItem(collection, itemId, cfg.fields);
 
-  if (item.status && item.status !== 'published') {
-    console.log(`Skip: item ${itemId} not published`);
-    return;
-  }
-
   const objects = cfg.transform(item);
   await client.saveObjects({ indexName: collection, objects }); // v5 saveObjects :contentReference[oaicite:4]{index=4}
   console.log(`Indexed ${objects.length} record(s) for ${itemId}`);
