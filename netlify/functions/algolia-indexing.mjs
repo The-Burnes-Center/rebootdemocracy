@@ -132,7 +132,7 @@ async function handleUpsert(collection, itemId) {
   const cfg = COLLECTION_CONFIG[collection];
   const item = await fetchItem(collection, itemId, cfg.fields);
 
-  const allowedStatuses = ['published', 'Scheduled'];
+  const allowedStatuses = ['published', 'scheduled', 'Scheduled'];
   if (item.status && !allowedStatuses.includes(item.status)) {
     console.log(`Skip: item ${itemId} status=${item.status} (not allowed)`);
     return;
