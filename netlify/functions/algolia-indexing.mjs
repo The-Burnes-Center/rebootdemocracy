@@ -132,6 +132,12 @@ async function handleUpsert(collection, itemId) {
   const cfg = COLLECTION_CONFIG[collection];
   const item = await fetchItem(collection, itemId, cfg.fields);
 
+  const allowedStatuses = ['published', 'Scheduled'];
+  if (item.status && !allowedStatuses.includes(item.status)) {
+    console.log(`Skip: item ${itemId} status=${item.status} (not allowed)`);
+    return;
+  }
+
   const objects = cfg.transform(item);
   await client.saveObjects({ indexName: collection, objects }); // v5 saveObjects :contentReference[oaicite:4]{index=4}
   console.log(`Indexed ${objects.length} record(s) for ${itemId}`);
