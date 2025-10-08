@@ -29,6 +29,12 @@ export default function useSearchState() {
     showSearchResults.value = query.trim().length > 0
     currentPage.value = 0;
     
+    if (query.trim().length > 0) {
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+    
     if (query.trim().length > 0 && indexNames.value.length > 0) {
       isSearching.value = true
       try {

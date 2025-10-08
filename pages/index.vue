@@ -9,7 +9,41 @@
     <!-- SEARCH RESULTS -->
     <section class="home-section" v-if="showSearchResults" aria-label="Search Results">
       <div class="container">
-        <GlobalSearch />
+        <!-- Search Results Header -->
+        <div class="search-results-header">
+          <TitleText
+            :level="'h1'"
+            size="3xl"
+            weight="bold"
+            fontFamily="sora"
+            class="search-results-title"
+          >
+            Search Results
+          </TitleText>
+          <Text 
+            v-if="searchQuery" 
+            size="lg" 
+            weight="normal" 
+            fontFamily="habibi"
+            class="search-query-display"
+          >
+            Showing results for: <strong>"{{ searchQuery }}"</strong>
+          </Text>
+          <Text 
+            v-if="totalResults !== undefined" 
+            size="base" 
+            weight="normal" 
+            fontFamily="habibi"
+            class="search-count-display"
+          >
+            {{ totalResults }} {{ totalResults === 1 ? 'result' : 'results' }} found
+          </Text>
+        </div>
+        
+        <!-- Search Results Content -->
+        <div class="search-results-content">
+          <GlobalSearch />
+        </div>
       </div>
     </section>
 
@@ -320,7 +354,7 @@ import {
 } from "~/composables/useAuthorPosts";
 
 const router = useRouter();
-const { resetSearch, showSearchResults } = useSearchState();
+const { resetSearch, showSearchResults, searchQuery, totalResults } = useSearchState();
 
 useHead({
   title: 'Reboot Democracy - AI for Participatory Democracy',
@@ -762,5 +796,31 @@ button:focus,
 
 .skip-link:focus {
   top: 6px;
+}
+
+
+.search-results-title {
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+.search-query-display {
+  margin-bottom: 0.5rem;
+  color: #475569;
+}
+
+.search-query-display strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.search-count-display {
+  color: #64748b;
+  font-style: italic;
+}
+
+.search-results-content {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 </style>

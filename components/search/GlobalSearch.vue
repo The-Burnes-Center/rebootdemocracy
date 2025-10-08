@@ -34,7 +34,7 @@
     <div class="search-pagination" v-if="showLoadMore">
       <Button
         variant="secondary"
-        width="150px"
+        width="160px"
         height="40px"
         @click="loadMoreResults"
         :disabled="isSearching"
