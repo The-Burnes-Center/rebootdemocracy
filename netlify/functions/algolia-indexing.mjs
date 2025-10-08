@@ -114,8 +114,10 @@ function transformBlogItem(record) {
 
 function transformWeeklyNewsItem(record) {
   const epoch = isoToEpoch(record.date);
-  return record.items.map(i => ({
-    objectID: `${record.id}_${i.reboot_democracy_weekly_news_items_id.id}`,
+  const out = [];
+
+  out.push({
+    objectID: `${record.id}`, // unique ID for the parent
     id: record.id,
     author: record.author,
     title: record.title,
@@ -123,8 +125,31 @@ function transformWeeklyNewsItem(record) {
     edition: record.edition,
     date: record.date,
     date_at_epoch: epoch,
-    item: i.reboot_democracy_weekly_news_items_id,
-  }));
+    status: record.status,
+  });
+
+  if (Array.isArray(record.items) && record.items.length > 0) {
+    for (const i of record.items) {
+      const nested = i.reboot_democracy_weekly_news_items_id;
+      if (!nested) continue;
+      out.push({
+        objectID: `${record.id}_${nested.id}`,
+        id: record.id,
+        author: record.author,
+        title: record.title,
+        summary: record.summary,
+        edition: record.edition,
+        date: record.date,
+        date_at_epoch: epoch,
+        status: record.status,
+        item: nested,
+      });
+    }
+  } else {
+    console.log(`No nested items for weekly news record ${record.id} — indexed parent only`);
+  }
+
+  return out;
 }
 
 // ─── Algolia upsert / delete helpers ─────────────────────────────────────────
