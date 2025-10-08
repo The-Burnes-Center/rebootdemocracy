@@ -13,7 +13,7 @@ export const handler = async (event, context) => {
     const publicData = await directus.request(
       readItems("reboot_democracy_weekly_news", {
         filter: {
-          or: [
+          _or: [
             { status: { _eq: "published" } },
             { status: { _eq: "Scheduled" } }
           ],
