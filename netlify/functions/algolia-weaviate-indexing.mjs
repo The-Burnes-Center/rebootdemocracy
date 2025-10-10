@@ -49,7 +49,7 @@ const wv = weaviate.client({
   scheme,
   host,
   apiKey: process.env.VITE_WEAVIATE_APIKEY ? new weaviate.ApiKey(process.env.VITE_WEAVIATE_APIKEY) : undefined,
-  headers: { 'X-OpenAI-Api-Key': process.env.VITE_OPENAI_API_KEY || '' },
+  headers: { 'X-OpenAI-Api-Key': process.env.OPENAI_API_KEY || '' },
 });
 
 /****************  Directus fetch one item **********************/
