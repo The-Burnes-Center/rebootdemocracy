@@ -113,6 +113,26 @@
                     </li>
                   </ul>
                 </div>
+                <div v-if="m.youtubeVideos?.length" class="youtube-videos">
+                  <h4 class="youtube-title">Related Videos:</h4>
+                  <div class="youtube-list">
+                    <div v-for="(video, j) in m.youtubeVideos" :key="j" class="youtube-item">
+                      <div class="youtube-embed">
+                        <iframe 
+                          :src="getYouTubeEmbedUrl(video.url)" 
+                          :title="video.title"
+                          frameborder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowfullscreen>
+                        </iframe>
+                      </div>
+                      <div class="youtube-info">
+                        <h5 class="youtube-video-title">{{ video.title }}</h5>
+                        <a :href="video.url" target="_blank" class="youtube-link">Watch on YouTube</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div class="message-actions" v-if="m.text">
                   <!-- <button class="download-docx" @click="downloadDocx(m, i)" :title="'Download this answer as .docx'">
                     <i class="fa-solid fa-file-word"></i>
@@ -164,7 +184,7 @@ import DOMPurify from "dompurify";
 // import htmlDocx from "html-docx-js-typescript"; // Also moved to dynamic import
 
 const draft = ref("");
-const msgs = ref<{ sender: "user" | "bot"; text: string; sources?: any[] }[]>(
+const msgs = ref<{ sender: "user" | "bot"; text: string; sources?: any[]; youtubeVideos?: any[] }[]>(
   []
 );
 const busy = ref<boolean>(false);
@@ -176,6 +196,22 @@ const sample = [
 ];
 
 const md = (t: string) => DOMPurify.sanitize(marked.parse(t) as string);
+
+function getYouTubeEmbedUrl(url: string): string {
+  // Convert youtu.be URLs to embed format with timestamp
+  if (url.includes('youtu.be/')) {
+    const videoId = url.split('youtu.be/')[1].split('&')[0];
+    const timestamp = url.includes('&t=') ? url.split('&t=')[1] : '';
+    return `https://www.youtube.com/embed/${videoId}${timestamp ? `?start=${timestamp}` : ''}`;
+  }
+  // Convert youtube.com/watch URLs to embed format with timestamp
+  if (url.includes('youtube.com/watch')) {
+    const videoId = url.split('v=')[1].split('&')[0];
+    const timestamp = url.includes('&t=') ? url.split('&t=')[1] : '';
+    return `https://www.youtube.com/embed/${videoId}${timestamp ? `?start=${timestamp}` : ''}`;
+  }
+  return url;
+}
 
 function escapeHtml(text: string): string {
   return text
@@ -426,7 +462,14 @@ async function send() {
         if (!chunk || chunk === "[DONE]") continue;
         const payload = JSON.parse(chunk);
         if (payload.content) bot.text += payload.content;
-        if (payload.sourceDocuments) bot.sources = payload.sourceDocuments;
+        if (payload.sourceDocuments) {
+          // Separate YouTube videos from regular sources
+          const youtubeVideos = payload.sourceDocuments.filter((doc: any) => doc.type === 'video');
+          const regularSources = payload.sourceDocuments.filter((doc: any) => doc.type !== 'video');
+          
+          bot.sources = regularSources;
+          bot.youtubeVideos = youtubeVideos;
+        }
       }
     }
 
@@ -1128,6 +1171,86 @@ function useSample(q: string) {
   text-decoration: underline;
 }
 
+/* YouTube Videos */
+.youtube-videos {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.youtube-title {
+  font-family: var(--font-habibi);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.youtube-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.youtube-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.youtube-embed {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  background: #000;
+}
+
+.youtube-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.youtube-info {
+  padding: 12px 16px;
+  background: white;
+}
+
+.youtube-video-title {
+  font-family: var(--font-habibi);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.youtube-link {
+  font-family: var(--font-habibi);
+  font-size: 0.875rem;
+  color: #0d63eb;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.youtube-link:hover {
+  text-decoration: underline;
+}
+
+.youtube-link::before {
+  content: "▶";
+  font-size: 0.75rem;
+}
+
 /* Input Area */
 .input-area {
   padding: 20px;
@@ -1406,6 +1529,14 @@ function useSample(q: string) {
   .input-area {
     padding: 12px 12px 16px 12px;
   }
+  
+  .youtube-embed {
+    padding-bottom: 50%; /* Slightly different aspect ratio on mobile */
+  }
+  
+  .youtube-list {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
 }
 
 @media (max-width: 480px) {
@@ -1425,6 +1556,10 @@ function useSample(q: string) {
   
   .bot-message {
     max-width: 95%;
+  }
+  
+  .youtube-list {
+    grid-template-columns: 1fr; /* Single column on very small screens */
   }
 }
 
