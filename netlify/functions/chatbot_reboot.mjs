@@ -149,8 +149,8 @@ async function searchWeaviate(className, fields, query) {
         .withNearText({ concepts: [query] })
         .withWhere({
           path: ['category'],
-          operator: 'NotEqual',
-          valueText: 'innovate-us'
+          operator: 'Equal',
+          valueText: 'reboot'
         })
         .withLimit(5);
 
