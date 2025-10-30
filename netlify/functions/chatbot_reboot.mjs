@@ -95,12 +95,76 @@ const ragDocumentChunkFields = `
   _additional { id distance certainty }
 `;
 
+const youtubeVideoFields = `
+  videoId
+  url
+  title
+  text
+  start_seconds
+  end_seconds
+  source
+  _additional { id distance certainty }
+`;
+
 
 
 /*********************************************
  *  Search helper – BM25 then nearText       *
  *********************************************/
 async function searchWeaviate(className, fields, query) {
+  // Special handling for YouTube videos to exclude "innovate-us" category
+  if (className === 'Youtube_videos') {
+    // 1️⃣ Attempt fast keyword search (BM25) with category filter
+    try {
+      const bm25Query = weaviateClient.graphql
+        .get()
+        .withClassName(className)
+        .withFields(fields)
+        .withBm25({ query })
+        .withWhere({
+          path: ['category'],
+          operator: 'Equal',
+          valueText: 'reboot'
+        })
+        .withLimit(5);
+
+      const bm25Res = await bm25Query.do();
+      const bm25Hits = bm25Res?.data?.Get?.[className] ?? [];
+      
+      if (bm25Hits.length > 0) {
+        console.log(`YouTube BM25 search (excluding innovate-us) found ${bm25Hits.length} results for query: "${query}"`);
+        return bm25Hits.map(h => ({ ...h, _className: className }));
+      }
+
+    } catch (bm25Err) {
+      console.warn(`BM25 search failed for ${className}:`, bm25Err);
+    }
+
+    // 2️⃣ Fallback to semantic vector search with category filter
+    try {
+      const nearTextQuery = weaviateClient.graphql
+        .get()
+        .withClassName(className)
+        .withFields(fields)
+        .withNearText({ concepts: [query] })
+        .withWhere({
+          path: ['category'],
+          operator: 'Equal',
+          valueText: 'reboot'
+        })
+        .withLimit(5);
+
+      const vecRes = await nearTextQuery.do();
+      const vecHits = vecRes?.data?.Get?.[className] ?? [];
+      console.log(`YouTube nearText search (excluding innovate-us) found ${vecHits.length} results for query: "${query}"`);
+      return vecHits.map(h => ({ ...h, _className: className }));
+    } catch (vecErr) {
+      console.error(`nearText search failed for ${className}:`, vecErr);
+      return [];
+    }
+  }
+
+  // Regular search for other collections (no category filtering)
   // 1️⃣ Attempt fast keyword search (BM25)
   try {
     const bm25Query = weaviateClient.graphql
@@ -145,14 +209,34 @@ async function searchWeaviate(className, fields, query) {
 export async function searchContent(query) {
   try {
     // Search across all available collections in the migrated instance
-    const [newsHits, blogHits, ragDocHits, ragChunkHits] = await Promise.all([
+    console.log('Starting search for query:', query);
+    const [newsHits, blogHits, ragDocHits, ragChunkHits, youtubeHits] = await Promise.all([
       searchWeaviate('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
       searchWeaviate('RebootBlogPostChunk',  blogPostChunkFields,  query),
       searchWeaviate('RagDocument',          ragDocumentFields,    query),
-      searchWeaviate('RagDocumentChunk',     ragDocumentChunkFields, query)
+      searchWeaviate('RagDocumentChunk',     ragDocumentChunkFields, query),
+      searchWeaviate('Youtube_videos',       youtubeVideoFields,    query).catch(err => {
+        console.error('YouTube search failed:', err);
+        return [];
+      })
     ]);
     
-    const allResults = [...newsHits, ...blogHits, ...ragDocHits, ...ragChunkHits];
+    const allResults = [...newsHits, ...blogHits, ...ragDocHits, ...ragChunkHits, ...youtubeHits];
+    
+    console.log('YouTube hits found:', youtubeHits.length);
+    console.log('YouTube hits details:', youtubeHits);
+    
+    // Debug: Show text content of YouTube videos
+    youtubeHits.forEach((hit, index) => {
+      console.log(`YouTube video ${index + 1}:`, {
+        title: hit.title,
+        start_seconds: hit.start_seconds,
+        end_seconds: hit.end_seconds,
+        text_preview: hit.text ? hit.text.substring(0, 200) + '...' : 'No text content',
+        videoId: hit.videoId
+      });
+    });
+    console.log('Total results:', allResults.length);
 
     // 1. Filter for exact matches in relevant fields
     const lowerQuery = query.toLowerCase();
@@ -172,6 +256,8 @@ export async function searchContent(query) {
         hit.answer,
         hit.itemAuthor,
         hit.author,
+        hit.text, // YouTube video transcript text
+        hit.source, // YouTube video source
         ...(Array.isArray(hit.authors) ? hit.authors : [])
       ].filter(Boolean); // Remove null/undefined values
 
@@ -195,10 +281,22 @@ export async function searchContent(query) {
       console.log('Using all results (no exact matches)');
     }
 
-    return topChunks.slice(0, 5);
+    // Take top 5 results for main content
+    const finalResults = topChunks.slice(0, 5);
+    console.log('Final search results count:', finalResults.length);
+    console.log('Final search results types:', finalResults.map(r => r._className));
+    
+    // Return both search results and YouTube videos separately
+    return {
+      searchResults: finalResults,
+      youtubeVideos: youtubeHits
+    };
   } catch (error) {
     console.error('Error while querying Weaviate:', error);
-    return [];
+    return {
+      searchResults: [],
+      youtubeVideos: []
+    };
   }
 }
 
@@ -220,6 +318,18 @@ function formatSearchResults(results) {
         return `\n**${r.title || 'Untitled'}**\n- *Category*: ${r.primaryCategory || r.secondaryCategory || 'N/A'}\n- *Date*: ${(r.date || r.lastModified || 'N/A').toString().substring(0, 10)}\n- *Content*: ${r.shortDescription || r.description || r.fullDescriptionOfAllContents || ''}\n- *URL*: ${r.url || 'N/A'}`.trim();
       case 'RagDocumentChunk':
         return `\n**${r.title || 'Untitled'}**\n- *Content*: ${r.shortSummary || r.fullSummary || r.uncompressedContent || r.compressedContent || ''}\n- *URL*: ${r.mainExternalUrlFound || 'N/A'}`.trim();
+      case 'Youtube_videos':
+        const startTime = r.start_seconds ? Math.floor(r.start_seconds) : 0;
+        const endTime = r.end_seconds ? Math.floor(r.end_seconds) : startTime + 30;
+        // Convert to youtu.be format with timestamp
+        const videoUrl = r.videoId ? `https://youtu.be/${r.videoId}&t=${startTime}` : 'N/A';
+        // Format time as minutes:seconds
+        const formatTime = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, '0')} min`;
+        };
+        return `\n**${r.title || 'YouTube Video'}**\n- *Video ID*: ${r.videoId || 'N/A'}\n- *Content*: ${r.text || ''}\n- *Time*: ${formatTime(startTime)} - ${formatTime(endTime)}\n- *Video URL*: ${videoUrl}`.trim();
 
       default:
         return '';
@@ -238,10 +348,13 @@ export async function handler(event, context) {
   const { message, conversation } = JSON.parse(event.body || '{}');
 
   try {
-    const searchResults = await searchContent(message);
+    const searchData = await searchContent(message);
+    const searchResults = searchData.searchResults || searchData; // Handle both old and new format
+    const youtubeVideos = searchData.youtubeVideos || [];
     const formattedResults = formatSearchResults(searchResults);
     console.log('Search query:', message);
     console.log('Number of search results:', searchResults.length);
+    console.log('Number of YouTube videos:', youtubeVideos.length);
     console.log('Formatted results:', formattedResults);
     /********************************
      * Build messages for GPT model *
@@ -316,7 +429,12 @@ Instructions:
     /****************************
      *  Send source documents   *
      ****************************/
+    console.log('Processing source documents for', searchResults.length, 'results');
+    console.log('YouTube videos found for sources:', youtubeVideos.length);
+    
     let sourceDocuments = searchResults.flatMap(r => {
+      console.log('Processing result:', r._className, r.title || r.itemTitle || 'No title');
+      
       if (r._className === 'RebootWeeklyNewsItem') {
         return r.itemUrl ? [{ title: r.itemTitle || r.title, url: r.itemUrl }] : [];
       }
@@ -329,11 +447,58 @@ Instructions:
       if (r._className === 'RagDocumentChunk') {
         return r.mainExternalUrlFound ? [{ title: r.title, url: r.mainExternalUrlFound }] : [];
       }
+      if (r._className === 'Youtube_videos') {
+        const startTime = r.start_seconds ? Math.floor(r.start_seconds) : 0;
+        // Convert YouTube URL to youtu.be format with timestamp
+        let videoUrl = null;
+        if (r.url && r.videoId) {
+          // Extract video ID and create youtu.be URL with timestamp
+          videoUrl = `https://youtu.be/${r.videoId}&t=${startTime}`;
+        }
+        // Format time as minutes:seconds
+        const formatTime = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, '0')} min`;
+        };
+        console.log('YouTube video found:', { title: r.title, originalUrl: r.url, videoId: r.videoId, startTime, videoUrl });
+        const videoDoc = videoUrl ? [{ 
+          title: `${r.title || 'YouTube Video'} (${formatTime(startTime)})`, 
+          url: videoUrl,
+          type: 'video'
+        }] : [];
+        console.log('YouTube video document created:', videoDoc);
+        return videoDoc;
+      }
 
       return [];
     });
 
+// Add YouTube videos to source documents
+const youtubeSourceDocuments = youtubeVideos.map(r => {
+  const startTime = r.start_seconds ? Math.floor(r.start_seconds) : 0;
+  const videoUrl = r.videoId ? `https://youtu.be/${r.videoId}&t=${startTime}` : null;
+  // Format time as minutes:seconds
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')} min`;
+  };
+  console.log('YouTube video for sources:', { title: r.title, videoId: r.videoId, startTime, videoUrl });
+  return videoUrl ? { 
+    title: `${r.title || 'YouTube Video'} (${formatTime(startTime)})`, 
+    url: videoUrl,
+    type: 'video'
+  } : null;
+}).filter(Boolean);
+
+console.log('YouTube source documents created:', youtubeSourceDocuments.length);
+
+// Combine regular sources with YouTube videos
+sourceDocuments = [...sourceDocuments, ...youtubeSourceDocuments];
+
 // Deduplicate by URL, preserving order
+console.log('Source documents before deduplication:', sourceDocuments.length);
 const seen = new Set();
 sourceDocuments = sourceDocuments.filter(doc => {
   if (seen.has(doc.url)) return false;
@@ -341,8 +506,12 @@ sourceDocuments = sourceDocuments.filter(doc => {
   return true;
 });
 
+console.log('Source documents after deduplication:', sourceDocuments.length);
+
 // Limit to 10 links
 sourceDocuments = sourceDocuments.slice(0, 10);
+
+console.log('Source documents being sent:', sourceDocuments);
 
 context.res.body += `data: ${JSON.stringify({ sourceDocuments })}\n\n`;
 context.res.body += 'data: [DONE]\n\n';
