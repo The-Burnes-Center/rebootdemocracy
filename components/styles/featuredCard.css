@@ -32,7 +32,10 @@
 /* Image section */
 .featured-card__image-wrapper {
   position: relative;
-  height: 280px;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #f8f9fa;
   background-size: cover;
@@ -41,6 +44,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Modern browsers with aspect-ratio support */
+@supports (aspect-ratio: 16 / 9) {
+  .featured-card__image-wrapper {
+    height: auto;
+    padding-bottom: 0;
+  }
 }
 
 .featured-card__image-wrapper::before {
@@ -60,12 +71,21 @@
 }
 
 .featured-card__image {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.4s ease;
-  position: relative;
   z-index: 2;
+}
+
+/* Modern browsers with aspect-ratio support */
+@supports (aspect-ratio: 16 / 9) {
+  .featured-card__image {
+    position: relative;
+  }
 }
 
 
@@ -194,7 +214,7 @@
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .featured-card__image-wrapper {
-    height: 200px;
+    aspect-ratio: 16 / 9;
   }
 
   .featured-card__title {
