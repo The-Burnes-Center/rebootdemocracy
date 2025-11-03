@@ -42,7 +42,12 @@ export default function useSearchState() {
           const index = algoliaClient.initIndex(indexName)
           return index.search(query, {
             page: currentPage.value,
-            hitsPerPage: 2
+            hitsPerPage: 2,
+            removeWordsIfNoResults: "allOptional",
+            typoTolerance: true,
+            ignorePlurals: true,         
+            removeStopWords: false,      
+            advancedSyntax: true         
           })
         })
         
