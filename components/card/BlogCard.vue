@@ -103,15 +103,36 @@ const formattedDate = props.date
 
 .blogcard-image-wrapper {
   width: 100%;
-  height: 200px;
+  height: 0;
+  padding-bottom: 56.25%; 
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background-color: #f0f0f0;
+  position: relative;
+}
+
+/* Modern browsers with aspect-ratio support */
+@supports (aspect-ratio: 16 / 9) {
+  .blogcard-image-wrapper {
+    height: auto;
+    padding-bottom: 0;
+  }
 }
 
 .blogcard-image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Modern browsers with aspect-ratio support */
+@supports (aspect-ratio: 16 / 9) {
+  .blogcard-image {
+    position: relative;
+  }
 }
 
 .blogcard-content {
