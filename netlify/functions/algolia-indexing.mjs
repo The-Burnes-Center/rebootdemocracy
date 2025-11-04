@@ -191,20 +191,40 @@ async function handleDelete(collection, itemId) {
 }
 
 // ─── Webhook entry ───────────────────────────────────────────────────────────
+// ─── Webhook entry ───────────────────────────────────────────────────────────
 export default async (req, ctx) => {
   try {
-    const { id: itemId, action } = await req.json();
+    const { id, action } = await req.json();
     const [collection, , event] = action.split('.');
 
     if (!COLLECTION_CONFIG[collection]) {
-      console.log(`Unhandled collection: ${collection}`); return;
+      console.log(`Unhandled collection: ${collection}`);
+      return;
     }
 
-    if (event === 'create')            await handleUpsert(collection, itemId);
-    else if (event === 'update') {     await handleDelete(collection, itemId);
-                                        await handleUpsert(collection, itemId); }
-    else if (event === 'delete')       await handleDelete(collection, itemId);
-    else                               console.log(`Unhandled event: ${event}`);
+    const itemIds = Array.isArray(id) ? id : [id];
+    
+    console.log(`Processing ${event} for ${itemIds.length} item(s) in ${collection}`);
+
+    for (const itemId of itemIds) {
+      console.log(`Processing item ${itemId}...`);
+      
+      if (event === 'create') {
+        await handleUpsert(collection, itemId);
+      } 
+      else if (event === 'update') {
+        await handleDelete(collection, itemId);
+        await handleUpsert(collection, itemId);
+      } 
+      else if (event === 'delete') {
+        await handleDelete(collection, itemId);
+      } 
+      else {
+        console.log(`Unhandled event: ${event}`);
+      }
+    }
+    
+    console.log(`Successfully processed ${itemIds.length} item(s)`);
   } catch (err) {
     console.error('Webhook error:', err);
   }
