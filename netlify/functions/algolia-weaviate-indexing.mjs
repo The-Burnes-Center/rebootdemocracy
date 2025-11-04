@@ -16,7 +16,6 @@
 // Exported async function `handler(req, context)` – drop into
 // Netlify functions folder or adapt for other runtimes.
 // -------------------------------------------------------------
-
 import 'dotenv/config';
 import weaviate from 'weaviate-ts-client';
 import { htmlToText } from 'html-to-text';
@@ -44,6 +43,7 @@ function resolveHost() {
   }
   return { scheme: process.env.VITE_WEAVIATE_HTTP_SCHEME || 'https', host: raw };
 }
+
 const { scheme, host } = resolveHost();
 const wv = weaviate.client({
   scheme,
@@ -98,8 +98,6 @@ function flattenNews(edition) {
     itemImage: n.image_id || '',
   }));
 }
-
-
 
 /****************  Upsert & delete ******************************/
 async function deleteByDirectusId(className, directusId) {
@@ -170,30 +168,46 @@ async function deleteById(collection, id) {
 /****************  Netlify handler ******************************/
 export async function handler(event) {
   try {
-    //     const testPayload = { collection: "reboot_democracy_weekly_news", id: "9", action: "reboot_democracy_weekly_news.items.update" };
-    // const { id: itemId, action } = testPayload;
-    const { id: itemId, action } = JSON.parse(event.body);
+    const { id, action } = JSON.parse(event.body);
     const [collection, , eventType] = action.split('.');
 
     if (!['reboot_democracy_blog', 'reboot_democracy_weekly_news'].includes(collection)) {
       return { statusCode: 200, body: 'ignored' };
     }
 
-    switch (eventType) {
-      case 'create':
-        collection === 'reboot_democracy_blog' ? await upsertBlog(itemId) : await upsertWeeklyNews(itemId);
-        break;
-      case 'update':
-        await deleteById(collection, itemId);
-        collection === 'reboot_democracy_blog' ? await upsertBlog(itemId) : await upsertWeeklyNews(itemId);
-        break;
-      case 'delete':
-        await deleteById(collection, itemId);
-        break;
-      default:
-        console.log('Unhandled event:', eventType);
-    }
+    // Normalize ID(s) into an array
+    const itemIds = Array.isArray(id) ? id : [id];
+    
+    console.log(`Processing ${eventType} for ${itemIds.length} item(s) in ${collection}`);
 
+    // Process each item
+    for (const itemId of itemIds) {
+      console.log(`Processing item ${itemId}...`);
+      
+      switch (eventType) {
+        case 'create':
+          collection === 'reboot_democracy_blog' 
+            ? await upsertBlog(itemId) 
+            : await upsertWeeklyNews(itemId);
+          break;
+          
+        case 'update':
+          await deleteById(collection, itemId);
+          collection === 'reboot_democracy_blog' 
+            ? await upsertBlog(itemId) 
+            : await upsertWeeklyNews(itemId);
+          break;
+          
+        case 'delete':
+          await deleteById(collection, itemId);
+          break;
+          
+        default:
+          console.log('Unhandled event:', eventType);
+      }
+    }
+    
+    console.log(`Successfully processed ${itemIds.length} item(s)`);
     return { statusCode: 200, body: 'ok' };
   } catch (err) {
     console.error('Webhook error:', err);
