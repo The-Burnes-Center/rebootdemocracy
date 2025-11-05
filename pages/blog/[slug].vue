@@ -864,7 +864,7 @@ onBeforeUnmount(() => {
   background-color: #f2f2f2;
   font-weight: bold;
 }
-
+ 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .blog-back-btn:focus,
