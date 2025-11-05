@@ -4,8 +4,12 @@ import { createDirectus, rest, readItems, readItem } from '@directus/sdk';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
-const CACHE_DIR = join(process.cwd(), '.netlify', 'cache');
-const MANIFEST_FILE = join(CACHE_DIR, 'blog-routes-manifest.json');
+// Use Netlify's persistent cache directory (survives between builds)
+// Netlify provides /opt/build/cache which is automatically persisted between builds
+// Fallback to .netlify/cache for local development
+const CACHE_DIR = process.env.NETLIFY_CACHE_DIR || (process.platform === 'linux' ? '/opt/build/cache' : join(process.cwd(), '.netlify', 'cache'));
+const MANIFEST_CACHE_DIR = join(CACHE_DIR, 'rebootdemocracy', 'manifests');
+const MANIFEST_FILE = join(MANIFEST_CACHE_DIR, 'blog-routes-manifest.json');
 
 interface BlogRouteManifest {
   routes: Record<string, string>; // route -> date_updated timestamp
@@ -19,6 +23,9 @@ export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
   // Ensure cache directory exists
   if (!existsSync(CACHE_DIR)) {
     mkdirSync(CACHE_DIR, { recursive: true });
+  }
+  if (!existsSync(MANIFEST_CACHE_DIR)) {
+    mkdirSync(MANIFEST_CACHE_DIR, { recursive: true });
   }
 
   const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
@@ -69,7 +76,7 @@ export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
         writeFileSync(MANIFEST_FILE, JSON.stringify(manifest, null, 2));
         
         // Save changed routes
-        const changedRoutesFile = join(CACHE_DIR, 'changed-routes.json');
+        const changedRoutesFile = join(MANIFEST_CACHE_DIR, 'changed-routes.json');
         writeFileSync(changedRoutesFile, JSON.stringify(changedRoutes, null, 2));
         
         return {
@@ -175,7 +182,7 @@ export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
   writeFileSync(MANIFEST_FILE, JSON.stringify(currentManifest, null, 2));
 
   // Save changed routes to a separate file for nuxt.config.ts to read
-  const changedRoutesFile = join(CACHE_DIR, 'changed-routes.json');
+  const changedRoutesFile = join(MANIFEST_CACHE_DIR, 'changed-routes.json');
   writeFileSync(changedRoutesFile, JSON.stringify(changedRoutes, null, 2));
 
   return {

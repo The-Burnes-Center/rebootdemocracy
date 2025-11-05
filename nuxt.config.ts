@@ -16,18 +16,20 @@ const getChangedBlogRoutesForPartialBuild = (): string[] | null => {
   }
 
   // Try to read changed routes from manifest
-  const manifestFile = join(process.cwd(), '.netlify', 'cache', 'blog-routes-manifest.json');
-  if (existsSync(manifestFile)) {
+  // Use Netlify's persistent cache directory (survives between builds)
+  // Netlify provides /opt/build/cache which is automatically persisted between builds
+  // Fallback to .netlify/cache for local development
+  const CACHE_DIR = process.env.NETLIFY_CACHE_DIR || (process.platform === 'linux' ? '/opt/build/cache' : join(process.cwd(), '.netlify', 'cache'));
+  const MANIFEST_CACHE_DIR = join(CACHE_DIR, 'rebootdemocracy', 'manifests');
+  const changedRoutesFile = join(MANIFEST_CACHE_DIR, 'changed-routes.json');
+  
+  if (existsSync(changedRoutesFile)) {
     try {
-      const manifest = JSON.parse(readFileSync(manifestFile, 'utf-8'));
-      // Check if there's a separate file with changed routes
-      const changedRoutesFile = join(process.cwd(), '.netlify', 'cache', 'changed-routes.json');
-      if (existsSync(changedRoutesFile)) {
-        const changedRoutes = JSON.parse(readFileSync(changedRoutesFile, 'utf-8'));
-        return changedRoutes;
-      }
+      // Read changed routes directly
+      const changedRoutes = JSON.parse(readFileSync(changedRoutesFile, 'utf-8'));
+      return changedRoutes;
     } catch (error) {
-      console.warn('Could not read changed routes, falling back to full build');
+      console.warn('Could not read changed routes, falling back to full build:', error);
     }
   }
 

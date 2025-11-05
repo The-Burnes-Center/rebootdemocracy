@@ -10,9 +10,9 @@ functions = "netlify/functions"
   NETLIFY_BUILD_DEBUG = "true"
 
 # Build cache configuration for partial SSG
-# Cache the .netlify/cache directory to preserve previous build output and manifest
-[build.cache]
-  paths = [".netlify/cache"]
+# Netlify's persistent cache is at /opt/build/cache (automatically persisted between builds)
+# We use /opt/build/cache/rebootdemocracy for our build output and manifests
+# No need to explicitly configure - Netlify automatically caches /opt/build/cache
 
 [functions]
   node_bundler = "esbuild"

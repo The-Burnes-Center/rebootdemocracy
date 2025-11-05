@@ -1,16 +1,23 @@
 // scripts/partial-build.mjs
 // Netlify build script for partial SSG - only rebuilds changed blog routes
 import { execSync, spawnSync } from 'child_process';
-import { existsSync, mkdirSync, cpSync } from 'fs';
+import { existsSync, mkdirSync, cpSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 const OUTPUT_DIR = join(process.cwd(), '.output', 'public');
-const CACHE_DIR = join(process.cwd(), '.netlify', 'cache');
-const CACHED_OUTPUT_DIR = join(CACHE_DIR, '.output', 'public');
+// Use Netlify's persistent cache directory (survives between builds)
+// Netlify provides /opt/build/cache which is automatically persisted between builds
+// Fallback to .netlify/cache for local development
+const CACHE_DIR = process.env.NETLIFY_CACHE_DIR || (process.platform === 'linux' ? '/opt/build/cache' : join(process.cwd(), '.netlify', 'cache'));
+const CACHED_OUTPUT_DIR = join(CACHE_DIR, 'rebootdemocracy', '.output', 'public');
+const MANIFEST_CACHE_DIR = join(CACHE_DIR, 'rebootdemocracy', 'manifests');
 
-// Ensure cache directory exists
+// Ensure cache directories exist
 if (!existsSync(CACHE_DIR)) {
   mkdirSync(CACHE_DIR, { recursive: true });
+}
+if (!existsSync(MANIFEST_CACHE_DIR)) {
+  mkdirSync(MANIFEST_CACHE_DIR, { recursive: true });
 }
 
 // Step 1: Detect changed blog routes
@@ -134,20 +141,42 @@ try {
 }
 
 // Step 2: Restore previous build output from cache if it exists and doing partial build
-if (isPartialBuild && existsSync(CACHED_OUTPUT_DIR)) {
-  console.log('📦 Restoring previous build output from cache...');
-  if (!existsSync(OUTPUT_DIR)) {
-    const outputParent = join(process.cwd(), '.output');
-    if (!existsSync(outputParent)) {
-      mkdirSync(outputParent, { recursive: true });
+if (isPartialBuild) {
+  console.log('📦 Checking for cached build output...');
+  console.log(`   Cache directory: ${CACHE_DIR}`);
+  console.log(`   Cached output directory: ${CACHED_OUTPUT_DIR}`);
+  
+  if (existsSync(CACHE_DIR)) {
+    console.log(`   ✅ Cache directory exists`);
+    // List what's in the cache directory
+    try {
+      const cacheContents = readdirSync(CACHE_DIR, { withFileTypes: true });
+      console.log(`   📁 Cache contents: ${cacheContents.map(item => item.name).join(', ')}`);
+    } catch (e) {
+      // Ignore read errors
+      console.log(`   ⚠️  Could not read cache directory: ${e.message}`);
     }
-    mkdirSync(OUTPUT_DIR, { recursive: true });
+  } else {
+    console.log(`   ⚠️  Cache directory does not exist`);
   }
-  cpSync(CACHED_OUTPUT_DIR, OUTPUT_DIR, { recursive: true, force: false });
-  console.log('✅ Restored previous build output');
-} else if (isPartialBuild) {
-  console.log('⚠️  No cached build found, will do full build for this run');
-  isPartialBuild = false;
+  
+  if (existsSync(CACHED_OUTPUT_DIR)) {
+    console.log('📦 Restoring previous build output from cache...');
+    if (!existsSync(OUTPUT_DIR)) {
+      const outputParent = join(process.cwd(), '.output');
+      if (!existsSync(outputParent)) {
+        mkdirSync(outputParent, { recursive: true });
+      }
+      mkdirSync(OUTPUT_DIR, { recursive: true });
+    }
+    cpSync(CACHED_OUTPUT_DIR, OUTPUT_DIR, { recursive: true, force: false });
+    console.log('✅ Restored previous build output');
+  } else {
+    console.log('⚠️  No cached build found in .netlify/cache/.output/public');
+    console.log('   This is normal for the first build on a branch or after cache was cleared.');
+    console.log('   The cache will be saved after this build completes for use in the next build.');
+    isPartialBuild = false;
+  }
 }
 
 // Step 3: Run Nuxt generate with PARTIAL_BUILD env var if needed
