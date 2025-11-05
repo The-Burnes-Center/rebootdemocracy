@@ -65,27 +65,65 @@ export default defineNuxtConfig({
       // Check if we're doing a partial build
       const changedBlogRoutes = getChangedBlogRoutesForPartialBuild();
       
+      const isPartialBuild = process.env.PARTIAL_BUILD === 'true';
+      
       let blogRoutes: string[];
-      if (changedBlogRoutes && changedBlogRoutes.length > 0) {
+      let categoryRoutes: string[] = [];
+      let newsRoutes: string[] = [];
+      
+      if (changedBlogRoutes && changedBlogRoutes.length > 0 && isPartialBuild) {
         // Partial build - only prerender changed blog routes
         console.log(`📝 Partial build: Prerendering ${changedBlogRoutes.length} changed blog routes`);
         blogRoutes = changedBlogRoutes;
+        // Skip category and news routes in partial builds - they don't need regeneration
+        console.log('📝 Partial build: Skipping category and news routes');
+        
+        // In partial builds, completely override prerender configuration
+        // Disable route discovery and explicitly set only the routes we need
+        const partialRoutes = [
+          ...blogRoutes,
+          // Include homepage (may show recent blog posts)
+          '/',
+          // Only include essential pages that must exist (404, 200)
+          '/404.html',
+          '/200.html'
+        ];
+        
+        nitroConfig.prerender = {
+          crawlLinks: false, // Disable automatic route discovery
+          failOnError: false,
+          concurrency: 1,
+          // Explicitly set ONLY the changed blog route
+          // Don't include other routes - they're already in the cache
+          routes: partialRoutes,
+          // Ignore all routes that weren't explicitly included
+          // This prevents routeRules from adding routes we don't want
+          ignore: [
+            // Ignore all routes except our specific ones
+            (route: string) => {
+              // Keep our explicit routes
+              if (partialRoutes.includes(route)) return false;
+              // Ignore everything else
+              return true;
+            }
+          ]
+        };
+        console.log(`📝 Partial build: Only prerendering ${partialRoutes.length} routes total:`, partialRoutes);
       } else {
-        // Full build - prerender all blog routes
+        // Full build - prerender all routes
         console.log('📝 Full build: Prerendering all blog routes');
         blogRoutes = await getStaticBlogRoutes();
+        categoryRoutes = await getStaticCategoryRoutes();
+        newsRoutes = await getStaticNewsRoutes();
+        
+        nitroConfig.prerender = nitroConfig.prerender ?? {};
+        nitroConfig.prerender.routes = [
+          ...(nitroConfig.prerender.routes ?? []),
+          ...blogRoutes,
+          ...categoryRoutes,
+          ...newsRoutes
+        ];
       }
-
-      const categoryRoutes = await getStaticCategoryRoutes();
-      const newsRoutes = await getStaticNewsRoutes();
-      
-      nitroConfig.prerender = nitroConfig.prerender ?? {};
-      nitroConfig.prerender.routes = [
-        ...(nitroConfig.prerender.routes ?? []),
-        ...blogRoutes,
-        ...categoryRoutes,
-        ...newsRoutes
-      ];
     }
   },
   algolia: {
