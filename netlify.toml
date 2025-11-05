@@ -1,5 +1,5 @@
 [build]
-command = "rm -rf .output .nuxt && npm ci && npm run generate"
+command = "rm -rf .nuxt && npm ci && node scripts/partial-build.mjs"
 publish = ".output/public/"
 functions = "netlify/functions"
 
@@ -8,6 +8,11 @@ functions = "netlify/functions"
   NPM_VERSION = "10.8.0"
   NPM_FLAGS = "--no-audit --no-fund --verbose"
   NETLIFY_BUILD_DEBUG = "true"
+
+# Build cache configuration for partial SSG
+# Cache the .netlify/cache directory to preserve previous build output and manifest
+[build.cache]
+  paths = [".netlify/cache"]
 
 [functions]
   node_bundler = "esbuild"

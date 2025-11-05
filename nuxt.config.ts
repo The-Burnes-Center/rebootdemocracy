@@ -3,6 +3,36 @@ import '@nuxtjs/algolia';
 import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
+
+// Helper to get changed blog routes for partial builds
+const getChangedBlogRoutesForPartialBuild = (): string[] | null => {
+  // Check if we're doing a partial build (via env var or manifest file)
+  const isPartialBuild = process.env.PARTIAL_BUILD === 'true';
+  
+  if (!isPartialBuild) {
+    return null; // Full build - return null to use all routes
+  }
+
+  // Try to read changed routes from manifest
+  const manifestFile = join(process.cwd(), '.netlify', 'cache', 'blog-routes-manifest.json');
+  if (existsSync(manifestFile)) {
+    try {
+      const manifest = JSON.parse(readFileSync(manifestFile, 'utf-8'));
+      // Check if there's a separate file with changed routes
+      const changedRoutesFile = join(process.cwd(), '.netlify', 'cache', 'changed-routes.json');
+      if (existsSync(changedRoutesFile)) {
+        const changedRoutes = JSON.parse(readFileSync(changedRoutesFile, 'utf-8'));
+        return changedRoutes;
+      }
+    } catch (error) {
+      console.warn('Could not read changed routes, falling back to full build');
+    }
+  }
+
+  return null;
+};
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -28,12 +58,22 @@ export default defineNuxtConfig({
       serverDir: '.output/server'
     }
   },
-  generate: {
-    cache: false
-  },
   hooks: {
     async 'nitro:config'(nitroConfig) {
-      const blogRoutes = await getStaticBlogRoutes();
+      // Check if we're doing a partial build
+      const changedBlogRoutes = getChangedBlogRoutesForPartialBuild();
+      
+      let blogRoutes: string[];
+      if (changedBlogRoutes && changedBlogRoutes.length > 0) {
+        // Partial build - only prerender changed blog routes
+        console.log(`📝 Partial build: Prerendering ${changedBlogRoutes.length} changed blog routes`);
+        blogRoutes = changedBlogRoutes;
+      } else {
+        // Full build - prerender all blog routes
+        console.log('📝 Full build: Prerendering all blog routes');
+        blogRoutes = await getStaticBlogRoutes();
+      }
+
       const categoryRoutes = await getStaticCategoryRoutes();
       const newsRoutes = await getStaticNewsRoutes();
       
