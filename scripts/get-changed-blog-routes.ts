@@ -16,7 +16,7 @@ interface BlogRouteManifest {
   lastUpdated: string;
 }
 
-export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
+export const getChangedBlogRoutes = async (blogEntryId?: string | string[]): Promise<{
   changedRoutes: string[];
   allRoutes: string[];
 }> => {
@@ -30,66 +30,95 @@ export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
 
   const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
 
-  // If blog entry ID is provided (from webhook), fetch only that specific post
+  // If blog entry ID(s) is provided (from webhook), fetch only those specific posts
   if (blogEntryId) {
     try {
-      const post = await directus.request(
-        readItem('reboot_democracy_blog', blogEntryId, {
-          fields: ['slug', 'date_updated', 'status', 'date'],
-        })
+      // Normalize to array: handle both single ID and array of IDs
+      const ids = Array.isArray(blogEntryId) ? blogEntryId : [blogEntryId];
+      
+      // Fetch all posts in parallel
+      const posts = await Promise.all(
+        ids.map(id => 
+          directus.request(
+            readItem('reboot_democracy_blog', String(id), {
+              fields: ['slug', 'date_updated', 'status', 'date'],
+            })
+          ).catch(error => {
+            // Log error but continue with other posts
+            console.error(`Error fetching blog post ${id}:`, error);
+            return null;
+          })
+        )
       );
 
-      // Only regenerate if the post is published and not in the future
-      const isPublished = post.status === 'published';
-      const isNotFuture = post.date ? new Date(post.date) <= new Date() : true;
+      // Filter out null results and process valid posts
+      const validPosts = posts.filter((post): post is any => post !== null);
       
-      if (isPublished && isNotFuture) {
-        const route = `/blog/${post.slug}`;
-        const changedRoutes = [route];
-        
-        // Update manifest with this route
-        let manifest: BlogRouteManifest = {
-          routes: {},
-          lastUpdated: new Date().toISOString(),
-        };
-        
-        if (existsSync(MANIFEST_FILE)) {
-          try {
-            const manifestContent = readFileSync(MANIFEST_FILE, 'utf-8');
-            manifest = JSON.parse(manifestContent);
-            // Handle legacy manifest format
-            if (Array.isArray(manifest.routes)) {
-              const legacyRoutes = manifest.routes as unknown as string[];
-              manifest.routes = {};
-              legacyRoutes.forEach(r => {
-                manifest.routes[r] = manifest.lastUpdated;
-              });
-            }
-          } catch (error) {
-            // If manifest is corrupted, start fresh
-          }
-        }
-        
-        // Update manifest with this route's timestamp
-        manifest.routes[route] = post.date_updated || new Date().toISOString();
-        manifest.lastUpdated = new Date().toISOString();
-        writeFileSync(MANIFEST_FILE, JSON.stringify(manifest, null, 2));
-        
-        // Save changed routes
-        const changedRoutesFile = join(MANIFEST_CACHE_DIR, 'changed-routes.json');
-        writeFileSync(changedRoutesFile, JSON.stringify(changedRoutes, null, 2));
-        
-        return {
-          changedRoutes,
-          allRoutes: Object.keys(manifest.routes),
-        };
-      } else {
-        // Post is not published or is in the future, return empty
+      if (validPosts.length === 0) {
+        // No valid posts found, fall through to full detection
         return {
           changedRoutes: [],
           allRoutes: [],
         };
       }
+
+      // Filter for published, non-future posts
+      const publishedPosts = validPosts.filter(post => {
+        const isPublished = post.status === 'published';
+        const isNotFuture = post.date ? new Date(post.date) <= new Date() : true;
+        return isPublished && isNotFuture;
+      });
+
+      if (publishedPosts.length === 0) {
+        // No published posts, return empty
+        return {
+          changedRoutes: [],
+          allRoutes: [],
+        };
+      }
+
+      // Build changed routes from all valid posts
+      const changedRoutes = publishedPosts.map(post => `/blog/${post.slug}`);
+      
+      // Update manifest with these routes
+      let manifest: BlogRouteManifest = {
+        routes: {},
+        lastUpdated: new Date().toISOString(),
+      };
+      
+      if (existsSync(MANIFEST_FILE)) {
+        try {
+          const manifestContent = readFileSync(MANIFEST_FILE, 'utf-8');
+          manifest = JSON.parse(manifestContent);
+          // Handle legacy manifest format
+          if (Array.isArray(manifest.routes)) {
+            const legacyRoutes = manifest.routes as unknown as string[];
+            manifest.routes = {};
+            legacyRoutes.forEach(r => {
+              manifest.routes[r] = manifest.lastUpdated;
+            });
+          }
+        } catch (error) {
+          // If manifest is corrupted, start fresh
+        }
+      }
+      
+      // Update manifest with all changed routes' timestamps
+      publishedPosts.forEach(post => {
+        const route = `/blog/${post.slug}`;
+        manifest.routes[route] = post.date_updated || new Date().toISOString();
+      });
+      manifest.lastUpdated = new Date().toISOString();
+      writeFileSync(MANIFEST_FILE, JSON.stringify(manifest, null, 2));
+      
+      // Save changed routes
+      const changedRoutesFile = join(MANIFEST_CACHE_DIR, 'changed-routes.json');
+      writeFileSync(changedRoutesFile, JSON.stringify(changedRoutes, null, 2));
+      
+      return {
+        changedRoutes,
+        allRoutes: Object.keys(manifest.routes),
+      };
     } catch (error) {
       // Silently fall through to full detection mode
       // Error will be logged to stderr if script is run directly
@@ -207,16 +236,29 @@ if (import.meta.url.endsWith(process.argv[1] || '')) {
   console.warn = () => {}; // Suppress all console.warn
   
   // Get blog entry ID from environment variable (set by Netlify build hook)
-  const blogEntryId = process.env.BLOG_ENTRY_ID || process.env.INCOMING_HOOK_BODY || process.argv[2];
+  const blogEntryIdRaw = process.env.BLOG_ENTRY_ID || process.env.INCOMING_HOOK_BODY || process.argv[2];
   
-  // Try to parse JSON from INCOMING_HOOK_BODY if it's a JSON string
-  let parsedId = blogEntryId;
-  if (blogEntryId && typeof blogEntryId === 'string') {
+  // Try to parse JSON from environment variable - support both single ID and array
+  let parsedId: string | string[] | undefined = undefined;
+  if (blogEntryIdRaw && typeof blogEntryIdRaw === 'string') {
     try {
-      const parsed = JSON.parse(blogEntryId);
-      parsedId = parsed.id || parsed.BLOG_ENTRY_ID || parsed.payload?.id || blogEntryId;
+      const parsed = JSON.parse(blogEntryIdRaw);
+      // Handle both single ID and array of IDs
+      if (Array.isArray(parsed)) {
+        parsedId = parsed;
+      } else {
+        const idValue = parsed.id || parsed.BLOG_ENTRY_ID || parsed.payload?.id || parsed;
+        // Normalize to array: if it's already an array, use it; otherwise wrap in array
+        parsedId = Array.isArray(idValue) ? idValue : [idValue];
+      }
     } catch {
-      // Not JSON, use as-is
+      // Not JSON, try to parse as comma-separated IDs
+      if (blogEntryIdRaw.includes(',')) {
+        parsedId = blogEntryIdRaw.split(',').map(id => id.trim()).filter(id => id);
+      } else {
+        // Single ID, wrap in array for consistency
+        parsedId = [blogEntryIdRaw];
+      }
     }
   }
   

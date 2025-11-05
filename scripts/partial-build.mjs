@@ -39,31 +39,47 @@ if (!blogEntryId) {
 }
 
 // Try to parse JSON from INCOMING_HOOK_BODY if it's a JSON string
-let parsedId = blogEntryId;
+// Support both single ID (integer) and array of IDs
+let parsedIds = null;
 if (blogEntryId && typeof blogEntryId === 'string') {
   try {
     const parsed = JSON.parse(blogEntryId);
-    parsedId = parsed.id || parsed.BLOG_ENTRY_ID || parsed.payload?.id || blogEntryId;
-    console.log(`📝 Parsed blog entry ID from JSON: ${parsedId}`);
+    const idValue = parsed.id || parsed.BLOG_ENTRY_ID || parsed.payload?.id || blogEntryId;
+    
+    // Handle both single ID and array of IDs
+    if (Array.isArray(idValue)) {
+      parsedIds = idValue;
+      console.log(`📝 Parsed blog entry IDs from JSON (array): ${parsedIds.join(', ')}`);
+    } else {
+      parsedIds = [idValue];
+      console.log(`📝 Parsed blog entry ID from JSON (single): ${parsedIds[0]}`);
+    }
   } catch {
-    // Not JSON, use as-is
-    parsedId = blogEntryId;
-    console.log(`📝 Using blog entry ID as-is (not JSON): ${parsedId}`);
+    // Not JSON, try to parse as single ID or comma-separated IDs
+    const idParts = blogEntryId.split(',').map(id => id.trim()).filter(id => id);
+    if (idParts.length > 1) {
+      parsedIds = idParts;
+      console.log(`📝 Parsed blog entry IDs from comma-separated string: ${parsedIds.join(', ')}`);
+    } else {
+      parsedIds = [blogEntryId];
+      console.log(`📝 Using blog entry ID as-is (not JSON): ${parsedIds[0]}`);
+    }
   }
 }
 
 let isPartialBuild = false;
 let blogRoutes = []; // Store changed routes for cache restoration
 
-if (parsedId) {
-  console.log(`✅ Blog entry ID from webhook: ${parsedId}`);
+if (parsedIds && parsedIds.length > 0) {
+  console.log(`✅ Blog entry ID(s) from webhook: ${Array.isArray(parsedIds) ? parsedIds.join(', ') : parsedIds}`);
   // Only do partial build if webhook ID is provided
   // If no webhook ID, always do full build (e.g., manual builds, scheduled builds)
   try {
     // Run TypeScript file to detect changed routes
-    // Pass the blog entry ID as environment variable
+    // Pass the blog entry IDs as JSON array in environment variable
     const env = { ...process.env };
-    env.BLOG_ENTRY_ID = parsedId;
+    // Pass as JSON string so the script can parse it as array or single value
+    env.BLOG_ENTRY_ID = JSON.stringify(parsedIds);
     
     // Use spawn to capture stdout and stderr separately
     const result = spawnSync('npx', ['tsx', 'scripts/get-changed-blog-routes.ts'], {
