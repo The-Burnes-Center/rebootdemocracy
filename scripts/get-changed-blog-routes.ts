@@ -1,6 +1,6 @@
 // scripts/get-changed-blog-routes.ts
 // Detects which blog routes have changed and need to be regenerated
-import { createDirectus, rest, readItems } from '@directus/sdk';
+import { createDirectus, rest, readItems, readItem } from '@directus/sdk';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
@@ -12,7 +12,7 @@ interface BlogRouteManifest {
   lastUpdated: string;
 }
 
-export const getChangedBlogRoutes = async (): Promise<{
+export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
   changedRoutes: string[];
   allRoutes: string[];
 }> => {
@@ -21,9 +21,75 @@ export const getChangedBlogRoutes = async (): Promise<{
     mkdirSync(CACHE_DIR, { recursive: true });
   }
 
-  // Fetch all current blog routes from Directus with their update timestamps
   const directus = createDirectus('https://burnes-center.directus.app/').with(rest());
-  
+
+  // If blog entry ID is provided (from webhook), fetch only that specific post
+  if (blogEntryId) {
+    try {
+      const post = await directus.request(
+        readItem('reboot_democracy_blog', blogEntryId, {
+          fields: ['slug', 'date_updated', 'status', 'date'],
+        })
+      );
+
+      // Only regenerate if the post is published and not in the future
+      const isPublished = post.status === 'published';
+      const isNotFuture = post.date ? new Date(post.date) <= new Date() : true;
+      
+      if (isPublished && isNotFuture) {
+        const route = `/blog/${post.slug}`;
+        const changedRoutes = [route];
+        
+        // Update manifest with this route
+        let manifest: BlogRouteManifest = {
+          routes: {},
+          lastUpdated: new Date().toISOString(),
+        };
+        
+        if (existsSync(MANIFEST_FILE)) {
+          try {
+            const manifestContent = readFileSync(MANIFEST_FILE, 'utf-8');
+            manifest = JSON.parse(manifestContent);
+            // Handle legacy manifest format
+            if (Array.isArray(manifest.routes)) {
+              const legacyRoutes = manifest.routes as unknown as string[];
+              manifest.routes = {};
+              legacyRoutes.forEach(r => {
+                manifest.routes[r] = manifest.lastUpdated;
+              });
+            }
+          } catch (error) {
+            // If manifest is corrupted, start fresh
+          }
+        }
+        
+        // Update manifest with this route's timestamp
+        manifest.routes[route] = post.date_updated || new Date().toISOString();
+        manifest.lastUpdated = new Date().toISOString();
+        writeFileSync(MANIFEST_FILE, JSON.stringify(manifest, null, 2));
+        
+        // Save changed routes
+        const changedRoutesFile = join(CACHE_DIR, 'changed-routes.json');
+        writeFileSync(changedRoutesFile, JSON.stringify(changedRoutes, null, 2));
+        
+        return {
+          changedRoutes,
+          allRoutes: Object.keys(manifest.routes),
+        };
+      } else {
+        // Post is not published or is in the future, return empty
+        return {
+          changedRoutes: [],
+          allRoutes: [],
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching blog post by ID:', error);
+      // Fall through to full detection mode
+    }
+  }
+
+  // Fallback: Fetch all current blog routes from Directus with their update timestamps
   const posts = await directus.request(
     readItems('reboot_democracy_blog', {
       fields: ['slug', 'date_updated'],
@@ -58,7 +124,6 @@ export const getChangedBlogRoutes = async (): Promise<{
       previousManifest = JSON.parse(manifestContent);
       // Handle legacy manifest format (array of routes)
       if (Array.isArray(previousManifest.routes)) {
-        console.warn('Legacy manifest format detected, converting to new format');
         const legacyRoutes = previousManifest.routes as unknown as string[];
         previousManifest.routes = {};
         legacyRoutes.forEach(route => {
@@ -66,7 +131,7 @@ export const getChangedBlogRoutes = async (): Promise<{
         });
       }
     } catch (error) {
-      console.warn('Could not read previous manifest, will regenerate all routes');
+      // If manifest is corrupted, start fresh
     }
   }
 
@@ -74,7 +139,6 @@ export const getChangedBlogRoutes = async (): Promise<{
   let changedRoutes: string[];
   if (!previousManifest) {
     // First build - regenerate all blog routes
-    console.log('No previous manifest found, will regenerate all blog routes');
     changedRoutes = allRoutes;
   } else {
     const previousRoutesMap = previousManifest.routes;
@@ -101,23 +165,10 @@ export const getChangedBlogRoutes = async (): Promise<{
     );
     
     if (deletedRoutes.length > 0) {
-      console.log(`Found ${deletedRoutes.length} deleted routes, will clean up in next build`);
-      // Note: We don't need to regenerate all routes for deletions, 
-      // just remove them from the manifest (they'll be removed from cache on next deploy)
+      // Note: We don't need to regenerate all routes for deletions
     }
     
     changedRoutes = Array.from(changedRoutesSet);
-    
-    const newCount = changedRoutes.filter(r => !previousRoutesMap[r]).length;
-    const updatedCount = changedRoutes.length - newCount;
-    
-    if (changedRoutes.length > 0) {
-      console.log(`Found ${changedRoutes.length} changed blog routes:`);
-      console.log(`  - ${newCount} new routes`);
-      console.log(`  - ${updatedCount} updated routes (content changed)`);
-    } else {
-      console.log('No changed blog routes detected');
-    }
   }
 
   // Save current manifest for next build
@@ -133,14 +184,30 @@ export const getChangedBlogRoutes = async (): Promise<{
   };
 };
 
-// If run directly, output routes as JSON
+// If run directly, output routes as JSON (only JSON, no logs)
 if (import.meta.url.endsWith(process.argv[1] || '')) {
-  getChangedBlogRoutes()
+  // Get blog entry ID from environment variable (set by Netlify build hook)
+  const blogEntryId = process.env.BLOG_ENTRY_ID || process.env.INCOMING_HOOK_BODY || process.argv[2];
+  
+  // Try to parse JSON from INCOMING_HOOK_BODY if it's a JSON string
+  let parsedId = blogEntryId;
+  if (blogEntryId && typeof blogEntryId === 'string') {
+    try {
+      const parsed = JSON.parse(blogEntryId);
+      parsedId = parsed.id || parsed.BLOG_ENTRY_ID || blogEntryId;
+    } catch {
+      // Not JSON, use as-is
+    }
+  }
+  
+  getChangedBlogRoutes(parsedId)
     .then(({ changedRoutes }) => {
-      console.log(JSON.stringify(changedRoutes));
+      // Only output JSON, no console.log statements
+      process.stdout.write(JSON.stringify(changedRoutes));
     })
     .catch((error) => {
-      console.error('Error getting changed blog routes:', error);
+      // Output error as JSON for easier parsing
+      process.stderr.write(JSON.stringify({ error: error.message }));
       process.exit(1);
     });
 }
