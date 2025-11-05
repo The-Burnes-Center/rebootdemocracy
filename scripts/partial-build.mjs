@@ -1,7 +1,7 @@
 // scripts/partial-build.mjs
 // Netlify build script for partial SSG - only rebuilds changed blog routes
 import { execSync, spawnSync } from 'child_process';
-import { existsSync, mkdirSync, cpSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, cpSync, readdirSync, statSync, rmSync } from 'fs';
 import { join } from 'path';
 
 const OUTPUT_DIR = join(process.cwd(), '.output', 'public');
@@ -53,6 +53,7 @@ if (blogEntryId && typeof blogEntryId === 'string') {
 }
 
 let isPartialBuild = false;
+let blogRoutes = []; // Store changed routes for cache restoration
 
 if (parsedId) {
   console.log(`✅ Blog entry ID from webhook: ${parsedId}`);
@@ -114,13 +115,14 @@ if (parsedId) {
       throw new Error(`Expected array, got ${typeof changedRoutes}`);
     }
     
-    if (changedRoutes.length > 0) {
-      isPartialBuild = true;
-      console.log(`✅ Found ${changedRoutes.length} changed blog route(s)`);
-      console.log(`   Routes: ${changedRoutes.join(', ')}`);
-    } else {
-      console.log('ℹ️  No changed blog routes detected, will do full build');
-    }
+  if (changedRoutes.length > 0) {
+    isPartialBuild = true;
+    blogRoutes = changedRoutes; // Store for later use
+    console.log(`✅ Found ${changedRoutes.length} changed blog route(s)`);
+    console.log(`   Routes: ${changedRoutes.join(', ')}`);
+  } else {
+    console.log('ℹ️  No changed blog routes detected, will do full build');
+  }
   } catch (error) {
     console.warn('⚠️  Could not detect changed routes, falling back to full build:', error.message);
     // Log stderr if available for debugging
@@ -143,7 +145,8 @@ if (parsedId) {
   isPartialBuild = false;
 }
 
-// Step 2: Restore previous build output from cache if it exists and doing partial build
+// Step 2: For partial builds, save cache location info (we'll restore after generation)
+let cachedOutputExists = false;
 if (isPartialBuild) {
   console.log('📦 Checking for cached build output...');
   console.log(`   Cache directory: ${CACHE_DIR}`);
@@ -164,16 +167,8 @@ if (isPartialBuild) {
   }
   
   if (existsSync(CACHED_OUTPUT_DIR)) {
-    console.log('📦 Restoring previous build output from cache...');
-    if (!existsSync(OUTPUT_DIR)) {
-      const outputParent = join(process.cwd(), '.output');
-      if (!existsSync(outputParent)) {
-        mkdirSync(outputParent, { recursive: true });
-      }
-      mkdirSync(OUTPUT_DIR, { recursive: true });
-    }
-    cpSync(CACHED_OUTPUT_DIR, OUTPUT_DIR, { recursive: true, force: false });
-    console.log('✅ Restored previous build output');
+    cachedOutputExists = true;
+    console.log('✅ Found cached build output - will restore after generation');
   } else {
     console.log('⚠️  No cached build found in .netlify/cache/.output/public');
     console.log('   This is normal for the first build on a branch or after cache was cleared.');
@@ -204,7 +199,43 @@ try {
   process.exit(1);
 }
 
-// Step 4: Save current build output to cache for next build
+// Step 4: For partial builds, restore ALL cached files first, then overlay newly generated files
+if (isPartialBuild && cachedOutputExists) {
+  console.log('📦 Restoring ALL cached files from previous build...');
+  if (existsSync(CACHED_OUTPUT_DIR) && existsSync(OUTPUT_DIR)) {
+    try {
+      // Create a temporary directory to store newly generated files
+      const TEMP_GEN_DIR = join(process.cwd(), '.output', 'temp-generated');
+      
+      // Move newly generated files to temp directory
+      console.log('   Moving newly generated files to temp location...');
+      if (existsSync(TEMP_GEN_DIR)) {
+        // Clean up any existing temp dir
+        rmSync(TEMP_GEN_DIR, { recursive: true, force: true });
+      }
+      mkdirSync(TEMP_GEN_DIR, { recursive: true });
+      cpSync(OUTPUT_DIR, TEMP_GEN_DIR, { recursive: true });
+      
+      // Now restore ALL files from cache (this restores all unchanged routes)
+      console.log('   Restoring all cached files...');
+      cpSync(CACHED_OUTPUT_DIR, OUTPUT_DIR, { recursive: true, force: false });
+      
+      // Finally, overlay the newly generated files (overwrites only changed routes)
+      console.log('   Overlaying newly generated files (changed routes)...');
+      cpSync(TEMP_GEN_DIR, OUTPUT_DIR, { recursive: true, force: true });
+      
+      // Clean up temp directory
+      rmSync(TEMP_GEN_DIR, { recursive: true, force: true });
+      
+      console.log('✅ Restored cached files and merged with newly generated files');
+    } catch (error) {
+      console.warn('⚠️  Could not restore cached files, using generated output only:', error.message);
+      console.warn('   Error details:', error);
+    }
+  }
+}
+
+// Step 5: Save current build output to cache for next build
 if (existsSync(OUTPUT_DIR)) {
   console.log('💾 Caching build output for next build...');
   if (!existsSync(CACHED_OUTPUT_DIR)) {
