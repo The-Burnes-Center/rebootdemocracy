@@ -20,19 +20,35 @@ console.log('🔍 Detecting changed blog routes...');
 // Netlify build hooks can send payload via INCOMING_HOOK_BODY or custom env vars
 const blogEntryId = process.env.BLOG_ENTRY_ID || process.env.INCOMING_HOOK_BODY;
 
+// Debug logging to see what we received
+if (process.env.BLOG_ENTRY_ID) {
+  console.log(`📦 BLOG_ENTRY_ID env var present: ${process.env.BLOG_ENTRY_ID.substring(0, 50)}...`);
+}
+if (process.env.INCOMING_HOOK_BODY) {
+  console.log(`📦 INCOMING_HOOK_BODY env var present: ${process.env.INCOMING_HOOK_BODY.substring(0, 100)}...`);
+}
+if (!blogEntryId) {
+  console.log('⚠️  No blog entry ID found in environment variables (BLOG_ENTRY_ID or INCOMING_HOOK_BODY)');
+}
+
 // Try to parse JSON from INCOMING_HOOK_BODY if it's a JSON string
 let parsedId = blogEntryId;
 if (blogEntryId && typeof blogEntryId === 'string') {
   try {
     const parsed = JSON.parse(blogEntryId);
     parsedId = parsed.id || parsed.BLOG_ENTRY_ID || parsed.payload?.id || blogEntryId;
+    console.log(`📝 Parsed blog entry ID from JSON: ${parsedId}`);
   } catch {
     // Not JSON, use as-is
+    parsedId = blogEntryId;
+    console.log(`📝 Using blog entry ID as-is (not JSON): ${parsedId}`);
   }
 }
 
 if (parsedId) {
-  console.log(`📝 Blog entry ID from webhook: ${parsedId}`);
+  console.log(`✅ Blog entry ID from webhook: ${parsedId}`);
+} else {
+  console.log('ℹ️  No blog entry ID available - will detect changes via manifest comparison');
 }
 
 let isPartialBuild = false;
@@ -52,20 +68,47 @@ try {
     stdio: ['pipe', 'pipe', 'pipe']
   });
   
-  // Get only stdout (JSON output)
-  const stdout = result.stdout.trim();
-  const stderr = result.stderr.trim();
+  // Get only stdout (JSON output) and stderr separately
+  const stdout = result.stdout ? result.stdout.toString().trim() : '';
+  const stderr = result.stderr ? result.stderr.toString().trim() : '';
   
   if (result.error) {
     throw result.error;
   }
   
   if (result.status !== 0) {
-    throw new Error(`Script failed with status ${result.status}: ${stderr || stdout}`);
+    // Try to parse error from stderr as JSON
+    let errorMessage = `Script failed with status ${result.status}`;
+    if (stderr) {
+      try {
+        const errorJson = JSON.parse(stderr);
+        errorMessage = errorJson.error || errorMessage;
+      } catch {
+        // Not JSON, use stderr as error message
+        errorMessage = stderr || errorMessage;
+      }
+    }
+    throw new Error(errorMessage);
+  }
+  
+  // Validate that stdout is not empty before parsing
+  if (!stdout) {
+    throw new Error('Script produced no output');
   }
   
   // Parse JSON from stdout (should be only JSON, no logs)
-  const changedRoutes = JSON.parse(stdout);
+  let changedRoutes;
+  try {
+    changedRoutes = JSON.parse(stdout);
+  } catch (parseError) {
+    // If parsing fails, it means stdout contains non-JSON content
+    throw new Error(`Failed to parse JSON output. Output was: ${stdout.substring(0, 100)}...`);
+  }
+  
+  // Ensure changedRoutes is an array
+  if (!Array.isArray(changedRoutes)) {
+    throw new Error(`Expected array, got ${typeof changedRoutes}`);
+  }
   
   if (changedRoutes.length > 0) {
     isPartialBuild = true;
@@ -76,13 +119,16 @@ try {
   }
 } catch (error) {
   console.warn('⚠️  Could not detect changed routes, falling back to full build:', error.message);
-  // If error output contains JSON, try to parse it
+  // Log stderr if available for debugging
   if (error.stderr) {
     try {
       const errorJson = JSON.parse(error.stderr.toString());
       console.warn('   Error details:', errorJson.error);
     } catch {
-      // Not JSON error, ignore
+      // Not JSON error, log as-is
+      if (error.stderr.toString().trim()) {
+        console.warn('   Stderr:', error.stderr.toString().trim());
+      }
     }
   }
 }

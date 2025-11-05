@@ -84,8 +84,8 @@ export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
         };
       }
     } catch (error) {
-      console.error('Error fetching blog post by ID:', error);
-      // Fall through to full detection mode
+      // Silently fall through to full detection mode
+      // Error will be logged to stderr if script is run directly
     }
   }
 
@@ -186,6 +186,19 @@ export const getChangedBlogRoutes = async (blogEntryId?: string): Promise<{
 
 // If run directly, output routes as JSON (only JSON, no logs)
 if (import.meta.url.endsWith(process.argv[1] || '')) {
+  // Suppress all console output when run directly to ensure only JSON goes to stdout
+  const originalConsoleError = console.error;
+  const originalConsoleLog = console.log;
+  const originalConsoleWarn = console.warn;
+  
+  console.error = (...args: any[]) => {
+    // Only write to stderr, not stdout
+    process.stderr.write(args.map(arg => String(arg)).join(' ') + '\n');
+  };
+  
+  console.log = () => {}; // Suppress all console.log
+  console.warn = () => {}; // Suppress all console.warn
+  
   // Get blog entry ID from environment variable (set by Netlify build hook)
   const blogEntryId = process.env.BLOG_ENTRY_ID || process.env.INCOMING_HOOK_BODY || process.argv[2];
   
@@ -194,7 +207,7 @@ if (import.meta.url.endsWith(process.argv[1] || '')) {
   if (blogEntryId && typeof blogEntryId === 'string') {
     try {
       const parsed = JSON.parse(blogEntryId);
-      parsedId = parsed.id || parsed.BLOG_ENTRY_ID || blogEntryId;
+      parsedId = parsed.id || parsed.BLOG_ENTRY_ID || parsed.payload?.id || blogEntryId;
     } catch {
       // Not JSON, use as-is
     }
@@ -202,11 +215,12 @@ if (import.meta.url.endsWith(process.argv[1] || '')) {
   
   getChangedBlogRoutes(parsedId)
     .then(({ changedRoutes }) => {
-      // Only output JSON, no console.log statements
+      // Only output JSON to stdout, no other text
       process.stdout.write(JSON.stringify(changedRoutes));
+      process.exit(0);
     })
     .catch((error) => {
-      // Output error as JSON for easier parsing
+      // Output error as JSON to stderr for easier parsing
       process.stderr.write(JSON.stringify({ error: error.message }));
       process.exit(1);
     });
