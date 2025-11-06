@@ -27,11 +27,12 @@ functions = "netlify/functions"
 
 # API routes are handled by Nuxt Nitro server
 # IMPORTANT: /api/* routes must be handled BEFORE the catch-all redirect
-# With nitro.preset: 'netlify', server routes are automatically available at /.netlify/functions/nitro
-# We need to explicitly route /api/* to Nitro to prevent the catch-all from catching them
+# With nitro.preset: 'netlify', Nitro creates a serverless function that handles all server routes
+# The function is typically at /.netlify/functions/server (not nitro)
+# We need to pass the full path including /api to the function
 [[redirects]]
 from = "/api/*"
-to = "/.netlify/functions/nitro"
+to = "/.netlify/functions/server/api/:splat"
 status = 200
 force = true
 
