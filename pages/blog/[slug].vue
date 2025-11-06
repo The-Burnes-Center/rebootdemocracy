@@ -432,7 +432,9 @@ useHead({
   ]
 });
 
-const isLoading = ref(true);
+// Use pending from useAsyncData instead of separate isLoading ref
+// This works correctly during both prerendering and runtime
+const isLoading = computed(() => pending.value);
 
 // Function to navigate to blogs filtered by category
 function navigateToCategory(category: string) {
@@ -492,7 +494,7 @@ function formatDate(dateValue: Date | string) {
 onMounted(async () => {
   resetSearch();
   setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
-  isLoading.value = false;
+  // isLoading is now computed from pending, no need to set it here
   
   // Enhance accessibility of dynamically loaded content
   await nextTick(() => {

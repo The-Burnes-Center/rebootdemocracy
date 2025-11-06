@@ -20,14 +20,17 @@ functions = "netlify/functions"
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
   directory = "netlify/functions"
 
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
-
+# API routes should be handled by Netlify Functions
 [[redirects]]
 from = "/api/*"
 to = "/.netlify/functions/:splat"
+status = 200
+
+# Catch-all for non-prerendered routes (should come AFTER static files are checked)
+# Netlify will serve static files (like prerendered blog posts) before applying this redirect
+[[redirects]]
+from = "/*"
+to = "/index.html"
 status = 200
 
 [[redirects]]

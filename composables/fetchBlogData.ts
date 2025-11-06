@@ -84,6 +84,7 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
       _and: [
         { slug: { _eq: slug } },
         { status: { _eq: 'published' } },
+        { date: { _lte: '$NOW' } }, // Only show posts that are not in the future
       ]
     };
 
