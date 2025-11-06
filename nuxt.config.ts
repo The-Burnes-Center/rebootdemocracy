@@ -149,11 +149,27 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     // Blog listing - prerender at build time
     '/blog': { prerender: true },
-    // Blog posts - use ISR with on-demand revalidation
-    // Pages will be generated on first request and cached
-    // Cache will be invalidated via webhook when content changes
+    // Blog posts - PRERENDER at build time for SEO + cache tags for on-demand revalidation
+    // This hybrid approach ensures:
+    // 1. Pages are prerendered at build time (fully accessible to bots/search engines)
+    // 2. Full HTML with complete meta information exists immediately after build
+    // 3. Cache can be invalidated on-demand via webhook when content changes
+    // 4. After cache purge, Netlify will regenerate the page on next request
+    // 5. Cache tags (set in the page component) allow fine-grained invalidation
+    // 
+    // Note: We use prerender (not ISR) because:
+    // - ISR (`isr: true`) prevents prerendering at build time
+    // - We need prerendered pages for SEO and bot accessibility
+    // - Cache tags + headers provide the same on-demand revalidation capability
     '/blog/**': { 
-      isr: true,  // Cache indefinitely, revalidate on-demand via cache tags
+      prerender: true,  // Prerender at build time - ensures pages exist for SEO/bots
+      headers: {
+        // Browser should revalidate, but CDN caches with stale-while-revalidate
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+        // Netlify CDN caches indefinitely but allows revalidation via cache tags
+        // When cache is purged via webhook, page regenerates on next request
+        'Netlify-CDN-Cache-Control': 'public, max-age=31536000, stale-while-revalidate=31536000, durable'
+      }
     },
     // Other static pages - prerender at build time
     '/events': { prerender: true },

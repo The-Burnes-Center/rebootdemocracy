@@ -9,6 +9,9 @@ export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
     
+    // Log incoming webhook for debugging
+    console.log('Webhook received:', JSON.stringify(body, null, 2));
+    
     // Support both single ID and array of IDs
     let blogIds: string[] = [];
     
@@ -47,7 +50,9 @@ export default defineEventHandler(async (event) => {
 
     // Purge cache for all provided blog post IDs
     // Each blog post page is tagged with its ID in the Netlify-Cache-Tag header
+    console.log(`Purging cache for blog post IDs: ${blogIds.join(', ')}`);
     await purgeCache({ tags: blogIds });
+    console.log(`Successfully purged cache for ${blogIds.length} blog post(s)`);
 
     // Return success response
     setResponseStatus(event, 202);
