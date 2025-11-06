@@ -135,3 +135,12 @@ remote_images = ["https://burnes-center.directus.app/assets/.*"]
 
 [functions.scheduled-build]
 schedule = "0 */12 * * *"
+
+# Warm-up function for ISR blog posts
+# RECOMMENDED: Use Netlify Deploy Notifications to trigger automatically after each deployment
+# See WARM_UP_SETUP.md for step-by-step setup instructions
+# 
+# Alternative: Scheduled function (runs every hour as backup)
+[functions.warm-up-blog-posts]
+schedule = "0 * * * *"  # Runs every hour (backup option)
+# Note: Deploy Notifications is preferred - runs immediately after deployment
