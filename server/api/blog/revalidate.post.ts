@@ -63,16 +63,19 @@ export default defineEventHandler(async (event) => {
 
     // Purge cache for all provided blog post IDs
     // Each blog post page is tagged with its ID in the Netlify-Cache-Tag header
+    // With ISR, pages regenerate on the next request via serverless function (not a full build)
     console.log(`Purging cache for blog post IDs: ${blogIds.join(', ')}`);
     await purgeCache({ tags: blogIds });
     console.log(`Successfully purged cache for ${blogIds.length} blog post(s)`);
+    console.log(`Pages will regenerate on next request via ISR (serverless function)`);
 
     // Return success response
     setResponseStatus(event, 202);
     return {
       success: true,
-      message: `Cache purged for ${blogIds.length} blog post(s)`,
+      message: `Cache purged for ${blogIds.length} blog post(s). Pages will regenerate on next request via ISR.`,
       purgedIds: blogIds,
+      regeneration: 'on-demand', // Pages regenerate via serverless function on next request
     };
   } catch (error: any) {
     console.error('Error purging cache:', error);
