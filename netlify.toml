@@ -27,7 +27,8 @@ functions = "netlify/functions"
 
 # API routes are handled by Nuxt Nitro serverless function
 # With nitro.preset: 'netlify', Nitro creates a serverless function at /.netlify/functions/server
-# We explicitly redirect /api/* routes to this function to ensure they're handled correctly
+# We need to explicitly redirect /api/* routes to this function
+# Nitro will handle routing based on the original request path
 # This redirect MUST come BEFORE the catch-all redirect
 [[redirects]]
 from = "/api/*"
