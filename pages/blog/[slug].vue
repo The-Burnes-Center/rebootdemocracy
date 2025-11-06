@@ -340,11 +340,12 @@ const {
   if (import.meta.server && blogPost?.id && !import.meta.prerender) {
     try {
       const nuxtApp = useNuxtApp();
-      const event = nuxtApp.ssrContext?.event;
-      if (event?.node?.res) {
+      const ssrContext = nuxtApp.ssrContext;
+      if (ssrContext?.res) {
         // Set cache tag to the blog post ID
         // This allows us to purge the cache for this specific page when the post is updated
-        event.node.res.setHeader('Netlify-Cache-Tag', String(blogPost.id));
+        // Matches Netlify's guidance: ssrContext.res.setHeader('Netlify-Cache-Tag', tag)
+        ssrContext.res.setHeader('Netlify-Cache-Tag', String(blogPost.id));
       }
     } catch (e) {
       // Ignore errors during prerendering or if context is unavailable
