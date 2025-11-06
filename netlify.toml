@@ -25,12 +25,19 @@ functions = "netlify/functions"
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
   directory = "netlify/functions"
 
-# API routes are handled by Nuxt Nitro server - no redirect needed
-# They are automatically available at /api/* when nitro.preset is 'netlify'
+# API routes are handled by Nuxt Nitro server
+# IMPORTANT: /api/* routes must be handled BEFORE the catch-all redirect
+# With nitro.preset: 'netlify', server routes are automatically available at /.netlify/functions/nitro
+# We need to explicitly route /api/* to Nitro to prevent the catch-all from catching them
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/nitro"
+status = 200
+force = true
 
-# Catch-all for non-prerendered routes (should come AFTER static files are checked)
+# Catch-all for non-prerendered routes (should come AFTER /api/* redirect)
 # Netlify will serve static files (like prerendered blog posts) before applying this redirect
-# The catch-all should NOT catch /api/* routes as they're handled by Nitro
+# This catch-all should NOT catch /api/* routes (handled above)
 [[redirects]]
 from = "/*"
 to = "/index.html"
