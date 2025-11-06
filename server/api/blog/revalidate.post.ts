@@ -1,5 +1,4 @@
 import { purgeCache } from '@netlify/functions';
-import { createDirectus, rest, readItem } from '@directus/sdk';
 
 export default defineEventHandler(async (event) => {
   // Only allow POST requests
