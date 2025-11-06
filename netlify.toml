@@ -25,20 +25,21 @@ functions = "netlify/functions"
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
   directory = "netlify/functions"
 
-# API routes are automatically handled by Nuxt Nitro serverless function
-# With nitro.preset: 'netlify', Nitro automatically creates a serverless function
-# that handles all server routes (including /api/*) - no redirect needed
-# Netlify processes functions BEFORE redirects, so /api/* routes are handled by Nitro first
+# API routes are handled by Nuxt Nitro serverless function
+# With nitro.preset: 'netlify', Nitro creates a serverless function at /.netlify/functions/server
+# We explicitly redirect /api/* to this function to ensure it takes precedence
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/server"
+status = 200
+force = true
 
 # Catch-all for non-prerendered routes (should come AFTER static files and API routes are checked)
 # Netlify will serve static files (like prerendered blog posts) before applying this redirect
-# IMPORTANT: Excludes /api/* routes which are automatically handled by Nitro serverless functions
-# Netlify processes functions before redirects, so /api/* routes are handled by Nitro first
 [[redirects]]
 from = "/*"
 to = "/index.html"
 status = 200
-conditions = {Path = ["!/api/*"]}
 
 [[redirects]]
 from = "/newsoftheweek/feed/rss"
