@@ -13,9 +13,22 @@ export default defineEventHandler(async (event) => {
     console.log('Webhook received:', JSON.stringify(body, null, 2));
     
     // Support both single ID and array of IDs
+    // Accepts: id, blogIds, blogEntryId, payload.id, or array of IDs
     let blogIds: string[] = [];
     
-    if (Array.isArray(body.id)) {
+    if (body.blogIds) {
+      // Support blogIds field (array or single value)
+      const blogIdsValue = body.blogIds;
+      blogIds = Array.isArray(blogIdsValue)
+        ? blogIdsValue.map((id: any) => String(id))
+        : [String(blogIdsValue)];
+    } else if (body.blogEntryId) {
+      // Support blogEntryId field (array or single value)
+      const blogEntryIdValue = body.blogEntryId;
+      blogIds = Array.isArray(blogEntryIdValue)
+        ? blogEntryIdValue.map((id: any) => String(id))
+        : [String(blogEntryIdValue)];
+    } else if (Array.isArray(body.id)) {
       blogIds = body.id.map((id: any) => String(id));
     } else if (body.id) {
       blogIds = [String(body.id)];
@@ -31,7 +44,7 @@ export default defineEventHandler(async (event) => {
     } else {
       throw createError({ 
         statusCode: 400, 
-        message: 'Missing blog entry ID(s) in request body' 
+        message: 'Missing blog entry ID(s) in request body. Expected: id, blogIds, blogEntryId, payload.id, or array of IDs' 
       });
     }
 
