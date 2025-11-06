@@ -37,7 +37,10 @@ const getChangedBlogRoutesForPartialBuild = (): string[] | null => {
 };
 
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
+  compatibilityDate: '2024-11-13',
+  future: {
+    compatibilityVersion: 4,
+  },
   devtools: { enabled: true },
   ssr: true,
   
@@ -134,20 +137,36 @@ export default defineNuxtConfig({
       theme: 'satellite',
     },
   },
+  runtimeConfig: {
+    // Expose webhook secret to server-side
+    directusWebhookSecret: process.env.DIRECTUS_WEBHOOK_SECRET,
+    public: {
+      // Public runtime config (if needed)
+    },
+  },
   routeRules: {
+    // Homepage - prerender at build time
     '/': { prerender: true },
+    // Blog listing - prerender at build time
     '/blog': { prerender: true },
-    '/blog/**': { prerender: true },
+    // Blog posts - use ISR with on-demand revalidation
+    // Pages will be generated on first request and cached
+    // Cache will be invalidated via webhook when content changes
+    '/blog/**': { 
+      isr: true,  // Cache indefinitely, revalidate on-demand via cache tags
+    },
+    // Other static pages - prerender at build time
     '/events': { prerender: true },
     '/more-resources': { prerender: true },
     '/newsthatcaughtoureye/**': { prerender: true },
     '/about': { prerender: true },
     '/our-research': { prerender: true },
     '/our-engagements': { prerender: true },
+    // News latest - SSR with short cache
     '/newsthatcaughtoureye/latest': { 
-    prerender: false,  
-    headers: { 'cache-control': 's-maxage=60' } 
-  },
+      prerender: false,  
+      headers: { 'cache-control': 's-maxage=60' } 
+    },
     '/events/reboot-democracy': {
       redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
       prerender: true

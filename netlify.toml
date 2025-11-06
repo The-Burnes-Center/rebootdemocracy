@@ -1,5 +1,5 @@
 [build]
-command = "rm -rf .nuxt && npm ci && node scripts/partial-build.mjs"
+command = "rm -rf .nuxt && npm ci && npm run generate"
 publish = ".output/public/"
 functions = "netlify/functions"
 
@@ -9,10 +9,11 @@ functions = "netlify/functions"
   NPM_FLAGS = "--no-audit --no-fund --verbose"
   NETLIFY_BUILD_DEBUG = "true"
 
-# Build cache configuration for partial SSG
-# Netlify's persistent cache is at /opt/build/cache (automatically persisted between builds)
-# We use /opt/build/cache/rebootdemocracy for our build output and manifests
-# No need to explicitly configure - Netlify automatically caches /opt/build/cache
+# ISR with cache tags configuration
+# Blog posts use ISR (Incremental Static Regeneration) with on-demand revalidation
+# Pages are generated on first request and cached at the CDN edge
+# Cache is invalidated via webhook at /api/blog/revalidate when content changes
+# No manual cache restoration needed - Netlify handles it automatically
 
 [functions]
   node_bundler = "esbuild"
@@ -69,9 +70,8 @@ remote_images = ["https://burnes-center.directus.app/assets/.*"]
 [[headers]]
   for = "/blog/*"
   [headers.values]
-    cache-control = "no-cache, no-store, must-revalidate"
-    pragma = "no-cache"
-    expires = "0"
+    # ISR pages: Browser should revalidate, but CDN caches with Netlify-CDN-Cache-Control
+    # Set by Nuxt ISR route rules - no need to override here
     access-control-allow-origin = "*"
 
 [[headers]]

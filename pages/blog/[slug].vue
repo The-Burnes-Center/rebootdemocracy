@@ -334,6 +334,18 @@ const {
     );
   }
 
+  // Set cache tag for ISR on-demand revalidation
+  // Tag the page with the blog post ID so we can invalidate it via webhook
+  if (import.meta.server && blogPost?.id) {
+    const nuxtApp = useNuxtApp();
+    const event = nuxtApp.ssrContext?.event;
+    if (event) {
+      // Set cache tag to the blog post ID
+      // This allows us to purge the cache for this specific page when the post is updated
+      event.node.res.setHeader('Netlify-Cache-Tag', String(blogPost.id));
+    }
+  }
+
   return {
     blog: blogPost,
     relatedBlogs: relatedPostsList,
