@@ -357,6 +357,11 @@ const {
     blog: blogPost,
     relatedBlogs: relatedPostsList,
   };
+}, {
+  // Disable caching for ISR pages
+  // When cache is purged and page regenerates, we want fresh data from Directus
+  // getCachedData: () => null ensures we always fetch fresh data
+  getCachedData: () => null,
 });
 
 const blog = computed(() => blogData.value?.blog || null);
