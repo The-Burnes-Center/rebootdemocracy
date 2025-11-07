@@ -175,11 +175,19 @@ export default defineEventHandler(async (event) => {
     if (purgeSucceeded && blogPaths.length > 0) {
       console.log(`Triggering regeneration for ${blogPaths.length} blog post(s)...`);
       
-      // Get the site URL from environment or construct it
-      const siteUrl = process.env.URL || 
-                      process.env.DEPLOY_PRIME_URL || 
-                      process.env.CONTEXT?.site?.url ||
-                      'https://nuxt4-isr-cache-tags--burnesblogtemplate.netlify.app';
+      // Get the site URL from the request headers (most reliable)
+      // Use the host from the incoming request to ensure we're hitting the correct deploy
+      const requestHost = event.node?.req?.headers?.host || 
+                         event.headers?.host ||
+                         'nuxt4-isr-cache-tags--burnesblogtemplate.netlify.app';
+      
+      // Construct the full URL using the request host
+      const protocol = event.node?.req?.headers?.['x-forwarded-proto'] || 
+                       event.headers?.['x-forwarded-proto'] ||
+                       'https';
+      const siteUrl = `${protocol}://${requestHost}`;
+      
+      console.log(`Using site URL for regeneration: ${siteUrl}`);
       
       // Fetch each blog post URL to trigger regeneration
       // Don't await - fire and forget so we don't block the response
@@ -192,26 +200,50 @@ export default defineEventHandler(async (event) => {
             headers: {
               'User-Agent': 'Netlify-ISR-Regeneration/1.0',
               'X-Netlify-Cache-Purge': 'true', // Custom header to identify regeneration requests
+              'Cache-Control': 'no-cache', // Ensure we get a fresh response
             },
           });
           console.log(`Regeneration triggered for ${path}: ${response.status} ${response.statusText}`);
-          return { path, status: response.status, success: response.ok };
+          
+          // Check if response is OK (200-299)
+          const isSuccess = response.ok;
+          if (!isSuccess) {
+            console.warn(`Regeneration failed for ${path}: ${response.status} ${response.statusText}`);
+            // Try to read response body for more details
+            try {
+              const text = await response.text();
+              console.warn(`Response body: ${text.substring(0, 200)}`);
+            } catch (e) {
+              // Ignore errors reading response
+            }
+          }
+          
+          return { path, status: response.status, success: isSuccess };
         } catch (error: any) {
           console.error(`Error triggering regeneration for ${path}:`, error.message);
+          console.error(`Error stack:`, error.stack);
           return { path, status: 0, success: false, error: error.message };
         }
       });
       
-      // Fire and forget - don't wait for regeneration to complete
-      // This allows the webhook to return quickly while regeneration happens in the background
-      Promise.all(regenerationPromises).then((results) => {
-        const successful = results.filter(r => r.success).length;
-        console.log(`Regeneration complete: ${successful}/${results.length} pages regenerated successfully`);
-      }).catch((error) => {
-        console.error('Error during regeneration:', error);
-      });
+      // Wait a short delay after cache purge to ensure CDN has processed the purge
+      // Then trigger regeneration
+      setTimeout(() => {
+        // Fire and forget - don't wait for regeneration to complete
+        // This allows the webhook to return quickly while regeneration happens in the background
+        Promise.all(regenerationPromises).then((results) => {
+          const successful = results.filter(r => r.success).length;
+          const failed = results.filter(r => !r.success);
+          console.log(`Regeneration complete: ${successful}/${results.length} pages regenerated successfully`);
+          if (failed.length > 0) {
+            console.warn(`Failed regenerations:`, failed.map(r => ({ path: r.path, status: r.status, error: r.error })));
+          }
+        }).catch((error) => {
+          console.error('Error during regeneration:', error);
+        });
+      }, 2000); // Wait 2 seconds after cache purge for CDN to process
       
-      console.log(`Regeneration triggered for ${blogPaths.length} blog post(s) (running in background)`);
+      console.log(`Regeneration triggered for ${blogPaths.length} blog post(s) (running in background after 2s delay)`);
     }
 
     console.log('Preparing response...');
