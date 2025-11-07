@@ -336,8 +336,9 @@ const {
 
   // Set cache tag for ISR on-demand revalidation
   // Tag the page with the blog post ID so we can invalidate it via webhook
-  // Only set cache tag during runtime (not during prerendering)
-  if (import.meta.server && blogPost?.id && !import.meta.prerender) {
+  // IMPORTANT: Set cache tag during both prerendering AND runtime
+  // Prerendered pages need cache tags so they can be purged via webhook
+  if (import.meta.server && blogPost?.id) {
     try {
       const nuxtApp = useNuxtApp();
       const ssrContext = nuxtApp.ssrContext;
@@ -345,10 +346,11 @@ const {
         // Set cache tag to the blog post ID
         // This allows us to purge the cache for this specific page when the post is updated
         // Matches Netlify's guidance: ssrContext.res.setHeader('Netlify-Cache-Tag', tag)
+        // Must be set during prerendering so prerendered pages can be purged
         ssrContext.res.setHeader('Netlify-Cache-Tag', String(blogPost.id));
       }
     } catch (e) {
-      // Ignore errors during prerendering or if context is unavailable
+      // Ignore errors if context is unavailable
       console.warn('Could not set cache tag:', e);
     }
   }
