@@ -457,6 +457,9 @@ export const handler = async (event, context) => {
     path: h3Event.path,
     url: h3Event.url, // Should be full URL now
     fullUrl: fullUrl, // The full URL we constructed
+    hasBody: h3Event.body !== undefined && h3Event.body !== null,
+    bodyType: typeof h3Event.body,
+    bodyPreview: h3Event.body ? JSON.stringify(h3Event.body).substring(0, 100) : null,
   });
 
   // Call the Nitro handler

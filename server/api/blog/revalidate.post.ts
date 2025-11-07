@@ -53,8 +53,25 @@ export default defineEventHandler(async (event) => {
     console.log('purgeCache type:', typeof purgeCache, 'isFunction:', typeof purgeCache === 'function');
     
     // Wrap purgeCache in a timeout to prevent hanging
+    // Get Netlify token from environment
+    // purgeCache requires a Netlify personal access token
+    // Set this as an environment variable in Netlify: NETLIFY_AUTH_TOKEN
+    const netlifyToken = process.env.NETLIFY_AUTH_TOKEN;
+    
     console.log('Creating purgeCache promise...');
-    const purgePromise = purgeCache({ tags: blogIds });
+    console.log('Netlify token available:', !!netlifyToken);
+    
+    if (!netlifyToken) {
+      console.warn('NETLIFY_AUTH_TOKEN not found in environment. Cache purge may fail.');
+      console.warn('To fix: Set NETLIFY_AUTH_TOKEN as an environment variable in Netlify with your personal access token.');
+    }
+    
+    const purgeOptions: { tags: string[]; token?: string } = { tags: blogIds };
+    if (netlifyToken) {
+      purgeOptions.token = netlifyToken;
+    }
+    
+    const purgePromise = purgeCache(purgeOptions);
     console.log('purgeCache promise created, type:', typeof purgePromise, 'isPromise:', purgePromise && typeof purgePromise.then === 'function');
     
     const timeoutPromise = new Promise((_, reject) => {
