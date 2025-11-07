@@ -20,6 +20,7 @@
 
 import { IncomingMessage, ServerResponse } from 'http';
 import { Readable } from 'stream';
+import { EventEmitter } from 'events';
 
 // Lazy load Nitro modules using dynamic import to avoid CommonJS/ESM bundling issues
 let nitroHandler;
@@ -228,7 +229,19 @@ export const handler = async (event, context) => {
 
   // Create a mock Node.js ServerResponse
   // Use Object.create to avoid setting read-only properties
+  // ServerResponse extends OutgoingMessage extends Stream extends EventEmitter
+  // So Object.create(ServerResponse.prototype) should give us EventEmitter methods
   const res = Object.create(ServerResponse.prototype);
+  // Ensure EventEmitter methods are available by mixing in the prototype
+  // This ensures we can emit events even if the prototype chain isn't fully initialized
+  Object.assign(res, EventEmitter.prototype);
+  // Initialize EventEmitter instance state by creating a temporary instance
+  // and copying its internal state (event listeners array, etc.)
+  const tempEmitter = new EventEmitter();
+  // Copy the internal event emitter state
+  res._events = tempEmitter._events || {};
+  res._eventsCount = tempEmitter._eventsCount || 0;
+  res._maxListeners = tempEmitter._maxListeners || EventEmitter.defaultMaxListeners;
   res.req = req;
   res.statusCode = 200;
   res.statusMessage = 'OK';
@@ -264,7 +277,13 @@ export const handler = async (event, context) => {
       responseBody += chunk.toString();
     }
     _finished = true;
+    // Emit 'finish' event so the promise resolves
+    // Use setImmediate to ensure this happens after any synchronous operations
+    setImmediate(() => {
+      res.emit('finish');
+    });
     if (callback) callback();
+    return res;
   };
 
   res.writeHead = function(code, statusMessage, headersObj) {
@@ -349,38 +368,77 @@ export const handler = async (event, context) => {
   });
 
   // Call the Nitro handler
-  await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error('Request timeout'));
-    }, 30000); // 30 second timeout
+  // Wrap in try-catch to handle any synchronous errors
+  try {
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        console.error('Request timeout after 30 seconds');
+        if (!_finished) {
+          res.end();
+        }
+        reject(new Error('Request timeout'));
+      }, 30000); // 30 second timeout
 
-    res.on('finish', () => {
-      clearTimeout(timeout);
-      resolve();
-    });
-    
-    res.on('error', (err) => {
-      clearTimeout(timeout);
-      reject(err);
-    });
+      res.on('finish', () => {
+        clearTimeout(timeout);
+        console.log('Response finished');
+        resolve();
+      });
+      
+      res.on('error', (err) => {
+        clearTimeout(timeout);
+        console.error('Response error:', err);
+        reject(err);
+      });
 
-    try {
       // Call the Nitro handler with the H3 event
-      const result = nitroHandler(h3Event);
-      if (result && typeof result.then === 'function') {
-        result.then(() => {
+      console.log('Calling Nitro handler...');
+      try {
+        const result = nitroHandler(h3Event);
+        console.log('Nitro handler called, result type:', typeof result, 'isPromise:', result && typeof result.then === 'function');
+        
+        if (result && typeof result.then === 'function') {
+          // Handler returned a promise
+          result
+            .then((response) => {
+              console.log('Nitro handler promise resolved');
+              if (!_finished) {
+                res.end();
+              }
+            })
+            .catch((err) => {
+              console.error('Nitro handler promise rejected:', err);
+              clearTimeout(timeout);
+              reject(err);
+            });
+        } else {
+          // Handler returned synchronously
+          console.log('Nitro handler returned synchronously');
           if (!_finished) {
             res.end();
           }
-        }).catch(reject);
-      } else if (!_finished) {
-        res.end();
+        }
+      } catch (err) {
+        // Synchronous error from handler
+        console.error('Nitro handler threw synchronous error:', err);
+        clearTimeout(timeout);
+        reject(err);
       }
-    } catch (err) {
-      clearTimeout(timeout);
-      reject(err);
-    }
-  });
+    });
+  } catch (err) {
+    console.error('Error in handler wrapper:', err);
+    // If we get here, the handler failed
+    // Return an error response
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        error: 'Internal server error',
+        message: err.message,
+        stack: process.env.NETLIFY_DEV ? err.stack : undefined,
+      }),
+    };
+  }
 
   // Return Netlify function response
   return {
