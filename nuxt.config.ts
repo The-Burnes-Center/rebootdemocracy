@@ -63,6 +63,7 @@ export default defineNuxtConfig({
       serverDir: '.output/server'
     }
   },
+  
   hooks: {
     async 'nitro:config'(nitroConfig) {
       // Check if we're doing a partial build
