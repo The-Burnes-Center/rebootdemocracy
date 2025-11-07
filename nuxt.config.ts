@@ -64,6 +64,7 @@ export default defineNuxtConfig({
     }
   },
   
+  
   hooks: {
     async 'nitro:config'(nitroConfig) {
       // Check if we're doing a partial build
