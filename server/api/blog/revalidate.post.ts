@@ -1,8 +1,17 @@
 // Simple revalidate endpoint - minimal version
+console.log('Revalidate endpoint module loaded');
+
 import { purgeCache } from '@netlify/functions';
+
+console.log('purgeCache imported, type:', typeof purgeCache);
 
 export default defineEventHandler(async (event) => {
   console.log('Revalidate endpoint called, method:', event.method);
+  console.log('Event details:', {
+    method: event.method,
+    path: event.path,
+    url: event.node?.req?.url,
+  });
   
   if (event.method !== 'POST') {
     throw createError({ statusCode: 405, message: 'Method not allowed' });
