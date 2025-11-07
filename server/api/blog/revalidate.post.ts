@@ -93,8 +93,9 @@ export default defineEventHandler(async (event) => {
     
     // Set timeout to 10 seconds (purgeCache should be fast, typically < 1 second)
     // If it takes longer, something is wrong and we should fail fast
+    let timeoutId: NodeJS.Timeout | null = null;
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         console.warn('purgeCache timeout after 10 seconds - cache purge may still be in progress');
         reject(new Error('purgeCache timeout after 10 seconds'));
       }, 10000);
@@ -103,10 +104,25 @@ export default defineEventHandler(async (event) => {
     let purgeSucceeded = false;
     try {
       console.log('Awaiting purgeCache (with 10s timeout)...');
-      await Promise.race([purgePromise, timeoutPromise]);
+      await Promise.race([
+        purgePromise.then((result) => {
+          // Clear timeout when purgeCache succeeds
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
+          return result;
+        }),
+        timeoutPromise
+      ]);
       purgeSucceeded = true;
       console.log(`Cache purged successfully`);
     } catch (error: any) {
+      // Clear timeout on error too
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
       console.error('Error during purgeCache:', error);
       // Note: purgeCache might still succeed even if the promise times out
       // The cache purge is asynchronous and may complete after the timeout
