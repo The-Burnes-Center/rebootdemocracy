@@ -15,25 +15,39 @@
  * - The bundled function code is deployed as a separate artifact
  * 
  * This wrapper converts Netlify function events to Node.js HTTP requests
- * and uses Nitro's toNodeListener to handle them.
+ * and uses Nitro's handler to process them.
  */
 
 import { IncomingMessage, ServerResponse } from 'http';
 import { Readable } from 'stream';
-import { URL } from 'url';
 
-// Import the Nitro server handler
-// The path is relative to the netlify/functions directory
-// In Netlify's build environment, .output is in the project root
-// This import is resolved during BUILD/BUNDLING, not at runtime
-import nitroApp from '../../.output/server/server.mjs';
-import { toNodeListener } from '../../.output/server/chunks/nitro/nitro.mjs';
+// Lazy load Nitro modules using dynamic import to avoid CommonJS/ESM bundling issues
+let nitroHandler;
+let createEvent;
 
-// Convert Nitro app to Node.js listener
-const nodeListener = toNodeListener(nitroApp);
+async function loadNitro() {
+  if (!nitroHandler) {
+    // Import the Nitro server handler
+    // The path is relative to the netlify/functions directory
+    // In Netlify's build environment, .output is in the project root
+    const nitroModule = await import('../../.output/server/server.mjs');
+    nitroHandler = nitroModule.default;
+    
+    // Import createEvent from nitro chunks
+    // createEvent is not exported, but we can access it via dynamic import
+    const nitroChunks = await import('../../.output/server/chunks/nitro/nitro.mjs');
+    // Try to access createEvent - it might be available in the module namespace
+    // If not, we'll create an H3 event manually
+    createEvent = nitroChunks.createEvent;
+  }
+  return { nitroHandler, createEvent };
+}
 
 // Netlify function handler
 export const handler = async (event, context) => {
+  // Load Nitro modules
+  const { nitroHandler, createEvent: nitroCreateEvent } = await loadNitro();
+  
   // Build the full URL from Netlify event
   const host = event.headers?.host || 
                event.headers?.['x-forwarded-host'] || 
@@ -48,9 +62,6 @@ export const handler = async (event, context) => {
     path += '?' + queryString;
   }
 
-  // Create full URL
-  const fullUrl = `${protocol}://${host}${path}`;
-  
   // Create a mock Node.js IncomingMessage
   const req = Object.create(IncomingMessage.prototype);
   req.method = event.httpMethod || 'GET';
@@ -123,7 +134,23 @@ export const handler = async (event, context) => {
     return res;
   };
 
-  // Call the Node.js listener
+  // Create H3 event from Node.js req/res
+  // If createEvent is available, use it; otherwise create manually
+  let h3Event;
+  if (nitroCreateEvent && typeof nitroCreateEvent === 'function') {
+    h3Event = nitroCreateEvent(req, res);
+  } else {
+    // Create H3 event manually
+    h3Event = {
+      node: { req, res },
+      path: path.split('?')[0],
+      method: req.method,
+      headers: req.headers,
+      url: path,
+    };
+  }
+
+  // Call the Nitro handler
   await new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       reject(new Error('Request timeout'));
@@ -140,7 +167,17 @@ export const handler = async (event, context) => {
     });
 
     try {
-      nodeListener(req, res);
+      // Call the Nitro handler with the H3 event
+      const result = nitroHandler(h3Event);
+      if (result && typeof result.then === 'function') {
+        result.then(() => {
+          if (!res.finished) {
+            res.end();
+          }
+        }).catch(reject);
+      } else if (!res.finished) {
+        res.end();
+      }
     } catch (err) {
       clearTimeout(timeout);
       reject(err);
