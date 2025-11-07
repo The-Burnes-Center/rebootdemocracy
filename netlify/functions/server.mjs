@@ -146,11 +146,41 @@ export const handler = async (event, context) => {
   req.method = event.httpMethod || 'GET';
   req.url = path;
   req.originalUrl = path; // Nitro uses originalUrl
-  req.headers = { ...event.headers };
-  // Set host header - Nitro's getRequestHost looks for this
+  
+  // Normalize headers to lowercase (Node.js headers are case-insensitive but Nitro expects lowercase)
+  const normalizedHeaders = {};
+  if (event.headers) {
+    for (const [key, value] of Object.entries(event.headers)) {
+      normalizedHeaders[key.toLowerCase()] = value;
+    }
+  }
+  req.headers = normalizedHeaders;
+  
+  // Set host header - Nitro's getRequestHost looks for lowercase 'host'
   req.headers.host = validHost;
-  // Set protocol header - Nitro's getRequestProtocol looks for this
+  // Set protocol header - Nitro's getRequestProtocol looks for lowercase 'x-forwarded-proto'
   req.headers['x-forwarded-proto'] = validProtocol;
+  
+  // Debug: Verify headers are set correctly
+  console.log('Request headers set:', {
+    host: req.headers.host,
+    'x-forwarded-proto': req.headers['x-forwarded-proto'],
+    connectionEncrypted: req.connection?.encrypted,
+  });
+  
+  // Test URL construction to catch errors early
+  try {
+    const testUrl = new URL(path, `${validProtocol}://${validHost}`);
+    console.log('URL construction test successful:', testUrl.href);
+  } catch (err) {
+    console.error('URL construction test failed:', err.message, {
+      path,
+      protocol: validProtocol,
+      host: validHost,
+      baseUrl: `${validProtocol}://${validHost}`,
+    });
+    throw err;
+  }
   
   // Add required properties for IncomingMessage
   req.httpVersion = '1.1';
@@ -249,6 +279,7 @@ export const handler = async (event, context) => {
   if (nitroCreateEvent && typeof nitroCreateEvent === 'function') {
     try {
       h3Event = nitroCreateEvent(req, res);
+      console.log('H3 event created successfully via createEvent');
     } catch (err) {
       // If createEvent fails, create H3 event manually
       console.warn('createEvent failed, creating H3 event manually:', err);
@@ -262,6 +293,7 @@ export const handler = async (event, context) => {
     }
   } else {
     // Create H3 event manually
+    console.log('createEvent not available, creating H3 event manually');
     h3Event = {
       node: { req, res },
       path: path.split('?')[0],
@@ -270,6 +302,17 @@ export const handler = async (event, context) => {
       url: path,
     };
   }
+  
+  // Debug: Check what getRequestHost and getRequestProtocol would return
+  console.log('H3 event created:', {
+    hasNode: !!h3Event.node,
+    hasReq: !!h3Event.node?.req,
+    hasRes: !!h3Event.node?.res,
+    reqHost: h3Event.node?.req?.headers?.host,
+    reqProto: h3Event.node?.req?.headers?.['x-forwarded-proto'],
+    reqConnection: h3Event.node?.req?.connection,
+    path: h3Event.path,
+  });
 
   // Call the Nitro handler
   await new Promise((resolve, reject) => {
