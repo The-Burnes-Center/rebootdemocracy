@@ -49,14 +49,63 @@ export const handler = async (event, context) => {
   const { nitroHandler, createEvent: nitroCreateEvent } = await loadNitro();
   
   // Build the full URL from Netlify event
+  // Netlify event structure: event.path, event.httpMethod, event.headers, event.queryStringParameters
+  // Nitro's getRequestHost and getRequestProtocol look for specific headers
+  // We need to provide valid host and protocol for URL construction
   const host = event.headers?.host || 
                event.headers?.['x-forwarded-host'] || 
                event.headers?.['Host'] ||
+               event.headers?.['host'] ||
+               event.headers?.['X-Forwarded-Host'] ||
                'localhost';
-  const protocol = event.headers?.['x-forwarded-proto'] || 'https';
+  
+  // Ensure host is valid (not empty, has proper format)
+  // Nitro's getRequestURL creates a URL from path and base URL
+  // The host must be a valid domain for URL construction
+  let validHost = host && host.trim() ? host.trim() : null;
+  
+  // If host is missing or invalid, try to get it from Netlify environment
+  // Netlify provides the site URL in environment variables
+  if (!validHost || validHost === 'localhost' || validHost === '') {
+    // Try to get host from Netlify environment variables
+    const netlifyHost = process.env.URL || 
+                       process.env.DEPLOY_PRIME_URL || 
+                       process.env.CONTEXT?.site?.url;
+    
+    if (netlifyHost) {
+      // Extract host from URL (e.g., "https://example.netlify.app" -> "example.netlify.app")
+      try {
+        const url = new URL(netlifyHost);
+        validHost = url.host;
+      } catch {
+        // If URL parsing fails, use the host as-is
+        validHost = netlifyHost.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      }
+    } else {
+      // Fallback to a valid domain for URL construction
+      // This is just for URL construction - the actual request will work
+      validHost = 'netlify.app';
+    }
+  }
+  
+  const protocol = event.headers?.['x-forwarded-proto'] || 
+                   event.headers?.['X-Forwarded-Proto'] ||
+                   event.headers?.['x-forwarded-protocol'] ||
+                   'https';
+  
+  // Ensure protocol is valid
+  const validProtocol = (protocol === 'http' || protocol === 'https') ? protocol : 'https';
   
   // Construct path with query string
-  let path = event.path || '/';
+  // event.path might be the full path or just the pathname
+  let path = event.path || event.rawPath || '/';
+  
+  // Ensure path starts with /
+  if (!path.startsWith('/')) {
+    path = '/' + path;
+  }
+  
+  // Add query string if present
   if (event.queryStringParameters && Object.keys(event.queryStringParameters).length > 0) {
     const queryString = new URLSearchParams(event.queryStringParameters).toString();
     path += '?' + queryString;
@@ -66,8 +115,19 @@ export const handler = async (event, context) => {
   const req = Object.create(IncomingMessage.prototype);
   req.method = event.httpMethod || 'GET';
   req.url = path;
+  req.originalUrl = path; // Nitro uses originalUrl
   req.headers = { ...event.headers };
-  req.headers.host = host;
+  // Set host header - Nitro's getRequestHost looks for this
+  req.headers.host = validHost;
+  // Set protocol header - Nitro's getRequestProtocol looks for this
+  req.headers['x-forwarded-proto'] = validProtocol;
+  
+  // Add required properties for IncomingMessage
+  req.httpVersion = '1.1';
+  req.httpVersionMajor = 1;
+  req.httpVersionMinor = 1;
+  req.socket = null;
+  req.connection = null;
   
   // Handle body
   if (event.body) {
@@ -147,10 +207,23 @@ export const handler = async (event, context) => {
   };
 
   // Create H3 event from Node.js req/res
-  // If createEvent is available, use it; otherwise create manually
+  // Nitro's createEvent function creates an H3 event with proper structure
+  // If createEvent is not available, we need to create it manually
   let h3Event;
   if (nitroCreateEvent && typeof nitroCreateEvent === 'function') {
-    h3Event = nitroCreateEvent(req, res);
+    try {
+      h3Event = nitroCreateEvent(req, res);
+    } catch (err) {
+      // If createEvent fails, create H3 event manually
+      console.warn('createEvent failed, creating H3 event manually:', err);
+      h3Event = {
+        node: { req, res },
+        path: path.split('?')[0],
+        method: req.method,
+        headers: req.headers,
+        url: path,
+      };
+    }
   } else {
     // Create H3 event manually
     h3Event = {
