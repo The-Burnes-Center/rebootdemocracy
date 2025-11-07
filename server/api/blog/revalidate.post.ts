@@ -2,8 +2,13 @@
 console.log('Revalidate endpoint module loaded');
 
 import { purgeCache } from '@netlify/functions';
+import { createDirectus, rest, readItems } from '@directus/sdk';
 
 console.log('purgeCache imported, type:', typeof purgeCache);
+
+// Directus client for fetching blog slugs
+const API_URL = 'https://burnes-center.directus.app/';
+const directus = createDirectus(API_URL).with(rest());
 
 export default defineEventHandler(async (event) => {
   console.log('Revalidate endpoint called, method:', event.method);
@@ -64,8 +69,37 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Purge cache
-    console.log(`Purging cache for blog IDs: ${blogIds.join(', ')}`);
+    // Fetch blog slugs from Directus using the IDs
+    console.log(`Fetching blog slugs for IDs: ${blogIds.join(', ')}`);
+    const blogPaths: string[] = [];
+    
+    try {
+      const blogPosts = await directus.request(
+        readItems('reboot_democracy_blog', {
+          filter: {
+            id: { _in: blogIds }
+          },
+          fields: ['id', 'slug']
+        })
+      );
+      
+      for (const post of blogPosts) {
+        if (post.slug) {
+          blogPaths.push(`/blog/${post.slug}`);
+        }
+      }
+      
+      console.log(`Found ${blogPaths.length} blog paths to purge:`, blogPaths);
+    } catch (error: any) {
+      console.error('Error fetching blog slugs:', error);
+      // Continue with tag-based purge as fallback
+      console.warn('Falling back to tag-based cache purge');
+    }
+
+    // Purge cache by path (more reliable than tags for prerendered pages)
+    // Also purge by tag as fallback
+    console.log(`Purging cache for blog paths: ${blogPaths.join(', ')}`);
+    console.log(`Also purging by tags: ${blogIds.join(', ')}`);
     console.log('About to call purgeCache...');
     console.log('purgeCache type:', typeof purgeCache, 'isFunction:', typeof purgeCache === 'function');
     
@@ -83,7 +117,13 @@ export default defineEventHandler(async (event) => {
       console.warn('To fix: Set NETLIFY_AUTH_TOKEN as an environment variable in Netlify with your personal access token.');
     }
     
-    const purgeOptions: { tags: string[]; token?: string } = { tags: blogIds };
+    // Purge by path (for prerendered static files) AND by tag (for ISR pages)
+    const purgeOptions: { paths?: string[]; tags?: string[]; token?: string } = {};
+    if (blogPaths.length > 0) {
+      purgeOptions.paths = blogPaths;
+    }
+    // Also purge by tag as fallback for ISR pages
+    purgeOptions.tags = blogIds;
     if (netlifyToken) {
       purgeOptions.token = netlifyToken;
     }
@@ -130,13 +170,59 @@ export default defineEventHandler(async (event) => {
       console.warn('purgeCache timed out or failed, but cache purge may still be in progress');
     }
 
+    // After cache purge, trigger regeneration by fetching each blog post URL
+    // This ensures pages are regenerated immediately, not waiting for the next user request
+    if (purgeSucceeded && blogPaths.length > 0) {
+      console.log(`Triggering regeneration for ${blogPaths.length} blog post(s)...`);
+      
+      // Get the site URL from environment or construct it
+      const siteUrl = process.env.URL || 
+                      process.env.DEPLOY_PRIME_URL || 
+                      process.env.CONTEXT?.site?.url ||
+                      'https://nuxt4-isr-cache-tags--burnesblogtemplate.netlify.app';
+      
+      // Fetch each blog post URL to trigger regeneration
+      // Don't await - fire and forget so we don't block the response
+      const regenerationPromises = blogPaths.map(async (path) => {
+        try {
+          const url = `${siteUrl}${path}`;
+          console.log(`Fetching ${url} to trigger regeneration...`);
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'User-Agent': 'Netlify-ISR-Regeneration/1.0',
+              'X-Netlify-Cache-Purge': 'true', // Custom header to identify regeneration requests
+            },
+          });
+          console.log(`Regeneration triggered for ${path}: ${response.status} ${response.statusText}`);
+          return { path, status: response.status, success: response.ok };
+        } catch (error: any) {
+          console.error(`Error triggering regeneration for ${path}:`, error.message);
+          return { path, status: 0, success: false, error: error.message };
+        }
+      });
+      
+      // Fire and forget - don't wait for regeneration to complete
+      // This allows the webhook to return quickly while regeneration happens in the background
+      Promise.all(regenerationPromises).then((results) => {
+        const successful = results.filter(r => r.success).length;
+        console.log(`Regeneration complete: ${successful}/${results.length} pages regenerated successfully`);
+      }).catch((error) => {
+        console.error('Error during regeneration:', error);
+      });
+      
+      console.log(`Regeneration triggered for ${blogPaths.length} blog post(s) (running in background)`);
+    }
+
     console.log('Preparing response...');
     const response = {
       success: purgeSucceeded,
       message: purgeSucceeded 
-        ? `Cache purged for ${blogIds.length} blog post(s)`
+        ? `Cache purged and regeneration triggered for ${blogIds.length} blog post(s)`
         : `Cache purge initiated for ${blogIds.length} blog post(s) (may still be in progress)`,
       purgedIds: blogIds,
+      purgedPaths: blogPaths,
+      regenerationTriggered: purgeSucceeded && blogPaths.length > 0,
       warning: purgeSucceeded ? undefined : 'Cache purge timed out but may still complete asynchronously',
     };
     console.log('Returning response:', JSON.stringify(response));
