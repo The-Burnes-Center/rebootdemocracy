@@ -1,5 +1,5 @@
 [build]
-command = "rm -rf .nuxt && npm ci && npm run build"
+command = "rm -rf .nuxt && npm run build"
 publish = ".output/public/"
 # Use manual wrapper function to bridge Nitro and Netlify
 # Nitro generates .output/server/server.mjs, but Netlify's bundler
