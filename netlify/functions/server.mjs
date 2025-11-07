@@ -147,7 +147,13 @@ export const handler = async (event, context) => {
   });
 
   // Create a mock Node.js IncomingMessage
+  // IncomingMessage extends Readable, so we need to ensure it's properly initialized
   const req = Object.create(IncomingMessage.prototype);
+  // Mix in Readable prototype methods to ensure stream functionality
+  Object.assign(req, Readable.prototype);
+  // Initialize Readable stream state by creating a temporary instance and copying state
+  const tempReadable = new Readable();
+  req._readableState = tempReadable._readableState;
   req.method = event.httpMethod || 'GET';
   req.url = path;
   req.originalUrl = path; // Nitro uses originalUrl
@@ -223,12 +229,32 @@ export const handler = async (event, context) => {
     configurable: false,
   });
   
-  // Handle body
+  // Handle body - H3's readBody reads from the request stream itself
+  // We need to make the request readable by pushing data to it
+  // Create a proper Readable stream for the body
+  let bodyStream = null;
   if (event.body) {
-    const bodyStream = new Readable();
-    bodyStream.push(event.body);
-    bodyStream.push(null);
-    req.body = bodyStream;
+    // Convert body to string if it's not already
+    const bodyString = typeof event.body === 'string' ? event.body : JSON.stringify(event.body);
+    // Create a Readable stream for the body
+    bodyStream = new Readable({
+      read() {
+        // Stream is already pushed, so this is just a no-op
+      }
+    });
+    bodyStream.push(Buffer.from(bodyString, 'utf8'));
+    bodyStream.push(null); // Signal end of stream
+    // Also set content-length header if not already set
+    if (!req.headers['content-length']) {
+      req.headers['content-length'] = String(Buffer.byteLength(bodyString, 'utf8'));
+    }
+    // Make the request readable by pushing data to it
+    // IncomingMessage extends Readable, so we can push to it
+    req.push(Buffer.from(bodyString, 'utf8'));
+    req.push(null); // Signal end of stream
+  } else {
+    // No body - signal end of stream immediately
+    req.push(null);
   }
 
   // Create a mock Node.js ServerResponse
