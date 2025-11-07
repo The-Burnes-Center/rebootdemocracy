@@ -113,6 +113,15 @@ remote_images = ["https://burnes-center.directus.app/assets/.*"]
     cache-control = "public, max-age=2592000, immutable"
     access-control-allow-origin = "*"
 
+# Cache _payload.json files for ISR pages (they're part of the cached page)
+# Other JSON files (like API responses) should not be cached
+[[headers]]
+  for = "/blog/**/_payload.json"
+  [headers.values]
+    # Cache _payload.json files for ISR pages - they're part of the cached page
+    cache-control = "public, max-age=31536000, immutable"
+    access-control-allow-origin = "*"
+
 [[headers]]
   for = "/*.json"
   [headers.values]
