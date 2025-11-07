@@ -18,8 +18,15 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    console.log('Reading request body...');
-    const body = await readBody(event);
+    // Check if body is already available on the event (set by wrapper)
+    let body;
+    if (event.body !== undefined && event.body !== null) {
+      console.log('Using body from event.body (pre-parsed by wrapper)');
+      body = event.body;
+    } else {
+      console.log('Reading request body from stream...');
+      body = await readBody(event);
+    }
     console.log('Revalidate webhook received:', JSON.stringify(body, null, 2));
     
     // Extract blog IDs - support multiple formats

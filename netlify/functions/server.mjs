@@ -386,6 +386,27 @@ export const handler = async (event, context) => {
   // Nitro's getRequestURL might call new URL() with just the path, which fails
   const fullUrl = `${validProtocol}://${validHost}${path}`;
   
+  // Parse body if available and set it directly on the event
+  // This avoids H3's readBody from trying to read from the stream
+  let parsedBody = null;
+  if (event.body) {
+    try {
+      // Try to parse JSON body
+      if (typeof event.body === 'string') {
+        try {
+          parsedBody = JSON.parse(event.body);
+        } catch {
+          // Not JSON, use as-is
+          parsedBody = event.body;
+        }
+      } else {
+        parsedBody = event.body;
+      }
+    } catch (err) {
+      console.warn('Failed to parse body:', err);
+    }
+  }
+  
   let h3Event;
   if (nitroCreateEvent && typeof nitroCreateEvent === 'function') {
     try {
@@ -393,6 +414,10 @@ export const handler = async (event, context) => {
       // Ensure the URL is set to the full URL
       if (h3Event) {
         h3Event.url = fullUrl;
+        // Set body directly on event to avoid stream reading
+        if (parsedBody !== null) {
+          h3Event.body = parsedBody;
+        }
       }
       console.log('H3 event created successfully via createEvent');
     } catch (err) {
@@ -404,6 +429,7 @@ export const handler = async (event, context) => {
         method: req.method,
         headers: req.headers,
         url: fullUrl, // Use full URL instead of just path
+        body: parsedBody, // Set body directly
       };
     }
   } else {
@@ -415,6 +441,7 @@ export const handler = async (event, context) => {
       method: req.method,
       headers: req.headers,
       url: fullUrl, // Use full URL instead of just path
+      body: parsedBody, // Set body directly
     };
   }
   
