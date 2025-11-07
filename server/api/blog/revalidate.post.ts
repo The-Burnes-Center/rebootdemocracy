@@ -91,29 +91,37 @@ export default defineEventHandler(async (event) => {
     const purgePromise = purgeCache(purgeOptions);
     console.log('purgeCache promise created, type:', typeof purgePromise, 'isPromise:', purgePromise && typeof purgePromise.then === 'function');
     
-    const timeoutPromise = new Promise((_, reject) => {
+    // Set timeout to 10 seconds (purgeCache should be fast, typically < 1 second)
+    // If it takes longer, something is wrong and we should fail fast
+    const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
-        console.error('purgeCache timeout after 25 seconds');
-        reject(new Error('purgeCache timeout after 25 seconds'));
-      }, 25000);
+        console.warn('purgeCache timeout after 10 seconds - cache purge may still be in progress');
+        reject(new Error('purgeCache timeout after 10 seconds'));
+      }, 10000);
     });
     
+    let purgeSucceeded = false;
     try {
-      console.log('Awaiting purgeCache (with timeout)...');
+      console.log('Awaiting purgeCache (with 10s timeout)...');
       await Promise.race([purgePromise, timeoutPromise]);
+      purgeSucceeded = true;
       console.log(`Cache purged successfully`);
     } catch (error: any) {
       console.error('Error during purgeCache:', error);
-      // If purgeCache fails, we still want to return success
-      // The cache might still be purged, or it might need manual intervention
-      console.warn('Continuing despite purgeCache error - cache may still be purged');
+      // Note: purgeCache might still succeed even if the promise times out
+      // The cache purge is asynchronous and may complete after the timeout
+      // We'll return a warning but still indicate the request was processed
+      console.warn('purgeCache timed out or failed, but cache purge may still be in progress');
     }
 
     console.log('Preparing response...');
     const response = {
-      success: true,
-      message: `Cache purged for ${blogIds.length} blog post(s)`,
+      success: purgeSucceeded,
+      message: purgeSucceeded 
+        ? `Cache purged for ${blogIds.length} blog post(s)`
+        : `Cache purge initiated for ${blogIds.length} blog post(s) (may still be in progress)`,
       purgedIds: blogIds,
+      warning: purgeSucceeded ? undefined : 'Cache purge timed out but may still complete asynchronously',
     };
     console.log('Returning response:', JSON.stringify(response));
     return response;
