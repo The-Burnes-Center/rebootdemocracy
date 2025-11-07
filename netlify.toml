@@ -42,21 +42,13 @@ to = "/.netlify/functions/server"
 status = 200
 force = true
 
-# Blog routes are handled by ISR (serverless function)
-# Blog posts use ISR only - they're generated on first request via serverless function
-# Redirect blog routes to serverless function to ensure they're handled correctly
-[[redirects]]
-from = "/blog/*"
-to = "/.netlify/functions/server"
-status = 200
-force = true
-
-# Catch-all for non-prerendered routes (should come AFTER static files, API routes, and blog routes are checked)
-# Netlify will serve static files (like prerendered pages) before applying this redirect
-# Blog routes are excluded because they use ISR (handled by serverless function above)
+# Blog routes use ISR (isr: true) and are automatically handled by Nitro's serverless function
+# Nitro's netlify preset automatically handles all routes via the serverless function
+# Static files are served first, then Nitro handles dynamic routes
+# Catch-all redirect ensures all non-static routes are handled by the serverless function
 [[redirects]]
 from = "/*"
-to = "/index.html"
+to = "/.netlify/functions/server"
 status = 200
 
 [[redirects]]
