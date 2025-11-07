@@ -1,10 +1,11 @@
 [build]
 command = "rm -rf .nuxt && npm ci && npm run build"
 publish = ".output/public/"
-# Try using Nitro's generated function directly
-# Nitro generates the function in .output/server/server.mjs
-# If this doesn't work, we'll revert to netlify/functions
-functions = ".output/server"
+# Use manual wrapper function to bridge Nitro and Netlify
+# Nitro generates .output/server/server.mjs, but Netlify's bundler
+# can't handle Nitro's internal module structure directly
+# The wrapper at netlify/functions/server.mjs imports Nitro's handler
+functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20.12.2"
@@ -26,10 +27,10 @@ functions = ".output/server"
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
-  # Try using Nitro's generated function directly instead of manual wrapper
-  # Nitro generates the function in .output/server/server.mjs with proper config
-  # If this doesn't work, we'll need to keep the manual wrapper
-  directory = ".output/server"
+  # Use manual wrapper function directory
+  # The wrapper imports Nitro's handler from .output/server/server.mjs
+  # This avoids bundling issues with Nitro's internal module structure
+  directory = "netlify/functions"
 
 # API routes are handled by Nuxt Nitro serverless function
 # With nitro.preset: 'netlify', Nitro creates a serverless function at /.netlify/functions/server

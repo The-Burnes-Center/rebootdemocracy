@@ -298,10 +298,18 @@ export const handler = async (event, context) => {
   // Create H3 event from Node.js req/res
   // Nitro's createEvent function creates an H3 event with proper structure
   // If createEvent is not available, we need to create it manually
+  // IMPORTANT: The url property should be the full URL, not just the path
+  // Nitro's getRequestURL might call new URL() with just the path, which fails
+  const fullUrl = `${validProtocol}://${validHost}${path}`;
+  
   let h3Event;
   if (nitroCreateEvent && typeof nitroCreateEvent === 'function') {
     try {
       h3Event = nitroCreateEvent(req, res);
+      // Ensure the URL is set to the full URL
+      if (h3Event) {
+        h3Event.url = fullUrl;
+      }
       console.log('H3 event created successfully via createEvent');
     } catch (err) {
       // If createEvent fails, create H3 event manually
@@ -311,7 +319,7 @@ export const handler = async (event, context) => {
         path: path.split('?')[0],
         method: req.method,
         headers: req.headers,
-        url: path,
+        url: fullUrl, // Use full URL instead of just path
       };
     }
   } else {
@@ -322,7 +330,7 @@ export const handler = async (event, context) => {
       path: path.split('?')[0],
       method: req.method,
       headers: req.headers,
-      url: path,
+      url: fullUrl, // Use full URL instead of just path
     };
   }
   
@@ -332,9 +340,12 @@ export const handler = async (event, context) => {
     hasReq: !!h3Event.node?.req,
     hasRes: !!h3Event.node?.res,
     reqHost: h3Event.node?.req?.headers?.host,
+    reqXForwardedHost: h3Event.node?.req?.headers?.['x-forwarded-host'],
     reqProto: h3Event.node?.req?.headers?.['x-forwarded-proto'],
     reqConnection: h3Event.node?.req?.connection,
     path: h3Event.path,
+    url: h3Event.url, // Should be full URL now
+    fullUrl: fullUrl, // The full URL we constructed
   });
 
   // Call the Nitro handler

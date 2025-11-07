@@ -38,7 +38,7 @@ fetch(url, {
         if (data.success) {
           console.log('');
           console.log('✅ SUCCESS: Endpoint is working correctly!');
-          process.exit(0);
+      process.exit(0);
         } else {
           console.log('');
           console.log('⚠️  WARNING: Endpoint returned success: false');

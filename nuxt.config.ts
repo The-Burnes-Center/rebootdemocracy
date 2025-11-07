@@ -118,14 +118,14 @@ export default defineNuxtConfig({
         blogRoutes = await getStaticBlogRoutes();
         categoryRoutes = await getStaticCategoryRoutes();
         newsRoutes = await getStaticNewsRoutes();
-        
-        nitroConfig.prerender = nitroConfig.prerender ?? {};
-        nitroConfig.prerender.routes = [
-          ...(nitroConfig.prerender.routes ?? []),
-          ...blogRoutes,
-          ...categoryRoutes,
-          ...newsRoutes
-        ];
+      
+      nitroConfig.prerender = nitroConfig.prerender ?? {};
+      nitroConfig.prerender.routes = [
+        ...(nitroConfig.prerender.routes ?? []),
+        ...blogRoutes,
+        ...categoryRoutes,
+        ...newsRoutes
+      ];
       }
     }
   },
@@ -182,9 +182,9 @@ export default defineNuxtConfig({
     '/our-engagements': { prerender: true },
     // News latest - SSR with short cache
     '/newsthatcaughtoureye/latest': { 
-      prerender: false,  
-      headers: { 'cache-control': 's-maxage=60' } 
-    },
+    prerender: false,  
+    headers: { 'cache-control': 's-maxage=60' } 
+  },
     '/events/reboot-democracy': {
       redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
       prerender: true
