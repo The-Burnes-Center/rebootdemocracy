@@ -42,7 +42,7 @@ export default function useSearchState() {
           const index = algoliaClient.initIndex(indexName)
           return index.search(query, {
             page: currentPage.value,
-            hitsPerPage: 2,
+            hitsPerPage: 10,
             removeWordsIfNoResults: "allOptional",
             typoTolerance: true,
             ignorePlurals: true,         
@@ -80,15 +80,22 @@ export default function useSearchState() {
   }
   
   const loadMoreResults = async () => {
-    // Don't proceed if there's no search query or no indices to search
-    if (!searchQuery.value || indexNames.value.length === 0) return;
+    if (!searchQuery.value || indexNames.value.length === 0) {
+      console.warn('Load more called but no search query or indices available')
+      return;
+    }
     
-    // Don't load more if already searching
-    if (isSearching.value) return;
+    if (isSearching.value) {
+      console.warn('Already searching, please wait')
+      return;
+    }
     
+    console.log(`Loading more results for "${searchQuery.value}" - page ${currentPage.value + 1}`)
     isSearching.value = true
     
     try {
+      const beforeCount = searchResults.value.length
+      
       // Increment the page number
       currentPage.value += 1
       
@@ -96,7 +103,12 @@ export default function useSearchState() {
         const index = algoliaClient.initIndex(indexName)
         return index.search(searchQuery.value, {
           page: currentPage.value,
-          hitsPerPage: 2
+          hitsPerPage: 10,
+          removeWordsIfNoResults: "allOptional",
+          typoTolerance: true,
+          ignorePlurals: true,         
+          removeStopWords: false,      
+          advancedSyntax: true
         })
       })
       
@@ -119,11 +131,16 @@ export default function useSearchState() {
         
         // Append new hits to existing results
         searchResults.value = [...searchResults.value, ...newHits]
+        
+        const afterCount = searchResults.value.length
+        console.log(`Loaded ${afterCount - beforeCount} new results (${afterCount} total)`)
       } else {
         console.log('No more results available')
       }
     } catch (error) {
       console.error('Error loading more results:', error)
+      // Revert page increment on error
+      currentPage.value = Math.max(0, currentPage.value - 1)
     } finally {
       isSearching.value = false
     }

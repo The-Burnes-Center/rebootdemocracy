@@ -32,12 +32,16 @@
 
     <!-- Simple pagination placeholder -->
     <div class="search-pagination" v-if="showLoadMore">
+      <div class="results-info" role="status" aria-live="polite">
+        Showing {{ processedResults.length }} of {{ totalResults }} results
+      </div>
       <Button
         variant="secondary"
         width="160px"
         height="40px"
         @click="loadMoreResults"
         :disabled="isSearching"
+        :aria-label="`Load more search results. Currently showing ${processedResults.length} of ${totalResults}`"
       >
         {{ isSearching ? "Loading..." : "Show More" }}
       </Button>
@@ -194,11 +198,12 @@ function deduplicateResults(results: SearchResultItem[]): SearchResultItem[] {
 
 /**
  * Process and rank search results
+ * Maintains original order from Algolia - new results are appended at bottom
  */
 const processedResults = computed(() => {
   const today = new Date();
   
-  // First, filter out future-dated items
+  // Filter out future-dated items while preserving original order
   let filtered = typedSearchResults.value.filter((item) => {
     const dateStr = item.date;
     if (!dateStr) return true; 
@@ -207,28 +212,8 @@ const processedResults = computed(() => {
     return itemDate <= today;
   });
   
-  // Calculate relevance scores
-  filtered = filtered.map(item => ({
-    ...item,
-    relevanceScore: calculateRelevanceScore(item, currentSearchQuery.value)
-  }));
-  
-  // Sort by relevance score (highest first)
-  filtered.sort((a, b) => {
-    const scoreA = a.relevanceScore || 0;
-    const scoreB = b.relevanceScore || 0;
-    
-    if (scoreA !== scoreB) {
-      return scoreB - scoreA; // Higher scores first
-    }
-    
-    // If scores are equal, sort by date (most recent first)
-    const dateA = a.date ? new Date(a.date).getTime() : 0;
-    const dateB = b.date ? new Date(b.date).getTime() : 0;
-    return dateB - dateA;
-  });
-  
-  // Remove duplicates while preserving order
+  // Remove duplicates while preserving order (first occurrence kept)
+  // This maintains the chronological order from Algolia's search results
   return deduplicateResults(filtered);
 });
 
@@ -248,12 +233,13 @@ const rebootResults = computed(() =>
 const hasRebootResults = computed(() => rebootResults.value.length > 0);
 const hasNewsResults = computed(() => newsResults.value.length > 0);
 
-const showLoadMore = computed(
-  () =>
-    !isSearching.value &&
-    processedResults.value.length > 0 &&
-    typedSearchResults.value.length < totalResults.value
-);
+const showLoadMore = computed(() => {
+  if (isSearching.value || processedResults.value.length === 0) {
+    return false;
+  }
+
+  return typedSearchResults.value.length < totalResults.value;
+});
 
 const directusUrl = "https://burnes-center.directus.app/";
 
@@ -425,7 +411,16 @@ function getImageUrl(image: { id?: string; filename_disk?: string }, width?: num
 
 .search-pagination {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   padding: 2rem 0;
+}
+
+.results-info {
+  font-family: var(--font-habibi);
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
 }
 </style>
