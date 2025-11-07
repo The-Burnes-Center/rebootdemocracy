@@ -78,17 +78,29 @@ export const handler = async (event, context) => {
   }
 
   // Create a mock Node.js ServerResponse
+  // Use Object.create to avoid setting read-only properties
   const res = Object.create(ServerResponse.prototype);
   res.req = req;
   res.statusCode = 200;
   res.statusMessage = 'OK';
-  res.headers = {};
-  res.headersSent = false;
-  res.finished = false;
   
+  // Track state internally (don't set read-only properties)
+  let _headersSent = false;
+  let _finished = false;
   let responseBody = '';
   let statusCode = 200;
   const responseHeaders = {};
+
+  // Override getters for read-only properties
+  Object.defineProperty(res, 'headersSent', {
+    get: () => _headersSent,
+    configurable: true,
+  });
+
+  Object.defineProperty(res, 'finished', {
+    get: () => _finished,
+    configurable: true,
+  });
 
   // Override write methods to capture response
   res.write = function(chunk, encoding, callback) {
@@ -102,7 +114,7 @@ export const handler = async (event, context) => {
     if (chunk) {
       responseBody += chunk.toString();
     }
-    res.finished = true;
+    _finished = true;
     if (callback) callback();
   };
 
@@ -116,7 +128,7 @@ export const handler = async (event, context) => {
     }
     res.statusCode = code;
     res.statusMessage = statusMessage || 'OK';
-    res.headersSent = true;
+    _headersSent = true;
     return res;
   };
 
@@ -171,11 +183,11 @@ export const handler = async (event, context) => {
       const result = nitroHandler(h3Event);
       if (result && typeof result.then === 'function') {
         result.then(() => {
-          if (!res.finished) {
+          if (!_finished) {
             res.end();
           }
         }).catch(reject);
-      } else if (!res.finished) {
+      } else if (!_finished) {
         res.end();
       }
     } catch (err) {
