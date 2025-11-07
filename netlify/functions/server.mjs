@@ -45,6 +45,15 @@ async function loadNitro() {
 
 // Netlify function handler
 export const handler = async (event, context) => {
+  // Debug logging to understand the event structure
+  console.log('Netlify event received:', {
+    path: event.path,
+    rawPath: event.rawPath,
+    httpMethod: event.httpMethod,
+    headers: event.headers ? Object.keys(event.headers) : null,
+    queryStringParameters: event.queryStringParameters,
+  });
+  
   // Load Nitro modules
   const { nitroHandler, createEvent: nitroCreateEvent } = await loadNitro();
   
@@ -98,18 +107,39 @@ export const handler = async (event, context) => {
   
   // Construct path with query string
   // event.path might be the full path or just the pathname
-  let path = event.path || event.rawPath || '/';
+  // Netlify Functions 2.0 uses event.rawPath, older versions use event.path
+  let path = event.rawPath || event.path || '/';
   
   // Ensure path starts with /
   if (!path.startsWith('/')) {
     path = '/' + path;
   }
   
+  // Don't sanitize the path - Nitro will handle it
+  // The path should be a valid URL path (starts with /, can have query string)
+  // Nitro's getRequestURL normalizes the path, so we don't need to sanitize it
+  
   // Add query string if present
   if (event.queryStringParameters && Object.keys(event.queryStringParameters).length > 0) {
     const queryString = new URLSearchParams(event.queryStringParameters).toString();
-    path += '?' + queryString;
+    if (queryString) {
+      path += '?' + queryString;
+    }
   }
+  
+  // Validate that path is valid for URL construction
+  // Path should be a valid URL path (starts with /, can have query string)
+  if (!path || path === '') {
+    path = '/';
+  }
+  
+  // Debug logging for URL construction
+  console.log('URL construction values:', {
+    path,
+    validHost,
+    validProtocol,
+    baseUrl: `${validProtocol}://${validHost}`,
+  });
 
   // Create a mock Node.js IncomingMessage
   const req = Object.create(IncomingMessage.prototype);
@@ -126,8 +156,14 @@ export const handler = async (event, context) => {
   req.httpVersion = '1.1';
   req.httpVersionMajor = 1;
   req.httpVersionMinor = 1;
-  req.socket = null;
-  req.connection = null;
+  
+  // Create a mock connection object for protocol detection
+  // Nitro's getRequestProtocol checks req.connection?.encrypted
+  const mockConnection = {
+    encrypted: validProtocol === 'https',
+  };
+  req.socket = mockConnection;
+  req.connection = mockConnection;
   
   // Handle body
   if (event.body) {
