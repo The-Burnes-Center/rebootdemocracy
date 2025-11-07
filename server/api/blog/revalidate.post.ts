@@ -23,11 +23,28 @@ export default defineEventHandler(async (event) => {
     if (event.body !== undefined && event.body !== null) {
       console.log('Using body from event.body (pre-parsed by wrapper)');
       body = event.body;
+      // If body is a string, parse it
+      if (typeof body === 'string') {
+        try {
+          body = JSON.parse(body);
+        } catch (err) {
+          console.warn('Failed to parse body string:', err);
+        }
+      }
     } else {
       console.log('Reading request body from stream...');
       body = await readBody(event);
+      // If body is a string, parse it
+      if (typeof body === 'string') {
+        try {
+          body = JSON.parse(body);
+        } catch (err) {
+          console.warn('Failed to parse body string:', err);
+        }
+      }
     }
     console.log('Revalidate webhook received:', JSON.stringify(body, null, 2));
+    console.log('Body type:', typeof body, 'isObject:', typeof body === 'object');
     
     // Extract blog IDs - support multiple formats
     let blogIds: string[] = [];
