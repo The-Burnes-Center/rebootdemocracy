@@ -31,8 +31,11 @@ async function loadNitro() {
     // Import the Nitro server handler
     // The path is relative to the netlify/functions directory
     // In Netlify's build environment, .output is in the project root
+    console.log('Loading Nitro handler from .output/server/server.mjs...');
     const nitroModule = await import('../../.output/server/server.mjs');
+    console.log('Nitro module loaded, exports:', Object.keys(nitroModule));
     nitroHandler = nitroModule.default;
+    console.log('Nitro handler loaded, type:', typeof nitroHandler, 'isFunction:', typeof nitroHandler === 'function');
     
     // Import createEvent from nitro chunks
     // createEvent is not exported, but we can access it via dynamic import
@@ -40,6 +43,7 @@ async function loadNitro() {
     // Try to access createEvent - it might be available in the module namespace
     // If not, we'll create an H3 event manually
     createEvent = nitroChunks.createEvent;
+    console.log('createEvent available:', typeof createEvent === 'function');
   }
   return { nitroHandler, createEvent };
 }
@@ -393,7 +397,24 @@ export const handler = async (event, context) => {
 
       // Call the Nitro handler with the H3 event
       console.log('Calling Nitro handler...');
+      console.log('Nitro handler type:', typeof nitroHandler, 'isFunction:', typeof nitroHandler === 'function');
+      
+      if (!nitroHandler || typeof nitroHandler !== 'function') {
+        const error = new Error('Nitro handler is not a function');
+        console.error('Nitro handler error:', error);
+        clearTimeout(timeout);
+        reject(error);
+        return;
+      }
+      
       try {
+        console.log('About to call nitroHandler with h3Event:', {
+          hasNode: !!h3Event.node,
+          hasReq: !!h3Event.node?.req,
+          hasRes: !!h3Event.node?.res,
+          path: h3Event.path,
+          url: h3Event.url,
+        });
         const result = nitroHandler(h3Event);
         console.log('Nitro handler called, result type:', typeof result, 'isPromise:', result && typeof result.then === 'function');
         

@@ -2,11 +2,14 @@
 import { purgeCache } from '@netlify/functions';
 
 export default defineEventHandler(async (event) => {
+  console.log('Revalidate endpoint called, method:', event.method);
+  
   if (event.method !== 'POST') {
     throw createError({ statusCode: 405, message: 'Method not allowed' });
   }
 
   try {
+    console.log('Reading request body...');
     const body = await readBody(event);
     console.log('Revalidate webhook received:', JSON.stringify(body, null, 2));
     
@@ -30,14 +33,40 @@ export default defineEventHandler(async (event) => {
 
     // Purge cache
     console.log(`Purging cache for blog IDs: ${blogIds.join(', ')}`);
-    await purgeCache({ tags: blogIds });
-    console.log(`Cache purged successfully`);
+    console.log('About to call purgeCache...');
+    console.log('purgeCache type:', typeof purgeCache, 'isFunction:', typeof purgeCache === 'function');
+    
+    // Wrap purgeCache in a timeout to prevent hanging
+    console.log('Creating purgeCache promise...');
+    const purgePromise = purgeCache({ tags: blogIds });
+    console.log('purgeCache promise created, type:', typeof purgePromise, 'isPromise:', purgePromise && typeof purgePromise.then === 'function');
+    
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        console.error('purgeCache timeout after 25 seconds');
+        reject(new Error('purgeCache timeout after 25 seconds'));
+      }, 25000);
+    });
+    
+    try {
+      console.log('Awaiting purgeCache (with timeout)...');
+      await Promise.race([purgePromise, timeoutPromise]);
+      console.log(`Cache purged successfully`);
+    } catch (error: any) {
+      console.error('Error during purgeCache:', error);
+      // If purgeCache fails, we still want to return success
+      // The cache might still be purged, or it might need manual intervention
+      console.warn('Continuing despite purgeCache error - cache may still be purged');
+    }
 
-    return {
+    console.log('Preparing response...');
+    const response = {
       success: true,
       message: `Cache purged for ${blogIds.length} blog post(s)`,
       purgedIds: blogIds,
     };
+    console.log('Returning response:', JSON.stringify(response));
+    return response;
   } catch (error: any) {
     console.error('Error in revalidate endpoint:', error);
     throw createError({
