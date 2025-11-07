@@ -158,12 +158,15 @@ export const handler = async (event, context) => {
   
   // Set host header - Nitro's getRequestHost looks for lowercase 'host'
   req.headers.host = validHost;
+  // Set x-forwarded-host header - Nitro's getRequestHost with xForwardedHost: true checks this first
+  req.headers['x-forwarded-host'] = validHost;
   // Set protocol header - Nitro's getRequestProtocol looks for lowercase 'x-forwarded-proto'
   req.headers['x-forwarded-proto'] = validProtocol;
   
   // Debug: Verify headers are set correctly
   console.log('Request headers set:', {
     host: req.headers.host,
+    'x-forwarded-host': req.headers['x-forwarded-host'],
     'x-forwarded-proto': req.headers['x-forwarded-proto'],
     connectionEncrypted: req.connection?.encrypted,
   });
@@ -189,11 +192,31 @@ export const handler = async (event, context) => {
   
   // Create a mock connection object for protocol detection
   // Nitro's getRequestProtocol checks req.connection?.encrypted
+  // We need to ensure the connection object is properly set and accessible
   const mockConnection = {
     encrypted: validProtocol === 'https',
   };
+  
+  // Set both socket and connection to the same mock object
+  // Some code paths check req.socket, others check req.connection
   req.socket = mockConnection;
   req.connection = mockConnection;
+  
+  // Ensure the connection object is properly accessible
+  // Use Object.defineProperty to make it non-configurable and ensure it's read correctly
+  Object.defineProperty(req, 'connection', {
+    value: mockConnection,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  });
+  
+  Object.defineProperty(req, 'socket', {
+    value: mockConnection,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  });
   
   // Handle body
   if (event.body) {
