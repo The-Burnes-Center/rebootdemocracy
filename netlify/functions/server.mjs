@@ -153,7 +153,41 @@ export const handler = async (event, context) => {
     validHost,
     validProtocol,
     baseUrl: `${validProtocol}://${validHost}`,
+    fullUrl: `${validProtocol}://${validHost}${path}`,
   });
+
+  // Ensure we have a valid full URL for Nitro
+  // Nitro's getRequestURL might need this to construct URLs correctly
+  const fullUrl = `${validProtocol}://${validHost}${path}`;
+  
+  // Validate the full URL can be constructed
+  let validatedUrl;
+  try {
+    validatedUrl = new URL(fullUrl);
+    console.log('Full URL validation successful:', validatedUrl.href);
+  } catch (err) {
+    console.error('Full URL validation failed:', err.message, {
+      fullUrl,
+      path,
+      validHost,
+      validProtocol,
+    });
+    // If URL construction fails, return an error response
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        error: 'Internal server error',
+        message: `Invalid URL: ${err.message}`,
+        details: {
+          path,
+          host: validHost,
+          protocol: validProtocol,
+          fullUrl,
+        },
+      }),
+    };
+  }
 
   // Create a mock Node.js IncomingMessage
   // IncomingMessage extends Readable, so we need to ensure it's properly initialized
@@ -191,17 +225,23 @@ export const handler = async (event, context) => {
     allowHalfOpen: true,
   };
   req.method = event.httpMethod || 'GET';
-  req.url = path;
-  req.originalUrl = path; // Nitro uses originalUrl
-  req.path = path.split('?')[0]; // Add path property (without query string)
+  // CRITICAL: Some Nitro code paths do `new URL(req.url)` directly without a base URL
+  // This will fail if req.url is just a path. We need to ensure req.url is a full URL
+  // OR ensure that Nitro's getRequestURL is used instead
+  // For now, set req.url to the full URL to prevent "Invalid URL" errors
+  // Nitro's getRequestURL will still construct URLs from headers, but this prevents errors
+  req.url = fullUrl; // Use full URL to prevent "Invalid URL" errors in Nitro
+  req.originalUrl = path; // Keep originalUrl as path (Nitro uses this for routing)
+  req.path = path.split('?')[0]; // Add path property (without query string) for routing
   
-  // Ensure URL is properly formatted for Nitro
-  // Nitro's getRequestURL might try to create a URL from req.url
-  // Make sure it's a valid path (starts with /, properly encoded)
-  if (req.url && !req.url.startsWith('/')) {
-    req.url = '/' + req.url;
-    req.originalUrl = req.url;
+  // Ensure URL is properly formatted
+  if (req.url && !req.url.startsWith('http')) {
+    // If somehow req.url is not a full URL, construct it
+    req.url = `${validProtocol}://${validHost}${req.url.startsWith('/') ? req.url : '/' + req.url}`;
   }
+  
+  // Store the full URL for reference
+  req._fullUrl = fullUrl;
   
   // Normalize headers to lowercase (Node.js headers are case-insensitive but Nitro expects lowercase)
   const normalizedHeaders = {};
