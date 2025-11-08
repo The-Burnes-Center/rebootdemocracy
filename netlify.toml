@@ -1,5 +1,5 @@
 [build]
-command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build"
+command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build && ls -la .output/ && ls -la .output/public/ 2>/dev/null | head -5 || echo 'WARNING: .output/public not found'"
 publish = ".output/public"
 
 [build.environment]
@@ -13,7 +13,6 @@ publish = ".output/public"
 
 [functions]
   # Tell Netlify to use the functions from .output/server (Nitro's output)
-  # Nitro's server.mjs already has nodeBundler: "none" so Netlify won't bundle it
   directory = ".output/server"
 
 # Catch-all redirect for ISR pages (blog posts)
