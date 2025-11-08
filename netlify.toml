@@ -3,7 +3,7 @@ command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build"
 publish = ".output/public"
 
 [build.environment]
-  NODE_VERSION = "20.12.2"
+  NODE_VERSION = "20.19.0"
   NPM_VERSION = "10.8.0"
   NPM_FLAGS = "--no-audit --no-fund --verbose"
 
