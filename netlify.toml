@@ -1,11 +1,7 @@
 [build]
-command = "rm -rf .nuxt node_modules/.cache/nuxt && npm run build"
-publish = ".output/public/"
-# Use manual wrapper function to bridge Nitro and Netlify
-# Nitro generates .output/server/server.mjs, but Netlify's bundler
-# can't handle Nitro's internal module structure directly
-# The wrapper at netlify/functions/server.mjs imports Nitro's handler
-functions = "netlify/functions"
+command = "npm run build"
+publish = ".output/public"
+functions = ".output/server"
 
 [build.environment]
   NODE_VERSION = "20.12.2"
@@ -27,29 +23,9 @@ functions = "netlify/functions"
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
-  # Use manual wrapper function directory
-  # The wrapper imports Nitro's handler from .output/server/server.mjs
-  # This avoids bundling issues with Nitro's internal module structure
-  directory = "netlify/functions"
 
-# API routes are handled by Nuxt Nitro serverless function
-# With nitro.preset: 'netlify', Nitro creates a serverless function at /.netlify/functions/server
-# If using .output/server as functions directory, the function name is 'server'
-# We explicitly redirect /api/* to this function to ensure it takes precedence
-[[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/server"
-status = 200
-force = true
-
-# Blog routes use ISR (isr: true) and are automatically handled by Nitro's serverless function
-# Nitro's netlify preset automatically handles all routes via the serverless function
-# Static files are served first, then Nitro handles dynamic routes
-# Catch-all redirect ensures all non-static routes are handled by the serverless function
-[[redirects]]
-from = "/*"
-to = "/.netlify/functions/server"
-status = 200
+# Nitro's netlify preset automatically generates a serverless function
+# All routes are handled automatically - static files are served first, then Nitro handles dynamic routes
 
 [[redirects]]
 from = "/newsoftheweek/feed/rss"
@@ -91,8 +67,7 @@ remote_images = ["https://burnes-center.directus.app/assets/.*"]
 [[headers]]
   for = "/blog/*"
   [headers.values]
-    # ISR pages: Browser should revalidate, but CDN caches with Netlify-CDN-Cache-Control
-    # Set by Nuxt ISR route rules - no need to override here
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
     access-control-allow-origin = "*"
 
 [[headers]]
