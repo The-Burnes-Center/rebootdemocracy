@@ -24,7 +24,6 @@ import { EventEmitter } from 'events';
 
 // Lazy load Nitro modules using dynamic import to avoid CommonJS/ESM bundling issues
 let nitroHandler;
-let createEvent;
 
 async function loadNitro() {
   if (!nitroHandler) {
@@ -36,16 +35,8 @@ async function loadNitro() {
     console.log('Nitro module loaded, exports:', Object.keys(nitroModule));
     nitroHandler = nitroModule.default;
     console.log('Nitro handler loaded, type:', typeof nitroHandler, 'isFunction:', typeof nitroHandler === 'function');
-    
-    // Import createEvent from nitro chunks
-    // createEvent is not exported, but we can access it via dynamic import
-    const nitroChunks = await import('../../.output/server/chunks/nitro/nitro.mjs');
-    // Try to access createEvent - it might be available in the module namespace
-    // If not, we'll create an H3 event manually
-    createEvent = nitroChunks.createEvent;
-    console.log('createEvent available:', typeof createEvent === 'function');
   }
-  return { nitroHandler, createEvent };
+  return { nitroHandler };
 }
 
 // Netlify function handler
@@ -60,7 +51,7 @@ export const handler = async (event, context) => {
   });
   
   // Load Nitro modules
-  const { nitroHandler, createEvent: nitroCreateEvent } = await loadNitro();
+  const { nitroHandler } = await loadNitro();
   
   // Build the full URL from Netlify event
   // Netlify event structure: event.path, event.httpMethod, event.headers, event.queryStringParameters
@@ -184,6 +175,7 @@ export const handler = async (event, context) => {
   req.method = event.httpMethod || 'GET';
   req.url = path;
   req.originalUrl = path; // Nitro uses originalUrl
+  req.path = path.split('?')[0]; // Add path property (without query string)
   
   // Normalize headers to lowercase (Node.js headers are case-insensitive but Nitro expects lowercase)
   const normalizedHeaders = {};
@@ -379,91 +371,20 @@ export const handler = async (event, context) => {
     return res;
   };
 
-  // Create H3 event from Node.js req/res
-  // Nitro's createEvent function creates an H3 event with proper structure
-  // If createEvent is not available, we need to create it manually
-  // IMPORTANT: The url property should be the full URL, not just the path
-  // Nitro's getRequestURL might call new URL() with just the path, which fails
-  const fullUrl = `${validProtocol}://${validHost}${path}`;
-  
-  // Parse body if available and set it directly on the event
-  // This avoids H3's readBody from trying to read from the stream
-  let parsedBody = null;
-  if (event.body) {
-    try {
-      // Try to parse JSON body
-      if (typeof event.body === 'string') {
-        try {
-          parsedBody = JSON.parse(event.body);
-        } catch {
-          // Not JSON, use as-is
-          parsedBody = event.body;
-        }
-      } else {
-        parsedBody = event.body;
-      }
-    } catch (err) {
-      console.warn('Failed to parse body:', err);
-    }
-  }
-  
-  let h3Event;
-  if (nitroCreateEvent && typeof nitroCreateEvent === 'function') {
-    try {
-      h3Event = nitroCreateEvent(req, res);
-      // Ensure the URL is set to the full URL
-      if (h3Event) {
-        h3Event.url = fullUrl;
-        // Set body directly on event to avoid stream reading
-        if (parsedBody !== null) {
-          h3Event.body = parsedBody;
-        }
-      }
-      console.log('H3 event created successfully via createEvent');
-    } catch (err) {
-      // If createEvent fails, create H3 event manually
-      console.warn('createEvent failed, creating H3 event manually:', err);
-      h3Event = {
-        node: { req, res },
-        path: path.split('?')[0],
-        method: req.method,
-        headers: req.headers,
-        url: fullUrl, // Use full URL instead of just path
-        body: parsedBody, // Set body directly
-      };
-    }
-  } else {
-    // Create H3 event manually
-    console.log('createEvent not available, creating H3 event manually');
-    h3Event = {
-      node: { req, res },
-      path: path.split('?')[0],
-      method: req.method,
-      headers: req.headers,
-      url: fullUrl, // Use full URL instead of just path
-      body: parsedBody, // Set body directly
-    };
-  }
-  
-  // Debug: Check what getRequestHost and getRequestProtocol would return
-  console.log('H3 event created:', {
-    hasNode: !!h3Event.node,
-    hasReq: !!h3Event.node?.req,
-    hasRes: !!h3Event.node?.res,
-    reqHost: h3Event.node?.req?.headers?.host,
-    reqXForwardedHost: h3Event.node?.req?.headers?.['x-forwarded-host'],
-    reqProto: h3Event.node?.req?.headers?.['x-forwarded-proto'],
-    reqConnection: h3Event.node?.req?.connection,
-    path: h3Event.path,
-    url: h3Event.url, // Should be full URL now
-    fullUrl: fullUrl, // The full URL we constructed
-    hasBody: h3Event.body !== undefined && h3Event.body !== null,
-    bodyType: typeof h3Event.body,
-    bodyPreview: h3Event.body ? JSON.stringify(h3Event.body).substring(0, 100) : null,
+  // Nitro's handler is a Node.js listener that expects (req, res) directly
+  // We don't need to create H3 events - Nitro handles the conversion internally
+  // The req/res objects we created are sufficient for Nitro's handler
+  console.log('Request/Response objects ready for Nitro handler:', {
+    reqMethod: req.method,
+    reqUrl: req.url,
+    reqPath: req.path,
+    reqHost: req.headers.host,
+    resStatusCode: res.statusCode,
   });
 
   // Call the Nitro handler
-  // Wrap in try-catch to handle any synchronous errors
+  // Nitro's handler is a Node.js listener that expects (req, res) directly
+  // We've already created proper Node.js req/res objects, so we can call it directly
   try {
     await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -476,7 +397,7 @@ export const handler = async (event, context) => {
 
       res.on('finish', () => {
         clearTimeout(timeout);
-        console.log('Response finished');
+        console.log('Response finished, body length:', responseBody.length);
         resolve();
       });
       
@@ -486,8 +407,8 @@ export const handler = async (event, context) => {
         reject(err);
       });
 
-      // Call the Nitro handler with the H3 event
-      console.log('Calling Nitro handler...');
+      // Call the Nitro handler as a Node.js listener
+      console.log('Calling Nitro handler as Node.js listener...');
       console.log('Nitro handler type:', typeof nitroHandler, 'isFunction:', typeof nitroHandler === 'function');
       
       if (!nitroHandler || typeof nitroHandler !== 'function') {
@@ -499,37 +420,20 @@ export const handler = async (event, context) => {
       }
       
       try {
-        console.log('About to call nitroHandler with h3Event:', {
-          hasNode: !!h3Event.node,
-          hasReq: !!h3Event.node?.req,
-          hasRes: !!h3Event.node?.res,
-          path: h3Event.path,
-          url: h3Event.url,
+        console.log('About to call nitroHandler with req/res:', {
+          reqMethod: req.method,
+          reqUrl: req.url,
+          reqPath: req.path,
+          resStatusCode: res.statusCode,
         });
-        const result = nitroHandler(h3Event);
-        console.log('Nitro handler called, result type:', typeof result, 'isPromise:', result && typeof result.then === 'function');
         
-        if (result && typeof result.then === 'function') {
-          // Handler returned a promise
-          result
-            .then((response) => {
-              console.log('Nitro handler promise resolved');
-              if (!_finished) {
-                res.end();
-              }
-            })
-            .catch((err) => {
-              console.error('Nitro handler promise rejected:', err);
-              clearTimeout(timeout);
-              reject(err);
-            });
-        } else {
-          // Handler returned synchronously
-          console.log('Nitro handler returned synchronously');
-          if (!_finished) {
-            res.end();
-          }
-        }
+        // Nitro's handler is a Node.js listener: (req, res) => void
+        // It writes directly to res, so we don't need to handle the return value
+        nitroHandler(req, res);
+        
+        console.log('Nitro handler called (Node.js listener)');
+        // The handler writes to res, which will trigger the 'finish' event
+        // We don't need to manually call res.end() - Nitro will do it
       } catch (err) {
         // Synchronous error from handler
         console.error('Nitro handler threw synchronous error:', err);
