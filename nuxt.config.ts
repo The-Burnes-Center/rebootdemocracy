@@ -170,15 +170,9 @@ export default defineNuxtConfig({
     // - This new page is cached at CDN edge with cache tags
     // - Only that specific page regenerates, metadata updates automatically
     '/blog/**': { 
-      isr: true,  // ISR: Pages generated on first request, regenerated after cache purge
-      // Note: Blog posts are NOT prerendered - they use ISR only for better cache purge support
+      isr: 3600,  // ISR: Regenerate every hour (as per article)
       headers: {
-        // Browser should revalidate, but CDN caches with stale-while-revalidate
-        // Use lowercase to match Netlify's header normalization
-        'cache-control': 'public, max-age=0, must-revalidate',
-        // Netlify CDN caches indefinitely but allows revalidation via cache tags
-        // When cache is purged via webhook, page regenerates on next request via serverless function
-        'Netlify-CDN-Cache-Control': 'public, max-age=31536000, stale-while-revalidate=31536000, durable'
+        'cache-control': 'public, s-maxage=3600, stale-while-revalidate=86400'
       }
     },
     // Other static pages - prerender at build time

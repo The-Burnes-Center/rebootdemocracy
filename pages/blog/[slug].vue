@@ -335,23 +335,8 @@ const {
     );
   }
 
-  // Set cache tag for ISR on-demand revalidation
-  // Tag the page with the blog post ID so we can invalidate it via webhook
-  // IMPORTANT: Set cache tag during both prerendering AND runtime
-  // Prerendered pages need cache tags so they can be purged via webhook
-  // Use setResponseHeader from h3 instead of accessing res directly
-  if (import.meta.server && blogPost?.id) {
-    try {
-      const event = useRequestEvent();
-      if (event) {
-        // Use h3's setResponseHeader instead of accessing res directly
-        setResponseHeader(event, 'Netlify-Cache-Tag', String(blogPost.id));
-      }
-    } catch (e) {
-      // Ignore errors if context is unavailable
-      console.warn('Could not set cache tag:', e);
-    }
-  }
+  // Cache tag removed for now - will add back once basic functionality works
+  // The cache tag is optional and was causing errors
 
   return {
     blog: blogPost,
