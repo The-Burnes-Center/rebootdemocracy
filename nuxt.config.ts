@@ -1,40 +1,5 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
-import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
-import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
-import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
-
-// Helper to get changed blog routes for partial builds
-const getChangedBlogRoutesForPartialBuild = (): string[] | null => {
-  // Check if we're doing a partial build (via env var or manifest file)
-  const isPartialBuild = process.env.PARTIAL_BUILD === 'true';
-  
-  if (!isPartialBuild) {
-    return null; // Full build - return null to use all routes
-  }
-
-  // Try to read changed routes from manifest
-  // Use Netlify's persistent cache directory (survives between builds)
-  // Netlify provides /opt/build/cache which is automatically persisted between builds
-  // Fallback to .netlify/cache for local development
-  const CACHE_DIR = process.env.NETLIFY_CACHE_DIR || (process.platform === 'linux' ? '/opt/build/cache' : join(process.cwd(), '.netlify', 'cache'));
-  const MANIFEST_CACHE_DIR = join(CACHE_DIR, 'rebootdemocracy', 'manifests');
-  const changedRoutesFile = join(MANIFEST_CACHE_DIR, 'changed-routes.json');
-  
-  if (existsSync(changedRoutesFile)) {
-    try {
-      // Read changed routes directly
-      const changedRoutes = JSON.parse(readFileSync(changedRoutesFile, 'utf-8'));
-      return changedRoutes;
-    } catch (error) {
-      console.warn('Could not read changed routes, falling back to full build:', error);
-    }
-  }
-
-  return null;
-};
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-13',
@@ -52,87 +17,6 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'netlify',
     compatibilityDate: '2024-11-13', // Required for Netlify Functions 2.0
-    prerender: {
-      crawlLinks: false,
-      failOnError: false,
-      concurrency: 1,
-      routes: []
-    },
-    output: {
-      dir: '.output',
-      publicDir: '.output/public',
-      serverDir: '.output/server'
-    }
-  },
-  
-  
-  hooks: {
-    async 'nitro:config'(nitroConfig) {
-      // Check if we're doing a partial build
-      const changedBlogRoutes = getChangedBlogRoutesForPartialBuild();
-      
-      const isPartialBuild = process.env.PARTIAL_BUILD === 'true';
-      
-      let blogRoutes: string[];
-      let categoryRoutes: string[] = [];
-      let newsRoutes: string[] = [];
-      
-      if (changedBlogRoutes && changedBlogRoutes.length > 0 && isPartialBuild) {
-        // Partial build - only prerender changed blog routes
-        console.log(`📝 Partial build: Prerendering ${changedBlogRoutes.length} changed blog routes`);
-        blogRoutes = changedBlogRoutes;
-        // Skip category and news routes in partial builds - they don't need regeneration
-        console.log('📝 Partial build: Skipping category and news routes');
-        
-        // In partial builds, completely override prerender configuration
-        // Disable route discovery and explicitly set only the routes we need
-        const partialRoutes = [
-          ...blogRoutes,
-          // Include homepage (may show recent blog posts)
-          '/',
-          // Only include essential pages that must exist (404, 200)
-          '/404.html',
-          '/200.html'
-        ];
-        
-        nitroConfig.prerender = {
-          crawlLinks: false, // Disable automatic route discovery
-          failOnError: false,
-          concurrency: 1,
-          // Explicitly set ONLY the changed blog route
-          // Don't include other routes - they're already in the cache
-          routes: partialRoutes,
-          // Ignore all routes that weren't explicitly included
-          // This prevents routeRules from adding routes we don't want
-          ignore: [
-            // Ignore all routes except our specific ones
-            (route: string) => {
-              // Keep our explicit routes
-              if (partialRoutes.includes(route)) return false;
-              // Ignore everything else
-              return true;
-            }
-          ]
-        };
-        console.log(`📝 Partial build: Only prerendering ${partialRoutes.length} routes total:`, partialRoutes);
-      } else {
-        // Full build - DO NOT prerender blog routes (use ISR only)
-        // Blog posts use ISR: generated on first request, regenerated after cache purge
-        console.log('📝 Full build: Using ISR for blog routes (not prerendering)');
-        // Only prerender non-blog routes
-        categoryRoutes = await getStaticCategoryRoutes();
-        newsRoutes = await getStaticNewsRoutes();
-      
-      nitroConfig.prerender = nitroConfig.prerender ?? {};
-      nitroConfig.prerender.routes = [
-        ...(nitroConfig.prerender.routes ?? []),
-        // DO NOT include blogRoutes - they use ISR only
-        // ...blogRoutes, // REMOVED - blog posts use ISR
-        ...categoryRoutes,
-        ...newsRoutes
-      ];
-      }
-    }
   },
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
@@ -152,29 +36,15 @@ export default defineNuxtConfig({
   routeRules: {
     // Homepage - prerender at build time
     '/': { prerender: true },
+    // ISR Test Page - simple test case
+    '/test-isr': { 
+      isr: 3600,  // ISR: Regenerate every hour (1 hour = 3600 seconds)
+    },
     // Blog listing - prerender at build time
     '/blog': { prerender: true },
-    // Blog posts - ISR only (no prerendering)
-    // How it works:
-    // 1. Initial build: Blog posts are NOT prerendered - they use ISR only
-    // 2. First request: Page is generated by serverless function (Nuxt Nitro) and cached at CDN edge
-    // 3. Updates: When content changes, cache is purged → page regenerates on next request via serverless function
-    // 4. Regeneration happens via serverless function (Nuxt Nitro), not a full build
-    // 5. Only the specific page regenerates, not the entire site
-    // 6. Metadata (title, etc.) updates because it's a fresh render from the serverless function
-    // 
-    // How regeneration works after cache purge:
-    // - Pages are generated on first request (ISR) - no static files
-    // - When cache is purged via webhook, the CDN cache is invalidated
-    // - On next request, Netlify serves the page from the serverless function (ISR)
-    // - The serverless function generates the page with fresh data from Directus
-    // - This new page is cached at CDN edge with cache tags
-    // - Only that specific page regenerates, metadata updates automatically
+    // Blog posts - ISR (simple setup as per article)
     '/blog/**': { 
-      isr: 3600,  // ISR: Regenerate every hour (as per article)
-      headers: {
-        'cache-control': 'public, s-maxage=3600, stale-while-revalidate=86400'
-      }
+      isr: 3600,  // ISR: Regenerate every hour
     },
     // Other static pages - prerender at build time
     '/events': { prerender: true },
@@ -183,11 +53,10 @@ export default defineNuxtConfig({
     '/about': { prerender: true },
     '/our-research': { prerender: true },
     '/our-engagements': { prerender: true },
-    // News latest - SSR with short cache
     '/newsthatcaughtoureye/latest': { 
-    prerender: false,  
-    headers: { 'cache-control': 's-maxage=60' } 
-  },
+      prerender: false,  
+      headers: { 'cache-control': 's-maxage=60' } 
+    },
     '/events/reboot-democracy': {
       redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
       prerender: true
