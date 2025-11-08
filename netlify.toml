@@ -1,6 +1,7 @@
 [build]
 command = "npm run build"
 publish = ".output/public"
+functions = ".output/server"
 
 [build.environment]
   NODE_VERSION = "20.12.2"
@@ -25,6 +26,14 @@ publish = ".output/public"
 
 # Nitro's netlify preset automatically generates a serverless function
 # All routes are handled automatically - static files are served first, then Nitro handles dynamic routes
+
+# Catch-all redirect for non-static routes (ISR pages, API routes, etc.)
+# This ensures that blog posts and other dynamic routes are handled by the serverless function
+# Note: Nitro generates server.mjs which exports the handler from main.mjs
+[[redirects]]
+from = "/*"
+to = "/.netlify/functions/server"
+status = 200
 
 [[redirects]]
 from = "/newsoftheweek/feed/rss"
