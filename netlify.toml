@@ -1,5 +1,5 @@
 [build]
-command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build && ls -la .output/ && ls -la .output/public/ 2>/dev/null | head -5 || echo 'WARNING: .output/public not found'"
+command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build && (if [ -d .netlify/functions-internal/public ]; then cp -r .netlify/functions-internal/public/* .output/public/ 2>/dev/null || true; fi) && (if [ ! -d .output/public ]; then mkdir -p .output/public && cp -r .nuxt/dist/client/* .output/public/ 2>/dev/null || true; fi)"
 publish = ".output/public"
 
 [build.environment]
@@ -11,9 +11,9 @@ publish = ".output/public"
 # Nitro's netlify preset automatically generates serverless functions
 # The server.mjs file has nodeBundler: "none" which tells Netlify not to bundle it
 
-[functions]
-  # Tell Netlify to use the functions from .output/server (Nitro's output)
-  directory = ".output/server"
+# Nitro's Netlify preset generates functions to .netlify/functions-internal
+# Netlify will auto-detect these, so we don't need to specify functionsDirectory
+# But we still need .output/public for static files
 
 # Catch-all redirect for ISR pages (blog posts)
 [[redirects]]

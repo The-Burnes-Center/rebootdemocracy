@@ -17,6 +17,10 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'netlify',
     compatibilityDate: '2024-11-13', // Required for Netlify Functions 2.0
+    output: {
+      dir: '.output',
+      publicDir: '.output/public',
+    },
   },
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
