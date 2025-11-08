@@ -1,7 +1,6 @@
 [build]
 command = "npm run build"
 publish = ".output/public"
-functions = ".output/server"
 
 [build.environment]
   NODE_VERSION = "20.12.2"
@@ -67,7 +66,7 @@ remote_images = ["https://burnes-center.directus.app/assets/.*"]
 [[headers]]
   for = "/blog/*"
   [headers.values]
-    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+    cache-control = "public, s-maxage=3600, stale-while-revalidate=86400"
     access-control-allow-origin = "*"
 
 [[headers]]

@@ -51,6 +51,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'netlify',
+    compatibilityDate: '2024-11-13', // Required for Netlify Functions 2.0
     prerender: {
       crawlLinks: false,
       failOnError: false,
