@@ -21,8 +21,14 @@ functions = ".output/server"
 # to generate all blog posts on first request (see scripts/warm-up-blog-posts.ts)
 
 [functions]
-  node_bundler = "esbuild"
+  # Nitro's netlify preset generates functions with nodeBundler: "none"
+  # Don't force bundling - let Nitro handle it via server.mjs config
+  # node_bundler is set per-function in Nitro's server.mjs (nodeBundler: "none")
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
+  
+  # Configure the server function to not bundle (matches Nitro's nodeBundler: "none")
+  [functions.server]
+    node_bundler = "none"
 
 # Nitro's netlify preset automatically generates a serverless function
 # All routes are handled automatically - static files are served first, then Nitro handles dynamic routes
