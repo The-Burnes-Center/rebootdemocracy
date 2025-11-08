@@ -30,7 +30,7 @@
     "jsdom": "^26.1.0",
     "jstoxml": "^7.0.1",
     "marked": "^15.0.11",
-    "nuxt": "3.16.1",
+    "nuxt": "^4.2.1",
     "nuxt-build-cache": "^0.1.1",
     "nuxt-gtag": "^3.0.2",
     "nuxt-lazy-hydrate": "^1.0.0",
