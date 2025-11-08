@@ -1,5 +1,5 @@
 [build]
-command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build && (if [ -d .netlify/functions-internal/public ]; then cp -r .netlify/functions-internal/public/* .output/public/ 2>/dev/null || true; fi) && (if [ ! -d .output/public ]; then mkdir -p .output/public && cp -r .nuxt/dist/client/* .output/public/ 2>/dev/null || true; fi)"
+command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build"
 publish = ".output/public"
 
 [build.environment]
@@ -11,11 +11,14 @@ publish = ".output/public"
 # Nitro's netlify preset automatically generates serverless functions
 # The server.mjs file has nodeBundler: "none" which tells Netlify not to bundle it
 
-# Nitro's Netlify preset generates functions to .netlify/functions-internal
-# Netlify will auto-detect these, so we don't need to specify functionsDirectory
-# But we still need .output/public for static files
+# Nitro's Netlify preset generates functions to .netlify/functions-internal/server
+# But we need to tell Netlify where to find them
+# The server function is at .netlify/functions-internal/server/server.mjs
+# Netlify auto-detects .netlify/functions-internal, so we don't need to specify it
+# But we need to ensure the catch-all redirect points to the right function
 
 # Catch-all redirect for ISR pages (blog posts)
+# Static files are served first, so this only applies to non-static routes
 [[redirects]]
 from = "/*"
 to = "/.netlify/functions/server"
