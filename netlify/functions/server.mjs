@@ -1,5 +1,6 @@
-// Simple Netlify function wrapper for Nitro
-// This imports Nitro's handler and converts Netlify events to Node.js req/res
+// Netlify function wrapper for Nitro
+// Based on Nuxt 4 ISR guide: https://dev.to/blamsa0mine/implementing-incremental-static-regeneration-isr-in-nuxt-4-the-complete-guide-2j7h
+// Nitro's handler is already a Node.js listener, so we just need to convert Netlify events to Node.js req/res
 
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { Readable } from 'node:stream';
@@ -10,21 +11,35 @@ let nitroHandler;
 
 async function loadNitro() {
   if (!nitroHandler) {
-    const nitroModule = await import('../../.output/server/server.mjs');
-    nitroHandler = nitroModule.default;
+    console.log('Loading Nitro handler from .output/server/server.mjs...');
+    // Nitro generates server.mjs for Netlify preset that exports the handler
+    const serverModule = await import('../../.output/server/server.mjs');
+    console.log('Nitro module loaded, exports:', Object.keys(serverModule));
+    nitroHandler = serverModule.default;
+    if (!nitroHandler || typeof nitroHandler !== 'function') {
+      throw new Error('Nitro handler not found or invalid');
+    }
+    console.log('Nitro handler loaded successfully, type:', typeof nitroHandler);
   }
   return nitroHandler;
 }
 
 export const handler = async (event, context) => {
+  console.log('Netlify event received:', {
+    path: event.path,
+    rawPath: event.rawPath,
+    httpMethod: event.httpMethod,
+  });
+  
   const nitroHandler = await loadNitro();
   
-  // Get host and protocol from event
+  // Get host and protocol
   const host = event.headers?.host || 
                event.headers?.['x-forwarded-host'] || 
+               event.headers?.['Host'] ||
                'localhost';
   const protocol = event.headers?.['x-forwarded-proto'] || 
-                   event.headers?.['x-forwarded-protocol'] || 
+                   event.headers?.['X-Forwarded-Proto'] ||
                    'https';
   
   // Get path
@@ -41,10 +56,10 @@ export const handler = async (event, context) => {
     }
   }
   
-  // Create full URL for req.url (Nitro needs this)
+  // Create full URL (Nitro needs this for URL parsing)
   const fullUrl = `${protocol}://${host}${path}`;
   
-  // Create minimal Node.js request object
+  // Create Node.js request object
   const req = Object.create(IncomingMessage.prototype);
   Object.assign(req, Readable.prototype);
   
@@ -54,7 +69,7 @@ export const handler = async (event, context) => {
   
   // Set request properties
   req.method = event.httpMethod || 'GET';
-  req.url = fullUrl; // Full URL for Nitro
+  req.url = fullUrl; // Full URL for Nitro's URL parsing
   req.originalUrl = path; // Path for routing
   req.path = path.split('?')[0];
   
@@ -77,8 +92,18 @@ export const handler = async (event, context) => {
   
   // Set connection for protocol detection
   const connection = { encrypted: protocol === 'https' };
-  req.connection = connection;
-  req.socket = connection;
+  Object.defineProperty(req, 'connection', {
+    value: connection,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  });
+  Object.defineProperty(req, 'socket', {
+    value: connection,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  });
   
   // Handle request body
   if (event.body) {
@@ -90,9 +115,8 @@ export const handler = async (event, context) => {
     req.push(null);
   }
   
-  // Create minimal Node.js response object
+  // Create Node.js response object
   const res = Object.create(ServerResponse.prototype);
-  // Properly initialize EventEmitter
   EventEmitter.call(res);
   Object.setPrototypeOf(res, EventEmitter.prototype);
   res.req = req;
@@ -118,22 +142,29 @@ export const handler = async (event, context) => {
   });
   
   // Implement response methods
-  res.write = function(chunk) {
+  res.write = function(chunk, encoding, callback) {
     if (chunk) {
-      responseBody += chunk.toString();
+      const chunkStr = Buffer.isBuffer(chunk) ? chunk.toString(encoding || 'utf8') : chunk.toString();
+      responseBody += chunkStr;
+    }
+    if (callback) {
+      callback();
     }
     return true;
   };
   
-  res.end = function(chunk) {
+  res.end = function(chunk, encoding, callback) {
     if (chunk) {
-      responseBody += chunk.toString();
+      const chunkStr = Buffer.isBuffer(chunk) ? chunk.toString(encoding || 'utf8') : chunk.toString();
+      responseBody += chunkStr;
     }
     if (!_finished) {
       _finished = true;
       _headersSent = true;
-      // Emit finish event immediately
       res.emit('finish');
+    }
+    if (callback) {
+      callback();
     }
     return res;
   };
@@ -167,7 +198,7 @@ export const handler = async (event, context) => {
   };
   
   // Call Nitro handler and wait for response
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       console.error('Request timeout after 30 seconds');
       if (!_finished) {
@@ -178,6 +209,7 @@ export const handler = async (event, context) => {
     
     res.on('finish', () => {
       clearTimeout(timeout);
+      console.log('Response finished, body length:', responseBody.length, 'status:', statusCode);
       resolve({
         statusCode,
         headers: responseHeaders,
@@ -191,38 +223,8 @@ export const handler = async (event, context) => {
     });
     
     try {
-      // Call Nitro handler - it's a Node.js listener that writes to res
-      const result = nitroHandler(req, res);
-      
-      // If handler returns a promise, await it
-      if (result && typeof result.then === 'function') {
-        try {
-          await result;
-          // Handler promise resolved - check if response finished
-          // If not, wait a bit more for async operations to complete
-          await new Promise(resolve => setTimeout(resolve, 50));
-          
-          if (!_finished) {
-            console.warn('Handler promise resolved but response not finished - ending manually');
-            res.end();
-          }
-        } catch (err) {
-          console.error('Handler promise rejected:', err);
-          clearTimeout(timeout);
-          if (!_finished) {
-            res.end();
-          }
-          reject(err);
-        }
-      } else {
-        // Handler is synchronous - give it a moment to finish
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        if (!_finished) {
-          console.warn('Synchronous handler did not finish - ending manually');
-          res.end();
-        }
-      }
+      // Call Nitro handler - it's a Node.js listener
+      nitroHandler(req, res);
     } catch (err) {
       console.error('Handler threw error:', err);
       clearTimeout(timeout);

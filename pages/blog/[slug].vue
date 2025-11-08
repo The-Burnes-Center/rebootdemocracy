@@ -299,6 +299,7 @@ import { onMounted, onBeforeUnmount, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { BlogPost } from "@/types/BlogPost";
 import { format } from "date-fns";
+import { setResponseHeader } from "h3";
 
 const { showSearchResults, setIndexNames, resetSearch, searchQuery, totalResults } = useSearchState();
 
@@ -338,16 +339,13 @@ const {
   // Tag the page with the blog post ID so we can invalidate it via webhook
   // IMPORTANT: Set cache tag during both prerendering AND runtime
   // Prerendered pages need cache tags so they can be purged via webhook
+  // Use setResponseHeader from h3 instead of accessing res directly
   if (import.meta.server && blogPost?.id) {
     try {
-      const nuxtApp = useNuxtApp();
-      const ssrContext = nuxtApp.ssrContext;
-      if (ssrContext?.res) {
-        // Set cache tag to the blog post ID
-        // This allows us to purge the cache for this specific page when the post is updated
-        // Matches Netlify's guidance: ssrContext.res.setHeader('Netlify-Cache-Tag', tag)
-        // Must be set during prerendering so prerendered pages can be purged
-        ssrContext.res.setHeader('Netlify-Cache-Tag', String(blogPost.id));
+      const event = useRequestEvent();
+      if (event) {
+        // Use h3's setResponseHeader instead of accessing res directly
+        setResponseHeader(event, 'Netlify-Cache-Tag', String(blogPost.id));
       }
     } catch (e) {
       // Ignore errors if context is unavailable
