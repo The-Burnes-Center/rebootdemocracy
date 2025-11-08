@@ -1,26 +1,38 @@
-// Simple Netlify function wrapper for Nitro
-// Uses Nitro's localFetch instead of the handler directly
+// Netlify function wrapper for Nitro
 // Based on Nuxt 4 ISR guide: https://dev.to/blamsa0mine/implementing-incremental-static-regeneration-isr-in-nuxt-4-the-complete-guide-2j7h
+// 
+// IMPORTANT: We cannot import from .output/server/index.mjs because it has file:// imports
+// that can't be bundled. Instead, we use Nitro's generated handler from .output/server/server.mjs
+// which is designed for Netlify preset.
 
-let localFetch;
+let nitroHandler;
 
 async function loadNitro() {
-  if (!localFetch) {
-    const indexModule = await import('../../.output/server/index.mjs');
-    localFetch = indexModule.localFetch;
-    if (!localFetch || typeof localFetch !== 'function') {
-      throw new Error('Nitro localFetch not found');
+  if (!nitroHandler) {
+    console.log('Loading Nitro handler from .output/server/server.mjs...');
+    // Nitro generates server.mjs for Netlify preset that exports the handler
+    const serverModule = await import('../../.output/server/server.mjs');
+    console.log('Nitro module loaded, exports:', Object.keys(serverModule));
+    nitroHandler = serverModule.default || serverModule.handler || serverModule;
+    if (!nitroHandler || typeof nitroHandler !== 'function') {
+      throw new Error('Nitro handler not found or invalid');
     }
+    console.log('Nitro handler loaded successfully, type:', typeof nitroHandler);
   }
-  return localFetch;
+  return nitroHandler;
 }
 
 export const handler = async (event, context) => {
-  const localFetch = await loadNitro();
+  const handlerFn = await loadNitro();
   
   // Get host and protocol
-  const host = event.headers?.host || event.headers?.['x-forwarded-host'] || 'localhost';
-  const protocol = event.headers?.['x-forwarded-proto'] || 'https';
+  const host = event.headers?.host || 
+               event.headers?.['x-forwarded-host'] || 
+               event.headers?.['Host'] ||
+               'localhost';
+  const protocol = event.headers?.['x-forwarded-proto'] || 
+                   event.headers?.['X-Forwarded-Proto'] ||
+                   'https';
   
   // Get path
   let path = event.rawPath || event.path || '/';
@@ -32,49 +44,34 @@ export const handler = async (event, context) => {
     if (queryString && !path.includes('?')) path += '?' + queryString;
   }
   
-  // Create full URL
+  // Create full URL (Nitro needs this for URL parsing)
   const fullUrl = `${protocol}://${host}${path}`;
   
-  // Build request options
-  const requestOptions = {
-    method: event.httpMethod || 'GET',
+  // Create a simple request object that Nitro can handle
+  // Nitro's Netlify preset handler expects a Netlify event-like object
+  const nitroEvent = {
+    httpMethod: event.httpMethod || 'GET',
+    path: path,
+    rawPath: path,
+    queryStringParameters: event.queryStringParameters || {},
     headers: event.headers || {},
+    body: event.body || null,
+    isBase64Encoded: event.isBase64Encoded || false,
+    requestContext: event.requestContext || {},
   };
   
-  // Add body for POST/PUT/PATCH
-  if (event.body && ['POST', 'PUT', 'PATCH'].includes(event.httpMethod)) {
-    requestOptions.body = typeof event.body === 'string' ? event.body : JSON.stringify(event.body);
-    if (!requestOptions.headers['content-type']) {
-      requestOptions.headers['content-type'] = 'application/json';
-    }
-  }
-  
   try {
-    console.log('Calling Nitro localFetch for:', fullUrl);
+    console.log('Calling Nitro handler for:', fullUrl);
     
-    // Use Nitro's localFetch - it handles the request internally
-    const response = await localFetch(fullUrl, requestOptions);
+    // Call Nitro's handler - it should return a response object
+    const result = await handlerFn(nitroEvent, context);
     
-    console.log('Nitro response received, status:', response.status);
+    console.log('Nitro handler returned, status:', result?.statusCode || result?.status);
     
-    // Get response body
-    const body = await response.text();
-    
-    console.log('Response body length:', body.length);
-    
-    // Convert Headers object to plain object
-    const headers = {};
-    response.headers.forEach((value, key) => {
-      headers[key] = value;
-    });
-    
-    return {
-      statusCode: response.status,
-      headers,
-      body,
-    };
+    // Nitro's handler should return a Netlify-compatible response
+    return result;
   } catch (error) {
-    console.error('Error calling Nitro localFetch:', error);
+    console.error('Error calling Nitro handler:', error);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
