@@ -174,7 +174,8 @@ export default defineNuxtConfig({
       // Note: Blog posts are NOT prerendered - they use ISR only for better cache purge support
       headers: {
         // Browser should revalidate, but CDN caches with stale-while-revalidate
-        'Cache-Control': 'public, max-age=0, must-revalidate',
+        // Use lowercase to match Netlify's header normalization
+        'cache-control': 'public, max-age=0, must-revalidate',
         // Netlify CDN caches indefinitely but allows revalidation via cache tags
         // When cache is purged via webhook, page regenerates on next request via serverless function
         'Netlify-CDN-Cache-Control': 'public, max-age=31536000, stale-while-revalidate=31536000, durable'

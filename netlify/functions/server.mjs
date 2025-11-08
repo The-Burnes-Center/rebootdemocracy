@@ -111,15 +111,18 @@ export const handler = async (event, context) => {
     path = '/' + path;
   }
   
-  // Don't sanitize the path - Nitro will handle it
-  // The path should be a valid URL path (starts with /, can have query string)
-  // Nitro's getRequestURL normalizes the path, so we don't need to sanitize it
+  // Validate path is valid for URL construction
+  // Don't over-encode - just ensure it's properly formatted
+  // The path should already be valid from Netlify
   
   // Add query string if present
   if (event.queryStringParameters && Object.keys(event.queryStringParameters).length > 0) {
     const queryString = new URLSearchParams(event.queryStringParameters).toString();
     if (queryString) {
-      path += '?' + queryString;
+      // Only add query string if it's not already in the path
+      if (!path.includes('?')) {
+        path += '?' + queryString;
+      }
     }
   }
   
@@ -127,6 +130,21 @@ export const handler = async (event, context) => {
   // Path should be a valid URL path (starts with /, can have query string)
   if (!path || path === '') {
     path = '/';
+  }
+  
+  // Final validation: ensure path can be used in URL construction
+  try {
+    const testUrl = new URL(path, `${validProtocol}://${validHost}`);
+    // If successful, use the pathname and search from the test URL
+    // This ensures the path is properly formatted
+    path = testUrl.pathname + testUrl.search;
+  } catch (err) {
+    console.warn('URL validation failed, using original path:', err);
+    // If URL construction fails, use the original path
+    // But ensure it starts with /
+    if (!path.startsWith('/')) {
+      path = '/' + path;
+    }
   }
   
   // Debug logging for URL construction
@@ -176,6 +194,14 @@ export const handler = async (event, context) => {
   req.url = path;
   req.originalUrl = path; // Nitro uses originalUrl
   req.path = path.split('?')[0]; // Add path property (without query string)
+  
+  // Ensure URL is properly formatted for Nitro
+  // Nitro's getRequestURL might try to create a URL from req.url
+  // Make sure it's a valid path (starts with /, properly encoded)
+  if (req.url && !req.url.startsWith('/')) {
+    req.url = '/' + req.url;
+    req.originalUrl = req.url;
+  }
   
   // Normalize headers to lowercase (Node.js headers are case-insensitive but Nitro expects lowercase)
   const normalizedHeaders = {};
@@ -395,13 +421,28 @@ export const handler = async (event, context) => {
         reject(new Error('Request timeout'));
       }, 30000); // 30 second timeout
 
+      // Handle unhandled promise rejections within the handler
+      const unhandledRejectionHandler = (err) => {
+        console.error('Unhandled promise rejection in Nitro handler:', err);
+        clearTimeout(timeout);
+        if (!_finished) {
+          res.end();
+        }
+        reject(err);
+      };
+      
+      // Listen for unhandled rejections (but only for this request)
+      process.once('unhandledRejection', unhandledRejectionHandler);
+
       res.on('finish', () => {
+        process.removeListener('unhandledRejection', unhandledRejectionHandler);
         clearTimeout(timeout);
         console.log('Response finished, body length:', responseBody.length);
         resolve();
       });
       
       res.on('error', (err) => {
+        process.removeListener('unhandledRejection', unhandledRejectionHandler);
         clearTimeout(timeout);
         console.error('Response error:', err);
         reject(err);
@@ -414,6 +455,7 @@ export const handler = async (event, context) => {
       if (!nitroHandler || typeof nitroHandler !== 'function') {
         const error = new Error('Nitro handler is not a function');
         console.error('Nitro handler error:', error);
+        process.removeListener('unhandledRejection', unhandledRejectionHandler);
         clearTimeout(timeout);
         reject(error);
         return;
@@ -424,25 +466,50 @@ export const handler = async (event, context) => {
           reqMethod: req.method,
           reqUrl: req.url,
           reqPath: req.path,
+          reqOriginalUrl: req.originalUrl,
           resStatusCode: res.statusCode,
         });
         
         // Nitro's handler is a Node.js listener: (req, res) => void
         // It writes directly to res, so we don't need to handle the return value
-        nitroHandler(req, res);
+        // Wrap in try-catch to catch synchronous errors
+        const handlerResult = nitroHandler(req, res);
         
-        console.log('Nitro handler called (Node.js listener)');
+        // If handler returns a promise, handle it
+        if (handlerResult && typeof handlerResult.then === 'function') {
+          handlerResult
+            .then(() => {
+              console.log('Nitro handler promise resolved');
+              // Don't resolve here - wait for 'finish' event
+            })
+            .catch((err) => {
+              console.error('Nitro handler promise rejected:', err);
+              process.removeListener('unhandledRejection', unhandledRejectionHandler);
+              clearTimeout(timeout);
+              if (!_finished) {
+                res.end();
+              }
+              reject(err);
+            });
+        } else {
+          console.log('Nitro handler called (Node.js listener, synchronous)');
+        }
         // The handler writes to res, which will trigger the 'finish' event
         // We don't need to manually call res.end() - Nitro will do it
       } catch (err) {
         // Synchronous error from handler
         console.error('Nitro handler threw synchronous error:', err);
+        process.removeListener('unhandledRejection', unhandledRejectionHandler);
         clearTimeout(timeout);
+        if (!_finished) {
+          res.end();
+        }
         reject(err);
       }
     });
   } catch (err) {
     console.error('Error in handler wrapper:', err);
+    console.error('Error stack:', err.stack);
     // If we get here, the handler failed
     // Return an error response
     return {
