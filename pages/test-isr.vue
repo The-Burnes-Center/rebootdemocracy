@@ -40,6 +40,14 @@
 </template>
 
 <script setup>
+import { setResponseHeader } from 'h3'
+
+// Set cache tag directly on the page (as per article)
+const event = useRequestEvent()
+if (import.meta.server && event) {
+  setResponseHeader(event, 'netlify-cache-tag', 'test-isr')
+}
+
 // Simple data fetch - no await to prevent blocking
 const { data, refresh, pending } = useFetch('/api/test-isr')
 
@@ -51,18 +59,15 @@ async function revalidate() {
   revalidateStatus.value = 'Purging cache...'
   
   try {
-    const response = await $fetch('/api/test-isr/revalidate', {
-      method: 'POST'
+    // Use the revalidate endpoint from netlify/functions/revalidate.js
+    const response = await $fetch('/.netlify/functions/revalidate?tag=test-isr', {
+      method: 'GET'
     })
     
-    if (response.success) {
-      revalidateStatus.value = 'Cache purged! Reload the page to see new data.'
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
-    } else {
-      revalidateStatus.value = 'Error: ' + (response.message || 'Unknown error')
-    }
+    revalidateStatus.value = 'Cache purged! Reload the page to see new data.'
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to revalidate'
     revalidateStatus.value = 'Error: ' + errorMessage

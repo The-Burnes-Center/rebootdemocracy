@@ -308,6 +308,12 @@ const router = useRouter();
 
 const blogslug = computed(() => route.params.slug as string);
 
+// Set cache tag directly on the page (as per Geist article)
+const event = useRequestEvent();
+if (import.meta.server && event && route.params.slug) {
+  setResponseHeader(event, 'netlify-cache-tag', `blog-${route.params.slug}`)
+}
+
 // Accessibility: Keyboard navigation handler
 const handleKeydown = (event: KeyboardEvent, callback: () => void): void => {
   if (event.key === 'Enter' || event.key === ' ') {

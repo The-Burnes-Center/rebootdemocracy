@@ -40,15 +40,23 @@ export default defineNuxtConfig({
   routeRules: {
     // Homepage - prerender at build time
     '/': { prerender: true },
-    // ISR Test Page - simple test case
-    '/test-isr': { 
-      isr: 3600,  // ISR: Regenerate every hour (1 hour = 3600 seconds)
+    // ISR Test Page - following Geist article pattern
+    '/test-isr': {
+      headers: {
+        'netlify-cache-tag': 'test-isr',
+        'cache-control': 'public, max-age=0, must-revalidate',
+        'netlify-cdn-cache-control': 'public, max-age=3600, stale-while-revalidate=604800, durable'
+      }
     },
     // Blog listing - prerender at build time
     '/blog': { prerender: true },
-    // Blog posts - ISR (simple setup as per article)
-    '/blog/**': { 
-      isr: 3600,  // ISR: Regenerate every hour
+    // Blog posts - ISR following Geist article pattern
+    '/blog/**': {
+      headers: {
+        'netlify-cache-tag': 'blog',
+        'cache-control': 'public, max-age=0, must-revalidate',
+        'netlify-cdn-cache-control': 'public, max-age=3600, stale-while-revalidate=604800, durable'
+      }
     },
     // Other static pages - prerender at build time
     '/events': { prerender: true },

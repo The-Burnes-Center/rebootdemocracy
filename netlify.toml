@@ -2,25 +2,17 @@
 command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build"
 publish = ".output/public"
 
-[functions]
-directory = ".output/server"
-
 [build.environment]
   NODE_VERSION = "20.19.0"
   NPM_VERSION = "10.8.0"
   NPM_FLAGS = "--no-audit --no-fund --verbose"
 
-# Simple ISR setup following Nuxt 4 article
+# ISR setup following Geist article: https://geistjs.com/blog/nuxt-isr-and-advanced-caching-on-netlify
 # Nitro's netlify preset automatically generates serverless functions
-# The server.mjs file has nodeBundler: "none" which tells Netlify not to bundle it
+# Netlify auto-detects .netlify/functions-internal for Nitro functions
+# and netlify/functions for custom functions (like revalidate.js)
 
-# Nitro's Netlify preset generates functions to .netlify/functions-internal/server
-# But we need to tell Netlify where to find them
-# The server function is at .netlify/functions-internal/server/server.mjs
-# Netlify auto-detects .netlify/functions-internal, so we don't need to specify it
-# But we need to ensure the catch-all redirect points to the right function
-
-# Catch-all redirect for ISR pages (blog posts)
+# Catch-all redirect for ISR pages
 # Static files are served first, so this only applies to non-static routes
 [[redirects]]
 from = "/*"
