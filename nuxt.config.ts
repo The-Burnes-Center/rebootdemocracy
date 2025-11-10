@@ -7,8 +7,7 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   devtools: { enabled: true },
-  ssr: true,
-  
+  ssr: true,  
   modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag', 'nuxt-build-cache', 'nuxt-lazy-hydrate'],
   gtag: {
     id: 'G-L78LX2HS2N',
