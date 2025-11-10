@@ -12,6 +12,5 @@ export default async (req, context) => {
     tags: [cacheTag]
   })
 
-  return new Response('cache purged', { status: 202 })
+  return new Response('Cache purged', { status: 202 })
 }
-

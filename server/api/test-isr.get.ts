@@ -1,10 +1,10 @@
-// Simple API endpoint that returns changing data for ISR testing
 export default defineEventHandler(async (event) => {
-  // Return current timestamp - this will change on each request
+  // Simulate some dynamic data
+  const timestamp = new Date().toISOString()
+  
   return {
-    timestamp: new Date().toISOString(),
-    message: 'This data changes on each request',
-    generatedAt: Date.now()
+    message: 'This is ISR test data',
+    timestamp,
+    random: Math.floor(Math.random() * 1000)
   }
 })
-

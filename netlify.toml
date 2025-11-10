@@ -1,16 +1,9 @@
 [build]
-command = "rm -rf .nuxt .output node_modules/.cache/nuxt && npm run build"
+command = "npm run build"
 publish = ".output/public"
 
 [build.environment]
-  NODE_VERSION = "20.19.0"
-  NPM_VERSION = "10.8.0"
-  NPM_FLAGS = "--no-audit --no-fund --verbose"
-
-# ISR setup following Geist article: https://geistjs.com/blog/nuxt-isr-and-advanced-caching-on-netlify
-# Nitro's netlify preset automatically generates serverless functions
-# Netlify auto-detects .netlify/functions-internal for Nitro functions
-# and netlify/functions for custom functions (like revalidate.js)
+NODE_VERSION = "20.19.0"
 
 # Catch-all redirect for ISR pages
 # Static files are served first, so this only applies to non-static routes
@@ -18,112 +11,3 @@ publish = ".output/public"
 from = "/*"
 to = "/.netlify/functions/server"
 status = 200
-
-[[redirects]]
-from = "/newsoftheweek/feed/rss"
-to = "/.netlify/functions/newsoftheweek"
-status = 200
-force = true
-
-[dev]
-command = "npm run dev"
-targetPort = 3000
-
-[images]
-remote_images = ["https://burnes-center.directus.app/assets/.*"]
-
-[[headers]]
-  for = "/"
-  [headers.values]
-    cache-control = "no-cache, no-store, must-revalidate"
-    pragma = "no-cache"
-    expires = "0"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    cache-control = "no-cache, no-store, must-revalidate"
-    pragma = "no-cache"
-    expires = "0"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/blog"
-  [headers.values]
-    cache-control = "no-cache, no-store, must-revalidate"
-    pragma = "no-cache"
-    expires = "0"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/test-isr"
-  [headers.values]
-    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
-
-[[headers]]
-  for = "/blog/*"
-  [headers.values]
-    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
-
-[[headers]]
-  for = "/_nuxt/*.js"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-    access-control-allow-origin = "*"
-  
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    cache-control = "no-cache, no-store, must-revalidate"
-    pragma = "no-cache"
-    expires = "0"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    cache-control = "public, max-age=2592000, immutable"
-    access-control-allow-origin = "*"
-
-# Cache _payload.json files for ISR pages (they're part of the cached page)
-# Other JSON files (like API responses) should not be cached
-[[headers]]
-  for = "/blog/**/_payload.json"
-  [headers.values]
-    # Cache _payload.json files for ISR pages - they're part of the cached page
-    cache-control = "public, max-age=31536000, immutable"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/*.json"
-  [headers.values]
-    cache-control = "no-cache, no-store, must-revalidate"
-    pragma = "no-cache"
-    expires = "0"
-    access-control-allow-origin = "*"
-
-# CACHE for fonts (1 year - fonts rarely change)
-[[headers]]
-  for = "/*.woff"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/*.woff2"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/*.ttf"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-    access-control-allow-origin = "*"
-
-[[headers]]
-  for = "/*.eot"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-    access-control-allow-origin = "*"
