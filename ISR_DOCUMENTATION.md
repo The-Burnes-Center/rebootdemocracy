@@ -384,13 +384,50 @@ According to Netlify documentation:
 2. Add to Netlify Site Settings → Environment Variables
 3. Redeploy site
 
+## Post-Deployment Warm-Up
+
+After deployment, ISR pages need to be generated on first request. To avoid cold starts for the first user, a warm-up script can be triggered automatically.
+
+### Setup
+
+1. **Warm-up Endpoint**: `POST /api/warm-up`
+   - Automatically requests ISR pages to trigger caching
+   - Configurable list of pages to warm up
+   - Returns summary of successful/failed warm-ups
+
+2. **Netlify Deploy Notification**:
+   - Configure in Netlify Dashboard → Site Settings → Build & Deploy → Deploy Notifications
+   - URL: `https://your-site.netlify.app/api/warm-up`
+   - Event: "Deploy succeeded"
+   - This automatically triggers warm-up after each successful deployment
+
+See `WARM_UP_SETUP.md` for detailed setup instructions.
+
+### How It Works
+
+```
+1. Deployment completes
+   ↓
+2. Netlify Deploy Notification triggers
+   ↓
+3. POST /api/warm-up is called
+   ↓
+4. Script makes GET requests to configured ISR pages
+   ↓
+5. Each request triggers serverless function
+   ↓
+6. Generated pages are cached on CDN
+   ↓
+7. First user gets cached response immediately
+```
+
 ## Future Improvements
 
 1. **Reduce revalidation time**: Could optimize timing based on actual CDN propagation
 2. **Batch revalidation**: Support multiple paths/tags in single request
 3. **Webhook security**: Add authentication for webhook requests
 4. **Monitoring**: Add metrics for cache hit rates and revalidation success
-5. **Automatic warm-up**: Trigger warm-up requests automatically after purge
+5. **Automatic warm-up**: Already implemented - see Post-Deployment Warm-Up section above
 
 ## References
 

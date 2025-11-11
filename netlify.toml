@@ -4,3 +4,10 @@ publish = "dist"
 
 [build.environment]
 NODE_VERSION = "20.19.0"
+
+# Deploy notifications - triggers warm-up after successful deployment
+# Set up in Netlify Dashboard: Site Settings → Build & Deploy → Deploy Notifications
+# Add notification with URL: https://your-site.netlify.app/api/warm-up
+# Event: "Deploy succeeded"
+[build.processing]
+  skip_processing = false
