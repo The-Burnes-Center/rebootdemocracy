@@ -5,10 +5,11 @@ This document describes the ISR implementation for the Nuxt application deployed
 ## Overview
 
 The ISR implementation uses:
-- **Nuxt 4** with `isr: true` route rules
+- **Nuxt 3.14.159** with Nuxt 4 compatibility mode enabled (`compatibilityVersion: 4`)
 - **Netlify CDN caching** with cache tags for granular invalidation
 - **On-demand revalidation** via API endpoint that purges cache and triggers regeneration
 - **Durable cache directive** for shared cache across Netlify edge nodes
+- **@netlify/functions 5.1.0** for cache purge API
 
 ## Architecture
 
@@ -183,17 +184,25 @@ The `useState` with a static key ensures:
 
 **Key Configuration**:
 ```typescript
-routeRules: {
-  "/": { prerender: true },
-  "/test-isr": {
-    isr: true,
-    headers: {
-      "Cache-Control": "public, max-age=0, must-revalidate",
-      "Netlify-CDN-Cache-Control": "public, max-age=31536000, stale-while-revalidate=31536000, durable",
+export default defineNuxtConfig({
+  compatibilityDate: "2024-11-13",
+  future: {
+    compatibilityVersion: 4,  // Opt into Nuxt 4 features while on Nuxt 3
+  },
+  routeRules: {
+    "/": { prerender: true },
+    "/test-isr": {
+      isr: true,
+      headers: {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Netlify-CDN-Cache-Control": "public, max-age=31536000, stale-while-revalidate=31536000, durable",
+      },
     },
   },
-}
+})
 ```
+
+**Note**: The project uses Nuxt 3.14.159 with `compatibilityVersion: 4` to enable Nuxt 4 features (like ISR) while remaining on Nuxt 3.
 
 **Cache Headers Explained**:
 - `Cache-Control: public, max-age=0, must-revalidate`
