@@ -93,10 +93,9 @@ async function revalidate() {
     // The regeneration process takes time (cache purge + multiple regeneration attempts)
     setTimeout(() => {
       // Reload to base path (no query params) to get the cached/regenerated version
-      // Add a small cache-busting param to ensure we get the newly regenerated version
-      const timestamp = Date.now()
-      window.location.href = `/test-isr?_t=${timestamp}`
-    }, 4000)
+      // The base path should now have the new content cached
+      window.location.href = `/test-isr`
+    }, 6000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"

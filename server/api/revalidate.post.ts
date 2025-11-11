@@ -93,65 +93,66 @@ export default defineEventHandler(async (event) => {
         const host = event.headers.get("host") || "localhost:8888"
         const protocol = event.headers.get("x-forwarded-proto") || "http"
         const siteUrl = `${protocol}://${host}`
+        const basePath = `${siteUrl}${body.path}`
         
-        // Use the base path with a unique query param to force regeneration
-        // The query param ensures we bypass any edge cache
-        const timestamp = Date.now()
-        const regenerateUrl = `${siteUrl}${body.path}?_regenerate=${timestamp}`
-        
-        console.log(`Triggering regeneration for base path: ${regenerateUrl}`)
+        console.log(`Triggering regeneration for base path: ${basePath}`)
         
         // Wait a bit for cache purge to fully propagate
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1500))
         
-        // Make multiple regeneration requests to ensure it happens
-        // Use unique query params each time to bypass cache
-        const regenerationPromises = []
-        for (let i = 0; i < 3; i++) {
-          const uniqueUrl = `${siteUrl}${body.path}?_regenerate=${timestamp}-${i}`
-          regenerationPromises.push(
-            fetch(uniqueUrl, {
+        // First, make requests with query params to bypass cache and trigger regeneration
+        // These ensure the server generates new content
+        for (let i = 0; i < 2; i++) {
+          const bypassUrl = `${basePath}?_bypass=${Date.now()}-${i}`
+          try {
+            const response = await fetch(bypassUrl, {
               method: "GET",
               headers: {
                 "Cache-Control": "no-cache, no-store, must-revalidate",
                 "Pragma": "no-cache",
                 "X-Requested-With": "XMLHttpRequest",
-                // Add headers to bypass CDN cache
                 "X-Netlify-Cache-Bypass": "1",
-                "X-Regeneration-Attempt": String(i + 1),
               },
-            }).then(async (response) => {
-              const text = await response.text()
-              console.log(`Regeneration attempt ${i + 1} completed: ${response.status}, body length: ${text.length}`)
-              return response
-            }).catch((err) => {
-              // Non-blocking - regeneration will happen on next request anyway
-              console.warn(`Regeneration attempt ${i + 1} failed (non-blocking):`, err)
             })
-          )
-          // Delay between attempts to ensure cache purge has propagated
-          if (i < 2) {
+            const text = await response.text()
+            console.log(`Bypass request ${i + 1} completed: ${response.status}, body length: ${text.length}`)
+          } catch (err) {
+            console.warn(`Bypass request ${i + 1} failed (non-blocking):`, err)
+          }
+          // Wait between bypass requests
+          if (i < 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000))
           }
         }
         
-        await Promise.all(regenerationPromises)
+        // Now make multiple requests to the BASE PATH (no query params) to ensure it's cached
+        // This is critical - we need to cache the base path with the new content
+        await new Promise((resolve) => setTimeout(resolve, 1000))
         
-        // Final request to base path to ensure it's cached with new content
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        await fetch(`${siteUrl}${body.path}`, {
-          method: "GET",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "X-Requested-With": "XMLHttpRequest",
-            "X-Netlify-Cache-Bypass": "1",
-          },
-        }).catch((err) => {
-          console.warn("Final regeneration request failed (non-blocking):", err)
-        })
+        for (let i = 0; i < 3; i++) {
+          try {
+            const response = await fetch(basePath, {
+              method: "GET",
+              headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "X-Requested-With": "XMLHttpRequest",
+                "X-Netlify-Cache-Bypass": "1",
+                "X-Cache-Update": String(i + 1),
+              },
+            })
+            const text = await response.text()
+            console.log(`Base path cache update ${i + 1} completed: ${response.status}, body length: ${text.length}`)
+          } catch (err) {
+            console.warn(`Base path cache update ${i + 1} failed (non-blocking):`, err)
+          }
+          // Wait between base path requests to ensure each one hits the server
+          if (i < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 1500))
+          }
+        }
         
-        console.log("Regeneration triggered successfully for base path (3 attempts + final)")
+        console.log("Regeneration triggered successfully for base path")
       } catch (regenerateError) {
         // Non-blocking - regeneration will happen on next request
         console.warn("Regeneration trigger error (non-blocking):", regenerateError)
