@@ -8,17 +8,23 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: "Missing tag parameter" })
     }
 
-    // Check if NETLIFY_AUTH_TOKEN is available (required for purgeCache)
-    const authToken = process.env.NETLIFY_AUTH_TOKEN
-    if (!authToken) {
-      console.warn("NETLIFY_AUTH_TOKEN not found - cache purge may fail")
-      // In local development, simulate success
-      if (process.env.NODE_ENV === "development") {
-        return { message: "Cache purge simulated (local dev)", tag: body.tag }
+    // purgeCache automatically uses NETLIFY_AUTH_TOKEN from environment
+    // If not available, it will fail - check logs for details
+    try {
+      await purgeCache({ tags: [body.tag] })
+    } catch (purgeError) {
+      const errorMsg = purgeError instanceof Error ? purgeError.message : String(purgeError)
+      console.error("purgeCache error:", errorMsg)
+      
+      // If it's an auth token error, provide helpful message
+      if (errorMsg.includes("token") || errorMsg.includes("auth")) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: "NETLIFY_AUTH_TOKEN not configured. Please set it in Netlify environment variables.",
+        })
       }
+      throw purgeError
     }
-
-    await purgeCache({ tags: [body.tag] })
 
     setResponseStatus(event, 202)
     return { message: "Cache purged", tag: body.tag }
