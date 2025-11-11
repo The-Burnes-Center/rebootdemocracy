@@ -157,137 +157,30 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Trigger regeneration and wait for it to be cached
-    let regenerationResult: { cached: boolean; attempts: number; finalStatus: string; cacheInfo?: any } | null = null
-    
-    if (body.path) {
-      try {
-        const host = event.headers.get("host") || "localhost:8888"
-        const protocol = event.headers.get("x-forwarded-proto") || "http"
-        const siteUrl = `${protocol}://${host}`
-        const basePath = `${siteUrl}${body.path}`
-        
-        console.log(`🔄 Triggering regeneration for: ${basePath}`)
-        
-        // Step 1: Make a request with cache-busting query param to trigger server-side regeneration
-        // The fetch() promise resolves when the response is ready, so we know regeneration is complete
-        const regenerateUrl = `${basePath}?_regen=${Date.now()}`
-        const regenerateResponse = await fetch(regenerateUrl, {
-          method: "GET",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-          },
-        })
-        
-        // Await the response body to ensure the server has fully generated the new content
-        await regenerateResponse.text()
-        
-        const regenerateStatus = regenerateResponse.status
-        console.log(`✅ Regeneration complete: ${regenerateStatus}`)
-        
-        // Step 2: Make a request to the BASE PATH (no query params) to cache the new content
-        // 
-        // IMPORTANT: Why we need to purge with ISR (not just stale-while-revalidate):
-        // 
-        // stale-while-revalidate behavior:
-        // - Only works when cache is EXPIRED (stale)
-        // - Serves stale content while regenerating in background
-        // - Great for time-based regeneration, but not for on-demand updates
-        //
-        // Why we purge for on-demand revalidation:
-        // - ISR regenerates pages based on TTL (time), not content changes
-        // - Without purging, old cached content would be served until TTL expires (could be years!)
-        // - stale-while-revalidate won't trigger if cache is still valid (not expired)
-        // - With purging, we force immediate regeneration when content changes
-        // - We want fresh content immediately, not stale content while regenerating
-        //
-        // Cache purge propagation: Netlify documentation states purge typically
-        // completes within "a few seconds" across the entire network.
-        // Source: https://docs.netlify.com/build/caching/caching-overview/
-        console.log(`🔄 Requesting base path to cache new content...`)
-        
-        // Make multiple requests with cache-busting to ensure we get fresh content
-        // Netlify's purge propagation can take a few seconds, so we retry with delays
-        let basePathResponse: Response | null = null
-        let basePathCacheInfo: any = null
-        let freshContentReceived = false
-        
-        // Wait for initial purge propagation (Netlify says "a few seconds")
-        // Start with 2 seconds, then retry with exponential backoff
-        console.log(`⏳ Waiting 2 seconds for initial cache purge propagation...`)
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        
-        // Retry with exponential backoff: 2s, 3s, 5s, 8s, 13s (total ~31 seconds max)
-        const retryDelays = [2000, 3000, 5000, 8000, 13000]
-        const maxAttempts = retryDelays.length + 1 // 6 total attempts
-        
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          basePathResponse = await fetch(basePath, {
-            method: "GET",
-            headers: {
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              "Pragma": "no-cache",
-              "X-Netlify-Cache-Bypass": "1",
-              "X-Force-Regeneration": String(attempt),
-            },
-          })
-          
-          // Await the response body to ensure the content is fully generated
-          await basePathResponse.text()
-          
-          basePathCacheInfo = getCacheStatus(basePathResponse)
-          const basePathStatus = basePathResponse.status
-          
-          console.log(`Base path request attempt ${attempt}/${maxAttempts}: ${basePathStatus}, cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
-          
-          // If we got a cache miss, we have fresh content
-          if (!basePathCacheInfo.hit) {
-            freshContentReceived = true
-            console.log(`✅ Fresh content received on attempt ${attempt}`)
-            break
-          }
-          
-          // If still cached, wait longer and try again (cache purge propagation delay)
-          // Use exponential backoff with longer delays
-          if (attempt < maxAttempts) {
-            const waitTime = retryDelays[attempt - 1] // 2s, 3s, 5s, 8s, 13s
-            console.log(`⚠️ Still cached, waiting ${waitTime}ms for purge propagation (attempt ${attempt + 1}/${maxAttempts})...`)
-            await new Promise((resolve) => setTimeout(resolve, waitTime))
-          }
-        }
-        
-        if (!freshContentReceived && basePathResponse) {
-          console.warn(`⚠️ Base path still showing cached content after ${maxAttempts} attempts (~31 seconds total) - purge may need more time to propagate across all edge nodes, or cache-busting headers may not be working`)
-        }
-        
-        // Step 3: Wait for the base path to be cached (check Cache-Status header)
-        // The base path should now be cached with the new content
-        console.log(`⏳ Waiting for base path to be cached (checking Cache-Status header)...`)
-        regenerationResult = await waitForCache(basePath, 15, 800)
-        
-        if (regenerationResult.cached) {
-          console.log(`✅ Base path is now cached after ${regenerationResult.attempts} attempts`)
-        } else {
-          console.warn(`⚠️ Base path not cached after ${regenerationResult.attempts} attempts (status: ${regenerationResult.finalStatus})`)
-        }
-      } catch (regenerateError) {
-        console.warn("Regeneration error (non-blocking):", regenerateError)
-      }
-    }
-
+    // Return 202 Accepted immediately to avoid function timeout
+    // Regeneration happens asynchronously in the background
     setResponseStatus(event, 202)
+    
+    // Start regeneration asynchronously (don't await - fire and forget)
+    if (body.path) {
+      const host = event.headers.get("host") || "localhost:8888"
+      const protocol = event.headers.get("x-forwarded-proto") || "http"
+      const siteUrl = `${protocol}://${host}`
+      const basePath = `${siteUrl}${body.path}`
+      
+      // Don't await - let this run in background to avoid timeout
+      regenerateAndCache(basePath).catch((error) => {
+        console.error("[Background] Regeneration error:", error)
+      })
+    }
+    
     return {
-      message: "Cache purge and regeneration completed",
+      message: "Cache purged successfully. Regeneration in progress...",
       purge: purgeResults,
-      regeneration: regenerationResult
-        ? {
-            cached: regenerationResult.cached,
-            attempts: regenerationResult.attempts,
-            status: regenerationResult.finalStatus,
-            cacheInfo: regenerationResult.cacheInfo,
-          }
-        : null,
+      regeneration: {
+        status: "in_progress",
+        note: "Regeneration is happening in the background. The page will be updated shortly.",
+      },
       tag: body.tag,
       path: body.path,
     }
@@ -304,3 +197,84 @@ export default defineEventHandler(async (event) => {
     })
   }
 })
+
+/**
+ * Regenerate and cache the page (runs asynchronously in background)
+ * This function can take up to ~31 seconds, so it's run separately to avoid function timeout
+ */
+async function regenerateAndCache(basePath: string) {
+  try {
+    console.log(`🔄 [Background] Triggering regeneration for: ${basePath}`)
+    
+    // Step 1: Trigger regeneration
+    const regenerateUrl = `${basePath}?_regen=${Date.now()}`
+    const regenerateResponse = await fetch(regenerateUrl, {
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+      },
+    })
+    
+    await regenerateResponse.text()
+    console.log(`✅ [Background] Regeneration complete: ${regenerateResponse.status}`)
+    
+    // Step 2: Request base path to cache new content
+    console.log(`🔄 [Background] Requesting base path to cache new content...`)
+    
+    // Wait for initial purge propagation
+    console.log(`⏳ [Background] Waiting 2 seconds for initial cache purge propagation...`)
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    
+    // Retry with exponential backoff: 2s, 3s, 5s, 8s, 13s (total ~31 seconds max)
+    const retryDelays = [2000, 3000, 5000, 8000, 13000]
+    const maxAttempts = retryDelays.length + 1
+    let basePathResponse: Response | null = null
+    let freshContentReceived = false
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      basePathResponse = await fetch(basePath, {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "X-Netlify-Cache-Bypass": "1",
+          "X-Force-Regeneration": String(attempt),
+        },
+      })
+      
+      await basePathResponse.text()
+      const basePathCacheInfo = getCacheStatus(basePathResponse)
+      
+      console.log(`[Background] Base path attempt ${attempt}/${maxAttempts}: cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
+      
+      if (!basePathCacheInfo.hit) {
+        freshContentReceived = true
+        console.log(`✅ [Background] Fresh content received on attempt ${attempt}`)
+        break
+      }
+      
+      if (attempt < maxAttempts) {
+        const waitTime = retryDelays[attempt - 1]
+        console.log(`⚠️ [Background] Still cached, waiting ${waitTime}ms (attempt ${attempt + 1}/${maxAttempts})...`)
+        await new Promise((resolve) => setTimeout(resolve, waitTime))
+      }
+    }
+    
+    if (!freshContentReceived) {
+      console.warn(`⚠️ [Background] Base path still cached after ${maxAttempts} attempts - purge may need more time`)
+    }
+    
+    // Step 3: Wait for base path to be cached
+    console.log(`⏳ [Background] Waiting for base path to be cached...`)
+    const regenerationResult = await waitForCache(basePath, 15, 800)
+    
+    if (regenerationResult.cached) {
+      console.log(`✅ [Background] Base path cached after ${regenerationResult.attempts} attempts`)
+    } else {
+      console.warn(`⚠️ [Background] Base path not cached after ${regenerationResult.attempts} attempts`)
+    }
+  } catch (error) {
+    console.error("[Background] Regeneration error:", error)
+  }
+}
