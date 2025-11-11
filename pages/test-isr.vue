@@ -11,77 +11,18 @@
       It is configured to be cached on the Netlify CDN, with Incremental Static
       Regeneration (ISR) configured to never consider the cache stale. The first
       request after a deploy will invoke the SSR function to render on the fly
-      and the result will be cached and served for all subsequent requests.
+      and the result will be cached and served for all subsequent requests. As
+      the cache entry never becomes stale, the CDN will always serve it, unless
+      invalidated (via cache purge API or a deploy).
     </p>
     <p>Below is a random number generated any time the page is rendered:</p>
-    <p style="font-size: 2rem; font-weight: bold;">{{ id }}</p>
-    
-    <div style="margin-top: 2rem;">
-      <h2>Data from API:</h2>
-      <div v-if="pending">Loading...</div>
-      <div v-else-if="error">Error: {{ error }}</div>
-      <div v-else>
-        <pre>{{ JSON.stringify(data, null, 2) }}</pre>
-        <p style="margin-top: 1rem; color: #666;">
-          Generated at: {{ data.timestamp }}
-        </p>
-      </div>
-    </div>
-
-    <button @click="revalidate" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">
-      Revalidate Cache
-    </button>
-    <p v-if="revalidateStatus" style="margin-top: 1rem; color: green;">
-      {{ revalidateStatus }}
+    <p style="font-size: 2rem; font-weight: bold; text-align: center;">
+      <code>{{ id }}</code>
     </p>
   </div>
 </template>
 
 <script setup>
-// Set cache tag header as per Netlify docs
-try {
-  const { ssrContext } = useNuxtApp()
-  if (ssrContext && ssrContext.res) {
-    ssrContext.res.setHeader("Netlify-Cache-Tag", "test-isr")
-  }
-} catch (e) {
-  // Non-critical - cache tag is optional
-  console.warn("Could not set cache tag:", e)
-}
-
-// Simple random ID like example
+// Simple random ID like example - this is all we need for ISR to work
 const id = useState("id", () => new Date().getMilliseconds())
-
-// Fetch data (non-blocking, client-side only to avoid SSR issues)
-const { data, pending, error } = useFetch("/api/test-isr", {
-  server: false, // Only fetch on client to avoid SSR issues
-})
-
-// Revalidation status
-const revalidateStatus = ref("")
-
-// On-demand revalidation
-async function revalidate() {
-  revalidateStatus.value = "Purging cache..."
-  try {
-    await $fetch("/api/revalidate", {
-      method: "POST",
-      body: { tag: "test-isr", path: "/test-isr" },
-    })
-    revalidateStatus.value = "Cache purged! Reload the page to see new data."
-    setTimeout(() => {
-      window.location.reload()
-    }, 1000)
-  } catch (error) {
-    revalidateStatus.value =
-      "Error: " + (error instanceof Error ? error.message : "Failed to revalidate")
-    console.error("Revalidation error:", error)
-  }
-}
-
-// SEO
-useSeoMeta({
-  title: "ISR Test Page",
-  description: "Testing Incremental Static Regeneration with Nuxt 4",
-})
 </script>
