@@ -86,7 +86,6 @@ When revalidation is triggered (via button click or webhook):
 
 ### 3. Cache Purge Process
 
-
 The revalidation endpoint performs:
 
 1. **Tag-based purge**: `purgeCache({ tags: ['test-isr'] })`
@@ -97,7 +96,14 @@ The revalidation endpoint performs:
    - Invalidates cached objects for the specific path
    - Provides additional invalidation method
 
-3. **Rate limit handling**:
+3. **Purge propagation time**:
+   - Netlify documentation states purge typically completes within **"a few seconds"** across the entire network
+   - Source: [Netlify Caching Overview](https://docs.netlify.com/build/caching/caching-overview/)
+   - The code waits 1 second initially, then retries with exponential backoff (1s, 2s, 3s, 4s) if cache is still hit
+   - This ensures we get fresh content even if purge propagation is delayed across edge nodes
+   - Maximum wait time: ~10 seconds (1s initial + 1s + 2s + 3s + 4s retries)
+
+4. **Rate limit handling**:
    - Netlify allows 2 purges per tag/path every 5 seconds
    - If rate limit hit, logs warning but continues
    - Regeneration will still work even if purge is throttled
