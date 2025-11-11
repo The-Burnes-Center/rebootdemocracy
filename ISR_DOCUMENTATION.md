@@ -46,6 +46,19 @@ When a user first visits `/test-isr`:
    - `Netlify-CDN-Cache-Control: public, max-age=31536000, stale-while-revalidate=31536000, durable`
 5. Subsequent requests are served from CDN cache
 
+### Why We Need Cache Purge with ISR
+
+**Important**: ISR (Incremental Static Regeneration) regenerates pages based on **time** (TTL), not content changes. This means:
+
+- **Without cache purge**: Old cached content would be served until the TTL expires (which could be a very long time with `isr: true`)
+- **With cache purge**: We force immediate regeneration when content changes, ensuring users get fresh content right away
+- **ISR's stale-while-revalidate**: Can serve stale content while regenerating in the background, but we want fresh content immediately when content changes
+
+**Cache Layers**:
+- **Edge CDN Cache**: Cached at edge locations for fast delivery
+- **Durable Cache**: Global object store that persists across edge nodes
+- Both layers need to be purged for immediate content updates
+
 ### 2. Cache Revalidation Flow
 
 When revalidation is triggered (via button click or webhook):

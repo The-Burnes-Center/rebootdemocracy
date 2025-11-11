@@ -187,17 +187,30 @@ export default defineEventHandler(async (event) => {
         console.log(`✅ Regeneration complete: ${regenerateStatus}`)
         
         // Step 2: Make a request to the BASE PATH (no query params) to cache the new content
-        // We need to ensure this bypasses cache completely to get fresh content
-        // Even though we purged, there might be propagation delay, so we use aggressive cache-busting
+        // 
+        // IMPORTANT: Why we need to purge with ISR:
+        // - ISR regenerates pages based on TTL (time), not content changes
+        // - Without purging, old cached content would be served until TTL expires
+        // - With purging, we force immediate regeneration when content changes
+        // - ISR's "stale-while-revalidate" can serve stale content while regenerating,
+        //   but we want fresh content immediately, so we purge first
+        //
+        // Cache purge propagation: Netlify documentation states purge typically
+        // completes within "a few seconds" across the entire network.
+        // Source: https://docs.netlify.com/build/caching/caching-overview/
         console.log(`🔄 Requesting base path to cache new content...`)
         
         // Make multiple requests with cache-busting to ensure we get fresh content
-        // The first request might still hit cache, so we make a few attempts
+        // Netlify's purge propagation can take a few seconds, so we retry with delays
         let basePathResponse: Response | null = null
         let basePathCacheInfo: any = null
         let freshContentReceived = false
         
-        for (let attempt = 1; attempt <= 3; attempt++) {
+        // Wait a moment for initial purge propagation (Netlify says "a few seconds")
+        // We start with a 1 second wait, then retry with increasing delays
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        
+        for (let attempt = 1; attempt <= 5; attempt++) {
           basePathResponse = await fetch(basePath, {
             method: "GET",
             headers: {
@@ -223,15 +236,17 @@ export default defineEventHandler(async (event) => {
             break
           }
           
-          // If still cached, wait a bit and try again (cache purge propagation delay)
-          if (attempt < 3) {
-            console.log(`⚠️ Still cached, waiting for purge propagation...`)
-            await new Promise((resolve) => setTimeout(resolve, 300))
+          // If still cached, wait longer and try again (cache purge propagation delay)
+          // Netlify says "a few seconds" - we use exponential backoff: 1s, 2s, 3s, 4s
+          if (attempt < 5) {
+            const waitTime = attempt * 1000 // 1s, 2s, 3s, 4s
+            console.log(`⚠️ Still cached, waiting ${waitTime}ms for purge propagation (attempt ${attempt + 1}/5)...`)
+            await new Promise((resolve) => setTimeout(resolve, waitTime))
           }
         }
         
         if (!freshContentReceived && basePathResponse) {
-          console.warn(`⚠️ Base path still showing cached content after 3 attempts - may need to wait longer for purge propagation`)
+          console.warn(`⚠️ Base path still showing cached content after 5 attempts - purge may need more time to propagate across all edge nodes`)
         }
         
         // Step 3: Wait for the base path to be cached (check Cache-Status header)
