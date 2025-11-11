@@ -59,8 +59,11 @@
 
 <script setup lang="ts">
 // Generate a new random ID on each SSR render
-// Don't use a static key - generate fresh on each render
-const id = ref(Math.floor(Math.random() * 10000))
+// This will be different on each server-side render
+const id = computed(() => {
+  // Generate fresh random number - this runs on each SSR
+  return Math.floor(Math.random() * 10000)
+})
 
 // Revalidation state
 const revalidating = ref(false)
