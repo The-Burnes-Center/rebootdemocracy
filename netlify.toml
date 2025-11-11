@@ -5,10 +5,5 @@ publish = ".output/public"
 [build.environment]
 NODE_VERSION = "20.19.0"
 
-# Catch-all redirect for ISR pages
-# Static files are served first, so this only applies to non-static routes
-[[redirects]]
-from = "/*"
-to = "/.netlify/functions/server"
-status = 200
-force = false
+# Nitro's Netlify preset automatically handles routing for ISR pages
+# No explicit redirects needed - Nitro generates the necessary routing
