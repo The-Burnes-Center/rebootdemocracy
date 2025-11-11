@@ -9,6 +9,10 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'netlify',
     compatibilityDate: '2024-11-13',
+    output: {
+      dir: '.output',
+      publicDir: '.output/public',
+    },
   },
   routeRules: {
     // Homepage - prerender
