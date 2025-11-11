@@ -36,9 +36,12 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    let purgeSucceeded = false
+
     // Purge cache by tag if provided
     if (body.tag) {
       try {
+        console.log(`🔄 Attempting to purge cache for tag: ${body.tag}`)
         // Add timeout to prevent hanging
         const purgePromise = purgeCache({ tags: [body.tag] })
         const timeoutPromise = new Promise((_, reject) =>
@@ -46,13 +49,14 @@ export default defineEventHandler(async (event) => {
         )
 
         await Promise.race([purgePromise, timeoutPromise])
-        console.log(`Cache purged for tag: ${body.tag}`)
+        console.log(`✅ Cache purged successfully for tag: ${body.tag}`)
+        purgeSucceeded = true
       } catch (purgeError) {
         const errorMsg =
           purgeError instanceof Error
             ? purgeError.message
             : String(purgeError)
-        console.error("purgeCache error:", errorMsg)
+        console.error(`❌ purgeCache error for tag ${body.tag}:`, errorMsg)
 
         // If it's an auth token error, provide helpful message
         if (errorMsg.includes("token") || errorMsg.includes("auth")) {
@@ -62,28 +66,47 @@ export default defineEventHandler(async (event) => {
               "NETLIFY_AUTH_TOKEN invalid. Please check your Netlify environment variables.",
           })
         }
-        throw purgeError
+        
+        // If it's a rate limit error, log but continue
+        if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
+          console.warn("⚠️ Rate limit hit for tag purge - cache purge may be throttled")
+          // Don't throw - continue with path purge attempt
+        } else {
+          throw purgeError
+        }
       }
     }
 
     // Purge cache by path if provided
     if (body.path) {
       try {
+        console.log(`🔄 Attempting to purge cache for path: ${body.path}`)
         const purgePromise = purgeCache({ paths: [body.path] })
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Cache purge timeout")), 10000)
         )
 
         await Promise.race([purgePromise, timeoutPromise])
-        console.log(`Cache purged for path: ${body.path}`)
+        console.log(`✅ Cache purged successfully for path: ${body.path}`)
+        purgeSucceeded = true
       } catch (purgeError) {
         const errorMsg =
           purgeError instanceof Error
             ? purgeError.message
             : String(purgeError)
-        console.error("purgeCache path error:", errorMsg)
+        console.error(`❌ purgeCache path error for ${body.path}:`, errorMsg)
+        
+        // If it's a rate limit error, log but continue
+        if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
+          console.warn("⚠️ Rate limit hit for path purge - continuing anyway")
+          // Continue - regeneration will still work
+        }
         // Non-blocking - tag purge might have worked
       }
+    }
+
+    if (!purgeSucceeded && body.tag && body.path) {
+      console.warn("⚠️ Cache purge may have failed - but continuing with regeneration attempt")
     }
 
     // After successful cache purge, trigger regeneration by fetching the base path
