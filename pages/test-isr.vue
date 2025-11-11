@@ -58,17 +58,6 @@
 </template>
 
 <script setup lang="ts">
-// Set cache tag header for targeted invalidation
-try {
-  const { ssrContext } = useNuxtApp()
-  if (ssrContext && ssrContext.res) {
-    ssrContext.res.setHeader("Netlify-Cache-Tag", "test-isr")
-  }
-} catch (e) {
-  // Non-critical - cache tag is optional
-  console.warn("Could not set cache tag:", e)
-}
-
 // Simple random ID like example - this is all we need for ISR to work
 const id = useState("id", () => new Date().getMilliseconds())
 
