@@ -18,7 +18,9 @@ export default defineNuxtConfig({
     // Homepage - prerender
     '/': { prerender: true },
     // ISR test page - following Geist article pattern
+    // Using isr: true to enable ISR (generated on first request, then cached)
     '/test-isr': {
+      isr: true,
       headers: {
         'netlify-cache-tag': 'test-isr',
         'cache-control': 'public, max-age=0, must-revalidate',
