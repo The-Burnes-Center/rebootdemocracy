@@ -58,8 +58,9 @@
 </template>
 
 <script setup lang="ts">
-// Simple random ID like example - this is all we need for ISR to work
-const id = useState("id", () => new Date().getMilliseconds())
+// Generate a new random ID on each SSR render
+// Don't use a static key - generate fresh on each render
+const id = ref(Math.floor(Math.random() * 10000))
 
 // Revalidation state
 const revalidating = ref(false)
@@ -84,11 +85,12 @@ async function revalidate() {
     revalidateStatus.value = "Cache purged! Regenerating page..."
     
     // Reload after a delay to allow regeneration to complete
-    // Use base path to ensure we get the regenerated version
+    // Use base path with cache-busting to ensure we get the regenerated version
     setTimeout(() => {
-      // Reload the base path - the regeneration should have completed by now
-      window.location.href = `/test-isr`
-    }, 2000)
+      // Add a small cache-busting param to force fresh fetch
+      const timestamp = Date.now()
+      window.location.href = `/test-isr?_cb=${timestamp}`
+    }, 2500)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"

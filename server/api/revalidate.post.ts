@@ -100,21 +100,35 @@ export default defineEventHandler(async (event) => {
         
         console.log(`Triggering regeneration for base path: ${regenerateUrl}`)
         
-        await fetch(regenerateUrl, {
-          method: "GET",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "X-Requested-With": "XMLHttpRequest",
-            // Add a header to bypass CDN cache
-            "X-Netlify-Cache-Bypass": "1",
-          },
-        }).catch((err) => {
-          // Non-blocking - regeneration will happen on next request anyway
-          console.warn("Regeneration trigger failed (non-blocking):", err)
-        })
+        // Make multiple regeneration requests to ensure it happens
+        // Sometimes the first request might still hit cache
+        const regenerationPromises = []
+        for (let i = 0; i < 2; i++) {
+          regenerationPromises.push(
+            fetch(regenerateUrl, {
+              method: "GET",
+              headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "X-Requested-With": "XMLHttpRequest",
+                // Add a header to bypass CDN cache
+                "X-Netlify-Cache-Bypass": "1",
+                // Add timestamp to ensure unique request
+                "X-Regeneration-Attempt": String(i + 1),
+              },
+            }).catch((err) => {
+              // Non-blocking - regeneration will happen on next request anyway
+              console.warn(`Regeneration attempt ${i + 1} failed (non-blocking):`, err)
+            })
+          )
+          // Small delay between attempts
+          if (i < 1) {
+            await new Promise((resolve) => setTimeout(resolve, 500))
+          }
+        }
         
-        console.log("Regeneration triggered successfully for base path")
+        await Promise.all(regenerationPromises)
+        console.log("Regeneration triggered successfully for base path (2 attempts)")
       } catch (regenerateError) {
         // Non-blocking - regeneration will happen on next request
         console.warn("Regeneration trigger error (non-blocking):", regenerateError)
