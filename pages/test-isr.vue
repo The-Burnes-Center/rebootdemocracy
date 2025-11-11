@@ -19,9 +19,91 @@
     <p style="font-size: 2rem; font-weight: bold; text-align: center;">
       <code>{{ id }}</code>
     </p>
+
+    <div style="margin-top: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+      <h2>Cache Revalidation</h2>
+      <p style="margin-bottom: 1rem;">
+        Click the button below to purge the cache and regenerate this page:
+      </p>
+      <button
+        @click="revalidate"
+        :disabled="revalidating"
+        style="
+          padding: 0.75rem 1.5rem;
+          background: #00c7b7;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 600;
+        "
+      >
+        {{ revalidating ? "Revalidating..." : "Revalidate Cache" }}
+      </button>
+      <p
+        v-if="revalidateStatus"
+        style="margin-top: 1rem; color: #00c7b7; font-weight: 600;"
+      >
+        {{ revalidateStatus }}
+      </p>
+      <p
+        v-if="revalidateError"
+        style="margin-top: 1rem; color: #ff6b6b; font-weight: 600;"
+      >
+        Error: {{ revalidateError }}
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const id = useState("id", () => new Date().getMilliseconds());
+// Set cache tag header for targeted invalidation
+try {
+  const { ssrContext } = useNuxtApp()
+  if (ssrContext && ssrContext.res) {
+    ssrContext.res.setHeader("Netlify-Cache-Tag", "test-isr")
+  }
+} catch (e) {
+  // Non-critical - cache tag is optional
+  console.warn("Could not set cache tag:", e)
+}
+
+// Simple random ID like example - this is all we need for ISR to work
+const id = useState("id", () => new Date().getMilliseconds())
+
+// Revalidation state
+const revalidating = ref(false)
+const revalidateStatus = ref("")
+const revalidateError = ref("")
+
+// On-demand revalidation
+async function revalidate() {
+  revalidating.value = true
+  revalidateStatus.value = ""
+  revalidateError.value = ""
+
+  try {
+    const response = await $fetch("/api/revalidate", {
+      method: "POST",
+      body: {
+        tag: "test-isr",
+        path: "/test-isr",
+      },
+    })
+
+    revalidateStatus.value = "Cache purged! Reload the page to see a new random number."
+    
+    // Reload after a short delay to show the new content
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
+  } catch (error) {
+    revalidateError.value =
+      error instanceof Error ? error.message : "Failed to revalidate"
+    console.error("Revalidation error:", error)
+  } finally {
+    revalidating.value = false
+  }
+}
 </script>
