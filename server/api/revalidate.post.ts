@@ -189,35 +189,53 @@ export default defineEventHandler(async (event) => {
           }
         }
         
-        // Now make final request to base path (no query params) to cache the new content
-        // Wait a bit more to ensure the server has the new content ready
+        // Now make multiple requests to base path (no query params) to cache the new content
+        // Use a timestamp-based query param that changes each time to ensure we bypass cache
+        // But the query param won't affect the cached base path
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        console.log("Making final request to base path to cache new content...")
+        console.log("Making final requests to base path to cache new content...")
         
-        try {
-          const finalResponse = await fetch(basePath, {
-            method: "GET",
-            headers: {
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              "Pragma": "no-cache",
-              "X-Requested-With": "XMLHttpRequest",
-              "X-Netlify-Cache-Bypass": "1",
-              "X-Final-Cache-Update": "1",
-            },
-          })
-          const finalText = await finalResponse.text()
-          const finalNumberMatch = finalText.match(/<code>(\d+)<\/code>/)
-          if (finalNumberMatch) {
-            const finalNum = parseInt(finalNumberMatch[1])
-            console.log(`✅ Final base path request - number: ${finalNum}`)
-            if (regenerationNumbers.length > 0 && finalNum === regenerationNumbers[regenerationNumbers.length - 1]) {
-              console.log("✅ Final number matches last regeneration - cache should be updated")
-            } else {
-              console.warn(`⚠️ Final number (${finalNum}) doesn't match last regeneration (${regenerationNumbers[regenerationNumbers.length - 1]})`)
+        const finalNumbers: number[] = []
+        for (let i = 0; i < 3; i++) {
+          try {
+            // Use a query param that changes to bypass cache, but won't affect base path caching
+            const cacheBustUrl = `${basePath}?_cb=${Date.now()}-${i}`
+            console.log(`Final base path cache request ${i + 1}...`)
+            const finalResponse = await fetch(cacheBustUrl, {
+              method: "GET",
+              headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "X-Requested-With": "XMLHttpRequest",
+                "X-Netlify-Cache-Bypass": "1",
+                "X-Final-Cache-Update": String(i + 1),
+              },
+            })
+            const finalText = await finalResponse.text()
+            const finalNumberMatch = finalText.match(/<code>(\d+)<\/code>/)
+            if (finalNumberMatch) {
+              const finalNum = parseInt(finalNumberMatch[1])
+              finalNumbers.push(finalNum)
+              console.log(`✅ Final request ${i + 1} - number: ${finalNum}`)
             }
+          } catch (err) {
+            console.warn(`Final base path request ${i + 1} failed (non-blocking):`, err)
           }
-        } catch (err) {
-          console.warn("Final base path request failed (non-blocking):", err)
+          // Wait between final requests
+          if (i < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 1500))
+          }
+        }
+        
+        // Log summary
+        if (regenerationNumbers.length > 0 && finalNumbers.length > 0) {
+          const lastRegen = regenerationNumbers[regenerationNumbers.length - 1]
+          const lastFinal = finalNumbers[finalNumbers.length - 1]
+          if (lastFinal === lastRegen) {
+            console.log(`✅ Success: Final number (${lastFinal}) matches last regeneration (${lastRegen})`)
+          } else {
+            console.warn(`⚠️ Warning: Final number (${lastFinal}) doesn't match last regeneration (${lastRegen})`)
+          }
         }
         
         console.log("Regeneration triggered successfully for base path")
