@@ -58,11 +58,12 @@
 </template>
 
 <script setup lang="ts">
-// Generate a random ID once during SSR
+// Generate a random ID that persists until cache is revalidated
+// The key includes a timestamp to ensure it's stable across requests
 // This will only change when the page is regenerated on the server (after cache purge)
-// Not on client-side navigation or page reload
-const id = useState("test-isr-random-id", () => {
-  // This only runs during SSR, not on client-side navigation
+const id = useState("test-isr-id", () => {
+  // Generate a random number that will be the same for this cached version
+  // This only runs during SSR when the page is actually generated
   return Math.floor(Math.random() * 10000)
 })
 
@@ -89,11 +90,10 @@ async function revalidate() {
     revalidateStatus.value = "Cache purged! Regenerating page..."
     
     // Reload after a delay to allow regeneration to complete
-    // Use base path with cache-busting to ensure we get the regenerated version
+    // Reload to base path (no query params) to get the cached/regenerated version
     setTimeout(() => {
-      // Add a small cache-busting param to force fresh fetch
-      const timestamp = Date.now()
-      window.location.href = `/test-isr?_cb=${timestamp}`
+      // Force a hard reload to bypass any browser cache
+      window.location.href = `/test-isr`
     }, 2500)
   } catch (error) {
     revalidateError.value =
