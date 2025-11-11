@@ -213,11 +213,16 @@ export default defineEventHandler(async (event) => {
         let basePathCacheInfo: any = null
         let freshContentReceived = false
         
-        // Wait a moment for initial purge propagation (Netlify says "a few seconds")
-        // We start with a 1 second wait, then retry with increasing delays
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        // Wait for initial purge propagation (Netlify says "a few seconds")
+        // Start with 2 seconds, then retry with exponential backoff
+        console.log(`⏳ Waiting 2 seconds for initial cache purge propagation...`)
+        await new Promise((resolve) => setTimeout(resolve, 2000))
         
-        for (let attempt = 1; attempt <= 5; attempt++) {
+        // Retry with exponential backoff: 2s, 3s, 5s, 8s, 13s (total ~31 seconds max)
+        const retryDelays = [2000, 3000, 5000, 8000, 13000]
+        const maxAttempts = retryDelays.length + 1 // 6 total attempts
+        
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           basePathResponse = await fetch(basePath, {
             method: "GET",
             headers: {
@@ -234,7 +239,7 @@ export default defineEventHandler(async (event) => {
           basePathCacheInfo = getCacheStatus(basePathResponse)
           const basePathStatus = basePathResponse.status
           
-          console.log(`Base path request attempt ${attempt}: ${basePathStatus}, cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
+          console.log(`Base path request attempt ${attempt}/${maxAttempts}: ${basePathStatus}, cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
           
           // If we got a cache miss, we have fresh content
           if (!basePathCacheInfo.hit) {
@@ -244,16 +249,16 @@ export default defineEventHandler(async (event) => {
           }
           
           // If still cached, wait longer and try again (cache purge propagation delay)
-          // Netlify says "a few seconds" - we use exponential backoff: 1s, 2s, 3s, 4s
-          if (attempt < 5) {
-            const waitTime = attempt * 1000 // 1s, 2s, 3s, 4s
-            console.log(`⚠️ Still cached, waiting ${waitTime}ms for purge propagation (attempt ${attempt + 1}/5)...`)
+          // Use exponential backoff with longer delays
+          if (attempt < maxAttempts) {
+            const waitTime = retryDelays[attempt - 1] // 2s, 3s, 5s, 8s, 13s
+            console.log(`⚠️ Still cached, waiting ${waitTime}ms for purge propagation (attempt ${attempt + 1}/${maxAttempts})...`)
             await new Promise((resolve) => setTimeout(resolve, waitTime))
           }
         }
         
         if (!freshContentReceived && basePathResponse) {
-          console.warn(`⚠️ Base path still showing cached content after 5 attempts - purge may need more time to propagate across all edge nodes`)
+          console.warn(`⚠️ Base path still showing cached content after ${maxAttempts} attempts (~31 seconds total) - purge may need more time to propagate across all edge nodes, or cache-busting headers may not be working`)
         }
         
         // Step 3: Wait for the base path to be cached (check Cache-Status header)
