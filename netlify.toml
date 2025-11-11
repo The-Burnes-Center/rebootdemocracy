@@ -4,10 +4,3 @@ publish = ".output/public"
 
 [build.environment]
 NODE_VERSION = "20.19.0"
-
-# Catch-all redirect to Nitro serverless function
-# Static files are served first, then this handles ISR pages and API routes
-[[redirects]]
-from = "/*"
-to = "/.netlify/functions/server"
-status = 200

@@ -6,7 +6,10 @@
     <div v-else>
       <h2>Data from API:</h2>
       <pre>{{ JSON.stringify(data, null, 2) }}</pre>
-      <button @click="revalidate" style="margin-top: 1rem; padding: 0.5rem 1rem;">
+      <p style="margin-top: 1rem; color: #666;">
+        Generated at: {{ data.timestamp }}
+      </p>
+      <button @click="revalidate" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">
         Revalidate Cache
       </button>
       <p v-if="revalidateStatus" style="margin-top: 1rem; color: green;">
@@ -17,38 +20,42 @@
 </template>
 
 <script setup>
-// Set cache tag header (as per Geist article)
-const event = useRequestEvent()
-if (import.meta.server && event) {
-  setResponseHeader(event, 'netlify-cache-tag', 'test-isr')
+// Set cache tag header as per Netlify docs
+const { ssrContext } = useNuxtApp()
+if (ssrContext) {
+  ssrContext.res.setHeader("Netlify-Cache-Tag", "test-isr")
 }
 
 // Fetch data
-const { data, pending, error } = useFetch('/api/test-isr')
+const { data, pending, error } = await useAsyncData("test-isr", async () => {
+  return await $fetch("/api/test-isr")
+})
 
 // Revalidation status
-const revalidateStatus = ref('')
+const revalidateStatus = ref("")
 
 // On-demand revalidation
 async function revalidate() {
-  revalidateStatus.value = 'Purging cache...'
+  revalidateStatus.value = "Purging cache..."
   try {
-    const response = await $fetch('/.netlify/functions/revalidate?tag=test-isr', {
-      method: 'GET'
+    await $fetch("/api/revalidate", {
+      method: "POST",
+      body: { tag: "test-isr" },
     })
-    revalidateStatus.value = 'Cache purged! Reload the page to see new data.'
+    revalidateStatus.value = "Cache purged! Reload the page to see new data."
     setTimeout(() => {
       window.location.reload()
     }, 1000)
   } catch (error) {
-    revalidateStatus.value = 'Error: ' + (error instanceof Error ? error.message : 'Failed to revalidate')
-    console.error('Revalidation error:', error)
+    revalidateStatus.value =
+      "Error: " + (error instanceof Error ? error.message : "Failed to revalidate")
+    console.error("Revalidation error:", error)
   }
 }
 
 // SEO
 useSeoMeta({
-  title: 'ISR Test Page',
-  description: 'Testing Incremental Static Regeneration with Nuxt 4'
+  title: "ISR Test Page",
+  description: "Testing Incremental Static Regeneration with Nuxt 4",
 })
 </script>
