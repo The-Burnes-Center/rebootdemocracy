@@ -73,6 +73,7 @@ When revalidation is triggered (via button click or webhook):
 
 ### 3. Cache Purge Process
 
+
 The revalidation endpoint performs:
 
 1. **Tag-based purge**: `purgeCache({ tags: ['test-isr'] })`
