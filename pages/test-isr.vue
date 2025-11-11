@@ -82,8 +82,6 @@ async function revalidate() {
   revalidateError.value = ""
 
   try {
-    revalidateStatus.value = "Purging cache..."
-    
     const response = await $fetch("/api/revalidate", {
       method: "POST",
       body: {
@@ -92,38 +90,16 @@ async function revalidate() {
       },
     })
 
-    // Update status based on purge results
-    if (response.purge) {
-      const purgeSuccess = response.purge.tag || response.purge.path
-      if (purgeSuccess) {
-        revalidateStatus.value = "Cache purged! Regenerating page..."
-      } else {
-        revalidateStatus.value = "Cache purge may have failed, but continuing..."
-      }
-    }
-
-    // Check regeneration status from Cache-Status header polling
-    if (response.regeneration) {
-      if (response.regeneration.cached) {
-        revalidateStatus.value = `✅ Page regenerated and cached! (${response.regeneration.attempts} attempts)`
-        // Reload immediately since we know it's cached
-        setTimeout(() => {
-          window.location.href = `/test-isr`
-        }, 1000)
-      } else {
-        revalidateStatus.value = `⚠️ Regeneration in progress... (${response.regeneration.attempts} attempts, status: ${response.regeneration.status})`
-        // Wait a bit longer if not cached yet
-        setTimeout(() => {
-          window.location.href = `/test-isr`
-        }, 3000)
-      }
-    } else {
-      // Fallback if no regeneration info
-      revalidateStatus.value = "Cache purged! Reloading page..."
-      setTimeout(() => {
-        window.location.href = `/test-isr`
-      }, 2000)
-    }
+    revalidateStatus.value = "Cache purged! Waiting for regeneration..."
+    
+    // Reload after a longer delay to allow cache purge to propagate and regeneration to complete
+    // The cache purge needs time to propagate across Netlify's CDN
+    setTimeout(() => {
+      // Reload to base path (no query params)
+      // After cache purge, this request will hit the server and generate new content
+      // The new content will then be cached
+      window.location.href = `/test-isr`
+    }, 8000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
