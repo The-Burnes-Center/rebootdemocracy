@@ -170,7 +170,7 @@ export default defineEventHandler(async (event) => {
         console.log(`🔄 Triggering regeneration for: ${basePath}`)
         
         // Step 1: Make a request with cache-busting query param to trigger server-side regeneration
-        // This ensures the server generates new content
+        // The fetch() promise resolves when the response is ready, so we know regeneration is complete
         const regenerateUrl = `${basePath}?_regen=${Date.now()}`
         const regenerateResponse = await fetch(regenerateUrl, {
           method: "GET",
@@ -180,14 +180,15 @@ export default defineEventHandler(async (event) => {
           },
         })
         
+        // Await the response body to ensure the server has fully generated the new content
+        await regenerateResponse.text()
+        
         const regenerateStatus = regenerateResponse.status
-        console.log(`✅ Regeneration triggered: ${regenerateStatus}`)
+        console.log(`✅ Regeneration complete: ${regenerateStatus}`)
         
-        // Step 2: Wait a moment for the regeneration to complete
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        
-        // Step 3: Make a request to the BASE PATH (no query params) to cache the new content
-        // This is critical - we need to request the base path so it gets cached with the new content
+        // Step 2: Make a request to the BASE PATH (no query params) to cache the new content
+        // Since cache was purged, this will hit the server and get the newly generated content
+        // The fetch() promise resolves when the response is ready, so we know it's been generated
         console.log(`🔄 Requesting base path to cache new content...`)
         const basePathResponse = await fetch(basePath, {
           method: "GET",
@@ -196,11 +197,14 @@ export default defineEventHandler(async (event) => {
           },
         })
         
+        // Await the response body to ensure the content is fully generated
+        await basePathResponse.text()
+        
         const basePathStatus = basePathResponse.status
         const basePathCacheInfo = getCacheStatus(basePathResponse)
         console.log(`Base path request: ${basePathStatus}, cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
         
-        // Step 4: Wait for the base path to be cached (check Cache-Status header)
+        // Step 3: Wait for the base path to be cached (check Cache-Status header)
         // The base path should now be cached with the new content
         console.log(`⏳ Waiting for base path to be cached (checking Cache-Status header)...`)
         regenerationResult = await waitForCache(basePath, 15, 800)
