@@ -169,7 +169,8 @@ export default defineEventHandler(async (event) => {
         
         console.log(`🔄 Triggering regeneration for: ${basePath}`)
         
-        // Make a request to trigger regeneration (with cache-busting query param)
+        // Step 1: Make a request with cache-busting query param to trigger server-side regeneration
+        // This ensures the server generates new content
         const regenerateUrl = `${basePath}?_regen=${Date.now()}`
         const regenerateResponse = await fetch(regenerateUrl, {
           method: "GET",
@@ -182,7 +183,25 @@ export default defineEventHandler(async (event) => {
         const regenerateStatus = regenerateResponse.status
         console.log(`✅ Regeneration triggered: ${regenerateStatus}`)
         
-        // Wait for the base path to be cached (check Cache-Status header)
+        // Step 2: Wait a moment for the regeneration to complete
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        
+        // Step 3: Make a request to the BASE PATH (no query params) to cache the new content
+        // This is critical - we need to request the base path so it gets cached with the new content
+        console.log(`🔄 Requesting base path to cache new content...`)
+        const basePathResponse = await fetch(basePath, {
+          method: "GET",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        })
+        
+        const basePathStatus = basePathResponse.status
+        const basePathCacheInfo = getCacheStatus(basePathResponse)
+        console.log(`Base path request: ${basePathStatus}, cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
+        
+        // Step 4: Wait for the base path to be cached (check Cache-Status header)
+        // The base path should now be cached with the new content
         console.log(`⏳ Waiting for base path to be cached (checking Cache-Status header)...`)
         regenerationResult = await waitForCache(basePath, 15, 800)
         
