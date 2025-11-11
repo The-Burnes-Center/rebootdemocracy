@@ -5,17 +5,5 @@ publish = ".output/public"
 [build.environment]
 NODE_VERSION = "20.19.0"
 
-# Redirect API routes to serverless function
-[[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/server"
-status = 200
-force = true
-
-# Redirect ISR pages to serverless function
-# Static files are served first, so this only applies to non-static routes
-[[redirects]]
-from = "/test-isr"
-to = "/.netlify/functions/server"
-status = 200
-force = false
+# Nitro's netlify preset automatically handles routing
+# No explicit redirects needed - Nitro generates the necessary routing
