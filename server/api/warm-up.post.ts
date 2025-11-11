@@ -1,9 +1,15 @@
 export default defineEventHandler(async (event) => {
   try {
+    // Log that warm-up was triggered
+    console.log("🔥 Warm-up endpoint called")
+    console.log("Request headers:", Object.fromEntries(event.headers.entries()))
+    
     // Get the site URL from headers or environment
     const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
     const protocol = event.headers.get("x-forwarded-proto") || "http"
     const siteUrl = `${protocol}://${host}`
+    
+    console.log(`Site URL: ${siteUrl}`)
     
     // Pages to warm up after deployment
     const pagesToWarmUp = [
