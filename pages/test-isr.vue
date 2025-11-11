@@ -58,10 +58,11 @@
 </template>
 
 <script setup lang="ts">
-// Generate a new random ID on each SSR render
-// This will be different on each server-side render
-const id = computed(() => {
-  // Generate fresh random number - this runs on each SSR
+// Generate a random ID once during SSR
+// This will only change when the page is regenerated on the server (after cache purge)
+// Not on client-side navigation or page reload
+const id = useState("test-isr-random-id", () => {
+  // This only runs during SSR, not on client-side navigation
   return Math.floor(Math.random() * 10000)
 })
 
