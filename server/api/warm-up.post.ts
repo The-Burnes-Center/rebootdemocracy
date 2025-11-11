@@ -21,6 +21,16 @@ export default defineEventHandler(async (event) => {
     
     const results = []
     
+    // Helper to check Cache-Status header
+    function getCacheStatus(response: Response): string {
+      const cacheStatus = response.headers.get("Cache-Status")
+      if (!cacheStatus) return "unknown"
+      if (cacheStatus.includes("hit")) return "hit"
+      if (cacheStatus.includes("fwd=stale")) return "stale"
+      if (cacheStatus.includes("fwd=miss") || cacheStatus.includes("miss")) return "miss"
+      return "unknown"
+    }
+
     for (const path of pagesToWarmUp) {
       try {
         const url = `${siteUrl}${path}`
@@ -37,15 +47,17 @@ export default defineEventHandler(async (event) => {
         const status = response.status
         const text = await response.text()
         const hasContent = text.length > 0
+        const cacheStatus = getCacheStatus(response)
         
         results.push({
           path,
           status,
           success: status === 200 && hasContent,
           contentLength: text.length,
+          cacheStatus,
         })
         
-        console.log(`✅ ${path}: ${status} (${text.length} bytes)`)
+        console.log(`✅ ${path}: ${status} (${text.length} bytes, cache: ${cacheStatus})`)
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
         console.error(`❌ Failed to warm up ${path}:`, errorMsg)
@@ -54,6 +66,7 @@ export default defineEventHandler(async (event) => {
           status: 0,
           success: false,
           error: errorMsg,
+          cacheStatus: "error",
         })
       }
     }
