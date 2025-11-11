@@ -86,9 +86,42 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    // After successful cache purge, trigger regeneration by fetching the page
+    // This ensures the page is regenerated immediately
+    if (body.path) {
+      try {
+        const host = event.headers.get("host") || "localhost:8888"
+        const protocol = event.headers.get("x-forwarded-proto") || "http"
+        const siteUrl = `${protocol}://${host}`
+        
+        // Fetch the page to trigger regeneration (with cache-busting)
+        const timestamp = Date.now()
+        const regenerateUrl = `${siteUrl}${body.path}?_revalidate=${timestamp}`
+        
+        console.log(`Triggering regeneration: ${regenerateUrl}`)
+        
+        await fetch(regenerateUrl, {
+          method: "GET",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        }).catch((err) => {
+          // Non-blocking - regeneration will happen on next request anyway
+          console.warn("Regeneration trigger failed (non-blocking):", err)
+        })
+        
+        console.log("Regeneration triggered successfully")
+      } catch (regenerateError) {
+        // Non-blocking - regeneration will happen on next request
+        console.warn("Regeneration trigger error (non-blocking):", regenerateError)
+      }
+    }
+
     setResponseStatus(event, 202)
     return {
-      message: "Cache purged successfully",
+      message: "Cache purged and regeneration triggered",
       tag: body.tag,
       path: body.path,
     }
