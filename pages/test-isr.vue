@@ -40,12 +40,16 @@ async function revalidate() {
   try {
     await $fetch("/api/revalidate", {
       method: "POST",
-      body: { tag: "test-isr" },
+      body: { tag: "test-isr", path: "/test-isr" },
     })
-    revalidateStatus.value = "Cache purged! Reload the page to see new data."
-    setTimeout(() => {
-      window.location.reload()
-    }, 1000)
+    revalidateStatus.value = "Cache purged! Regenerating page..."
+    
+    // Wait a bit for regeneration, then reload with cache-busting
+    setTimeout(async () => {
+      // Reload with cache-busting query param to ensure fresh data
+      const timestamp = Date.now()
+      window.location.href = `/test-isr?_revalidate=${timestamp}`
+    }, 2000)
   } catch (error) {
     revalidateStatus.value =
       "Error: " + (error instanceof Error ? error.message : "Failed to revalidate")
