@@ -129,8 +129,10 @@ export default defineEventHandler(async (event) => {
         // This is critical - we need to cache the base path with the new content
         await new Promise((resolve) => setTimeout(resolve, 1000))
         
+        console.log("Starting base path cache updates...")
         for (let i = 0; i < 3; i++) {
           try {
+            console.log(`Base path cache update attempt ${i + 1}...`)
             const response = await fetch(basePath, {
               method: "GET",
               headers: {
@@ -142,7 +144,15 @@ export default defineEventHandler(async (event) => {
               },
             })
             const text = await response.text()
-            console.log(`Base path cache update ${i + 1} completed: ${response.status}, body length: ${text.length}`)
+            // Check if the response contains a number (to verify it's the test page)
+            const hasNumber = /\d{4}/.test(text)
+            console.log(`Base path cache update ${i + 1} completed: ${response.status}, body length: ${text.length}, has number: ${hasNumber}`)
+            
+            // Extract the number from the response to verify it's new
+            const numberMatch = text.match(/<code>(\d+)<\/code>/)
+            if (numberMatch) {
+              console.log(`Number in response ${i + 1}: ${numberMatch[1]}`)
+            }
           } catch (err) {
             console.warn(`Base path cache update ${i + 1} failed (non-blocking):`, err)
           }
@@ -151,6 +161,7 @@ export default defineEventHandler(async (event) => {
             await new Promise((resolve) => setTimeout(resolve, 1500))
           }
         }
+        console.log("Base path cache updates completed")
         
         console.log("Regeneration triggered successfully for base path")
       } catch (regenerateError) {
