@@ -59,12 +59,15 @@
 
 <script setup lang="ts">
 // Generate a random ID that persists until cache is revalidated
-// The key includes a timestamp to ensure it's stable across requests
 // This will only change when the page is regenerated on the server (after cache purge)
+// The key must be static so the same value is used for the cached version
 const id = useState("test-isr-id", () => {
   // Generate a random number that will be the same for this cached version
   // This only runs during SSR when the page is actually generated
-  return Math.floor(Math.random() * 10000)
+  // Each time the server renders this page (after cache purge), a new number is generated
+  const randomNum = Math.floor(Math.random() * 10000)
+  console.log(`[SSR] Generated new random number: ${randomNum}`)
+  return randomNum
 })
 
 // Revalidation state
