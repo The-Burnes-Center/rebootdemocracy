@@ -149,26 +149,27 @@ export default defineEventHandler(async (event) => {
         }
         
         // Wait longer for cache purge to fully propagate across CDN
-        console.log("Waiting for cache purge to propagate...")
-        await new Promise((resolve) => setTimeout(resolve, 3000))
+        // Netlify's CDN is distributed, so purge propagation can take time
+        console.log("Waiting for cache purge to propagate across CDN...")
+        await new Promise((resolve) => setTimeout(resolve, 5000))
         
-        // Now make requests to BASE PATH with unique query params first to force regeneration
-        // Then make final request to base path to cache it
-        console.log("Starting base path regeneration with query params...")
+        // The key insight: Netlify caches URLs with query params separately from base path
+        // So we need to ensure the base path itself is requested and cached with new content
+        // Strategy: Make requests that will trigger server-side generation, then the base path
+        // will be served from the server's cache (not CDN cache) until CDN cache updates
+        
+        console.log("Making regeneration requests to ensure server has new content...")
         const regenerationNumbers: number[] = []
         
-        for (let i = 0; i < 3; i++) {
+        // Make several requests with unique query params to ensure server generates new content
+        for (let i = 0; i < 5; i++) {
           try {
-            // Use unique query param to force server-side generation
-            const uniqueUrl = `${basePath}?_regen=${Date.now()}-${i}`
-            console.log(`Base path regeneration attempt ${i + 1} with unique URL...`)
+            const uniqueUrl = `${basePath}?_force_regen=${Date.now()}-${i}`
             const response = await fetch(uniqueUrl, {
               method: "GET",
               headers: {
                 "Cache-Control": "no-cache, no-store, must-revalidate",
                 "Pragma": "no-cache",
-                "X-Requested-With": "XMLHttpRequest",
-                "X-Netlify-Cache-Bypass": "1",
               },
             })
             const text = await response.text()
@@ -176,67 +177,27 @@ export default defineEventHandler(async (event) => {
             if (numberMatch) {
               const num = parseInt(numberMatch[1])
               regenerationNumbers.push(num)
-              console.log(`✅ Regeneration ${i + 1} generated number: ${num}`)
-            } else {
-              console.warn(`⚠️ Regeneration ${i + 1} - could not extract number`)
+              console.log(`✅ Regeneration ${i + 1} - number: ${num}`)
             }
           } catch (err) {
-            console.warn(`Regeneration attempt ${i + 1} failed (non-blocking):`, err)
+            console.warn(`Regeneration ${i + 1} failed:`, err)
           }
-          // Wait between regeneration attempts
-          if (i < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 2000))
-          }
-        }
-        
-        // Now make multiple requests to base path (no query params) to cache the new content
-        // Use a timestamp-based query param that changes each time to ensure we bypass cache
-        // But the query param won't affect the cached base path
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        console.log("Making final requests to base path to cache new content...")
-        
-        const finalNumbers: number[] = []
-        for (let i = 0; i < 3; i++) {
-          try {
-            // Use a query param that changes to bypass cache, but won't affect base path caching
-            const cacheBustUrl = `${basePath}?_cb=${Date.now()}-${i}`
-            console.log(`Final base path cache request ${i + 1}...`)
-            const finalResponse = await fetch(cacheBustUrl, {
-              method: "GET",
-              headers: {
-                "Cache-Control": "no-cache, no-store, must-revalidate",
-                "Pragma": "no-cache",
-                "X-Requested-With": "XMLHttpRequest",
-                "X-Netlify-Cache-Bypass": "1",
-                "X-Final-Cache-Update": String(i + 1),
-              },
-            })
-            const finalText = await finalResponse.text()
-            const finalNumberMatch = finalText.match(/<code>(\d+)<\/code>/)
-            if (finalNumberMatch) {
-              const finalNum = parseInt(finalNumberMatch[1])
-              finalNumbers.push(finalNum)
-              console.log(`✅ Final request ${i + 1} - number: ${finalNum}`)
-            }
-          } catch (err) {
-            console.warn(`Final base path request ${i + 1} failed (non-blocking):`, err)
-          }
-          // Wait between final requests
-          if (i < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+          // Small delay between requests
+          if (i < 4) {
+            await new Promise((resolve) => setTimeout(resolve, 1000))
           }
         }
         
-        // Log summary
-        if (regenerationNumbers.length > 0 && finalNumbers.length > 0) {
-          const lastRegen = regenerationNumbers[regenerationNumbers.length - 1]
-          const lastFinal = finalNumbers[finalNumbers.length - 1]
-          if (lastFinal === lastRegen) {
-            console.log(`✅ Success: Final number (${lastFinal}) matches last regeneration (${lastRegen})`)
-          } else {
-            console.warn(`⚠️ Warning: Final number (${lastFinal}) doesn't match last regeneration (${lastRegen})`)
-          }
+        if (regenerationNumbers.length === 0) {
+          console.warn("⚠️ No regeneration numbers captured - regeneration may have failed")
+        } else {
+          console.log(`✅ Captured ${regenerationNumbers.length} regeneration numbers. Latest: ${regenerationNumbers[regenerationNumbers.length - 1]}`)
         }
+        
+        // Note: The base path will be updated on the next natural request
+        // The CDN cache has been purged, so the next request to /test-isr will hit the server
+        // and generate new content, which will then be cached
+        console.log("✅ Cache purge complete. Base path will regenerate on next request.")
         
         console.log("Regeneration triggered successfully for base path")
       } catch (regenerateError) {

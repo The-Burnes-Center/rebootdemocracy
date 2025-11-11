@@ -90,15 +90,16 @@ async function revalidate() {
       },
     })
 
-    revalidateStatus.value = "Cache purged! Regenerating page..."
+    revalidateStatus.value = "Cache purged! Waiting for regeneration..."
     
-    // Reload after a longer delay to allow regeneration to complete
-    // The regeneration process takes time (cache purge + multiple regeneration attempts)
+    // Reload after a longer delay to allow cache purge to propagate and regeneration to complete
+    // The cache purge needs time to propagate across Netlify's CDN
     setTimeout(() => {
-      // Reload to base path (no query params) to get the cached/regenerated version
-      // The base path should now have the new content cached
+      // Reload to base path (no query params)
+      // After cache purge, this request will hit the server and generate new content
+      // The new content will then be cached
       window.location.href = `/test-isr`
-    }, 6000)
+    }, 8000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
