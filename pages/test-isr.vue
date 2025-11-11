@@ -22,7 +22,6 @@
   </div>
 </template>
 
-<script setup>
-// Simple random ID like example - this is all we need for ISR to work
-const id = useState("id", () => new Date().getMilliseconds())
+<script setup lang="ts">
+const id = useState("id", () => new Date().getMilliseconds());
 </script>

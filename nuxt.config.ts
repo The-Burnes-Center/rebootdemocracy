@@ -1,10 +1,8 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-13",
   future: {
     compatibilityVersion: 4,
-  },
-  nitro: {
-    preset: "netlify",
   },
   routeRules: {
     // Homepage - prerender
@@ -14,4 +12,4 @@ export default defineNuxtConfig({
       isr: true,
     },
   },
-})
+});
