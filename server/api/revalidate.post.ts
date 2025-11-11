@@ -187,22 +187,52 @@ export default defineEventHandler(async (event) => {
         console.log(`✅ Regeneration complete: ${regenerateStatus}`)
         
         // Step 2: Make a request to the BASE PATH (no query params) to cache the new content
-        // Since cache was purged, this will hit the server and get the newly generated content
-        // The fetch() promise resolves when the response is ready, so we know it's been generated
+        // We need to ensure this bypasses cache completely to get fresh content
+        // Even though we purged, there might be propagation delay, so we use aggressive cache-busting
         console.log(`🔄 Requesting base path to cache new content...`)
-        const basePathResponse = await fetch(basePath, {
-          method: "GET",
-          headers: {
-            "Cache-Control": "no-cache",
-          },
-        })
         
-        // Await the response body to ensure the content is fully generated
-        await basePathResponse.text()
+        // Make multiple requests with cache-busting to ensure we get fresh content
+        // The first request might still hit cache, so we make a few attempts
+        let basePathResponse: Response | null = null
+        let basePathCacheInfo: any = null
+        let freshContentReceived = false
         
-        const basePathStatus = basePathResponse.status
-        const basePathCacheInfo = getCacheStatus(basePathResponse)
-        console.log(`Base path request: ${basePathStatus}, cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          basePathResponse = await fetch(basePath, {
+            method: "GET",
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Pragma": "no-cache",
+              "X-Netlify-Cache-Bypass": "1",
+              "X-Force-Regeneration": String(attempt),
+            },
+          })
+          
+          // Await the response body to ensure the content is fully generated
+          await basePathResponse.text()
+          
+          basePathCacheInfo = getCacheStatus(basePathResponse)
+          const basePathStatus = basePathResponse.status
+          
+          console.log(`Base path request attempt ${attempt}: ${basePathStatus}, cache: hit=${basePathCacheInfo.hit}, edge=${basePathCacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${basePathCacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
+          
+          // If we got a cache miss, we have fresh content
+          if (!basePathCacheInfo.hit) {
+            freshContentReceived = true
+            console.log(`✅ Fresh content received on attempt ${attempt}`)
+            break
+          }
+          
+          // If still cached, wait a bit and try again (cache purge propagation delay)
+          if (attempt < 3) {
+            console.log(`⚠️ Still cached, waiting for purge propagation...`)
+            await new Promise((resolve) => setTimeout(resolve, 300))
+          }
+        }
+        
+        if (!freshContentReceived && basePathResponse) {
+          console.warn(`⚠️ Base path still showing cached content after 3 attempts - may need to wait longer for purge propagation`)
+        }
         
         // Step 3: Wait for the base path to be cached (check Cache-Status header)
         // The base path should now be cached with the new content
