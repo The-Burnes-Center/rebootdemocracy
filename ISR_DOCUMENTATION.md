@@ -64,7 +64,7 @@ When revalidation is triggered (via button click or webhook):
 6. Make 5 regeneration requests with unique query params
    (These ensure server generates new content)
    ↓
-7. Client reloads page after 8 seconds
+7. Client reloads page after 8 second
    ↓
 8. Next request hits server (cache is purged), generates new content
    ↓
