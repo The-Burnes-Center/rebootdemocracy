@@ -215,6 +215,58 @@ export default defineNuxtConfig({
   - `stale-while-revalidate=31536000`: Serve stale content while revalidating (1 year)
   - `durable`: Store in shared durable cache across edge nodes
 
+## Configuration Files
+
+### package.json
+
+```json
+{
+  "name": "nuxt-isr-minimal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@netlify/functions": "^5.1.0",
+    "nuxt": "^3.14.159",
+    "vue": "latest",
+    "vue-router": "latest"
+  }
+}
+```
+
+**Key Dependencies**:
+- `nuxt: ^3.14.159` - Nuxt 3 framework (with Nuxt 4 compatibility mode via `compatibilityVersion: 4`)
+- `@netlify/functions: ^5.1.0` - Netlify Functions SDK for cache purge API
+- `vue: latest` - Vue.js framework
+- `vue-router: latest` - Vue Router
+
+**Scripts**:
+- `build`: Builds the Nuxt application for production
+- `dev`: Starts development server
+- `preview`: Preview production build locally
+- `postinstall`: Runs `nuxt prepare` after npm install
+
+### netlify.toml
+
+```toml
+[build]
+command = "npm run build"
+publish = "dist"
+
+[build.environment]
+NODE_VERSION = "20.19.0"
+```
+
+**Configuration**:
+- **Build command**: `npm run build` (runs `nuxt build`)
+- **Publish directory**: `dist` (Nuxt 3 default output directory)
+- **Node.js version**: 20.19.0
+
 ## Environment Variables
 
 ### Required
@@ -344,6 +396,7 @@ According to Netlify documentation:
 
 - [Netlify Caching Documentation](https://docs.netlify.com/build/caching/overview/)
 - [Netlify Cache Tags and Purge API](https://www.netlify.com/blog/cache-tags-and-purge-api-on-netlify/)
-- [Nuxt 4 ISR Documentation](https://nuxt.com/docs/guide/concepts/rendering#incremental-static-regeneration-isr)
+- [Nuxt 3 ISR Documentation](https://nuxt.com/docs/guide/concepts/rendering#incremental-static-regeneration-isr)
+- [Nuxt 4 Compatibility Mode](https://nuxt.com/docs/getting-started/upgrade#compatibility-version)
 - [Netlify Functions Documentation](https://docs.netlify.com/functions/overview/)
 
