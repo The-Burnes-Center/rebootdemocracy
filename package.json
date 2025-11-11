@@ -9,6 +9,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@netlify/cache": "^1.11.2",
     "@netlify/functions": "^5.1.0",
     "nuxt": "^3.14.159",
     "vue": "latest",

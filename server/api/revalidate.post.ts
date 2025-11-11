@@ -1,30 +1,15 @@
 import { purgeCache } from "@netlify/functions"
+import { getCacheStatus } from "@netlify/cache"
 
 /**
- * Check Cache-Status header to determine cache state
- * Returns: 'miss' | 'hit' | 'stale' | 'unknown'
- */
-function getCacheStatus(response: Response): string {
-  const cacheStatus = response.headers.get("Cache-Status")
-  if (!cacheStatus) return "unknown"
-  
-  // Parse Cache-Status header (format: "Netlify Edge"; hit or "Netlify Edge"; fwd=miss)
-  if (cacheStatus.includes("hit")) return "hit"
-  if (cacheStatus.includes("fwd=stale")) return "stale"
-  if (cacheStatus.includes("fwd=miss") || cacheStatus.includes("miss")) return "miss"
-  
-  return "unknown"
-}
-
-/**
- * Poll a URL until it's cached, checking Cache-Status header
- * Returns when cache status is 'hit' or max attempts reached
+ * Poll a URL until it's cached, using Netlify's getCacheStatus utility
+ * Returns when cache status shows a hit or max attempts reached
  */
 async function waitForCache(
   url: string,
   maxAttempts: number = 15,
   delayMs: number = 800
-): Promise<{ cached: boolean; attempts: number; finalStatus: string }> {
+): Promise<{ cached: boolean; attempts: number; finalStatus: string; cacheInfo?: any }> {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const response = await fetch(url, {
@@ -34,11 +19,19 @@ async function waitForCache(
         },
       })
       
-      const cacheStatus = getCacheStatus(response)
-      console.log(`Cache check attempt ${attempt}/${maxAttempts}: ${cacheStatus}`)
+      // Use Netlify's getCacheStatus utility for accurate cache status
+      const cacheInfo = getCacheStatus(response)
+      const isHit = cacheInfo.hit
       
-      if (cacheStatus === "hit") {
-        return { cached: true, attempts, finalStatus: cacheStatus }
+      console.log(`Cache check attempt ${attempt}/${maxAttempts}: hit=${isHit}, edge=${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable=${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'}`)
+      
+      if (isHit) {
+        return { 
+          cached: true, 
+          attempts: attempt, 
+          finalStatus: "hit",
+          cacheInfo 
+        }
       }
       
       // If not cached yet, wait before next attempt
@@ -53,7 +46,12 @@ async function waitForCache(
     }
   }
   
-  return { cached: false, attempts: maxAttempts, finalStatus: "timeout" }
+  return { 
+    cached: false, 
+    attempts: maxAttempts, 
+    finalStatus: "timeout",
+    cacheInfo: null
+  }
 }
 
 export default defineEventHandler(async (event) => {
@@ -160,7 +158,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Trigger regeneration and wait for it to be cached
-    let regenerationResult: { cached: boolean; attempts: number; finalStatus: string } | null = null
+    let regenerationResult: { cached: boolean; attempts: number; finalStatus: string; cacheInfo?: any } | null = null
     
     if (body.path) {
       try {
@@ -207,6 +205,7 @@ export default defineEventHandler(async (event) => {
             cached: regenerationResult.cached,
             attempts: regenerationResult.attempts,
             status: regenerationResult.finalStatus,
+            cacheInfo: regenerationResult.cacheInfo,
           }
         : null,
       tag: body.tag,

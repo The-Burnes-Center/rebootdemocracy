@@ -21,15 +21,8 @@ export default defineEventHandler(async (event) => {
     
     const results = []
     
-    // Helper to check Cache-Status header
-    function getCacheStatus(response: Response): string {
-      const cacheStatus = response.headers.get("Cache-Status")
-      if (!cacheStatus) return "unknown"
-      if (cacheStatus.includes("hit")) return "hit"
-      if (cacheStatus.includes("fwd=stale")) return "stale"
-      if (cacheStatus.includes("fwd=miss") || cacheStatus.includes("miss")) return "miss"
-      return "unknown"
-    }
+    // Import Netlify's getCacheStatus utility
+    const { getCacheStatus } = await import("@netlify/cache")
 
     for (const path of pagesToWarmUp) {
       try {
@@ -47,7 +40,10 @@ export default defineEventHandler(async (event) => {
         const status = response.status
         const text = await response.text()
         const hasContent = text.length > 0
-        const cacheStatus = getCacheStatus(response)
+        
+        // Use Netlify's getCacheStatus utility for accurate cache status
+        const cacheInfo = getCacheStatus(response)
+        const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
         
         results.push({
           path,
@@ -55,9 +51,14 @@ export default defineEventHandler(async (event) => {
           success: status === 200 && hasContent,
           contentLength: text.length,
           cacheStatus,
+          cacheInfo: {
+            hit: cacheInfo.hit,
+            edgeHit: cacheInfo.caches?.edge?.hit || false,
+            durableHit: cacheInfo.caches?.durable?.hit || false,
+          },
         })
         
-        console.log(`✅ ${path}: ${status} (${text.length} bytes, cache: ${cacheStatus})`)
+        console.log(`✅ ${path}: ${status} (${text.length} bytes, cache: ${cacheStatus}, edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable: ${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'})`)
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
         console.error(`❌ Failed to warm up ${path}:`, errorMsg)
