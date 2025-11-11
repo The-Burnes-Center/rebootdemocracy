@@ -86,19 +86,19 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // After successful cache purge, trigger regeneration by fetching the page
-    // This ensures the page is regenerated immediately
+    // After successful cache purge, trigger regeneration by fetching the base path
+    // This ensures the page is regenerated for the base URL (without query params)
     if (body.path) {
       try {
         const host = event.headers.get("host") || "localhost:8888"
         const protocol = event.headers.get("x-forwarded-proto") || "http"
         const siteUrl = `${protocol}://${host}`
         
-        // Fetch the page to trigger regeneration (with cache-busting)
-        const timestamp = Date.now()
-        const regenerateUrl = `${siteUrl}${body.path}?_revalidate=${timestamp}`
+        // Use the base path without query params to regenerate the main cache entry
+        // Add a cache-busting header to ensure we hit the server, not CDN cache
+        const regenerateUrl = `${siteUrl}${body.path}`
         
-        console.log(`Triggering regeneration: ${regenerateUrl}`)
+        console.log(`Triggering regeneration for base path: ${regenerateUrl}`)
         
         await fetch(regenerateUrl, {
           method: "GET",
@@ -106,13 +106,15 @@ export default defineEventHandler(async (event) => {
             "Cache-Control": "no-cache, no-store, must-revalidate",
             "Pragma": "no-cache",
             "X-Requested-With": "XMLHttpRequest",
+            // Add a header to bypass CDN cache
+            "X-Netlify-Cache-Bypass": "1",
           },
         }).catch((err) => {
           // Non-blocking - regeneration will happen on next request anyway
           console.warn("Regeneration trigger failed (non-blocking):", err)
         })
         
-        console.log("Regeneration triggered successfully")
+        console.log("Regeneration triggered successfully for base path")
       } catch (regenerateError) {
         // Non-blocking - regeneration will happen on next request
         console.warn("Regeneration trigger error (non-blocking):", regenerateError)
