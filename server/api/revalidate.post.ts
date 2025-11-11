@@ -188,12 +188,19 @@ export default defineEventHandler(async (event) => {
         
         // Step 2: Make a request to the BASE PATH (no query params) to cache the new content
         // 
-        // IMPORTANT: Why we need to purge with ISR:
+        // IMPORTANT: Why we need to purge with ISR (not just stale-while-revalidate):
+        // 
+        // stale-while-revalidate behavior:
+        // - Only works when cache is EXPIRED (stale)
+        // - Serves stale content while regenerating in background
+        // - Great for time-based regeneration, but not for on-demand updates
+        //
+        // Why we purge for on-demand revalidation:
         // - ISR regenerates pages based on TTL (time), not content changes
-        // - Without purging, old cached content would be served until TTL expires
+        // - Without purging, old cached content would be served until TTL expires (could be years!)
+        // - stale-while-revalidate won't trigger if cache is still valid (not expired)
         // - With purging, we force immediate regeneration when content changes
-        // - ISR's "stale-while-revalidate" can serve stale content while regenerating,
-        //   but we want fresh content immediately, so we purge first
+        // - We want fresh content immediately, not stale content while regenerating
         //
         // Cache purge propagation: Netlify documentation states purge typically
         // completes within "a few seconds" across the entire network.
