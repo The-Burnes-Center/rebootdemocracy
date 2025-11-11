@@ -1,13 +1,6 @@
 [build]
 command = "npm run build"
-publish = ".output/public"
+publish = "dist"
 
 [build.environment]
 NODE_VERSION = "20.19.0"
-
-# Catch-all redirect to Nitro serverless function
-# Static files are served first, then non-static routes go to the serverless function
-[[redirects]]
-from = "/*"
-to = "/.netlify/functions/server"
-status = 200
