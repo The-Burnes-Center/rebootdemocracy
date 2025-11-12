@@ -86,12 +86,9 @@ const id = useState("test-isr-id", () => {
   // Generate a random number that will be the same for this cached version
   // This only runs during SSR when the page is actually generated
   // Each time the server renders this page (after cache purge), a new number is generated
-  // Use timestamp + random to ensure uniqueness
   const randomNum = Math.floor(Math.random() * 10000)
-  const timestamp = Date.now()
-  const uniqueId = randomNum + timestamp
-  console.log(`[SSR] Generated new random number: ${randomNum}, unique ID: ${uniqueId}`)
-  return randomNum // Still return just the random number for display
+  console.log(`[SSR] Generated new random number: ${randomNum}`)
+  return randomNum
 })
 
 // No complex reload logic - just let ISR handle regeneration naturally
@@ -130,13 +127,12 @@ async function revalidate() {
     const message = response.note || "Cache purged successfully"
     revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
     
-    // Reload with cache-busting to ensure we bypass browser cache and get fresh content
+    // Reload the same route - ISR will regenerate on next request
     // Wait longer for purge to propagate across all Netlify edge nodes
+    // Use forceReload to bypass browser cache without changing the URL
     setTimeout(() => {
-      // Use cache-busting query param to bypass browser cache and force fresh request
-      // Also helps bypass any edge cache that hasn't been purged yet
-      const timestamp = Date.now()
-      window.location.href = `/test-isr?_revalidate=${timestamp}`
+      // Force reload without query params to keep the route the same
+      window.location.reload()
     }, 8000) // Wait 8 seconds for purge to propagate
   } catch (error) {
     revalidateError.value =
