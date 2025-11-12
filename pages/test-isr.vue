@@ -60,10 +60,10 @@
 <script setup lang="ts">
 // Set cache tag during SSR so we can purge this page by tag
 try {
-  const { ssrContext } = useNuxtApp()
-  if (ssrContext?.res) {
+  const event = useRequestEvent()
+  if (event) {
     // Use a stable tag for this route - Netlify will cache the page with this tag
-    ssrContext.res.setHeader('Netlify-Cache-Tag', 'test-isr')
+    setResponseHeader(event, 'Netlify-Cache-Tag', 'test-isr')
   }
 } catch (error) {
   // Non-critical - cache tag is optional, page will still work
