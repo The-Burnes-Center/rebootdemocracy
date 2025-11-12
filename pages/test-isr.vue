@@ -22,15 +22,40 @@
     <p style="text-align: center; color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
       Generated at: {{ generatedAt }}
     </p>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; background: #f0f7ff; border-radius: 8px; border-left: 4px solid #2196f3;">
+      <h2 style="margin-top: 0; color: #1976d2;">API Data (Fetched During SSR)</h2>
+      <p style="color: #555; margin-bottom: 1rem;">
+        This data is fetched from an API endpoint during server-side rendering.
+        It only changes when the page is regenerated after cache purge.
+      </p>
+      
+      <div v-if="apiData" style="background: white; padding: 1rem; border-radius: 4px;">
+        <p style="margin: 0.5rem 0;"><strong>Message:</strong> "{{ apiData.message }}"</p>
+        <p style="margin: 0.5rem 0;"><strong>Random Value:</strong> <code>{{ apiData.randomValue }}</code></p>
+        <p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem;">
+          <strong>API Timestamp:</strong> {{ apiData.generatedAt }}
+        </p>
+      </div>
+      
+      <div v-if="apiLoading" style="padding: 1rem; text-align: center; color: #666;">
+        Loading API data...
+      </div>
+      
+      <div v-if="apiError" style="padding: 1rem; background: #ffebee; border-radius: 4px; color: #c62828;">
+        <strong>Error loading API data:</strong> {{ apiError }}
+      </div>
+    </div>
     
     
     <div style="margin-top: 1rem; padding: 1rem; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
       <h3 style="margin-top: 0; color: #2e7d32;">How to Verify a New Page</h3>
       <ol style="margin: 0.5rem 0; padding-left: 1.5rem;">
         <li>Note the current random number: <strong>{{ id }}</strong></li>
+        <li v-if="apiData">Note the API data: <strong>"{{ apiData.message }}"</strong> (value: {{ apiData.randomValue }})</li>
         <li>Click "Revalidate Cache" button below</li>
-        <li>Wait 3 seconds for the page to reload</li>
-        <li>Check if the number changed - if it did, a new page was generated! ✅</li>
+        <li>Wait for the page to reload (15-20 seconds)</li>
+        <li>Check if the number and API data changed - if they did, a new page was generated! ✅</li>
       </ol>
       <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #555;">
         <strong>Tip:</strong> The number only changes when the server regenerates the page after cache purge.
@@ -129,6 +154,23 @@ const generatedAt = useState("test-isr-generated-at", () => {
     dateStyle: 'medium',
     timeStyle: 'medium'
   })
+})
+
+/**
+ * API Data State
+ * 
+ * Fetches data from /api/test-data during SSR.
+ * This data is embedded in the cached page and only changes
+ * when the page is regenerated after cache purge.
+ * 
+ * Important: This fetch happens during SSR, so the data is part
+ * of the cached HTML. When the page is regenerated, this API
+ * is called again and new data is fetched.
+ */
+const { data: apiData, pending: apiLoading, error: apiError } = await useFetch('/api/test-data', {
+  // This will be called during SSR and the data will be cached with the page
+  key: 'test-isr-api-data', // Static key ensures same data for cached version
+  server: true, // Ensure it runs on server during SSR
 })
 
 // Revalidation UI state

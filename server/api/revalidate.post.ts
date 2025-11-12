@@ -56,9 +56,20 @@ export default defineEventHandler(async (event) => {
     /**
      * Step 1: Purge Cache by Tag and Path
      * 
-     * We purge by both tag and path for maximum reliability:
-     * - Tag purge: Invalidates all cached objects with the specified tag
-     * - Path purge: Invalidates the specific path (backup to ensure base path is invalidated)
+     * IMPORTANT: Cache purge is by TAG only, NOT the complete Netlify cache.
+     * 
+     * How it works:
+     * - Tag purge: Invalidates ONLY cached objects with the specified tag (e.g., "test-isr")
+     * - Path purge: Invalidates ONLY the specific path (e.g., "/test-isr")
+     * - Other pages with different tags/paths remain cached and unaffected
+     * 
+     * This is fine-grained cache invalidation - you can purge specific pages
+     * without affecting the rest of your site's cache.
+     * 
+     * Example:
+     * - Page A has tag "blog-post-1" → purging "blog-post-1" only affects Page A
+     * - Page B has tag "blog-post-2" → remains cached even after purging "blog-post-1"
+     * - Homepage has no tag → remains cached regardless of other purges
      * 
      * According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
      * Rate limit: 2 purges per tag/site per 5 seconds
