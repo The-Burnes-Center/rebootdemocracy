@@ -129,11 +129,25 @@ async function revalidate() {
     
     // Reload the same route - ISR will regenerate on next request
     // Wait longer for purge to propagate across all Netlify edge nodes
-    // Use forceReload to bypass browser cache without changing the URL
+    // Netlify says purge takes "a few seconds" but can take up to 60 seconds
     setTimeout(() => {
       // Force reload without query params to keep the route the same
-      window.location.reload()
-    }, 8000) // Wait 8 seconds for purge to propagate
+      // Add cache-busting headers via fetch first to ensure we hit the server
+      fetch('/test-isr', {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+        cache: 'no-store'
+      }).then(() => {
+        // Then reload the page
+        window.location.reload()
+      }).catch(() => {
+        // If fetch fails, still reload
+        window.location.reload()
+      })
+    }, 15000) // Wait 15 seconds for purge to fully propagate
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
