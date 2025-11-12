@@ -129,12 +129,10 @@ async function revalidate() {
     // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
     // Wait 4 seconds to ensure purge has propagated and regeneration is complete
     setTimeout(() => {
-      // After cache purge, this request will hit the server and generate new content
-      // The new content will then be cached with the same tag
-      // Reload the base path (no query params) - it should now have fresh content
-      // Use a cache-busting query param to ensure we bypass any edge cache
-      const timestamp = Date.now()
-      window.location.href = `/test-isr?_cb=${timestamp}`
+      // After cache purge, the base path has been regenerated and cached
+      // Reload the base path WITHOUT query params - it should now have fresh content
+      // The base path cache entry was updated during regeneration
+      window.location.href = `/test-isr`
     }, 4000)
   } catch (error) {
     revalidateError.value =

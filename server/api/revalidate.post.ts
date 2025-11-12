@@ -110,20 +110,27 @@ export default defineEventHandler(async (event) => {
         // Wait for purge to propagate (longer if we hit rate limit)
         await new Promise(resolve => setTimeout(resolve, waitTime))
         
-        // Request the base path to trigger regeneration
-        // Use cache-busting headers to ensure we get fresh content
+        // Request the base path to trigger regeneration and cache it
+        // DON'T use cache-busting headers - we want this to be cached!
+        // Since we just purged, this request will hit the server and generate fresh content,
+        // which will then be cached with the same tag
         const response = await fetch(`${siteUrl}${body.path}`, {
           method: "GET",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "X-Netlify-Cache-Bypass": "1",
-          },
+          // No cache-busting headers - we want this response to be cached
         })
         
         const status = response.status
         const text = await response.text()
         console.log(`✅ Regeneration complete: ${status} (${text.length} bytes)`)
+        
+        // Make a second request to ensure the base path is cached
+        // This ensures the cache entry for the base path is properly established
+        await new Promise(resolve => setTimeout(resolve, 500))
+        const response2 = await fetch(`${siteUrl}${body.path}`, {
+          method: "GET",
+        })
+        const status2 = response2.status
+        console.log(`✅ Base path cache verified: ${status2}`)
       } catch (regenError) {
         // Non-critical - regeneration will happen on next natural request
         console.warn("⚠️ Could not trigger regeneration:", regenError)
