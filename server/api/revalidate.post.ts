@@ -173,9 +173,30 @@ export default defineEventHandler(async (event) => {
         if (!freshContent) {
           console.warn(`⚠️ Could not get fresh content after ${maxWaitTime/1000}s - cache may not be fully purged`)
         } else {
-          // Now make a request to the base path (no query params) to cache the fresh content
+          // Now cache the fresh content on the base path
+          // First, make a request WITH cache-busting to ensure we get fresh content (not old cache)
           await new Promise(resolve => setTimeout(resolve, 2000))
-          console.log(`🔄 Caching fresh content on base path...`)
+          console.log(`🔄 Requesting base path with cache-busting to get fresh content...`)
+          
+          const bypassResponse = await fetch(`${siteUrl}${body.path}?_bypass=${Date.now()}`, {
+            method: "GET",
+            headers: {
+              "User-Agent": "Netlify-Revalidate/1.0",
+              "X-Revalidate": "true",
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Pragma": "no-cache",
+            },
+          })
+          
+          const bypassCacheInfo = getCacheStatus(bypassResponse)
+          const bypassText = await bypassResponse.text()
+          console.log(`   Bypass request: ${bypassResponse.status} (${bypassText.length} bytes, cache: ${bypassCacheInfo.hit ? 'hit' : 'miss'})`)
+          
+          // Now make a request WITHOUT cache-busting to cache the fresh content on the base path
+          // Wait a bit more to ensure the purge has fully propagated
+          await new Promise(resolve => setTimeout(resolve, 3000))
+          console.log(`🔄 Caching fresh content on base path (no query params)...`)
+          
           const cacheResponse = await fetch(`${siteUrl}${body.path}`, {
             method: "GET",
             headers: {
@@ -184,8 +205,16 @@ export default defineEventHandler(async (event) => {
               // No cache-busting headers - we want this to be cached
             },
           })
+          
           const cacheInfo2 = getCacheStatus(cacheResponse)
-          console.log(`✅ Base path cached: ${cacheResponse.status} (cache: ${cacheInfo2.hit ? 'hit' : 'miss'})`)
+          const cacheText = await cacheResponse.text()
+          
+          // Verify we got fresh content (not old cache)
+          if (cacheInfo2.hit) {
+            console.warn(`⚠️ Base path still showing cached content (cache: hit) - may need more time for purge to propagate`)
+          } else {
+            console.log(`✅ Base path cached with fresh content: ${cacheResponse.status} (cache: ${cacheInfo2.hit ? 'hit' : 'miss'}, ${cacheText.length} bytes)`)
+          }
         }
       } catch (regenError) {
         // Non-critical - regeneration will happen on next natural request
