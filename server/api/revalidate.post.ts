@@ -32,10 +32,10 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Purge cache by tag (this invalidates all cached objects with that tag, including all URL variants)
+    // Purge cache by tag AND by path for maximum reliability
     // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
     // Rate limit: 2 purges per tag/site per 5 seconds
-    // We only purge by tag to avoid hitting rate limits (purging by tag should invalidate all paths with that tag)
+    // We purge by both tag and path to ensure complete invalidation
     let purgeSuccess = false
     let rateLimited = false
     
@@ -43,6 +43,24 @@ export default defineEventHandler(async (event) => {
       console.log(`🔄 Purging cache for tag: ${body.tag}`)
       await purgeCache({ tags: [body.tag] })
       console.log(`✅ Cache purged successfully for tag: ${body.tag}`)
+      
+      // Also purge by path if provided (as backup to ensure base path is invalidated)
+      if (body.path) {
+        try {
+          console.log(`🔄 Purging cache for path: ${body.path}`)
+          await purgeCache({ paths: [body.path] })
+          console.log(`✅ Cache purged successfully for path: ${body.path}`)
+        } catch (pathPurgeError) {
+          // Non-critical - tag purge should be sufficient
+          const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
+          if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
+            console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
+          } else {
+            console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
+          }
+        }
+      }
+      
       purgeSuccess = true
     } catch (purgeError) {
       const errorMsg =
@@ -102,29 +120,27 @@ export default defineEventHandler(async (event) => {
         const protocol = event.headers.get("x-forwarded-proto") || "http"
         const siteUrl = `${protocol}://${host}`
         
-        // Wait for purge to propagate (Netlify says "a few seconds")
-        const waitTime = rateLimited ? 6000 : 5000
-        console.log(`⏳ Waiting ${waitTime}ms for cache purge to propagate...`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
+        // Wait longer for purge to propagate - Netlify says "a few seconds" but can take up to 60 seconds
+        // We'll wait up to 60 seconds total, checking every 5 seconds
+        const maxWaitTime = 60000 // 60 seconds
+        const checkInterval = 5000 // Check every 5 seconds
+        const maxChecks = maxWaitTime / checkInterval // 12 checks
         
-        // Regenerate the page - use cache-busting to ensure we get fresh content
-        // The purge should have invalidated the cache, but we use cache-busting headers
-        // to ensure the request bypasses any remaining cache
-        console.log(`🔄 Regenerating page: ${siteUrl}${body.path}`)
+        console.log(`⏳ Waiting for cache purge to propagate (checking every ${checkInterval/1000}s, max ${maxWaitTime/1000}s)...`)
         
         const { getCacheStatus } = await import("@netlify/cache")
-        
-        // Make multiple attempts to get fresh content (not from cache)
         let freshContent = null
-        let attempts = 0
-        const maxAttempts = 5
+        let checks = 0
         
-        while (attempts < maxAttempts && !freshContent) {
-          attempts++
-          console.log(`🔄 Regeneration attempt ${attempts}/${maxAttempts}`)
+        // Poll until we get a cache miss or timeout
+        while (checks < maxChecks && !freshContent) {
+          checks++
+          const elapsed = checks * checkInterval
+          console.log(`   Check ${checks}/${maxChecks} (${elapsed/1000}s elapsed)...`)
           
-          // Use cache-busting headers to bypass cache
-          const response = await fetch(`${siteUrl}${body.path}`, {
+          // Use cache-busting headers and query param to force cache miss
+          const bypassUrl = `${siteUrl}${body.path}?_bypass=${Date.now()}`
+          const response = await fetch(bypassUrl, {
             method: "GET",
             headers: {
               "User-Agent": "Netlify-Revalidate/1.0",
@@ -136,34 +152,29 @@ export default defineEventHandler(async (event) => {
           
           const status = response.status
           const text = await response.text()
-          const hasContent = text.length > 0
-          
-          // Check cache status - we want a MISS, not a HIT
           const cacheInfo = getCacheStatus(response)
           const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
           
-          console.log(`   Attempt ${attempts}: ${status} (${text.length} bytes, cache: ${cacheStatus}, edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'})`)
+          console.log(`      Status: ${status}, Cache: ${cacheStatus}, Edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}`)
           
           // If we got a cache miss, we have fresh content
-          if (!cacheInfo.hit && status === 200 && hasContent) {
+          if (!cacheInfo.hit && status === 200 && text.length > 0) {
             freshContent = text
-            console.log(`✅ Fresh content received on attempt ${attempts} (cache miss)`)
+            console.log(`✅ Fresh content received after ${elapsed/1000}s (cache miss)`)
             break
           }
           
-          // Wait before next attempt if we still got cache hit
-          if (attempts < maxAttempts) {
-            const waitTime = attempts * 1000 // Exponential backoff: 1s, 2s, 3s, 4s
-            console.log(`   ⏳ Still cached, waiting ${waitTime}ms before retry...`)
-            await new Promise(resolve => setTimeout(resolve, waitTime))
+          // Wait before next check (unless this was the last one)
+          if (checks < maxChecks) {
+            await new Promise(resolve => setTimeout(resolve, checkInterval))
           }
         }
         
         if (!freshContent) {
-          console.warn("⚠️ Could not get fresh content after multiple attempts - cache may not be fully purged")
+          console.warn(`⚠️ Could not get fresh content after ${maxWaitTime/1000}s - cache may not be fully purged`)
         } else {
-          // Now make a request without cache-busting to cache the fresh content
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          // Now make a request to the base path (no query params) to cache the fresh content
+          await new Promise(resolve => setTimeout(resolve, 2000))
           console.log(`🔄 Caching fresh content on base path...`)
           const cacheResponse = await fetch(`${siteUrl}${body.path}`, {
             method: "GET",
