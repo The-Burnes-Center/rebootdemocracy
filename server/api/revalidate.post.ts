@@ -94,98 +94,18 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // After purge, trigger regeneration of the base path to ensure it's updated
-    // This ensures the base URL (without query params) gets fresh content
-    // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
-    // We need to wait for purge to fully propagate before regenerating
-    if (body.path) {
-      try {
-        const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
-        const protocol = event.headers.get("x-forwarded-proto") || "http"
-        const siteUrl = `${protocol}://${host}`
-        
-        // Wait longer for purge to propagate (Netlify says "a few seconds")
-        // Wait even longer if we hit rate limit
-        const waitTime = rateLimited ? 6000 : 4000
-        console.log(`⏳ Waiting ${waitTime}ms for cache purge to propagate...`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
-        
-        console.log(`🔄 Triggering regeneration for base path: ${siteUrl}${body.path}`)
-        
-        // Step 1: Make multiple bypass requests to ensure we get fresh content from server
-        // The first request might still hit cache, so we make 2-3 requests with unique query params
-        let freshContent = null
-        let attempts = 0
-        const maxAttempts = 3
-        
-        while (attempts < maxAttempts && !freshContent) {
-          attempts++
-          const bypassUrl = `${siteUrl}${body.path}?_bypass=${Date.now()}-${attempts}`
-          console.log(`🔄 Bypass request attempt ${attempts}/${maxAttempts}: ${bypassUrl}`)
-          
-          const bypassResponse = await fetch(bypassUrl, {
-            method: "GET",
-            headers: {
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              "Pragma": "no-cache",
-            },
-          })
-          
-          const bypassStatus = bypassResponse.status
-          const bypassText = await bypassResponse.text()
-          
-          // Check if we got fresh content (not from cache)
-          // If the response has content and status is 200, assume it's fresh
-          if (bypassStatus === 200 && bypassText.length > 0) {
-            freshContent = bypassText
-            console.log(`✅ Fresh content received on attempt ${attempts}: ${bypassStatus} (${bypassText.length} bytes)`)
-            break
-          }
-          
-          // Wait a bit before next attempt
-          if (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 1000))
-          }
-        }
-        
-        if (!freshContent) {
-          console.warn("⚠️ Could not get fresh content after multiple attempts")
-        }
-        
-        // Step 2: Wait a moment, then request the base path (no query params) multiple times
-        // This ensures the base path cache entry is updated with fresh content
-        // Make 2-3 requests to ensure the cache is updated
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        for (let i = 1; i <= 3; i++) {
-          console.log(`🔄 Caching base path (attempt ${i}/3): ${siteUrl}${body.path}`)
-          const cacheResponse = await fetch(`${siteUrl}${body.path}`, {
-            method: "GET",
-            // No cache-busting headers - we want this to be cached
-          })
-          const cacheStatus = cacheResponse.status
-          const cacheText = await cacheResponse.text()
-          console.log(`✅ Base path cache attempt ${i}: ${cacheStatus} (${cacheText.length} bytes)`)
-          
-          // Wait between attempts
-          if (i < 3) {
-            await new Promise(resolve => setTimeout(resolve, 500))
-          }
-        }
-      } catch (regenError) {
-        // Non-critical - regeneration will happen on next natural request
-        console.warn("⚠️ Could not trigger regeneration:", regenError)
-      }
-    }
-
-    // Return 202 Accepted - purge is complete
+    // Return 202 Accepted immediately after purge
+    // According to Netlify docs, purge propagation takes "a few seconds"
     // The next request to the tagged page will hit the server and regenerate
+    // We don't try to regenerate from within the function because:
+    // 1. Internal fetch requests might hit cache before purge propagates
+    // 2. It's simpler and more reliable to let the next natural request regenerate
     setResponseStatus(event, 202)
     return {
       message: "Cache purged successfully",
       tag: body.tag,
       path: body.path || "not specified",
-      note: "The next request to this page will regenerate and cache new content",
+      note: "Cache purge initiated. The next request to this page will regenerate and cache new content. Please wait a few seconds for purge to propagate before reloading.",
     }
   } catch (error) {
     console.error("Revalidation error:", error)
