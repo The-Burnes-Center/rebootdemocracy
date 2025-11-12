@@ -123,20 +123,18 @@ async function revalidate() {
     })
 
     const message = response.note || "Cache purged successfully"
-    revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
+    revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}. Waiting for purge to propagate...`
     
     // Reload after a delay to allow cache purge to propagate
     // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
-    // We wait 5 seconds to ensure cache purge has propagated
-    // Then reload with a cache-busting query param to ensure we bypass any remaining cache
+    // We wait 8 seconds to ensure cache purge has fully propagated across all edge nodes
+    // Then reload the base path (no query params) - it should hit the server and regenerate
     setTimeout(() => {
-      // After cache purge, reload with cache-busting query param
-      // This ensures we bypass any remaining cache and get fresh content
-      // The query param creates a separate cache entry, but since we purged by tag,
-      // all variants should be invalidated
-      const timestamp = Date.now()
-      window.location.href = `/test-isr?_revalidate=${timestamp}`
-    }, 5000)
+      // After cache purge has propagated, reload the base path
+      // Since we purged by tag, the base path cache entry should be invalidated
+      // This request will hit the server, generate new content, and cache it with the same tag
+      window.location.href = `/test-isr`
+    }, 8000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
