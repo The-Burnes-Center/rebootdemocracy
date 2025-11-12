@@ -107,41 +107,75 @@ export default defineEventHandler(async (event) => {
         console.log(`⏳ Waiting ${waitTime}ms for cache purge to propagate...`)
         await new Promise(resolve => setTimeout(resolve, waitTime))
         
-        // Regenerate the page using the same approach as warm-up
-        // This ensures the base path gets fresh content and is cached
+        // Regenerate the page - use cache-busting to ensure we get fresh content
+        // The purge should have invalidated the cache, but we use cache-busting headers
+        // to ensure the request bypasses any remaining cache
         console.log(`🔄 Regenerating page: ${siteUrl}${body.path}`)
         
         const { getCacheStatus } = await import("@netlify/cache")
         
-        const response = await fetch(`${siteUrl}${body.path}`, {
-          method: "GET",
-          headers: {
-            "User-Agent": "Netlify-Revalidate/1.0",
-            "X-Revalidate": "true",
-          },
-        })
+        // Make multiple attempts to get fresh content (not from cache)
+        let freshContent = null
+        let attempts = 0
+        const maxAttempts = 5
         
-        const status = response.status
-        const text = await response.text()
-        const hasContent = text.length > 0
+        while (attempts < maxAttempts && !freshContent) {
+          attempts++
+          console.log(`🔄 Regeneration attempt ${attempts}/${maxAttempts}`)
+          
+          // Use cache-busting headers to bypass cache
+          const response = await fetch(`${siteUrl}${body.path}`, {
+            method: "GET",
+            headers: {
+              "User-Agent": "Netlify-Revalidate/1.0",
+              "X-Revalidate": "true",
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Pragma": "no-cache",
+            },
+          })
+          
+          const status = response.status
+          const text = await response.text()
+          const hasContent = text.length > 0
+          
+          // Check cache status - we want a MISS, not a HIT
+          const cacheInfo = getCacheStatus(response)
+          const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
+          
+          console.log(`   Attempt ${attempts}: ${status} (${text.length} bytes, cache: ${cacheStatus}, edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'})`)
+          
+          // If we got a cache miss, we have fresh content
+          if (!cacheInfo.hit && status === 200 && hasContent) {
+            freshContent = text
+            console.log(`✅ Fresh content received on attempt ${attempts} (cache miss)`)
+            break
+          }
+          
+          // Wait before next attempt if we still got cache hit
+          if (attempts < maxAttempts) {
+            const waitTime = attempts * 1000 // Exponential backoff: 1s, 2s, 3s, 4s
+            console.log(`   ⏳ Still cached, waiting ${waitTime}ms before retry...`)
+            await new Promise(resolve => setTimeout(resolve, waitTime))
+          }
+        }
         
-        // Check cache status to verify we got fresh content
-        const cacheInfo = getCacheStatus(response)
-        const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
-        
-        console.log(`✅ Regeneration complete: ${status} (${text.length} bytes, cache: ${cacheStatus}, edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable: ${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'})`)
-        
-        // Make a second request to ensure the base path is properly cached
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const response2 = await fetch(`${siteUrl}${body.path}`, {
-          method: "GET",
-          headers: {
-            "User-Agent": "Netlify-Revalidate/1.0",
-            "X-Revalidate": "true",
-          },
-        })
-        const cacheInfo2 = getCacheStatus(response2)
-        console.log(`✅ Base path cache verified: ${response2.status} (cache: ${cacheInfo2.hit ? 'hit' : 'miss'})`)
+        if (!freshContent) {
+          console.warn("⚠️ Could not get fresh content after multiple attempts - cache may not be fully purged")
+        } else {
+          // Now make a request without cache-busting to cache the fresh content
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          console.log(`🔄 Caching fresh content on base path...`)
+          const cacheResponse = await fetch(`${siteUrl}${body.path}`, {
+            method: "GET",
+            headers: {
+              "User-Agent": "Netlify-Revalidate/1.0",
+              "X-Revalidate": "true",
+              // No cache-busting headers - we want this to be cached
+            },
+          })
+          const cacheInfo2 = getCacheStatus(cacheResponse)
+          console.log(`✅ Base path cached: ${cacheResponse.status} (cache: ${cacheInfo2.hit ? 'hit' : 'miss'})`)
+        }
       } catch (regenError) {
         // Non-critical - regeneration will happen on next natural request
         console.warn("⚠️ Could not trigger regeneration:", regenError)
