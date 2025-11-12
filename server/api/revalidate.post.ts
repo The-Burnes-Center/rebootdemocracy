@@ -112,47 +112,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // After purge, trigger regeneration asynchronously
-    // We return immediately to avoid timeouts, and let the client reload get fresh content
-    if (body.path) {
-      // Trigger regeneration in the background (don't await - return immediately)
-      const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
-      const protocol = event.headers.get("x-forwarded-proto") || "http"
-      const siteUrl = `${protocol}://${host}`
-      
-      // Fire and forget - trigger regeneration asynchronously
-      // The client will reload and get fresh content
-      setImmediate(async () => {
-        try {
-          // Wait a few seconds for purge to propagate
-          await new Promise(resolve => setTimeout(resolve, 5000))
-          
-          console.log(`🔄 Triggering regeneration for: ${siteUrl}${body.path}`)
-          
-          // Make a bypass request to trigger regeneration (this will be cached on next natural request)
-          const bypassResponse = await fetch(`${siteUrl}${body.path}?_bypass=${Date.now()}`, {
-            method: "GET",
-            headers: {
-              "User-Agent": "Netlify-Revalidate/1.0",
-              "X-Revalidate": "true",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              "Pragma": "no-cache",
-            },
-          })
-          
-          const { getCacheStatus } = await import("@netlify/cache")
-          const cacheInfo = getCacheStatus(bypassResponse)
-          const text = await bypassResponse.text()
-          
-          console.log(`✅ Regeneration triggered: ${bypassResponse.status} (${text.length} bytes, cache: ${cacheInfo.hit ? 'hit' : 'miss'})`)
-          
-          // The base path will be cached naturally on the next request (client reload)
-        } catch (regenError) {
-          // Non-critical - regeneration will happen on next natural request
-          console.warn("⚠️ Could not trigger regeneration:", regenError)
-        }
-      })
-    }
+    // After purge, the next request will trigger regeneration naturally
+    // No need to pre-warm or force regeneration - ISR will handle it
 
     // Return 202 Accepted - purge and regeneration complete
     setResponseStatus(event, 202)

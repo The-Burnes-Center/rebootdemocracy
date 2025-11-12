@@ -91,31 +91,7 @@ const id = useState("test-isr-id", () => {
   return randomNum
 })
 
-// Two-phase reload: After reloading with query param, reload again without it to cache base path
-onMounted(() => {
-  if (sessionStorage.getItem('isr_revalidate_phase2') === 'true') {
-    sessionStorage.removeItem('isr_revalidate_phase2')
-    // Wait longer for purge to propagate and ensure we have fresh content
-    // Store the current number to verify it changed
-    const currentNumber = id.value
-    const storedNumber = sessionStorage.getItem('isr_revalidate_old_number')
-    
-    // If the number changed, we got fresh content - proceed to cache base path
-    // If not, wait longer and retry
-    if (storedNumber && currentNumber.toString() !== storedNumber) {
-      // Number changed - we have fresh content, cache the base path
-      setTimeout(() => {
-        window.location.href = '/test-isr'
-      }, 2000)
-    } else {
-      // Number didn't change - wait longer for purge to propagate
-      console.log('Number unchanged, waiting longer for purge...')
-      setTimeout(() => {
-        window.location.href = '/test-isr'
-      }, 10000) // Wait 10 seconds
-    }
-  }
-})
+// No complex reload logic - just let ISR handle regeneration naturally
 
 // Track when the page was generated (for display purposes)
 const generatedAt = useState("test-isr-generated-at", () => {
@@ -151,22 +127,11 @@ async function revalidate() {
     const message = response.note || "Cache purged successfully"
     revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
     
-    // Store the old number to verify it changed after reload
-    sessionStorage.setItem('isr_revalidate_old_number', oldNumber.toString())
-    
-    // Two-phase reload strategy:
-    // 1. First reload with query param to get fresh content (bypasses cache)
-    // 2. Then reload without query param to cache the base path with fresh content
+    // Simple reload - ISR will regenerate on next request
+    // Wait a few seconds for purge to propagate, then reload
     setTimeout(() => {
-      // Phase 1: Reload with cache-busting query param to get fresh content
-      const timestamp = Date.now()
-      revalidateStatus.value = `Reloading with fresh content...`
-      window.location.href = `/test-isr?_revalidate=${timestamp}`
-      
-      // Phase 2: After page loads, reload again without query param to cache base path
-      // Store a flag in sessionStorage to trigger the second reload
-      sessionStorage.setItem('isr_revalidate_phase2', 'true')
-    }, 8000) // Wait 8 seconds for purge to propagate
+      window.location.reload()
+    }, 3000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
