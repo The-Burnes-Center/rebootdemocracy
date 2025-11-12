@@ -7,13 +7,15 @@ export default defineNuxtConfig({
   routeRules: {
     // Homepage - prerender
     "/": { prerender: true },
-    // ISR test page - using explicit cache headers to ensure proper behavior
+    // ISR test page - using durable directive for shared cache across edge nodes
+    // Following Netlify docs: https://docs.netlify.com/build/caching/caching-overview/#durable-directive
     "/test-isr": {
       isr: true,
       headers: {
-        // Explicit cache headers to ensure CDN caching and allow revalidation
+        // Use durable directive to store in shared cache across all edge nodes
+        // This ensures cache is shared and can be invalidated properly
         "Cache-Control": "public, max-age=0, must-revalidate",
-        "Netlify-CDN-Cache-Control": "public, max-age=31536000, stale-while-revalidate=31536000, durable",
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
       },
     },
   },
