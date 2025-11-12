@@ -32,21 +32,18 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Purge cache by tag AND by path
+    // Purge cache by tag (this invalidates all cached objects with that tag, including all URL variants)
     // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
-    // Purging by tag invalidates all cached objects with that tag
-    // Purging by path ensures the specific URL is invalidated
+    // Rate limit: 2 purges per tag/site per 5 seconds
+    // We only purge by tag to avoid hitting rate limits (purging by tag should invalidate all paths with that tag)
+    let purgeSuccess = false
+    let rateLimited = false
+    
     try {
       console.log(`🔄 Purging cache for tag: ${body.tag}`)
       await purgeCache({ tags: [body.tag] })
       console.log(`✅ Cache purged successfully for tag: ${body.tag}`)
-      
-      // Also purge by path if provided (ensures base path is invalidated)
-      if (body.path) {
-        console.log(`🔄 Purging cache for path: ${body.path}`)
-        await purgeCache({ paths: [body.path] })
-        console.log(`✅ Cache purged successfully for path: ${body.path}`)
-      }
+      purgeSuccess = true
     } catch (purgeError) {
       const errorMsg =
         purgeError instanceof Error
@@ -63,20 +60,45 @@ export default defineEventHandler(async (event) => {
         })
       }
       
-      // If it's a rate limit error, provide helpful message
+      // If it's a rate limit error, wait and retry once
       // Rate limit: 2 purges per tag/site per 5 seconds
       if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
-        throw createError({
-          statusCode: 429,
-          statusMessage: "Rate limit exceeded. Each cache tag or site can only be purged twice every 5 seconds.",
-        })
+        rateLimited = true
+        console.warn(`⚠️ Rate limit hit, waiting 6 seconds before retry...`)
+        
+        // Wait 6 seconds (slightly more than 5 to be safe)
+        await new Promise(resolve => setTimeout(resolve, 6000))
+        
+        try {
+          console.log(`🔄 Retrying cache purge for tag: ${body.tag}`)
+          await purgeCache({ tags: [body.tag] })
+          console.log(`✅ Cache purged successfully for tag: ${body.tag} (after retry)`)
+          purgeSuccess = true
+        } catch (retryError) {
+          const retryErrorMsg = retryError instanceof Error ? retryError.message : String(retryError)
+          console.error(`❌ Retry also failed:`, retryErrorMsg)
+          throw createError({
+            statusCode: 429,
+            statusMessage: "Rate limit exceeded. Please wait at least 5 seconds between revalidation attempts.",
+          })
+        }
+      } else {
+        throw purgeError
       }
-      
-      throw purgeError
+    }
+    
+    if (!purgeSuccess) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Cache purge failed for unknown reason",
+      })
     }
 
     // After purge, trigger regeneration of the base path to ensure it's updated
     // This ensures the base URL (without query params) gets fresh content
+    // Wait longer if we hit rate limit (to ensure purge has fully propagated)
+    const waitTime = rateLimited ? 2000 : 1000
+    
     if (body.path) {
       try {
         const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
@@ -85,8 +107,8 @@ export default defineEventHandler(async (event) => {
         
         console.log(`🔄 Triggering regeneration for base path: ${siteUrl}${body.path}`)
         
-        // Wait a moment for purge to propagate
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Wait for purge to propagate (longer if we hit rate limit)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
         
         // Request the base path to trigger regeneration
         // Use cache-busting headers to ensure we get fresh content
