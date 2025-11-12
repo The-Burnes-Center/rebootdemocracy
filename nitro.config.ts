@@ -1,8 +1,7 @@
 // Nitro configuration for Netlify deployment
-// Following Answer Overflow example: https://www.answeroverflow.com/m/1306962492647538760
-// Note: netlify_builder preset is deprecated, but using it to match the exact example
-// Modern approach would use 'netlify' preset with isr route rules
+// Using 'netlify' preset (netlify_builder is deprecated and causes module export errors)
+// The 'netlify' preset works with isr route rules in nuxt.config.ts
 export default defineNitroConfig({
-  preset: 'netlify_builder'
+  preset: 'netlify'
 })
 
