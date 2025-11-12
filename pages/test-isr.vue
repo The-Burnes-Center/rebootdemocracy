@@ -95,11 +95,25 @@ const id = useState("test-isr-id", () => {
 onMounted(() => {
   if (sessionStorage.getItem('isr_revalidate_phase2') === 'true') {
     sessionStorage.removeItem('isr_revalidate_phase2')
-    // Wait a moment for the page to fully render, then reload without query param
-    setTimeout(() => {
-      // Remove query param and reload to cache the base path with fresh content
-      window.location.href = '/test-isr'
-    }, 1000)
+    // Wait longer for purge to propagate and ensure we have fresh content
+    // Store the current number to verify it changed
+    const currentNumber = id.value
+    const storedNumber = sessionStorage.getItem('isr_revalidate_old_number')
+    
+    // If the number changed, we got fresh content - proceed to cache base path
+    // If not, wait longer and retry
+    if (storedNumber && currentNumber.toString() !== storedNumber) {
+      // Number changed - we have fresh content, cache the base path
+      setTimeout(() => {
+        window.location.href = '/test-isr'
+      }, 2000)
+    } else {
+      // Number didn't change - wait longer for purge to propagate
+      console.log('Number unchanged, waiting longer for purge...')
+      setTimeout(() => {
+        window.location.href = '/test-isr'
+      }, 10000) // Wait 10 seconds
+    }
   }
 })
 
@@ -137,6 +151,9 @@ async function revalidate() {
     const message = response.note || "Cache purged successfully"
     revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
     
+    // Store the old number to verify it changed after reload
+    sessionStorage.setItem('isr_revalidate_old_number', oldNumber.toString())
+    
     // Two-phase reload strategy:
     // 1. First reload with query param to get fresh content (bypasses cache)
     // 2. Then reload without query param to cache the base path with fresh content
@@ -147,10 +164,9 @@ async function revalidate() {
       window.location.href = `/test-isr?_revalidate=${timestamp}`
       
       // Phase 2: After page loads, reload again without query param to cache base path
-      // We'll do this in a script that runs after the page loads
       // Store a flag in sessionStorage to trigger the second reload
       sessionStorage.setItem('isr_revalidate_phase2', 'true')
-    }, 5000)
+    }, 8000) // Wait 8 seconds for purge to propagate
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
