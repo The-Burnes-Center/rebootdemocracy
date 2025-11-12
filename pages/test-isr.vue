@@ -19,6 +19,23 @@
     <p style="font-size: 2rem; font-weight: bold; text-align: center;">
       <code>{{ id }}</code>
     </p>
+    <p style="text-align: center; color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+      Generated at: {{ generatedAt }}
+    </p>
+    
+    <div style="margin-top: 1rem; padding: 1rem; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+      <h3 style="margin-top: 0; color: #2e7d32;">How to Verify a New Page</h3>
+      <ol style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li>Note the current random number: <strong>{{ id }}</strong></li>
+        <li>Click "Revalidate Cache" button below</li>
+        <li>Wait 3 seconds for the page to reload</li>
+        <li>Check if the number changed - if it did, a new page was generated! ✅</li>
+      </ol>
+      <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #555;">
+        <strong>Tip:</strong> The number only changes when the server regenerates the page after cache purge.
+        If you see the same number, the cache hasn't been purged yet or the page reloaded from cache.
+      </p>
+    </div>
 
     <div style="margin-top: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
       <h2>Cache Revalidation</h2>
@@ -73,6 +90,16 @@ const id = useState("test-isr-id", () => {
   return randomNum
 })
 
+// Track when the page was generated (for display purposes)
+const generatedAt = useState("test-isr-generated-at", () => {
+  const now = new Date()
+  return now.toLocaleString('en-US', { 
+    timeZone: 'UTC',
+    dateStyle: 'medium',
+    timeStyle: 'medium'
+  })
+})
+
 // Revalidation state
 const revalidating = ref(false)
 const revalidateStatus = ref("")
@@ -92,14 +119,17 @@ async function revalidate() {
       },
     })
 
-    revalidateStatus.value = "Cache purged! Reloading page..."
+    const oldNumber = id.value
+    revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. Reloading page in 3 seconds...`
     
     // Reload after a short delay to allow cache purge to propagate
     // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
     setTimeout(() => {
       // After cache purge, this request will hit the server and generate new content
       // The new content will then be cached with the same tag
-      window.location.href = `/test-isr`
+      // Use cache-busting query param to ensure we get fresh content
+      const timestamp = Date.now()
+      window.location.href = `/test-isr?_revalidate=${timestamp}`
     }, 3000)
   } catch (error) {
     revalidateError.value =
