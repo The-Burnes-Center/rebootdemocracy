@@ -1,14 +1,35 @@
+/**
+ * On-Demand Cache Revalidation Endpoint
+ * 
+ * This endpoint allows you to invalidate cached ISR pages on-demand, triggering
+ * regeneration on the next request. This is useful when content changes in your
+ * CMS and you want to update the cached pages immediately.
+ * 
+ * How it works:
+ * 1. Receives a cache tag (and optionally a path) to purge
+ * 2. Purges cache by tag using Netlify's purgeCache API
+ * 3. Also purges by path as a backup for reliability
+ * 4. Verifies purge worked by checking cache status
+ * 5. Returns cache status for debugging
+ * 
+ * Usage:
+ * POST /api/revalidate
+ * Body: { tag: "test-isr", path: "/test-isr" }
+ * 
+ * Rate Limits:
+ * - 2 purges per tag/site per 5 seconds
+ * - Automatic retry with 6-second wait if rate limited
+ * 
+ * Environment Variables:
+ * - NETLIFY_AUTH_TOKEN: Required for actual cache purging
+ *   Get from: Netlify Dashboard → Site Settings → Build & Deploy → Environment Variables
+ * 
+ * References:
+ * - Netlify Cache Invalidation: https://docs.netlify.com/build/caching/caching-overview/#on-demand-invalidation
+ * - purgeCache API: https://docs.netlify.com/api/get-started/#purge-cache
+ */
 import { purgeCache } from "@netlify/functions"
 
-/**
- * On-demand cache revalidation endpoint
- * 
- * Based on Netlify's recommended approach:
- * https://docs.netlify.com/build/caching/caching-overview/#on-demand-invalidation
- * 
- * Purges cached objects by tag. After purge, the next request will hit the server
- * and regenerate the page, which will then be cached again.
- */
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
@@ -32,10 +53,16 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Purge cache by tag AND by path for maximum reliability
-    // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
-    // Rate limit: 2 purges per tag/site per 5 seconds
-    // We purge by both tag and path to ensure complete invalidation
+    /**
+     * Step 1: Purge Cache by Tag and Path
+     * 
+     * We purge by both tag and path for maximum reliability:
+     * - Tag purge: Invalidates all cached objects with the specified tag
+     * - Path purge: Invalidates the specific path (backup to ensure base path is invalidated)
+     * 
+     * According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
+     * Rate limit: 2 purges per tag/site per 5 seconds
+     */
     let purgeSuccess = false
     let rateLimited = false
     
@@ -78,8 +105,13 @@ export default defineEventHandler(async (event) => {
         })
       }
       
-      // If it's a rate limit error, wait and retry once
-      // Rate limit: 2 purges per tag/site per 5 seconds
+      /**
+       * Step 2: Handle Rate Limiting
+       * 
+       * Netlify limits cache purges to 2 per tag/site per 5 seconds.
+       * If we hit the rate limit, we wait 6 seconds and retry once.
+       * This handles cases where multiple revalidations happen in quick succession.
+       */
       if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
         rateLimited = true
         console.warn(`⚠️ Rate limit hit, waiting 6 seconds before retry...`)
@@ -112,34 +144,50 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // After purge, verify the purge worked by checking cache status
-    // This helps debug why subsequent purges might not be working
+    /**
+     * Step 3: Verify Purge Worked (Debugging)
+     * 
+     * After purging, we make a test request to check if the cache was actually invalidated.
+     * This helps debug why subsequent purges might not be working.
+     * 
+     * We check:
+     * - Overall cache status (hit/miss)
+     * - Edge cache status (local edge node cache)
+     * - Durable cache status (shared cache across all edge nodes)
+     * 
+     * If cache is still showing as "hit" after purge, it means:
+     * - Purge hasn't propagated yet (needs more time)
+     * - Or there's an issue with the purge
+     * 
+     * The client uses this information to adjust wait time before reloading.
+     */
     if (body.path) {
       try {
         const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
         const protocol = event.headers.get("x-forwarded-proto") || "http"
         const siteUrl = `${protocol}://${host}`
         
-        // Wait a moment for purge to propagate, then check cache status
+        // Wait 2 seconds for purge to propagate before checking
         await new Promise(resolve => setTimeout(resolve, 2000))
         
         const { getCacheStatus } = await import("@netlify/cache")
         
-        // Make a test request to check if cache was actually purged
+        // Make a test request with cache-busting headers to check actual cache status
         const testResponse = await fetch(`${siteUrl}${body.path}`, {
           method: "GET",
           headers: {
             "User-Agent": "Netlify-Revalidate-Check/1.0",
-            "Cache-Control": "no-cache",
+            "Cache-Control": "no-cache", // Bypass browser cache, but CDN will still check its cache
           },
         })
         
+        // Get cache status from Netlify's cache utility
         const cacheInfo = getCacheStatus(testResponse)
         const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
         
         console.log(`🔍 Cache status after purge: ${cacheStatus} (edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable: ${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'})`)
         
-        // Return cache status in response for debugging
+        // Return cache status in response so client can adjust behavior
         setResponseStatus(event, 202)
         return {
           message: "Cache purged successfully",
@@ -155,7 +203,8 @@ export default defineEventHandler(async (event) => {
             : "✅ Cache purged - next request should regenerate",
         }
       } catch (checkError) {
-        // Non-critical - just log for debugging
+        // Non-critical - if cache check fails, we still return success
+        // The purge itself succeeded, the check is just for debugging
         console.warn("⚠️ Could not check cache status:", checkError)
       }
     }

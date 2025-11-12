@@ -76,24 +76,52 @@
 </template>
 
 <script setup lang="ts">
-// Cache tag is set via server plugin (server/plugins/cache-tag.ts)
-// This allows on-demand cache invalidation by tag
+/**
+ * ISR Test Page Component
+ * 
+ * This page demonstrates Incremental Static Regeneration (ISR) on Netlify.
+ * It displays a random number that only changes when the page is regenerated
+ * on the server after cache purge.
+ * 
+ * Key Features:
+ * - Random number generated during SSR (only changes after cache purge)
+ * - On-demand revalidation via /api/revalidate endpoint
+ * - Cache status display for debugging
+ * - Automatic reload after revalidation
+ * 
+ * How the random number works:
+ * - Generated once during SSR when page is first rendered
+ * - Stored in useState with a static key ("test-isr-id")
+ * - Same number is used for all cached versions of the page
+ * - Only changes when server regenerates the page (after cache purge)
+ * 
+ * Cache Tag:
+ * - Set via server plugin (server/plugins/cache-tag.ts)
+ * - Allows on-demand cache invalidation by tag
+ * - Tag: "test-isr"
+ */
 
-// Generate a random ID that persists until cache is revalidated
-// This will only change when the page is regenerated on the server (after cache purge)
-// The key must be static so the same value is used for the cached version
+/**
+ * Random Number State
+ * 
+ * This generates a random number that persists until cache is revalidated.
+ * The key "test-isr-id" is static, so the same value is used for the cached version.
+ * 
+ * Important: This only runs during SSR when the page is actually generated.
+ * Each time the server renders this page (after cache purge), a new number is generated.
+ */
 const id = useState("test-isr-id", () => {
-  // Generate a random number that will be the same for this cached version
-  // This only runs during SSR when the page is actually generated
-  // Each time the server renders this page (after cache purge), a new number is generated
   const randomNum = Math.floor(Math.random() * 10000)
   console.log(`[SSR] Generated new random number: ${randomNum}`)
   return randomNum
 })
 
-// No complex reload logic - just let ISR handle regeneration naturally
-
-// Track when the page was generated (for display purposes)
+/**
+ * Page Generation Timestamp
+ * 
+ * Tracks when the page was generated (for display purposes).
+ * This also only changes when the page is regenerated on the server.
+ */
 const generatedAt = useState("test-isr-generated-at", () => {
   const now = new Date()
   return now.toLocaleString('en-US', { 
@@ -103,61 +131,106 @@ const generatedAt = useState("test-isr-generated-at", () => {
   })
 })
 
-// Revalidation state
+// Revalidation UI state
 const revalidating = ref(false)
 const revalidateStatus = ref("")
 const revalidateError = ref("")
 
-// On-demand revalidation
+/**
+ * On-Demand Cache Revalidation
+ * 
+ * This function:
+ * 1. Calls /api/revalidate endpoint to purge the cache
+ * 2. Receives cache status information
+ * 3. Adjusts wait time based on cache status
+ * 4. Reloads the page after waiting for purge to propagate
+ * 
+ * The reload triggers ISR regeneration, which generates a new random number.
+ */
 async function revalidate() {
   revalidating.value = true
   revalidateStatus.value = ""
   revalidateError.value = ""
 
   try {
+    // Store the old number to show what changed
     const oldNumber = id.value
+    
+    /**
+     * Step 1: Call revalidation endpoint
+     * 
+     * This purges the cache by tag and path, and returns cache status information.
+     * The endpoint:
+     * - Purges cache by tag ("test-isr")
+     * - Purges cache by path ("/test-isr") as backup
+     * - Checks cache status after purge
+     * - Returns cache status for debugging
+     */
     const response = await $fetch("/api/revalidate", {
       method: "POST",
       body: {
-        tag: "test-isr",
-        path: "/test-isr", // Also purge the base path
+        tag: "test-isr", // Cache tag set by server plugin
+        path: "/test-isr", // Also purge the base path for reliability
       },
     })
 
     const message = response.note || "Cache purged successfully"
     const cacheStatus = response.cacheStatus
     
-    // Show cache status in UI for debugging
+    /**
+     * Step 2: Display cache status in UI
+     * 
+     * Show the user what happened and the cache status for debugging.
+     * This helps understand if purge worked and why regeneration might not happen.
+     */
     let statusMessage = `Cache purged! Old number was ${oldNumber}. ${message}`
     if (cacheStatus) {
       statusMessage += `\nCache status: ${cacheStatus.overall} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`
     }
     revalidateStatus.value = statusMessage
     
-    // Determine wait time based on cache status
-    // If cache is still hit, wait longer for purge to propagate
+    /**
+     * Step 3: Determine wait time based on cache status
+     * 
+     * If cache is still showing as "hit" after purge, it means:
+     * - Purge hasn't propagated yet (needs more time)
+     * - We should wait longer before reloading
+     * 
+     * Netlify says purge takes "a few seconds" but can take up to 60 seconds
+     * to propagate across all edge nodes.
+     */
     const waitTime = cacheStatus?.overall === 'hit' ? 20000 : 15000
     
     console.log(`⏳ Waiting ${waitTime/1000}s before reload (cache status: ${cacheStatus?.overall || 'unknown'})`)
     
-    // Reload the same route - ISR will regenerate on next request
-    // Wait longer for purge to propagate across all Netlify edge nodes
-    // Netlify says purge takes "a few seconds" but can take up to 60 seconds
+    /**
+     * Step 4: Reload page after waiting for purge to propagate
+     * 
+     * We do a two-step reload:
+     * 1. First, make a fetch request with cache-busting headers to ensure we hit the server
+     * 2. Then, reload the page normally
+     * 
+     * This ensures:
+     * - Browser cache is bypassed
+     * - We get fresh content from the server
+     * - ISR regenerates the page with a new random number
+     */
     setTimeout(() => {
-      // Force reload without query params to keep the route the same
-      // Add cache-busting headers via fetch first to ensure we hit the server
+      // Step 4a: Make a fetch request with cache-busting headers
+      // This ensures we hit the server, not browser cache
       fetch('/test-isr', {
         method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache', // Bypass browser cache
+          'Pragma': 'no-cache', // HTTP/1.0 cache control
         },
-        cache: 'no-store'
+        cache: 'no-store' // Don't store in browser cache
       }).then(() => {
-        // Then reload the page
+        // Step 4b: Reload the page
+        // This will trigger ISR regeneration if cache was purged
         window.location.reload()
       }).catch(() => {
-        // If fetch fails, still reload
+        // If fetch fails, still reload (non-critical)
         window.location.reload()
       })
     }, waitTime)
