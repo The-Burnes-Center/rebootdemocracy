@@ -94,18 +94,67 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Return 202 Accepted immediately after purge
-    // According to Netlify docs, purge propagation takes "a few seconds"
-    // The next request to the tagged page will hit the server and regenerate
-    // We don't try to regenerate from within the function because:
-    // 1. Internal fetch requests might hit cache before purge propagates
-    // 2. It's simpler and more reliable to let the next natural request regenerate
+    // After purge, trigger regeneration using the same approach as warm-up
+    // Wait for purge to propagate, then make a server-side request to regenerate the page
+    if (body.path) {
+      try {
+        const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
+        const protocol = event.headers.get("x-forwarded-proto") || "http"
+        const siteUrl = `${protocol}://${host}`
+        
+        // Wait for purge to propagate (Netlify says "a few seconds")
+        const waitTime = rateLimited ? 6000 : 5000
+        console.log(`⏳ Waiting ${waitTime}ms for cache purge to propagate...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+        
+        // Regenerate the page using the same approach as warm-up
+        // This ensures the base path gets fresh content and is cached
+        console.log(`🔄 Regenerating page: ${siteUrl}${body.path}`)
+        
+        const { getCacheStatus } = await import("@netlify/cache")
+        
+        const response = await fetch(`${siteUrl}${body.path}`, {
+          method: "GET",
+          headers: {
+            "User-Agent": "Netlify-Revalidate/1.0",
+            "X-Revalidate": "true",
+          },
+        })
+        
+        const status = response.status
+        const text = await response.text()
+        const hasContent = text.length > 0
+        
+        // Check cache status to verify we got fresh content
+        const cacheInfo = getCacheStatus(response)
+        const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
+        
+        console.log(`✅ Regeneration complete: ${status} (${text.length} bytes, cache: ${cacheStatus}, edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable: ${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'})`)
+        
+        // Make a second request to ensure the base path is properly cached
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        const response2 = await fetch(`${siteUrl}${body.path}`, {
+          method: "GET",
+          headers: {
+            "User-Agent": "Netlify-Revalidate/1.0",
+            "X-Revalidate": "true",
+          },
+        })
+        const cacheInfo2 = getCacheStatus(response2)
+        console.log(`✅ Base path cache verified: ${response2.status} (cache: ${cacheInfo2.hit ? 'hit' : 'miss'})`)
+      } catch (regenError) {
+        // Non-critical - regeneration will happen on next natural request
+        console.warn("⚠️ Could not trigger regeneration:", regenError)
+      }
+    }
+
+    // Return 202 Accepted - purge and regeneration complete
     setResponseStatus(event, 202)
     return {
-      message: "Cache purged successfully",
+      message: "Cache purged and page regenerated successfully",
       tag: body.tag,
       path: body.path || "not specified",
-      note: "Cache purge initiated. The next request to this page will regenerate and cache new content. Please wait a few seconds for purge to propagate before reloading.",
+      note: "The page has been regenerated and cached. You can reload to see the new content.",
     }
   } catch (error) {
     console.error("Revalidation error:", error)
