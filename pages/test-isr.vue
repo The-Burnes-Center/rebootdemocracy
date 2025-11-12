@@ -23,6 +23,7 @@
       Generated at: {{ generatedAt }}
     </p>
     
+    
     <div style="margin-top: 1rem; padding: 1rem; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
       <h3 style="margin-top: 0; color: #2e7d32;">How to Verify a New Page</h3>
       <ol style="margin: 0.5rem 0; padding-left: 1.5rem;">
