@@ -112,14 +112,15 @@ async function revalidate() {
   revalidateError.value = ""
 
   try {
+    const oldNumber = id.value
     const response = await $fetch("/api/revalidate", {
       method: "POST",
       body: {
         tag: "test-isr",
+        path: "/test-isr", // Also purge the base path
       },
     })
 
-    const oldNumber = id.value
     revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. Reloading page in 3 seconds...`
     
     // Reload after a short delay to allow cache purge to propagate
@@ -127,9 +128,8 @@ async function revalidate() {
     setTimeout(() => {
       // After cache purge, this request will hit the server and generate new content
       // The new content will then be cached with the same tag
-      // Use cache-busting query param to ensure we get fresh content
-      const timestamp = Date.now()
-      window.location.href = `/test-isr?_revalidate=${timestamp}`
+      // Reload the base path (no query params) - it should now have fresh content
+      window.location.href = `/test-isr`
     }, 3000)
   } catch (error) {
     revalidateError.value =

@@ -32,12 +32,21 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Purge cache by tag
+    // Purge cache by tag AND by path
     // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
+    // Purging by tag invalidates all cached objects with that tag
+    // Purging by path ensures the specific URL is invalidated
     try {
       console.log(`🔄 Purging cache for tag: ${body.tag}`)
       await purgeCache({ tags: [body.tag] })
       console.log(`✅ Cache purged successfully for tag: ${body.tag}`)
+      
+      // Also purge by path if provided (ensures base path is invalidated)
+      if (body.path) {
+        console.log(`🔄 Purging cache for path: ${body.path}`)
+        await purgeCache({ paths: [body.path] })
+        console.log(`✅ Cache purged successfully for path: ${body.path}`)
+      }
     } catch (purgeError) {
       const errorMsg =
         purgeError instanceof Error
@@ -66,12 +75,46 @@ export default defineEventHandler(async (event) => {
       throw purgeError
     }
 
+    // After purge, trigger regeneration of the base path to ensure it's updated
+    // This ensures the base URL (without query params) gets fresh content
+    if (body.path) {
+      try {
+        const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
+        const protocol = event.headers.get("x-forwarded-proto") || "http"
+        const siteUrl = `${protocol}://${host}`
+        
+        console.log(`🔄 Triggering regeneration for base path: ${siteUrl}${body.path}`)
+        
+        // Wait a moment for purge to propagate
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Request the base path to trigger regeneration
+        // Use cache-busting headers to ensure we get fresh content
+        const response = await fetch(`${siteUrl}${body.path}`, {
+          method: "GET",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "X-Netlify-Cache-Bypass": "1",
+          },
+        })
+        
+        const status = response.status
+        const text = await response.text()
+        console.log(`✅ Regeneration complete: ${status} (${text.length} bytes)`)
+      } catch (regenError) {
+        // Non-critical - regeneration will happen on next natural request
+        console.warn("⚠️ Could not trigger regeneration:", regenError)
+      }
+    }
+
     // Return 202 Accepted - purge is complete
     // The next request to the tagged page will hit the server and regenerate
     setResponseStatus(event, 202)
     return {
       message: "Cache purged successfully",
       tag: body.tag,
+      path: body.path || "not specified",
       note: "The next request to this page will regenerate and cache new content",
     }
   } catch (error) {
