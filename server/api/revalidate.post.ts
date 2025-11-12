@@ -1,11 +1,22 @@
+import { purgeCache } from "@netlify/functions"
+
+/**
+ * On-demand cache revalidation endpoint
+ * 
+ * Based on Netlify's recommended approach:
+ * https://docs.netlify.com/build/caching/caching-overview/#on-demand-invalidation
+ * 
+ * Purges cached objects by tag. After purge, the next request will hit the server
+ * and regenerate the page, which will then be cached again.
+ */
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
 
-    if (!body.tag && !body.path) {
+    if (!body?.tag) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Missing tag or path parameter",
+        statusMessage: "Missing tag parameter",
       })
     }
 
@@ -13,212 +24,64 @@ export default defineEventHandler(async (event) => {
     const authToken = process.env.NETLIFY_AUTH_TOKEN
     if (!authToken) {
       console.warn("NETLIFY_AUTH_TOKEN not set - cache purge will be simulated")
-      // Return success but log that it's simulated
       setResponseStatus(event, 202)
       return {
         message: "Cache purge simulated (NETLIFY_AUTH_TOKEN not configured)",
         tag: body.tag,
-        path: body.path,
         note: "Set NETLIFY_AUTH_TOKEN in Netlify environment variables for actual cache purging",
       }
     }
 
-    // Import purgeCache dynamically to avoid issues if package is not available
-    let purgeCache
+    // Purge cache by tag
+    // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
     try {
-      const netlifyFunctions = await import("@netlify/functions")
-      purgeCache = netlifyFunctions.purgeCache
-    } catch (importError) {
-      console.error("Failed to import @netlify/functions:", importError)
-      throw createError({
-        statusCode: 500,
-        statusMessage: "Cache purge service unavailable",
-      })
-    }
+      console.log(`🔄 Purging cache for tag: ${body.tag}`)
+      await purgeCache({ tags: [body.tag] })
+      console.log(`✅ Cache purged successfully for tag: ${body.tag}`)
+    } catch (purgeError) {
+      const errorMsg =
+        purgeError instanceof Error
+          ? purgeError.message
+          : String(purgeError)
+      console.error(`❌ purgeCache error for tag ${body.tag}:`, errorMsg)
 
-    let purgeSucceeded = false
-
-    // Purge cache by tag if provided
-    if (body.tag) {
-      try {
-        console.log(`🔄 Attempting to purge cache for tag: ${body.tag}`)
-        // Add timeout to prevent hanging
-        const purgePromise = purgeCache({ tags: [body.tag] })
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Cache purge timeout")), 10000)
-        )
-
-        await Promise.race([purgePromise, timeoutPromise])
-        console.log(`✅ Cache purged successfully for tag: ${body.tag}`)
-        purgeSucceeded = true
-      } catch (purgeError) {
-        const errorMsg =
-          purgeError instanceof Error
-            ? purgeError.message
-            : String(purgeError)
-        console.error(`❌ purgeCache error for tag ${body.tag}:`, errorMsg)
-
-        // If it's an auth token error, provide helpful message
-        if (errorMsg.includes("token") || errorMsg.includes("auth")) {
-          throw createError({
-            statusCode: 401,
-            statusMessage:
-              "NETLIFY_AUTH_TOKEN invalid. Please check your Netlify environment variables.",
-          })
-        }
-        
-        // If it's a rate limit error, log but continue
-        if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
-          console.warn("⚠️ Rate limit hit for tag purge - cache purge may be throttled")
-          // Don't throw - continue with path purge attempt
-        } else {
-          throw purgeError
-        }
+      // If it's an auth token error, provide helpful message
+      if (errorMsg.includes("token") || errorMsg.includes("auth")) {
+        throw createError({
+          statusCode: 401,
+          statusMessage:
+            "NETLIFY_AUTH_TOKEN invalid. Please check your Netlify environment variables.",
+        })
       }
-    }
-
-    // Purge cache by path if provided
-    if (body.path) {
-      try {
-        console.log(`🔄 Attempting to purge cache for path: ${body.path}`)
-        const purgePromise = purgeCache({ paths: [body.path] })
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Cache purge timeout")), 10000)
-        )
-
-        await Promise.race([purgePromise, timeoutPromise])
-        console.log(`✅ Cache purged successfully for path: ${body.path}`)
-        purgeSucceeded = true
-      } catch (purgeError) {
-        const errorMsg =
-          purgeError instanceof Error
-            ? purgeError.message
-            : String(purgeError)
-        console.error(`❌ purgeCache path error for ${body.path}:`, errorMsg)
-        
-        // If it's a rate limit error, log but continue
-        if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
-          console.warn("⚠️ Rate limit hit for path purge - continuing anyway")
-          // Continue - regeneration will still work
-        }
-        // Non-blocking - tag purge might have worked
+      
+      // If it's a rate limit error, provide helpful message
+      // Rate limit: 2 purges per tag/site per 5 seconds
+      if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
+        throw createError({
+          statusCode: 429,
+          statusMessage: "Rate limit exceeded. Each cache tag or site can only be purged twice every 5 seconds.",
+        })
       }
+      
+      throw purgeError
     }
 
-    if (!purgeSucceeded && body.tag && body.path) {
-      console.warn("⚠️ Cache purge may have failed - but continuing with regeneration attempt")
-    }
-
-    // After successful cache purge, trigger regeneration by fetching the base path
-    // This ensures the page is regenerated for the base URL (without query params)
-    if (body.path) {
-      try {
-        const host = event.headers.get("host") || "localhost:8888"
-        const protocol = event.headers.get("x-forwarded-proto") || "http"
-        const siteUrl = `${protocol}://${host}`
-        const basePath = `${siteUrl}${body.path}`
-        
-        console.log(`Triggering regeneration for base path: ${basePath}`)
-        
-        // Wait a bit for cache purge to fully propagate
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-        
-        // First, make requests with query params to bypass cache and trigger regeneration
-        // These ensure the server generates new content
-        for (let i = 0; i < 2; i++) {
-          const bypassUrl = `${basePath}?_bypass=${Date.now()}-${i}`
-          try {
-            const response = await fetch(bypassUrl, {
-              method: "GET",
-              headers: {
-                "Cache-Control": "no-cache, no-store, must-revalidate",
-                "Pragma": "no-cache",
-                "X-Requested-With": "XMLHttpRequest",
-                "X-Netlify-Cache-Bypass": "1",
-              },
-            })
-            const text = await response.text()
-            console.log(`Bypass request ${i + 1} completed: ${response.status}, body length: ${text.length}`)
-          } catch (err) {
-            console.warn(`Bypass request ${i + 1} failed (non-blocking):`, err)
-          }
-          // Wait between bypass requests
-          if (i < 1) {
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-          }
-        }
-        
-        // Wait longer for cache purge to fully propagate across CDN
-        // Netlify's CDN is distributed, so purge propagation can take time
-        console.log("Waiting for cache purge to propagate across CDN...")
-        await new Promise((resolve) => setTimeout(resolve, 5000))
-        
-        // The key insight: Netlify caches URLs with query params separately from base path
-        // So we need to ensure the base path itself is requested and cached with new content
-        // Strategy: Make requests that will trigger server-side generation, then the base path
-        // will be served from the server's cache (not CDN cache) until CDN cache updates
-        
-        console.log("Making regeneration requests to ensure server has new content...")
-        const regenerationNumbers: number[] = []
-        
-        // Make several requests with unique query params to ensure server generates new content
-        for (let i = 0; i < 5; i++) {
-          try {
-            const uniqueUrl = `${basePath}?_force_regen=${Date.now()}-${i}`
-            const response = await fetch(uniqueUrl, {
-              method: "GET",
-              headers: {
-                "Cache-Control": "no-cache, no-store, must-revalidate",
-                "Pragma": "no-cache",
-              },
-            })
-            const text = await response.text()
-            const numberMatch = text.match(/<code>(\d+)<\/code>/)
-            if (numberMatch) {
-              const num = parseInt(numberMatch[1])
-              regenerationNumbers.push(num)
-              console.log(`✅ Regeneration ${i + 1} - number: ${num}`)
-            }
-          } catch (err) {
-            console.warn(`Regeneration ${i + 1} failed:`, err)
-          }
-          // Small delay between requests
-          if (i < 4) {
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-          }
-        }
-        
-        if (regenerationNumbers.length === 0) {
-          console.warn("⚠️ No regeneration numbers captured - regeneration may have failed")
-        } else {
-          console.log(`✅ Captured ${regenerationNumbers.length} regeneration numbers. Latest: ${regenerationNumbers[regenerationNumbers.length - 1]}`)
-        }
-        
-        // Note: The base path will be updated on the next natural request
-        // The CDN cache has been purged, so the next request to /test-isr will hit the server
-        // and generate new content, which will then be cached
-        console.log("✅ Cache purge complete. Base path will regenerate on next request.")
-        
-        console.log("Regeneration triggered successfully for base path")
-      } catch (regenerateError) {
-        // Non-blocking - regeneration will happen on next request
-        console.warn("Regeneration trigger error (non-blocking):", regenerateError)
-      }
-    }
-
+    // Return 202 Accepted - purge is complete
+    // The next request to the tagged page will hit the server and regenerate
     setResponseStatus(event, 202)
     return {
-      message: "Cache purged and regeneration triggered",
+      message: "Cache purged successfully",
       tag: body.tag,
-      path: body.path,
+      note: "The next request to this page will regenerate and cache new content",
     }
   } catch (error) {
     console.error("Revalidation error:", error)
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error"
     
-    // Don't throw 500 for client errors
-    const statusCode = errorMessage.includes("Missing") ? 400 : 500
+    const statusCode = errorMessage.includes("Missing") ? 400 : 
+                      errorMessage.includes("Rate limit") ? 429 :
+                      errorMessage.includes("token") || errorMessage.includes("auth") ? 401 : 500
     
     throw createError({
       statusCode,

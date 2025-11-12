@@ -58,6 +58,13 @@
 </template>
 
 <script setup lang="ts">
+// Set cache tag during SSR so we can purge this page by tag
+const { ssrContext } = useNuxtApp()
+if (ssrContext) {
+  // Use a stable tag for this route - Netlify will cache the page with this tag
+  ssrContext.res.setHeader('Netlify-Cache-Tag', 'test-isr')
+}
+
 // Generate a random ID that persists until cache is revalidated
 // This will only change when the page is regenerated on the server (after cache purge)
 // The key must be static so the same value is used for the cached version
@@ -86,20 +93,18 @@ async function revalidate() {
       method: "POST",
       body: {
         tag: "test-isr",
-        path: "/test-isr",
       },
     })
 
-    revalidateStatus.value = "Cache purged! Waiting for regeneration..."
+    revalidateStatus.value = "Cache purged! Reloading page..."
     
-    // Reload after a longer delay to allow cache purge to propagate and regeneration to complete
-    // The cache purge needs time to propagate across Netlify's CDN
+    // Reload after a short delay to allow cache purge to propagate
+    // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
     setTimeout(() => {
-      // Reload to base path (no query params)
       // After cache purge, this request will hit the server and generate new content
-      // The new content will then be cached
+      // The new content will then be cached with the same tag
       window.location.href = `/test-isr`
-    }, 8000)
+    }, 3000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
