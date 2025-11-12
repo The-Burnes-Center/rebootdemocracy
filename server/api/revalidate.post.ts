@@ -112,72 +112,24 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // After purge, trigger regeneration using the same approach as warm-up
-    // Wait for purge to propagate, then make a server-side request to regenerate the page
+    // After purge, trigger regeneration asynchronously
+    // We return immediately to avoid timeouts, and let the client reload get fresh content
     if (body.path) {
-      try {
-        const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
-        const protocol = event.headers.get("x-forwarded-proto") || "http"
-        const siteUrl = `${protocol}://${host}`
-        
-        // Wait longer for purge to propagate - Netlify says "a few seconds" but can take up to 60 seconds
-        // We'll wait up to 60 seconds total, checking every 5 seconds
-        const maxWaitTime = 60000 // 60 seconds
-        const checkInterval = 5000 // Check every 5 seconds
-        const maxChecks = maxWaitTime / checkInterval // 12 checks
-        
-        console.log(`⏳ Waiting for cache purge to propagate (checking every ${checkInterval/1000}s, max ${maxWaitTime/1000}s)...`)
-        
-        const { getCacheStatus } = await import("@netlify/cache")
-        let freshContent = null
-        let checks = 0
-        
-        // Poll until we get a cache miss or timeout
-        while (checks < maxChecks && !freshContent) {
-          checks++
-          const elapsed = checks * checkInterval
-          console.log(`   Check ${checks}/${maxChecks} (${elapsed/1000}s elapsed)...`)
+      // Trigger regeneration in the background (don't await - return immediately)
+      const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
+      const protocol = event.headers.get("x-forwarded-proto") || "http"
+      const siteUrl = `${protocol}://${host}`
+      
+      // Fire and forget - trigger regeneration asynchronously
+      // The client will reload and get fresh content
+      setImmediate(async () => {
+        try {
+          // Wait a few seconds for purge to propagate
+          await new Promise(resolve => setTimeout(resolve, 5000))
           
-          // Use cache-busting headers and query param to force cache miss
-          const bypassUrl = `${siteUrl}${body.path}?_bypass=${Date.now()}`
-          const response = await fetch(bypassUrl, {
-            method: "GET",
-            headers: {
-              "User-Agent": "Netlify-Revalidate/1.0",
-              "X-Revalidate": "true",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              "Pragma": "no-cache",
-            },
-          })
+          console.log(`🔄 Triggering regeneration for: ${siteUrl}${body.path}`)
           
-          const status = response.status
-          const text = await response.text()
-          const cacheInfo = getCacheStatus(response)
-          const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
-          
-          console.log(`      Status: ${status}, Cache: ${cacheStatus}, Edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}`)
-          
-          // If we got a cache miss, we have fresh content
-          if (!cacheInfo.hit && status === 200 && text.length > 0) {
-            freshContent = text
-            console.log(`✅ Fresh content received after ${elapsed/1000}s (cache miss)`)
-            break
-          }
-          
-          // Wait before next check (unless this was the last one)
-          if (checks < maxChecks) {
-            await new Promise(resolve => setTimeout(resolve, checkInterval))
-          }
-        }
-        
-        if (!freshContent) {
-          console.warn(`⚠️ Could not get fresh content after ${maxWaitTime/1000}s - cache may not be fully purged`)
-        } else {
-          // Now cache the fresh content on the base path
-          // First, make a request WITH cache-busting to ensure we get fresh content (not old cache)
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          console.log(`🔄 Requesting base path with cache-busting to get fresh content...`)
-          
+          // Make a bypass request to trigger regeneration (this will be cached on next natural request)
           const bypassResponse = await fetch(`${siteUrl}${body.path}?_bypass=${Date.now()}`, {
             method: "GET",
             headers: {
@@ -188,69 +140,18 @@ export default defineEventHandler(async (event) => {
             },
           })
           
-          const bypassCacheInfo = getCacheStatus(bypassResponse)
-          const bypassText = await bypassResponse.text()
-          console.log(`   Bypass request: ${bypassResponse.status} (${bypassText.length} bytes, cache: ${bypassCacheInfo.hit ? 'hit' : 'miss'})`)
+          const { getCacheStatus } = await import("@netlify/cache")
+          const cacheInfo = getCacheStatus(bypassResponse)
+          const text = await bypassResponse.text()
           
-          // Now make a request WITHOUT cache-busting to cache the fresh content on the base path
-          // We need to wait for the purge to fully propagate, so we'll retry until we get a cache miss
-          console.log(`🔄 Caching fresh content on base path (no query params)...`)
+          console.log(`✅ Regeneration triggered: ${bypassResponse.status} (${text.length} bytes, cache: ${cacheInfo.hit ? 'hit' : 'miss'})`)
           
-          let basePathCached = false
-          let cacheAttempts = 0
-          const maxCacheAttempts = 10 // Try up to 10 times
-          
-          while (!basePathCached && cacheAttempts < maxCacheAttempts) {
-            cacheAttempts++
-            
-            // Wait progressively longer between attempts (5s, 10s, 15s, etc.)
-            if (cacheAttempts > 1) {
-              const waitTime = cacheAttempts * 5000 // 5s, 10s, 15s, etc.
-              console.log(`   Attempt ${cacheAttempts}/${maxCacheAttempts}: Waiting ${waitTime/1000}s for purge to propagate...`)
-              await new Promise(resolve => setTimeout(resolve, waitTime))
-            } else {
-              // First attempt: wait 5 seconds
-              await new Promise(resolve => setTimeout(resolve, 5000))
-            }
-            
-            console.log(`   Attempt ${cacheAttempts}/${maxCacheAttempts}: Requesting base path...`)
-            
-            const cacheResponse = await fetch(`${siteUrl}${body.path}`, {
-              method: "GET",
-              headers: {
-                "User-Agent": "Netlify-Revalidate/1.0",
-                "X-Revalidate": "true",
-                // No cache-busting headers - we want this to be cached
-              },
-            })
-            
-            const cacheInfo2 = getCacheStatus(cacheResponse)
-            const cacheText = await cacheResponse.text()
-            const cacheStatus = cacheInfo2.hit ? "hit" : "miss"
-            
-            console.log(`      Status: ${cacheResponse.status}, Cache: ${cacheStatus}, Edge: ${cacheInfo2.caches?.edge?.hit ? 'hit' : 'miss'}, ${cacheText.length} bytes`)
-            
-            // If we got a cache miss, we successfully cached fresh content
-            if (!cacheInfo2.hit && cacheResponse.status === 200 && cacheText.length > 0) {
-              basePathCached = true
-              console.log(`✅ Base path cached with fresh content after ${cacheAttempts} attempt(s)`)
-              break
-            }
-            
-            // If still cached, we'll retry
-            if (cacheAttempts < maxCacheAttempts) {
-              console.log(`   ⏳ Still cached, will retry...`)
-            }
-          }
-          
-          if (!basePathCached) {
-            console.warn(`⚠️ Could not cache fresh content on base path after ${maxCacheAttempts} attempts - purge may need more time to propagate`)
-          }
+          // The base path will be cached naturally on the next request (client reload)
+        } catch (regenError) {
+          // Non-critical - regeneration will happen on next natural request
+          console.warn("⚠️ Could not trigger regeneration:", regenError)
         }
-      } catch (regenError) {
-        // Non-critical - regeneration will happen on next natural request
-        console.warn("⚠️ Could not trigger regeneration:", regenError)
-      }
+      })
     }
 
     // Return 202 Accepted - purge and regeneration complete

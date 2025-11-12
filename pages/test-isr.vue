@@ -122,15 +122,15 @@ async function revalidate() {
       },
     })
 
-    const message = response.note || "Cache purged successfully"
-    revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
-    
-    // Reload after a short delay to see the regenerated content
-    // The server has already regenerated the page, so we just need to reload
-    setTimeout(() => {
-      // Reload the base path - it should now have fresh content from server-side regeneration
-      window.location.href = `/test-isr`
-    }, 2000)
+          const message = response.note || "Cache purged successfully"
+          revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
+          
+          // Reload after a delay to allow purge and regeneration to complete
+          // Use cache-busting query param to ensure we get fresh content
+          setTimeout(() => {
+            // Reload with cache-busting to bypass any remaining cache
+            window.location.href = `/test-isr?_revalidate=${Date.now()}`
+          }, 5000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
