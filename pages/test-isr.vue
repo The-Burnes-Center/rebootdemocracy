@@ -125,7 +125,20 @@ async function revalidate() {
     })
 
     const message = response.note || "Cache purged successfully"
-    revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
+    const cacheStatus = response.cacheStatus
+    
+    // Show cache status in UI for debugging
+    let statusMessage = `Cache purged! Old number was ${oldNumber}. ${message}`
+    if (cacheStatus) {
+      statusMessage += `\nCache status: ${cacheStatus.overall} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`
+    }
+    revalidateStatus.value = statusMessage
+    
+    // Determine wait time based on cache status
+    // If cache is still hit, wait longer for purge to propagate
+    const waitTime = cacheStatus?.overall === 'hit' ? 20000 : 15000
+    
+    console.log(`⏳ Waiting ${waitTime/1000}s before reload (cache status: ${cacheStatus?.overall || 'unknown'})`)
     
     // Reload the same route - ISR will regenerate on next request
     // Wait longer for purge to propagate across all Netlify edge nodes
@@ -147,7 +160,7 @@ async function revalidate() {
         // If fetch fails, still reload
         window.location.reload()
       })
-    }, 15000) // Wait 15 seconds for purge to fully propagate
+    }, waitTime)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"

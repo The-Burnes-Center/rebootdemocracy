@@ -112,16 +112,61 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // After purge, the next request will trigger regeneration naturally
-    // No need to pre-warm or force regeneration - ISR will handle it
+    // After purge, verify the purge worked by checking cache status
+    // This helps debug why subsequent purges might not be working
+    if (body.path) {
+      try {
+        const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
+        const protocol = event.headers.get("x-forwarded-proto") || "http"
+        const siteUrl = `${protocol}://${host}`
+        
+        // Wait a moment for purge to propagate, then check cache status
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        
+        const { getCacheStatus } = await import("@netlify/cache")
+        
+        // Make a test request to check if cache was actually purged
+        const testResponse = await fetch(`${siteUrl}${body.path}`, {
+          method: "GET",
+          headers: {
+            "User-Agent": "Netlify-Revalidate-Check/1.0",
+            "Cache-Control": "no-cache",
+          },
+        })
+        
+        const cacheInfo = getCacheStatus(testResponse)
+        const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
+        
+        console.log(`🔍 Cache status after purge: ${cacheStatus} (edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable: ${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'})`)
+        
+        // Return cache status in response for debugging
+        setResponseStatus(event, 202)
+        return {
+          message: "Cache purged successfully",
+          tag: body.tag,
+          path: body.path || "not specified",
+          cacheStatus: {
+            overall: cacheStatus,
+            edge: cacheInfo.caches?.edge?.hit ? "hit" : "miss",
+            durable: cacheInfo.caches?.durable?.hit ? "hit" : "miss",
+          },
+          note: cacheInfo.hit 
+            ? "⚠️ Cache still showing as hit - purge may need more time to propagate"
+            : "✅ Cache purged - next request should regenerate",
+        }
+      } catch (checkError) {
+        // Non-critical - just log for debugging
+        console.warn("⚠️ Could not check cache status:", checkError)
+      }
+    }
 
-    // Return 202 Accepted - purge and regeneration complete
+    // Return 202 Accepted - purge complete
     setResponseStatus(event, 202)
     return {
-      message: "Cache purged and page regenerated successfully",
+      message: "Cache purged successfully",
       tag: body.tag,
       path: body.path || "not specified",
-      note: "The page has been regenerated and cached. You can reload to see the new content.",
+      note: "The cache has been purged. You can reload to see the new content.",
     }
   } catch (error) {
     console.error("Revalidation error:", error)
