@@ -58,17 +58,8 @@
 </template>
 
 <script setup lang="ts">
-// Set cache tag during SSR so we can purge this page by tag
-try {
-  const event = useRequestEvent()
-  if (event) {
-    // Use a stable tag for this route - Netlify will cache the page with this tag
-    setResponseHeader(event, 'Netlify-Cache-Tag', 'test-isr')
-  }
-} catch (error) {
-  // Non-critical - cache tag is optional, page will still work
-  console.warn('Could not set cache tag:', error)
-}
+// Cache tag is set via server plugin (server/plugins/cache-tag.ts)
+// This allows on-demand cache invalidation by tag
 
 // Generate a random ID that persists until cache is revalidated
 // This will only change when the page is regenerated on the server (after cache purge)
