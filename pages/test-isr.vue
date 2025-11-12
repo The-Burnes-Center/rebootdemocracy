@@ -91,6 +91,18 @@ const id = useState("test-isr-id", () => {
   return randomNum
 })
 
+// Two-phase reload: After reloading with query param, reload again without it to cache base path
+onMounted(() => {
+  if (sessionStorage.getItem('isr_revalidate_phase2') === 'true') {
+    sessionStorage.removeItem('isr_revalidate_phase2')
+    // Wait a moment for the page to fully render, then reload without query param
+    setTimeout(() => {
+      // Remove query param and reload to cache the base path with fresh content
+      window.location.href = '/test-isr'
+    }, 1000)
+  }
+})
+
 // Track when the page was generated (for display purposes)
 const generatedAt = useState("test-isr-generated-at", () => {
   const now = new Date()
@@ -122,15 +134,23 @@ async function revalidate() {
       },
     })
 
-          const message = response.note || "Cache purged successfully"
-          revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
-          
-          // Reload after a delay to allow purge and regeneration to complete
-          // Use cache-busting query param to ensure we get fresh content
-          setTimeout(() => {
-            // Reload with cache-busting to bypass any remaining cache
-            window.location.href = `/test-isr?_revalidate=${Date.now()}`
-          }, 5000)
+    const message = response.note || "Cache purged successfully"
+    revalidateStatus.value = `Cache purged! Old number was ${oldNumber}. ${message}`
+    
+    // Two-phase reload strategy:
+    // 1. First reload with query param to get fresh content (bypasses cache)
+    // 2. Then reload without query param to cache the base path with fresh content
+    setTimeout(() => {
+      // Phase 1: Reload with cache-busting query param to get fresh content
+      const timestamp = Date.now()
+      revalidateStatus.value = `Reloading with fresh content...`
+      window.location.href = `/test-isr?_revalidate=${timestamp}`
+      
+      // Phase 2: After page loads, reload again without query param to cache base path
+      // We'll do this in a script that runs after the page loads
+      // Store a flag in sessionStorage to trigger the second reload
+      sessionStorage.setItem('isr_revalidate_phase2', 'true')
+    }, 5000)
   } catch (error) {
     revalidateError.value =
       error instanceof Error ? error.message : "Failed to revalidate"
