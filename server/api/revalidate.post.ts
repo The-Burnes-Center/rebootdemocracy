@@ -96,41 +96,46 @@ export default defineEventHandler(async (event) => {
 
     // After purge, trigger regeneration of the base path to ensure it's updated
     // This ensures the base URL (without query params) gets fresh content
-    // Wait longer if we hit rate limit (to ensure purge has fully propagated)
-    const waitTime = rateLimited ? 2000 : 1000
-    
+    // According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
+    // We need to wait for purge to fully propagate before regenerating
     if (body.path) {
       try {
         const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
         const protocol = event.headers.get("x-forwarded-proto") || "http"
         const siteUrl = `${protocol}://${host}`
         
-        console.log(`🔄 Triggering regeneration for base path: ${siteUrl}${body.path}`)
-        
-        // Wait for purge to propagate (longer if we hit rate limit)
+        // Wait longer for purge to propagate (Netlify says "a few seconds")
+        // Wait even longer if we hit rate limit
+        const waitTime = rateLimited ? 5000 : 3000
+        console.log(`⏳ Waiting ${waitTime}ms for cache purge to propagate...`)
         await new Promise(resolve => setTimeout(resolve, waitTime))
         
-        // Request the base path to trigger regeneration and cache it
-        // DON'T use cache-busting headers - we want this to be cached!
-        // Since we just purged, this request will hit the server and generate fresh content,
-        // which will then be cached with the same tag
-        const response = await fetch(`${siteUrl}${body.path}`, {
-          method: "GET",
-          // No cache-busting headers - we want this response to be cached
-        })
+        console.log(`🔄 Triggering regeneration for base path: ${siteUrl}${body.path}`)
         
-        const status = response.status
-        const text = await response.text()
-        console.log(`✅ Regeneration complete: ${status} (${text.length} bytes)`)
-        
-        // Make a second request to ensure the base path is cached
-        // This ensures the cache entry for the base path is properly established
-        await new Promise(resolve => setTimeout(resolve, 500))
-        const response2 = await fetch(`${siteUrl}${body.path}`, {
+        // Step 1: Request with cache-busting to ensure we get fresh content from server
+        // This bypasses any remaining cache and forces server-side generation
+        const bypassResponse = await fetch(`${siteUrl}${body.path}?_bypass=${Date.now()}`, {
           method: "GET",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+          },
         })
-        const status2 = response2.status
-        console.log(`✅ Base path cache verified: ${status2}`)
+        const bypassStatus = bypassResponse.status
+        const bypassText = await bypassResponse.text()
+        console.log(`✅ Bypass request complete: ${bypassStatus} (${bypassText.length} bytes)`)
+        
+        // Step 2: Wait a moment, then request the base path (no query params) to cache it
+        // This ensures the base path cache entry is updated with fresh content
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        console.log(`🔄 Caching base path: ${siteUrl}${body.path}`)
+        const cacheResponse = await fetch(`${siteUrl}${body.path}`, {
+          method: "GET",
+          // No cache-busting headers - we want this to be cached
+        })
+        const cacheStatus = cacheResponse.status
+        const cacheText = await cacheResponse.text()
+        console.log(`✅ Base path cached: ${cacheStatus} (${cacheText.length} bytes)`)
       } catch (regenError) {
         // Non-critical - regeneration will happen on next natural request
         console.warn("⚠️ Could not trigger regeneration:", regenError)
