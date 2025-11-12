@@ -12,8 +12,6 @@ export default defineNuxtConfig({
       isr: true,
     },
   },
-  nitro: {
-    preset: "netlify",
-  },
+  // Nitro preset is configured in nitro.config.ts (following Answer Overflow example)
 });
 
