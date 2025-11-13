@@ -32,14 +32,58 @@ import { purgeCache } from "@netlify/functions"
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody(event)
+    let rawBody = await readBody(event)
+    
+    /**
+     * Handle String Bodies (text/plain Content-Type)
+     * 
+     * Directus webhooks sometimes send the body as a string with Content-Type: text/plain
+     * instead of application/json. We need to parse it manually.
+     */
+    let body: any = rawBody
+    
+    if (typeof rawBody === 'string') {
+      try {
+        const trimmed = rawBody.trim()
+        body = JSON.parse(trimmed)
+        console.log(`📦 Parsed string body:`, body)
+      } catch (parseError) {
+        console.error("❌ Failed to parse body as JSON:", parseError)
+        throw createError({
+          statusCode: 400,
+          statusMessage: "Invalid JSON in request body. Expected JSON object with 'tag' field.",
+        })
+      }
+    }
 
-    if (!body?.tag) {
+    /**
+     * Extract Cache Tag from Request Body
+     * 
+     * Supports multiple payload formats:
+     * 1. Direct API: { tag: "test-isr", path: "/test-isr" }
+     * 2. Directus webhook: { tag: "test-isr" }
+     * 3. Directus webhook with payload: { payload: { tag: "test-isr" } }
+     */
+    let tag: string | undefined = body?.tag
+    
+    // Try nested payload formats (common in Directus webhooks)
+    if (!tag && body?.payload?.tag) {
+      tag = body.payload.tag
+    }
+    if (!tag && body?.data?.tag) {
+      tag = body.data.tag
+    }
+
+    if (!tag) {
+      console.error("❌ Missing tag parameter. Received body:", JSON.stringify(body, null, 2))
       throw createError({
         statusCode: 400,
-        statusMessage: "Missing tag parameter",
+        statusMessage: "Missing tag parameter. Expected: { tag: 'cache-tag' }",
       })
     }
+
+    // Extract path if provided, otherwise construct from tag (e.g., "test-isr" -> "/test-isr")
+    const path = body?.path || body?.payload?.path || body?.data?.path || (tag.startsWith("/") ? tag : `/${tag}`)
 
     // Check if NETLIFY_AUTH_TOKEN is available
     const authToken = process.env.NETLIFY_AUTH_TOKEN
@@ -78,24 +122,22 @@ export default defineEventHandler(async (event) => {
     let rateLimited = false
     
     try {
-      console.log(`🔄 Purging cache for tag: ${body.tag}`)
-      await purgeCache({ tags: [body.tag] })
-      console.log(`✅ Cache purged successfully for tag: ${body.tag}`)
+      console.log(`🔄 Purging cache for tag: ${tag}`)
+      await purgeCache({ tags: [tag] })
+      console.log(`✅ Cache purged successfully for tag: ${tag}`)
       
-      // Also purge by path if provided (as backup to ensure base path is invalidated)
-      if (body.path) {
-        try {
-          console.log(`🔄 Purging cache for path: ${body.path}`)
-          await purgeCache({ paths: [body.path] })
-          console.log(`✅ Cache purged successfully for path: ${body.path}`)
-        } catch (pathPurgeError) {
-          // Non-critical - tag purge should be sufficient
-          const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
-          if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
-            console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
-          } else {
-            console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
-          }
+      // Always purge by path (construct from tag if not provided) - EXACT same as button
+      try {
+        console.log(`🔄 Purging cache for path: ${path}`)
+        await purgeCache({ paths: [path] })
+        console.log(`✅ Cache purged successfully for path: ${path}`)
+      } catch (pathPurgeError) {
+        // Non-critical - tag purge should be sufficient
+        const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
+        if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
+          console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
+        } else {
+          console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
         }
       }
       
@@ -105,7 +147,7 @@ export default defineEventHandler(async (event) => {
         purgeError instanceof Error
           ? purgeError.message
           : String(purgeError)
-      console.error(`❌ purgeCache error for tag ${body.tag}:`, errorMsg)
+      console.error(`❌ purgeCache error for tag ${tag}:`, errorMsg)
 
       // If it's an auth token error, provide helpful message
       if (errorMsg.includes("token") || errorMsg.includes("auth")) {
@@ -131,9 +173,9 @@ export default defineEventHandler(async (event) => {
         await new Promise(resolve => setTimeout(resolve, 6000))
         
         try {
-          console.log(`🔄 Retrying cache purge for tag: ${body.tag}`)
-          await purgeCache({ tags: [body.tag] })
-          console.log(`✅ Cache purged successfully for tag: ${body.tag} (after retry)`)
+          console.log(`🔄 Retrying cache purge for tag: ${tag}`)
+          await purgeCache({ tags: [tag] })
+          console.log(`✅ Cache purged successfully for tag: ${tag} (after retry)`)
           purgeSuccess = true
         } catch (retryError) {
           const retryErrorMsg = retryError instanceof Error ? retryError.message : String(retryError)
@@ -156,77 +198,116 @@ export default defineEventHandler(async (event) => {
     }
 
     /**
-     * Step 3: Verify Purge Worked (Debugging)
+     * Step 3: Check Cache Status (EXACT Same as Button Process)
      * 
-     * After purging, we make a test request to check if the cache was actually invalidated.
-     * This helps debug why subsequent purges might not be working.
-     * 
-     * We check:
-     * - Overall cache status (hit/miss)
-     * - Edge cache status (local edge node cache)
-     * - Durable cache status (shared cache across all edge nodes)
-     * 
-     * If cache is still showing as "hit" after purge, it means:
-     * - Purge hasn't propagated yet (needs more time)
-     * - Or there's an issue with the purge
-     * 
-     * The client uses this information to adjust wait time before reloading.
+     * After purging, we check the cache status to determine how long to wait.
+     * This matches the EXACT process from the button click.
      */
-    if (body.path) {
-      try {
-        const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
-        const protocol = event.headers.get("x-forwarded-proto") || "http"
-        const siteUrl = `${protocol}://${host}`
+    const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
+    const protocol = event.headers.get("x-forwarded-proto") || "http"
+    const siteUrl = `${protocol}://${host}`
+    
+    try {
+      // Wait 2 seconds for purge to propagate before checking (EXACT same as button)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      const { getCacheStatus } = await import("@netlify/cache")
+      
+      // Make a test request to check cache status (EXACT same as button)
+      const testResponse = await fetch(`${siteUrl}${path}`, {
+        method: "GET",
+        headers: {
+          "User-Agent": "Netlify-Revalidate-Check/1.0",
+          "Cache-Control": "no-cache", // Bypass browser cache, but CDN will still check its cache
+        },
+      })
+      
+      // Get cache status from Netlify's cache utility
+      const cacheInfo = getCacheStatus(testResponse)
+      const overallStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
+      
+      const cacheStatus = {
+        overall: overallStatus,
+        edge: cacheInfo.caches?.edge?.hit ? "hit" : "miss",
+        durable: cacheInfo.caches?.durable?.hit ? "hit" : "miss",
+      }
+      
+      console.log(`🔍 Cache status after purge: ${overallStatus} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`)
+      
+      /**
+       * Step 4: Wait Based on Cache Status (EXACT Same as Button Process)
+       * 
+       * This matches the EXACT wait time logic from the button:
+       * - If cache is still "hit": wait 20 seconds (purge needs more time to propagate)
+       * - If cache is "miss": wait 15 seconds (purge propagated, ready to regenerate)
+       */
+      const waitTime = overallStatus === 'hit' ? 20000 : 15000
+      console.log(`⏳ Waiting ${waitTime/1000}s before regeneration (cache status: ${overallStatus})`)
+      await new Promise(resolve => setTimeout(resolve, waitTime))
+      
+      /**
+       * Step 5: Trigger Regeneration (EXACT Same Headers as Button Process)
+       * 
+       * This matches the EXACT fetch request from the button (lines 260-278 in test-isr.vue):
+       * - Same headers: Cache-Control: no-cache, Pragma: no-cache
+       * - Same cache option: cache: 'no-store'
+       * - This ensures we hit the server and trigger SSR regeneration
+       */
+      console.log(`🔄 Triggering regeneration for: ${path}`)
+      const regenerateResponse = await fetch(`${siteUrl}${path}`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache', // EXACT same as button - bypass browser cache
+          'Pragma': 'no-cache', // EXACT same as button - HTTP/1.0 cache control
+        },
+        cache: 'no-store' // EXACT same as button - don't store in browser cache
+      })
+      
+      const regenerateStatus = regenerateResponse.status
+      const regenerateText = await regenerateResponse.text()
+      const hasContent = regenerateText.length > 0
+      
+      if (regenerateStatus === 200 && hasContent) {
+        console.log(`✅ Page regenerated successfully: ${path} (${regenerateText.length} bytes)`)
         
-        // Wait 2 seconds for purge to propagate before checking
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
-        const { getCacheStatus } = await import("@netlify/cache")
-        
-        // Make a test request with cache-busting headers to check actual cache status
-        const testResponse = await fetch(`${siteUrl}${body.path}`, {
-          method: "GET",
+        // Make a normal request to cache the regenerated page (replaces button's window.location.reload())
+        // This ensures the new page is cached for future visitors
+        console.log(`🔄 Caching regenerated page...`)
+        await fetch(`${siteUrl}${path}`, {
+          method: 'GET',
           headers: {
-            "User-Agent": "Netlify-Revalidate-Check/1.0",
-            "Cache-Control": "no-cache", // Bypass browser cache, but CDN will still check its cache
+            'User-Agent': 'Netlify-Revalidate-Cache/1.0',
           },
         })
         
-        // Get cache status from Netlify's cache utility
-        const cacheInfo = getCacheStatus(testResponse)
-        const cacheStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
-        
-        console.log(`🔍 Cache status after purge: ${cacheStatus} (edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable: ${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'})`)
-        
-        // Return cache status in response so client can adjust behavior
+        // Return success with cache status
         setResponseStatus(event, 202)
         return {
-          message: "Cache purged successfully",
-          tag: body.tag,
-          path: body.path || "not specified",
-          cacheStatus: {
-            overall: cacheStatus,
-            edge: cacheInfo.caches?.edge?.hit ? "hit" : "miss",
-            durable: cacheInfo.caches?.durable?.hit ? "hit" : "miss",
-          },
-          note: cacheInfo.hit 
-            ? "⚠️ Cache still showing as hit - purge may need more time to propagate"
-            : "✅ Cache purged - next request should regenerate",
+          message: "Cache purged and page regenerated successfully",
+          tag: tag,
+          path: path,
+          regenerated: true,
+          cacheStatus: cacheStatus,
+          note: "✅ Page regenerated (same process as button click)",
         }
-      } catch (checkError) {
-        // Non-critical - if cache check fails, we still return success
-        // The purge itself succeeded, the check is just for debugging
-        console.warn("⚠️ Could not check cache status:", checkError)
+      } else {
+        console.warn(`⚠️ Regeneration returned status ${regenerateStatus} or empty content`)
       }
+    } catch (regenerateError) {
+      // Non-critical - if regeneration fails, we still return success
+      // The purge succeeded, and the page will regenerate on next request anyway
+      const errorMsg = regenerateError instanceof Error ? regenerateError.message : String(regenerateError)
+      console.warn(`⚠️ Could not trigger regeneration (non-critical): ${errorMsg}`)
     }
 
     // Return 202 Accepted - purge complete
+    // If we got here, purge succeeded but regeneration may not have been attempted
     setResponseStatus(event, 202)
     return {
       message: "Cache purged successfully",
-      tag: body.tag,
-      path: body.path || "not specified",
-      note: "The cache has been purged. You can reload to see the new content.",
+      tag: tag,
+      path: path,
+      note: "The cache has been purged. Page will regenerate on next request.",
     }
   } catch (error) {
     console.error("Revalidation error:", error)
