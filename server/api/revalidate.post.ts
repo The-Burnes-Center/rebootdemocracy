@@ -246,21 +246,28 @@ export default defineEventHandler(async (event) => {
       await new Promise(resolve => setTimeout(resolve, waitTime))
       
       /**
-       * Step 5: Trigger Regeneration (EXACT Same Headers as Button Process)
+       * Step 5: Trigger Regeneration (Aggressive Cache-Busting to Bypass Edge Cache)
        * 
-       * This matches the EXACT fetch request from the button (lines 260-278 in test-isr.vue):
-       * - Same headers: Cache-Control: no-cache, Pragma: no-cache
-       * - Same cache option: cache: 'no-store'
-       * - This ensures we hit the server and trigger SSR regeneration
+       * Uses aggressive cache-busting headers to ensure we bypass both edge cache
+       * and durable cache, forcing a fresh SSR regeneration.
+       * 
+       * Headers:
+       * - Cache-Control: no-cache, no-store, must-revalidate - Bypass all caches
+       * - Pragma: no-cache - HTTP/1.0 cache control
+       * - Expires: 0 - Tell caches content is expired
+       * - X-Cache-Bypass: unique timestamp - Additional header to force bypass
+       * - cache: 'no-store' - Don't store in any cache
        */
       console.log(`🔄 Triggering regeneration for: ${path}`)
       const regenerateResponse = await fetch(`${siteUrl}${path}`, {
         method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache', // EXACT same as button - bypass browser cache
-          'Pragma': 'no-cache', // EXACT same as button - HTTP/1.0 cache control
+          'Cache-Control': 'no-cache, no-store, must-revalidate', // Aggressive: bypass all caches
+          'Pragma': 'no-cache', // HTTP/1.0 cache control
+          'Expires': '0', // Tell caches content is expired
+          'X-Cache-Bypass': Date.now().toString(), // Unique header to force bypass
         },
-        cache: 'no-store' // EXACT same as button - don't store in browser cache
+        cache: 'no-store' // Don't store in any cache
       })
       
       const regenerateStatus = regenerateResponse.status
