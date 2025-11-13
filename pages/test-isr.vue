@@ -46,6 +46,26 @@
         <strong>Error loading API data:</strong> {{ apiError }}
       </div>
     </div>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
+      <h2 style="margin-top: 0; color: #f57c00;">Directus Blog Post Content (Fetched During SSR)</h2>
+      <p style="color: #555; margin-bottom: 1rem;">
+        This content is fetched from Directus during server-side rendering.
+        It only changes when the page is regenerated after cache purge.
+      </p>
+      
+      <div v-if="blogPost" style="background: white; padding: 1.5rem; border-radius: 4px; max-height: 500px; overflow-y: auto;">
+        <div v-html="blogPost" style="line-height: 1.6;"></div>
+      </div>
+      
+      <div v-if="blogLoading" style="padding: 1rem; text-align: center; color: #666;">
+        Loading blog post content...
+      </div>
+      
+      <div v-if="blogError" style="padding: 1rem; background: #ffebee; border-radius: 4px; color: #c62828;">
+        <strong>Error loading blog post:</strong> {{ blogError }}
+      </div>
+    </div>
     
     
     <div style="margin-top: 1rem; padding: 1rem; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
@@ -53,9 +73,10 @@
       <ol style="margin: 0.5rem 0; padding-left: 1.5rem;">
         <li>Note the current random number: <strong>{{ id }}</strong></li>
         <li v-if="apiData">Note the API data: <strong>"{{ apiData.message }}"</strong> (value: {{ apiData.randomValue }})</li>
+        <li v-if="blogPost">Note the blog post content (first few words): <strong>{{ blogPost.substring(0, 50) }}...</strong></li>
         <li>Click "Revalidate Cache" button below</li>
         <li>Wait for the page to reload (15-20 seconds)</li>
-        <li>Check if the number and API data changed - if they did, a new page was generated! ✅</li>
+        <li>Check if the number, API data, and blog content changed - if they did, a new page was generated! ✅</li>
       </ol>
       <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #555;">
         <strong>Tip:</strong> The number only changes when the server regenerates the page after cache purge.
@@ -172,6 +193,29 @@ const { data: apiData, pending: apiLoading, error: apiError } = await useFetch('
   key: 'test-isr-api-data', // Static key ensures same data for cached version
   server: true, // Ensure it runs on server during SSR
 })
+
+/**
+ * Directus Blog Post Content
+ * 
+ * Fetches blog post content from Directus during SSR.
+ * This data is embedded in the cached page and only changes
+ * when the page is regenerated after cache purge.
+ * 
+ * Important: This fetch happens during SSR, so the data is part
+ * of the cached HTML. When the page is regenerated, this API
+ * is called again and fresh content is fetched.
+ */
+const { data: blogPost, pending: blogLoading, error: blogError } = await useFetch(
+  'https://directus.theburnescenter.org/items/reboot_democracy_blog/28150',
+  {
+    key: 'test-isr-blog-post', // Static key ensures same data for cached version
+    server: true, // Ensure it runs on server during SSR
+    transform: (data: any) => {
+      // Extract only the content field from the response
+      return data?.data?.content || null
+    },
+  }
+)
 
 // Revalidation UI state
 const revalidating = ref(false)
