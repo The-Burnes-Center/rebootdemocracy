@@ -123,14 +123,18 @@ const { data: blogPost, pending: blogLoading, error: blogError } = await useFetc
         'slug',
         'content',
         'excerpt',
-        'image',
+        'image.id', // Expand image to get file ID
+        'image.filename_disk', // Get filename for potential use
         'date',
         'date_updated',
         'date_created',
         'status',
         'Tags',
         'fullURL',
-        'authors',
+        'authors.id', // Expand authors to get author data
+        'authors.name',
+        'authors.first_name',
+        'authors.last_name',
         'outlets',
         'one_line',
         'ai_content_disclaimer',
@@ -178,21 +182,149 @@ function formatDate(dateString: string | null | undefined): string {
   }
 }
 
-// Set page meta tags from blog post data
-useHead({
-  title: blogPost.value?.title || 'Blog Post',
-  meta: [
-    {
-      name: 'description',
-      content: blogPost.value?.excerpt || blogPost.value?.one_line || '',
-    },
-    ...(blogPost.value?.fullURL ? [
+/**
+ * Set Comprehensive Meta Tags from Blog Post Data
+ * 
+ * Sets all SEO and social media meta tags from the blog post data:
+ * - Basic SEO (title, description)
+ * - Open Graph tags (for Facebook, LinkedIn, etc.)
+ * - Twitter Card tags
+ * - Article meta tags (published date, authors, tags)
+ * - Canonical URL
+ */
+useHead(() => {
+  if (!blogPost.value) {
+    return {
+      title: 'Blog Post',
+    }
+  }
+
+  const post = blogPost.value
+  const siteUrl = 'https://rebootdemocracy.ai' // Update with your actual site URL
+  const currentUrl = post.fullURL || `${siteUrl}/blog/${post.slug}`
+  
+  // Construct image URL from Directus file ID
+  // Directus file URLs format: https://directus.theburnescenter.org/assets/{file-id}
+  // The image field might be a string UUID or an object with an id field
+  let imageId: string | null = null
+  if (post.image) {
+    if (typeof post.image === 'string') {
+      imageId = post.image
+    } else if (post.image.id) {
+      imageId = post.image.id
+    }
+  }
+  const imageUrl = imageId 
+    ? `https://directus.theburnescenter.org/assets/${imageId}`
+    : null
+  
+  // Get description (prefer excerpt, fallback to one_line)
+  const description = post.excerpt || post.one_line || ''
+  
+  // Get author names (if authors array exists)
+  const authorNames = post.authors && Array.isArray(post.authors)
+    ? post.authors.map((author: any) => author.name || author.first_name + ' ' + author.last_name).filter(Boolean).join(', ')
+    : null
+
+  return {
+    title: post.title || 'Blog Post',
+    meta: [
+      // Basic SEO
+      {
+        name: 'description',
+        content: description,
+      },
+      
+      // Open Graph / Facebook
+      {
+        property: 'og:type',
+        content: 'article',
+      },
+      {
+        property: 'og:title',
+        content: post.title || 'Blog Post',
+      },
+      {
+        property: 'og:description',
+        content: description,
+      },
       {
         property: 'og:url',
-        content: blogPost.value.fullURL,
+        content: currentUrl,
       },
-    ] : []),
-  ],
+      ...(imageUrl ? [
+        {
+          property: 'og:image',
+          content: imageUrl,
+        },
+        {
+          property: 'og:image:secure_url',
+          content: imageUrl,
+        },
+        {
+          property: 'og:image:type',
+          content: 'image/jpeg', // Adjust if needed
+        },
+      ] : []),
+      {
+        property: 'og:site_name',
+        content: 'Reboot Democracy',
+      },
+      
+      // Twitter Card
+      {
+        name: 'twitter:card',
+        content: imageUrl ? 'summary_large_image' : 'summary',
+      },
+      {
+        name: 'twitter:title',
+        content: post.title || 'Blog Post',
+      },
+      {
+        name: 'twitter:description',
+        content: description,
+      },
+      ...(imageUrl ? [
+        {
+          name: 'twitter:image',
+          content: imageUrl,
+        },
+      ] : []),
+      
+      // Article meta tags
+      ...(post.date ? [
+        {
+          property: 'article:published_time',
+          content: new Date(post.date).toISOString(),
+        },
+      ] : []),
+      ...(post.date_updated && post.date_updated !== post.date ? [
+        {
+          property: 'article:modified_time',
+          content: new Date(post.date_updated).toISOString(),
+        },
+      ] : []),
+      ...(authorNames ? [
+        {
+          property: 'article:author',
+          content: authorNames,
+        },
+      ] : []),
+      ...(post.Tags && Array.isArray(post.Tags) && post.Tags.length > 0 ? 
+        post.Tags.map((tag: string) => ({
+          property: 'article:tag',
+          content: tag,
+        }))
+      : []),
+    ],
+    link: [
+      // Canonical URL
+      {
+        rel: 'canonical',
+        href: currentUrl,
+      },
+    ],
+  }
 })
 </script>
 
