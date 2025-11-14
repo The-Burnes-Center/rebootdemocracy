@@ -61,6 +61,41 @@ export default defineNuxtConfig({
         "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
       },
     },
+    
+    /**
+     * Blog Posts - Incremental Static Regeneration with Durable Cache
+     * 
+     * Applies ISR configuration to all blog post routes (/blog/**).
+     * Each blog post is cached individually and can be revalidated on-demand
+     * by purging the cache tag "blog/{slug}".
+     * 
+     * How it works:
+     * 1. First request: Page is rendered on-demand by serverless function
+     * 2. Response is cached: Stored in Netlify's durable cache with tag "blog/{slug}"
+     * 3. Subsequent requests: Served from durable cache (no function invocation)
+     * 4. On-demand revalidation: Cache can be purged via /api/revalidate endpoint with tag "blog/{slug}"
+     * 5. After purge: Next request triggers regeneration and re-caching
+     * 
+     * Cache Tag Format:
+     * - Tag: "blog/{slug}" (e.g., "blog/my-post-slug")
+     * - Path: "/blog/{slug}" (e.g., "/blog/my-post-slug")
+     * - Set automatically by server/plugins/cache-tag.ts
+     * 
+     * Directus Webhook:
+     * - Send: { "tag": "blog/{slug}" } to /api/revalidate
+     * - The endpoint will automatically construct the path "/blog/{slug}" from the tag
+     */
+    "/blog/**": {
+      isr: true, // Enable ISR (never considers cache stale)
+      headers: {
+        // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        
+        // Netlify CDN cache control with durable directive
+        // This is the key header that enables shared durable cache across all edge nodes
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+      },
+    },
   },
   // Nitro preset is configured in nitro.config.ts
 });
