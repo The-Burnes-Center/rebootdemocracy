@@ -125,7 +125,6 @@ const { data: blogPost, pending: blogLoading, error: blogError } = await useFetc
         'excerpt',
         'image', // Image field (will be UUID string or object)
         'date',
-        
         'Tags',
         'fullURL',
         'one_line',
