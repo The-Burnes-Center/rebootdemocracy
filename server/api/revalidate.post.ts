@@ -222,6 +222,7 @@ export default defineEventHandler(async (event) => {
         },
       })
       
+      
       // Get cache status from Netlify's cache utility
       const cacheInfo = getCacheStatus(testResponse)
       const overallStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
