@@ -59,40 +59,7 @@
       </p>
     </div>
 
-    <div style="margin-top: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
-      <h2>Cache Revalidation</h2>
-      <p style="margin-bottom: 1rem;">
-        Click the button below to purge the cache and regenerate this page:
-      </p>
-      <button
-        @click="revalidate"
-        :disabled="revalidating"
-        style="
-          padding: 0.75rem 1.5rem;
-          background: #00c7b7;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 1rem;
-          font-weight: 600;
-        "
-      >
-        {{ revalidating ? "Revalidating..." : "Revalidate Cache" }}
-      </button>
-      <p
-        v-if="revalidateStatus"
-        style="margin-top: 1rem; color: #00c7b7; font-weight: 600;"
-      >
-        {{ revalidateStatus }}
-      </p>
-      <p
-        v-if="revalidateError"
-        style="margin-top: 1rem; color: #ff6b6b; font-weight: 600;"
-      >
-        Error: {{ revalidateError }}
-      </p>
-    </div>
+    
   </div>
 </template>
 
@@ -176,9 +143,9 @@ const { data: blogPost, pending: blogLoading, error: blogError } = await useFetc
 )
 
 // Revalidation UI state
-const revalidating = ref(false)
-const revalidateStatus = ref("")
-const revalidateError = ref("")
+// const revalidating = ref(false)
+// const revalidateStatus = ref("")
+// const revalidateError = ref("")
 
 /**
  * On-Demand Cache Revalidation
@@ -191,99 +158,99 @@ const revalidateError = ref("")
  * 
  * The reload triggers ISR regeneration, which generates a new random number.
  */
-async function revalidate() {
-  revalidating.value = true
-  revalidateStatus.value = ""
-  revalidateError.value = ""
+// async function revalidate() {
+//   revalidating.value = true
+//   revalidateStatus.value = ""
+//   revalidateError.value = ""
 
-  try {
-    // Store the old number to show what changed
-    const oldNumber = id.value
+//   try {
+//     // Store the old number to show what changed
+//     const oldNumber = id.value
     
-    /**
-     * Step 1: Call revalidation endpoint
-     * 
-     * This purges the cache by tag and path, and returns cache status information.
-     * The endpoint:
-     * - Purges cache by tag ("test-isr")
-     * - Purges cache by path ("/test-isr") as backup
-     * - Checks cache status after purge
-     * - Returns cache status for debugging
-     */
-    const response = await $fetch("/api/revalidate", {
-      method: "POST",
-      body: {
-        tag: "test-isr", // Cache tag set by server plugin
-        path: "/test-isr", // Also purge the base path for reliability
-      },
-    })
+//     /**
+//      * Step 1: Call revalidation endpoint
+//      * 
+//      * This purges the cache by tag and path, and returns cache status information.
+//      * The endpoint:
+//      * - Purges cache by tag ("test-isr")
+//      * - Purges cache by path ("/test-isr") as backup
+//      * - Checks cache status after purge
+//      * - Returns cache status for debugging
+//      */
+//     const response = await $fetch("/api/revalidate", {
+//       method: "POST",
+//       body: {
+//         tag: "test-isr", // Cache tag set by server plugin
+//         path: "/test-isr", // Also purge the base path for reliability
+//       },
+//     })
 
-    const message = response.note || "Cache purged successfully"
-    const cacheStatus = response.cacheStatus
+//     const message = response.note || "Cache purged successfully"
+//     const cacheStatus = response.cacheStatus
     
-    /**
-     * Step 2: Display cache status in UI
-     * 
-     * Show the user what happened and the cache status for debugging.
-     * This helps understand if purge worked and why regeneration might not happen.
-     */
-    let statusMessage = `Cache purged! Old number was ${oldNumber}. ${message}`
-    if (cacheStatus) {
-      statusMessage += `\nCache status: ${cacheStatus.overall} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`
-    }
-    revalidateStatus.value = statusMessage
+//     /**
+//      * Step 2: Display cache status in UI
+//      * 
+//      * Show the user what happened and the cache status for debugging.
+//      * This helps understand if purge worked and why regeneration might not happen.
+//      */
+//     let statusMessage = `Cache purged! Old number was ${oldNumber}. ${message}`
+//     if (cacheStatus) {
+//       statusMessage += `\nCache status: ${cacheStatus.overall} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`
+//     }
+//     revalidateStatus.value = statusMessage
     
-    /**
-     * Step 3: Determine wait time based on cache status
-     * 
-     * If cache is still showing as "hit" after purge, it means:
-     * - Purge hasn't propagated yet (needs more time)
-     * - We should wait longer before reloading
-     * 
-     * Netlify says purge takes "a few seconds" but can take up to 60 seconds
-     * to propagate across all edge nodes.
-     */
-    const waitTime = cacheStatus?.overall === 'hit' ? 20000 : 15000
+//     /**
+//      * Step 3: Determine wait time based on cache status
+//      * 
+//      * If cache is still showing as "hit" after purge, it means:
+//      * - Purge hasn't propagated yet (needs more time)
+//      * - We should wait longer before reloading
+//      * 
+//      * Netlify says purge takes "a few seconds" but can take up to 60 seconds
+//      * to propagate across all edge nodes.
+//      */
+//     const waitTime = cacheStatus?.overall === 'hit' ? 20000 : 15000
     
-    console.log(`⏳ Waiting ${waitTime/1000}s before reload (cache status: ${cacheStatus?.overall || 'unknown'})`)
+//     console.log(`⏳ Waiting ${waitTime/1000}s before reload (cache status: ${cacheStatus?.overall || 'unknown'})`)
     
-    /**
-     * Step 4: Reload page after waiting for purge to propagate
-     * 
-     * We do a two-step reload:
-     * 1. First, make a fetch request with cache-busting headers to ensure we hit the server
-     * 2. Then, reload the page normally
-     * 
-     * This ensures:
-     * - Browser cache is bypassed
-     * - We get fresh content from the server
-     * - ISR regenerates the page with a new random number
-     */
-    setTimeout(() => {
-      // Step 4a: Make a fetch request with cache-busting headers
-      // This ensures we hit the server, not browser cache
-      fetch('/test-isr', {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache', // Bypass browser cache
-          'Pragma': 'no-cache', // HTTP/1.0 cache control
-        },
-        cache: 'no-store' // Don't store in browser cache
-      }).then(() => {
-        // Step 4b: Reload the page
-        // This will trigger ISR regeneration if cache was purged
-        window.location.reload()
-      }).catch(() => {
-        // If fetch fails, still reload (non-critical)
-        window.location.reload()
-      })
-    }, waitTime)
-  } catch (error) {
-    revalidateError.value =
-      error instanceof Error ? error.message : "Failed to revalidate"
-    console.error("Revalidation error:", error)
-  } finally {
-    revalidating.value = false
-  }
-}
+//     /**
+//      * Step 4: Reload page after waiting for purge to propagate
+//      * 
+//      * We do a two-step reload:
+//      * 1. First, make a fetch request with cache-busting headers to ensure we hit the server
+//      * 2. Then, reload the page normally
+//      * 
+//      * This ensures:
+//      * - Browser cache is bypassed
+//      * - We get fresh content from the server
+//      * - ISR regenerates the page with a new random number
+//      */
+//     setTimeout(() => {
+//       // Step 4a: Make a fetch request with cache-busting headers
+//       // This ensures we hit the server, not browser cache
+//       fetch('/test-isr', {
+//         method: 'GET',
+//         headers: {
+//           'Cache-Control': 'no-cache', // Bypass browser cache
+//           'Pragma': 'no-cache', // HTTP/1.0 cache control
+//         },
+//         cache: 'no-store' // Don't store in browser cache
+//       }).then(() => {
+//         // Step 4b: Reload the page
+//         // This will trigger ISR regeneration if cache was purged
+//         window.location.reload()
+//       }).catch(() => {
+//         // If fetch fails, still reload (non-critical)
+//         window.location.reload()
+//       })
+//     }, waitTime)
+//   } catch (error) {
+//     revalidateError.value =
+//       error instanceof Error ? error.message : "Failed to revalidate"
+//     console.error("Revalidation error:", error)
+//   } finally {
+//     revalidating.value = false
+//   }
+// }
 </script>
