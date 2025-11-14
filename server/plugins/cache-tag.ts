@@ -20,6 +20,7 @@
  */
 export default defineEventHandler((event) => {
   try {
+    
     // Get URL from event - handle both node and web standard formats
     const url = event.node?.req?.url || event.path || ""
     
