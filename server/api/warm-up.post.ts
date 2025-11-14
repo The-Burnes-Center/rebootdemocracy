@@ -110,6 +110,7 @@ export default defineEventHandler(async (event) => {
           },
         })
         
+        
         console.log(`✅ ${path}: ${status} (${text.length} bytes, cache: ${cacheStatus}, edge: ${cacheInfo.caches?.edge?.hit ? 'hit' : 'miss'}, durable: ${cacheInfo.caches?.durable?.hit ? 'hit' : 'miss'})`)
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
