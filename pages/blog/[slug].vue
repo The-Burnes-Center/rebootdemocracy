@@ -123,25 +123,13 @@ const { data: blogPost, pending: blogLoading, error: blogError } = await useFetc
         'slug',
         'content',
         'excerpt',
-        'image.id', // Expand image to get file ID
-        'image.filename_disk', // Get filename for potential use
+        'image', // Image field (will be UUID string or object)
         'date',
-        'date_updated',
-        'date_created',
-        'status',
+        
         'Tags',
         'fullURL',
-        'authors.id', // Expand authors to get author data
-        'authors.name',
-        'authors.first_name',
-        'authors.last_name',
-        'outlets',
         'one_line',
-        'ai_content_disclaimer',
-        'audio_version',
-        'external_link',
-        'featuredBlog',
-      ].join(','), // Request all relevant fields
+      ].join(','), // Only request essential fields
     },
     transform: (data: any) => {
       // Directus returns an array, get the first matching post
@@ -220,11 +208,6 @@ useHead(() => {
   
   // Get description (prefer excerpt, fallback to one_line)
   const description = post.excerpt || post.one_line || ''
-  
-  // Get author names (if authors array exists)
-  const authorNames = post.authors && Array.isArray(post.authors)
-    ? post.authors.map((author: any) => author.name || author.first_name + ' ' + author.last_name).filter(Boolean).join(', ')
-    : null
 
   return {
     title: post.title || 'Blog Post',
@@ -302,12 +285,6 @@ useHead(() => {
         {
           property: 'article:modified_time',
           content: new Date(post.date_updated).toISOString(),
-        },
-      ] : []),
-      ...(authorNames ? [
-        {
-          property: 'article:author',
-          content: authorNames,
         },
       ] : []),
       ...(post.Tags && Array.isArray(post.Tags) && post.Tags.length > 0 ? 
