@@ -379,7 +379,7 @@ export default defineEventHandler(async (event) => {
        * Only "hit" means we need to wait longer for purge to propagate.
        */
       const purgeWorked = overallStatus === 'stale' || overallStatus === 'miss'
-      const waitTime = purgeWorked ? 15000 : 20000 // 15s if purge worked, 20s if still hit
+      const waitTime = purgeWorked ? 5000 : 20000 // 5s if purge worked, 20s if still hit
       console.log(`⏳ Waiting ${waitTime/1000}s before regeneration (CDN cache: ${overallStatus}, purge ${purgeWorked ? 'worked' : 'propagating...'})`)
       await new Promise(resolve => setTimeout(resolve, waitTime))
       
