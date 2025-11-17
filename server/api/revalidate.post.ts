@@ -418,12 +418,17 @@ export default defineEventHandler(async (event) => {
         // Make a normal request to cache the regenerated page (replaces button's window.location.reload())
         // This ensures the new page is cached for future visitors
         console.log(`🔄 Caching regenerated page...`)
-        await fetch(`${siteUrl}${path}`, {
+        const cacheRequest = await fetch(`${siteUrl}${path}`, {
           method: 'GET',
           headers: {
             'User-Agent': 'Netlify-Revalidate-Cache/1.0',
           },
         })
+        
+        // Check if the page is cached
+        const cacheCheckHeader = cacheRequest.headers.get("Cache-Status") || ""
+        const isCached = cacheCheckHeader.includes('hit') && !cacheCheckHeader.includes('fwd=stale')
+        console.log(`📋 Cache check: ${isCached ? '✅ Page is cached' : '⚠️ Page may not be cached yet'} (Cache-Status: ${cacheCheckHeader})`)
         
         // Return success with cache status
         setResponseStatus(event, 202)
@@ -433,6 +438,8 @@ export default defineEventHandler(async (event) => {
           path: path,
           regenerated: true,
           cacheStatus: cacheStatus,
+          isCached: isCached,
+          cacheCheckHeader: cacheCheckHeader,
           note: "✅ Page regenerated (same process as button click)",
         }
       } else {
