@@ -208,12 +208,23 @@ export default defineEventHandler(async (event) => {
     const siteUrl = `${protocol}://${host}`
     
     try {
-      // Wait 2 seconds for purge to propagate before checking (EXACT same as button)
+      // Wait 2 seconds for purge to propagate before checking
       await new Promise(resolve => setTimeout(resolve, 2000))
       
-      const { getCacheStatus } = await import("@netlify/cache")
-      
-      // Make a test request to check cache status (EXACT same as button)
+      /**
+       * Check CDN Cache Status via Cache-Status Header
+       * 
+       * IMPORTANT: We use the Cache-Status header (ground truth for CDN cache),
+       * NOT getCacheStatus from @netlify/cache (which is for Cache API).
+       * 
+       * Cache-Status values we care about:
+       * - "Netlify Edge"; hit → CDN edge cache still has fresh content (purge didn't work yet)
+       * - "Netlify Edge"; fwd=miss → CDN cache is empty (purge worked)
+       * - "Netlify Edge"; fwd=stale → CDN cache had stale content, fetched fresh (purge worked)
+       * - "Netlify Durable"; hit → Durable cache has content
+       * - "Netlify Durable"; fwd=miss → Durable cache is empty
+       * - "Netlify Durable"; fwd=stale → Durable cache had stale content
+       */
       const testResponse = await fetch(`${siteUrl}${path}`, {
         method: "GET",
         headers: {
@@ -222,28 +233,88 @@ export default defineEventHandler(async (event) => {
         },
       })
       
+      // Get Cache-Status header (ground truth for CDN cache)
+      // Note: There can be multiple Cache-Status headers (one for Edge, one for Durable)
+      // The fetch API Headers object may combine them with commas or keep them separate
+      const cacheStatusHeader = testResponse.headers.get("Cache-Status") || ""
+      // Parse Cache-Status header(s)
+      // Netlify sends separate headers like:
+      //   Cache-Status: "Netlify Edge"; hit
+      //   Cache-Status: "Netlify Durable"; hit
+      // But fetch API might combine them or we might get one combined value
+      let cacheStatusHeaders: string[] = []
+      if (cacheStatusHeader) {
+        // Check if it contains both "Netlify Edge" and "Netlify Durable" (combined)
+        // If so, split by looking for "Netlify" as delimiter
+        if (cacheStatusHeader.includes('"Netlify Edge') && cacheStatusHeader.includes('"Netlify Durable')) {
+          // Split by "Netlify" (but keep the prefix)
+          const parts = cacheStatusHeader.split(/(?="Netlify)/)
+          cacheStatusHeaders = parts.filter(p => p.trim().startsWith('"Netlify'))
+        } else {
+          // Single header or comma-separated
+          cacheStatusHeaders = cacheStatusHeader.split(',').map(h => h.trim()).filter(Boolean)
+        }
+      }
       
-      // Get cache status from Netlify's cache utility
-      const cacheInfo = getCacheStatus(testResponse)
-      const overallStatus = cacheInfo.hit ? "hit" : (cacheInfo.caches?.edge?.stale ? "stale" : "miss")
+      // Parse Cache-Status headers
+      let edgeStatus = "unknown"
+      let durableStatus = "unknown"
+      let overallStatus = "unknown"
+      
+      for (const header of cacheStatusHeaders) {
+        if (header.includes("Netlify Edge")) {
+          if (header.includes("hit") && !header.includes("fwd=stale")) {
+            edgeStatus = "hit"
+          } else if (header.includes("fwd=stale")) {
+            edgeStatus = "stale"
+          } else if (header.includes("fwd=miss")) {
+            edgeStatus = "miss"
+          }
+        }
+        if (header.includes("Netlify Durable")) {
+          if (header.includes("hit") && !header.includes("fwd=stale")) {
+            durableStatus = "hit"
+          } else if (header.includes("fwd=stale")) {
+            durableStatus = "stale"
+          } else if (header.includes("fwd=miss")) {
+            durableStatus = "miss"
+          }
+        }
+      }
+      
+      // Determine overall status
+      if (edgeStatus === "hit" || durableStatus === "hit") {
+        overallStatus = "hit"
+      } else if (edgeStatus === "stale" || durableStatus === "stale") {
+        overallStatus = "stale"
+      } else {
+        overallStatus = "miss"
+      }
       
       const cacheStatus = {
         overall: overallStatus,
-        edge: cacheInfo.caches?.edge?.hit ? "hit" : "miss",
-        durable: cacheInfo.caches?.durable?.hit ? "hit" : "miss",
+        edge: edgeStatus,
+        durable: durableStatus,
+        headers: cacheStatusHeaders, // Include raw headers for debugging
       }
       
-      console.log(`🔍 Cache status after purge: ${overallStatus} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`)
+      console.log(`🔍 CDN Cache status after purge: ${overallStatus} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`)
+      console.log(`📋 Cache-Status headers: ${cacheStatusHeaders.join(", ")}`)
       
       /**
-       * Step 4: Wait Based on Cache Status (EXACT Same as Button Process)
+       * Step 4: Wait Based on CDN Cache Status
        * 
-       * This matches the EXACT wait time logic from the button:
-       * - If cache is still "hit": wait 20 seconds (purge needs more time to propagate)
-       * - If cache is "miss": wait 15 seconds (purge propagated, ready to regenerate)
+       * Cache-Status interpretation:
+       * - "hit" (no fwd=stale): CDN still has fresh content (purge hasn't propagated yet) → wait longer
+       * - "fwd=stale": CDN recognized stale content, fetched fresh (purge worked) → ready to regenerate
+       * - "fwd=miss": CDN cache is empty (purge worked) → ready to regenerate
+       * 
+       * We treat "stale" and "miss" as "purge worked" and proceed with shorter wait.
+       * Only "hit" means we need to wait longer for purge to propagate.
        */
-      const waitTime = overallStatus === 'hit' ? 20000 : 15000
-      console.log(`⏳ Waiting ${waitTime/1000}s before regeneration (cache status: ${overallStatus})`)
+      const purgeWorked = overallStatus === 'stale' || overallStatus === 'miss'
+      const waitTime = purgeWorked ? 15000 : 20000 // 15s if purge worked, 20s if still hit
+      console.log(`⏳ Waiting ${waitTime/1000}s before regeneration (CDN cache: ${overallStatus}, purge ${purgeWorked ? 'worked' : 'propagating...'})`)
       await new Promise(resolve => setTimeout(resolve, waitTime))
       
       /**
