@@ -379,9 +379,14 @@ export default defineEventHandler(async (event) => {
        * Only "hit" means we need to wait longer for purge to propagate.
        */
       const purgeWorked = overallStatus === 'stale' || overallStatus === 'miss'
-      const waitTime = purgeWorked ? 5000 : 20000 // 5s if purge worked, 20s if still hit
-      console.log(`⏳ Waiting ${waitTime/1000}s before regeneration (CDN cache: ${overallStatus}, purge ${purgeWorked ? 'worked' : 'propagating...'})`)
-      await new Promise(resolve => setTimeout(resolve, waitTime))
+      if (purgeWorked) {
+        console.log(`✅ Purge worked (CDN cache: ${overallStatus}) - proceeding immediately to regeneration`)
+      } else {
+        // Only wait if cache is still "hit" (purge hasn't propagated yet)
+        const waitTime = 20000 // 20s if still hit
+        console.log(`⏳ Waiting ${waitTime/1000}s before regeneration (CDN cache: ${overallStatus}, purge propagating...)`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
       
       /**
        * Step 5: Trigger Regeneration (Aggressive Cache-Busting to Bypass Edge Cache)
