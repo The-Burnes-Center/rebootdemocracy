@@ -455,8 +455,7 @@
 
 .book-title-text {
   display: block;
-  font-weight: 600;
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1.6;
   margin: 0.75rem 0 0.5rem 0;
   letter-spacing: 0.2px;
@@ -466,7 +465,9 @@
 
 .book-author-text {
   display: block;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 1.2rem;
+  font-style: italic;
   margin-top: 1rem;
   letter-spacing: 0.8px;
   text-align: center;
@@ -536,11 +537,11 @@
   }
 
   .book-title-text {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
 
   .book-author-text {
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 
   .home-subscription {
@@ -702,11 +703,11 @@
   }
 
   .book-title-text {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
   }
 
   .book-author-text {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
   }
 
   .home-subscription {

@@ -121,7 +121,7 @@
                     as="span"
                     weight="semibold"
                     color="text-primary-light"
-                    fontFamily="habibi"
+                    fontFamily="sora"
                     lineHeight="relaxed"
                     class="book-title-text"
                   >
@@ -138,7 +138,7 @@
                       as="span"
                       weight="semibold"
                       color="text-primary-light"
-                      fontFamily="sora"
+                      fontFamily="habibi"
                       class="author-name"
                     >Beth Simone Noveck</Text>
                   </Text>
