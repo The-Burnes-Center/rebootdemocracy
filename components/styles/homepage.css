@@ -322,31 +322,62 @@
    =================================== */
 
 .home-subscription {
-  background: #003266;
+  background:
+    linear-gradient(135deg, #001a33 0%, #002d55 50%, #003d70 100%);
   padding: 2rem 2rem;
   width: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
+
+
 .subscription-content-wrapper {
-  max-width: 1450px;
+  max-width: 1300px;
   padding: 1rem 2rem;
   margin: 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+  gap: 4.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.subscription-left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.subscription-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  text-align: center;
 }
 
 .subscription-text {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1rem;
+  align-items: center;
+}
+
+.subscription-title {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.5px;
+  text-align: center;
 }
 
 .subscription-description {
   opacity: 0.95;
   max-width: 600px;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  letter-spacing: 0.2px;
+  text-align: center;
 }
 
 /* Subscription Button - Override btn-header hiding on mobile */
@@ -354,6 +385,98 @@
   display: flex !important;
   align-items: center;
   justify-content: center;
+  align-self: center;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+
+.book-thumbnail-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  max-width: 500px;
+  width: 100%;
+}
+
+.book-thumbnail {
+  width: 100%;
+  max-width: 450px;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border-radius: 6px;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.book-thumbnail:hover {
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.45),
+    0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.book-thumbnail-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.7;
+  opacity: 0.98;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  padding: 0 1rem;
+  max-width: 450px;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.book-coming-soon {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #fc6423 !important;
+  background: rgba(252, 100, 35, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 3px;
+  margin-bottom: 0.5rem;
+  border: 1px solid rgba(252, 100, 35, 0.3);
+}
+
+.book-title-text {
+  display: block;
+  font-weight: 600;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin: 0.75rem 0 0.5rem 0;
+  letter-spacing: 0.2px;
+  text-align: center;
+  width: 100%;
+}
+
+.book-author-text {
+  display: block;
+  font-size: 1rem;
+  margin-top: 1rem;
+  letter-spacing: 0.8px;
+  text-align: center;
+  width: 100%;
+}
+
+.author-name {
+  display: inline;
+  letter-spacing: 0.4px;
+  margin-left: 0.35rem;
 }
 
 
@@ -380,6 +503,21 @@
 
 /* Mobile - Up to 768px */
 @media (max-width: 768px) {
+  .subscription-content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .subscription-left {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .subscription-right {
+    align-items: center;
+    text-align: center;
+  }
+
   .subscription-title {
     text-align: center;
     font-size: 1.5rem;
@@ -387,6 +525,26 @@
 
   .subscription-description {
     text-align: center;
+  }
+
+  .subscription-content-wrapper .btn-header {
+    align-self: center;
+  }
+
+  .book-thumbnail-container {
+    max-width: 100%;
+  }
+
+  .book-title-text {
+    font-size: 1rem;
+  }
+
+  .book-author-text {
+    font-size: 0.85rem;
+  }
+
+  .home-subscription {
+    padding: 3rem 1.5rem;
   }
 
   .home-container {
@@ -511,14 +669,51 @@
 /* Small Mobile Devices - Up to 480px */
 @media (max-width: 480px) {
   .subscription-content-wrapper {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1rem;
+  }
+
+  .subscription-left {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .subscription-right {
     align-items: center;
     text-align: center;
-    padding: 1rem;
   }
 
   .subscription-content-wrapper .btn-header {
     width: 100%;
     max-width: 300px;
+    align-self: center;
+  }
+
+  .book-thumbnail-container {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .book-coming-soon {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    letter-spacing: 1.2px;
+  }
+
+  .book-title-text {
+    font-size: 0.95rem;
+  }
+
+  .book-author-text {
+    font-size: 0.8rem;
+  }
+
+  .home-subscription {
+    padding: 2.5rem 1rem;
+  }
+
+  .subscription-content-wrapper {
+    gap: 2.5rem;
   }
 }

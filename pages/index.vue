@@ -98,40 +98,90 @@
       <section class="home-section home-subscription" aria-labelledby="subscription-heading">
         <div class="container">
           <div class="subscription-content-wrapper">
-            <div class="subscription-text">
-              <Text
-                as="h2"
-                id="subscription-heading"
-                size="4xl"
-                weight="bold"
-                color="text-primary-light"
-                fontFamily="sora"
-                lineHeight="extra-loose"
-                class="subscription-title"
-              >
-                Subscribe for Updates
-              </Text>
-              <Text
-                as="p"
-                weight="normal"
-                color="text-primary-light"
-                fontFamily="habibi"
-                lineHeight="normal"
-                class="subscription-description"
-              >
-                A weekly curation of new findings and developments on innovation
-                in governance
-              </Text>
+            <div class="subscription-left">
+              <div class="book-thumbnail-container">
+                <img 
+                  src="/images/book-thumbnail.png" 
+                  alt="Book thumbnail for upcoming book" 
+                  class="book-thumbnail"
+                  loading="eager"
+                  @error="handleImageError"
+                />
+                <div class="book-thumbnail-caption">
+                  <Text
+                    as="span"
+                    weight="bold"
+                    color="text-primary-light"
+                    fontFamily="sora"
+                    class="book-coming-soon"
+                  >
+                    Coming Soon
+                  </Text>
+                  <Text
+                    as="span"
+                    weight="semibold"
+                    color="text-primary-light"
+                    fontFamily="habibi"
+                    lineHeight="relaxed"
+                    class="book-title-text"
+                  >
+                    "Reboot: AI and the Race to Save Democracy"
+                  </Text>
+                  <Text
+                    as="span"
+                    weight="normal"
+                    color="text-primary-light"
+                    fontFamily="habibi"
+                    class="book-author-text"
+                  >
+                    by <Text
+                      as="span"
+                      weight="semibold"
+                      color="text-primary-light"
+                      fontFamily="sora"
+                      class="author-name"
+                    >Beth Simone Noveck</Text>
+                  </Text>
+                </div>
+              </div>
             </div>
-            <Button
-              class="btn-header"
-              variant="secondary"
-              height="50px"
-              :onClick="onClick"
-              aria-label="Sign up for weekly updates about democracy and governance"
-            >
-              Sign up for updates
-            </Button>
+            
+            <div class="subscription-right">
+              <div class="subscription-text">
+                <Text
+                  as="h2"
+                  id="subscription-heading"
+                  size="4xl"
+                  weight="bold"
+                  color="text-primary-light"
+                  fontFamily="sora"
+                  lineHeight="extra-loose"
+                  class="subscription-title"
+                >
+                  Subscribe for Updates
+                </Text>
+                <Text
+                  as="p"
+                  weight="normal"
+                  color="text-primary-light"
+                  fontFamily="habibi"
+                  lineHeight="normal"
+                  class="subscription-description"
+                >
+                  A weekly curation of new findings and developments on innovation
+                  in governance
+                </Text>
+              </div>
+              <Button
+                class="btn-header"
+                variant="secondary"
+                height="50px"
+                :onClick="onClick"
+                aria-label="Sign up for weekly updates about democracy and governance"
+              >
+                Sign up for updates
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -605,6 +655,12 @@ async function handleTabChange(index: number, name: string): Promise<void> {
 
 const onClick = (): void => {
   router.push("/signup");
+};
+
+function handleImageError(event: Event): void {
+  console.error("Book thumbnail failed to load:", event);
+  const target = event.target as HTMLImageElement;
+  console.log("Attempted image path:", target.src);
 };
 
 async function applyFilters(): Promise<void> {
