@@ -201,6 +201,7 @@ export default defineEventHandler(async (event) => {
         }
       }
       
+      
       // Method 2: Purge using direct API call (CDN cache + Cache API)
       // This ensures we also clear any Cache API entries
       await purgeViaDirectAPI(tag, path)
