@@ -158,7 +158,7 @@
                   lineHeight="extra-loose"
                   class="subscription-title"
                 >
-                  Subscribe for Updates
+                Get the Reboot Weekly in your inbox
                 </Text>
                 <Text
                   as="p"
@@ -168,8 +168,7 @@
                   lineHeight="normal"
                   class="subscription-description"
                 >
-                  A weekly curation of new findings and developments on innovation
-                  in governance
+                A weekly roundup of the most intriguing and impactful stories from the world of artificial intelligence
                 </Text>
               </div>
               <Button
