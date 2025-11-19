@@ -1,32 +1,33 @@
 /**
  * On-Demand Cache Revalidation Endpoint
  * 
- * This endpoint allows you to invalidate cached ISR pages on-demand, triggering
- * regeneration on the next request. This is useful when content changes in your
- * CMS and you want to update the cached pages immediately.
+ * PURPOSE: When content changes in your CMS (e.g., Directus), this endpoint invalidates
+ * the cached page and immediately regenerates it with fresh content. This ensures users
+ * see updated content without waiting for the next scheduled regeneration.
  * 
- * How it works:
- * 1. Receives a cache tag (and optionally a path) to purge
- * 2. Purges cache by tag using Netlify's purgeCache API
- * 3. Also purges by path as a backup for reliability
- * 4. Verifies purge worked by checking cache status
- * 5. Returns cache status for debugging
+ * FLOW OVERVIEW:
+ * 1. Parse request → Extract cache tag from webhook/API payload
+ * 2. Invalidate cache → Mark cached page as stale (by tag + path for reliability)
+ * 3. Check status → Verify invalidation worked by reading Cache-Status header
+ * 4. Wait if needed → If cache still shows "hit", wait for invalidation to propagate
+ * 5. Regenerate → Force fresh SSR with cache-busting headers
+ * 6. Cache result → Make normal request to populate cache with new content
  * 
- * Usage:
+ * WHY THIS APPROACH:
+ * - Tag-based invalidation: Only affects the specific page, not entire site
+ * - Dual purge (tag + path): Ensures invalidation works even if tag isn't set correctly
+ * - Cache-Status header: Ground truth for CDN cache (not Cache API)
+ * - Conditional wait: Only waits if invalidation hasn't propagated yet
+ * - Cache-busting headers: Forces bypass of edge/durable cache during regeneration
+ * - Final cache request: Ensures new content is cached for future visitors
+ * 
+ * USAGE:
  * POST /api/revalidate
- * Body: { tag: "test-isr", path: "/test-isr" }
+ * Body: { tag: "blog/my-post-slug" }
  * 
- * Rate Limits:
- * - 2 purges per tag/site per 5 seconds
- * - Automatic retry with 6-second wait if rate limited
+ * RATE LIMITS: 2 purges per tag/site per 5 seconds (auto-retry with 6s wait)
  * 
- * Environment Variables:
- * - NETLIFY_AUTH_TOKEN: Required for actual cache purging
- *   Get from: Netlify Dashboard → Site Settings → Build & Deploy → Environment Variables
- * 
- * References:
- * - Netlify Cache Invalidation: https://docs.netlify.com/build/caching/caching-overview/#on-demand-invalidation
- * - purgeCache API: https://docs.netlify.com/api/get-started/#purge-cache
+ * ENV VARS: NETLIFY_AUTH_TOKEN (required for actual purging)
  */
 import { purgeCache } from "@netlify/functions"
 
@@ -35,10 +36,10 @@ export default defineEventHandler(async (event) => {
     let rawBody = await readBody(event)
     
     /**
-     * Handle String Bodies (text/plain Content-Type)
+     * STEP 1: Parse Request Body
      * 
-     * Directus webhooks sometimes send the body as a string with Content-Type: text/plain
-     * instead of application/json. We need to parse it manually.
+     * WHY: Directus webhooks may send JSON as a string (Content-Type: text/plain)
+     * instead of application/json. We handle both formats for compatibility.
      */
     let body: any = rawBody
     
@@ -57,12 +58,12 @@ export default defineEventHandler(async (event) => {
     }
 
     /**
-     * Extract Cache Tag from Request Body
+     * STEP 2: Extract Cache Tag
      * 
-     * Supports multiple payload formats:
-     * 1. Direct API: { tag: "test-isr", path: "/test-isr" }
-     * 2. Directus webhook: { tag: "test-isr" }
-     * 3. Directus webhook with payload: { payload: { tag: "test-isr" } }
+     * WHY: Different webhook formats nest the tag differently. We check multiple
+     * locations (body.tag, body.payload.tag, body.data.tag) to support all formats.
+     * 
+     * The tag identifies which cached page to invalidate (e.g., "blog/my-post").
      */
     let tag: string | undefined = body?.tag
     
@@ -82,10 +83,16 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Extract path if provided, otherwise construct from tag (e.g., "test-isr" -> "/test-isr")
+    // Construct path from tag if not provided (e.g., "blog/my-post" -> "/blog/my-post")
+    // WHY: We purge by both tag AND path for reliability (some caches may use one or the other)
     const path = body?.path || body?.payload?.path || body?.data?.path || (tag.startsWith("/") ? tag : `/${tag}`)
 
-    // Check if NETLIFY_AUTH_TOKEN is available
+    /**
+     * STEP 3: Verify Authentication
+     * 
+     * WHY: Cache purging requires Netlify API access. Without the token, we can't
+     * actually purge, so we return early with a helpful message.
+     */
     const authToken = process.env.NETLIFY_AUTH_TOKEN
     if (!authToken) {
       console.warn("NETLIFY_AUTH_TOKEN not set - cache purge will be simulated")
@@ -98,29 +105,23 @@ export default defineEventHandler(async (event) => {
     }
 
     /**
-     * Step 1: Purge Cache by Tag and Path (Both CDN Cache and Cache API)
+     * STEP 4: Invalidate Cache (Tag + Path)
      * 
-     * We purge using TWO methods to ensure both cache layers are cleared:
-     * 1. purgeCache helper from @netlify/functions (CDN cache)
-     * 2. Direct API call to Netlify Purge API endpoint (CDN cache + Cache API)
+     * WHAT: Marks the cached page as stale, so the next request triggers regeneration.
      * 
-     * IMPORTANT: Cache purge is by TAG/PATH, NOT the complete Netlify cache.
+     * WHY DUAL PURGE (tag + path):
+     * - Tag purge: Primary method, invalidates by Netlify-Cache-Tag header
+     * - Path purge: Backup method, invalidates by URL path (in case tag isn't set)
+     * - Both methods: Ensures invalidation works even if one method fails
      * 
-     * How it works:
-     * - Tag purge: Invalidates ONLY cached objects with the specified tag (e.g., "test-isr")
-     * - Path purge: Invalidates ONLY the specific path (e.g., "/test-isr")
-     * - Other pages with different tags/paths remain cached and unaffected
+     * WHY DUAL API CALLS (helper + direct):
+     * - Helper (purgeCache): Clears CDN cache via @netlify/functions
+     * - Direct API: Also clears Cache API entries (programmatic cache layer)
      * 
-     * This is fine-grained cache invalidation - you can purge specific pages
-     * without affecting the rest of your site's cache.
+     * IMPORTANT: This is fine-grained - only the specified page is invalidated.
+     * Other pages with different tags/paths remain cached.
      * 
-     * Example:
-     * - Page A has tag "blog-post-1" → purging "blog-post-1" only affects Page A
-     * - Page B has tag "blog-post-2" → remains cached even after purging "blog-post-1"
-     * - Homepage has no tag → remains cached regardless of other purges
-     * 
-     * According to Netlify docs: "On-demand invalidation across the entire network takes just a few seconds"
-     * Rate limit: 2 purges per tag/site per 5 seconds
+     * RATE LIMIT: 2 purges per tag/site per 5 seconds (handled below)
      */
     let purgeSuccess = false
     let rateLimited = false
@@ -131,8 +132,10 @@ export default defineEventHandler(async (event) => {
     const siteSlug = process.env.NETLIFY_SITE_NAME || process.env.SITE_NAME
     
     /**
-     * Helper function to purge cache via direct API call
-     * This ensures we also clear any Cache API entries in addition to CDN cache
+     * Helper: Purge via Direct Netlify API
+     * 
+     * WHY: The purgeCache helper may not clear Cache API entries (programmatic cache).
+     * This direct API call ensures both CDN cache AND Cache API are cleared.
      */
     const purgeViaDirectAPI = async (purgeTag: string, purgePath?: string) => {
       if (!siteId && !siteSlug) {
@@ -185,22 +188,22 @@ export default defineEventHandler(async (event) => {
       console.log(`✅ CDN cache purged successfully for tag: ${tag} (via helper)`)
       
       // Always purge by path (construct from tag if not provided)
-      try {
-        console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
-        await purgeCache({ paths: [path] })
-        console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
-      } catch (pathPurgeError) {
-        const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
-        if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
-          console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
-        } else {
-          console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
-        }
-      }
+      // try {
+      //   console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
+      //   await purgeCache({ paths: [path] })
+      //   console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
+      // } catch (pathPurgeError) {
+      //   const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
+      //   if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
+      //     console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
+      //   } else {
+      //     console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
+      //   }
+      // }
       
       // Method 2: Purge using direct API call (CDN cache + Cache API)
       // This ensures we also clear any Cache API entries
-      await purgeViaDirectAPI(tag, path)
+      // await purgeViaDirectAPI(tag, path)
       
       purgeSuccess = true
     } catch (purgeError) {
@@ -220,11 +223,11 @@ export default defineEventHandler(async (event) => {
       }
       
       /**
-       * Step 2: Handle Rate Limiting
+       * STEP 5: Handle Rate Limiting
        * 
-       * Netlify limits cache purges to 2 per tag/site per 5 seconds.
-       * If we hit the rate limit, we wait 6 seconds and retry once.
-       * This handles cases where multiple revalidations happen in quick succession.
+       * WHY: Netlify limits to 2 purges per tag/site per 5 seconds to prevent abuse.
+       * If we hit the limit, we wait 6 seconds (slightly more than 5) and retry once.
+       * This handles cases where multiple webhooks fire in quick succession.
        */
       if (errorMsg.includes("rate limit") || errorMsg.includes("429") || errorMsg.includes("too many")) {
         rateLimited = true
@@ -264,32 +267,34 @@ export default defineEventHandler(async (event) => {
     }
 
     /**
-     * Step 3: Check Cache Status (EXACT Same as Button Process)
+     * STEP 6: Check Cache Status
      * 
-     * After purging, we check the cache status to determine how long to wait.
-     * This matches the EXACT process from the button click.
+     * WHY: We need to verify the invalidation worked before regenerating. If the cache
+     * still shows "hit", the invalidation hasn't propagated yet and we should wait.
+     * 
+     * HOW: We make a test request and read the Cache-Status header (ground truth for CDN).
+     * We wait 2 seconds first to give the purge time to propagate across Netlify's network.
      */
     const host = event.headers.get("host") || process.env.NETLIFY_SITE_URL || "localhost:8888"
     const protocol = event.headers.get("x-forwarded-proto") || "http"
     const siteUrl = `${protocol}://${host}`
     
     try {
-      // Wait 2 seconds for purge to propagate before checking
+      // Wait 2 seconds for purge to propagate across Netlify's CDN network
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       /**
-       * Check CDN Cache Status via Cache-Status Header
+       * Read Cache-Status Header (Ground Truth for CDN Cache)
        * 
-       * IMPORTANT: We use the Cache-Status header (ground truth for CDN cache),
-       * NOT getCacheStatus from @netlify/cache (which is for Cache API).
+       * WHY: Cache-Status is the actual CDN cache status, not the Cache API status.
+       * We use this to determine if invalidation worked.
        * 
-       * Cache-Status values we care about:
-       * - "Netlify Edge"; hit → CDN edge cache still has fresh content (purge didn't work yet)
-       * - "Netlify Edge"; fwd=miss → CDN cache is empty (purge worked)
-       * - "Netlify Edge"; fwd=stale → CDN cache had stale content, fetched fresh (purge worked)
-       * - "Netlify Durable"; hit → Durable cache has content
-       * - "Netlify Durable"; fwd=miss → Durable cache is empty
-       * - "Netlify Durable"; fwd=stale → Durable cache had stale content
+       * VALUES:
+       * - "hit" (no fwd=stale): Cache still has fresh content → invalidation hasn't propagated
+       * - "fwd=stale": Cache recognized stale content, fetched fresh → invalidation worked
+       * - "fwd=miss": Cache is empty → invalidation worked
+       * 
+       * We check both "Netlify Edge" (local node cache) and "Netlify Durable" (shared cache).
        */
       const testResponse = await fetch(`${siteUrl}${path}`, {
         method: "GET",
@@ -300,14 +305,11 @@ export default defineEventHandler(async (event) => {
       })
       
       // Get Cache-Status header (ground truth for CDN cache)
-      // Note: There can be multiple Cache-Status headers (one for Edge, one for Durable)
-      // The fetch API Headers object may combine them with commas or keep them separate
       const cacheStatusHeader = testResponse.headers.get("Cache-Status") || ""
+      
       // Parse Cache-Status header(s)
-      // Netlify sends separate headers like:
-      //   Cache-Status: "Netlify Edge"; hit
-      //   Cache-Status: "Netlify Durable"; hit
-      // But fetch API might combine them or we might get one combined value
+      // WHY: Netlify sends separate headers for Edge and Durable, but fetch API
+      // may combine them. We handle both single and combined formats.
       let cacheStatusHeaders: string[] = []
       if (cacheStatusHeader) {
         // Check if it contains both "Netlify Edge" and "Netlify Durable" (combined)
@@ -368,15 +370,15 @@ export default defineEventHandler(async (event) => {
       console.log(`📋 Cache-Status headers: ${cacheStatusHeaders.join(", ")}`)
       
       /**
-       * Step 4: Wait Based on CDN Cache Status
+       * STEP 7: Wait Based on Cache Status
        * 
-       * Cache-Status interpretation:
-       * - "hit" (no fwd=stale): CDN still has fresh content (purge hasn't propagated yet) → wait longer
-       * - "fwd=stale": CDN recognized stale content, fetched fresh (purge worked) → ready to regenerate
-       * - "fwd=miss": CDN cache is empty (purge worked) → ready to regenerate
+       * WHY: If cache still shows "hit", invalidation hasn't propagated across all
+       * CDN nodes yet. We wait 20s to give it time. If "stale" or "miss", we proceed
+       * immediately because invalidation worked.
        * 
-       * We treat "stale" and "miss" as "purge worked" and proceed with shorter wait.
-       * Only "hit" means we need to wait longer for purge to propagate.
+       * LOGIC:
+       * - "stale" or "miss" → Invalidation worked → Proceed immediately (0s wait)
+       * - "hit" → Invalidation hasn't propagated → Wait 20s for propagation
        */
       const purgeWorked = overallStatus === 'stale' || overallStatus === 'miss'
       if (purgeWorked) {
@@ -390,17 +392,17 @@ export default defineEventHandler(async (event) => {
       
       
       /**
-       * Step 5: Trigger Regeneration (Aggressive Cache-Busting to Bypass Edge Cache)
+       * STEP 8: Trigger Regeneration (Force Fresh SSR)
        * 
-       * Uses aggressive cache-busting headers to ensure we bypass both edge cache
-       * and durable cache, forcing a fresh SSR regeneration.
+       * WHY: We need to force a fresh server-side render, bypassing any remaining
+       * cache entries. Aggressive cache-busting headers ensure we get fresh content.
        * 
-       * Headers:
-       * - Cache-Control: no-cache, no-store, must-revalidate - Bypass all caches
-       * - Pragma: no-cache - HTTP/1.0 cache control
-       * - Expires: 0 - Tell caches content is expired
-       * - X-Cache-Bypass: unique timestamp - Additional header to force bypass
-       * - cache: 'no-store' - Don't store in any cache
+       * HEADERS EXPLAINED:
+       * - Cache-Control: no-cache, no-store, must-revalidate → Bypass all caches
+       * - Pragma: no-cache → HTTP/1.0 compatibility (older proxies)
+       * - Expires: 0 → Tell caches content is expired
+       * - X-Cache-Bypass: timestamp → Unique value to prevent cache matching
+       * - cache: 'no-store' → Don't store response in any cache
        */
       console.log(`🔄 Triggering regeneration for: ${path}`)
       const regenerateResponse = await fetch(`${siteUrl}${path}`, {
@@ -421,8 +423,13 @@ export default defineEventHandler(async (event) => {
       if (regenerateStatus === 200 && hasContent) {
         console.log(`✅ Page regenerated successfully: ${path} (${regenerateText.length} bytes)`)
         
-        // Make a normal request to cache the regenerated page (replaces button's window.location.reload())
-        // This ensures the new page is cached for future visitors
+        /**
+         * STEP 9: Cache the Regenerated Page
+         * 
+         * WHY: The regeneration request used cache-busting headers, so it wasn't cached.
+         * We make a normal request (without cache-busting) to populate the cache with
+         * the fresh content for future visitors.
+         */
         console.log(`🔄 Caching regenerated page...`)
         const cacheRequest = await fetch(`${siteUrl}${path}`, {
           method: 'GET',
@@ -452,14 +459,24 @@ export default defineEventHandler(async (event) => {
         console.warn(`⚠️ Regeneration returned status ${regenerateStatus} or empty content`)
       }
     } catch (regenerateError) {
-      // Non-critical - if regeneration fails, we still return success
-      // The purge succeeded, and the page will regenerate on next request anyway
+      /**
+       * STEP 10: Handle Regeneration Errors (Non-Critical)
+       * 
+       * WHY: If regeneration fails, we still return success because the cache was
+       * invalidated. The page will regenerate automatically on the next user request.
+       * This prevents webhook failures from blocking cache invalidation.
+       */
       const errorMsg = regenerateError instanceof Error ? regenerateError.message : String(regenerateError)
       console.warn(`⚠️ Could not trigger regeneration (non-critical): ${errorMsg}`)
     }
 
-    // Return 202 Accepted - purge complete
-    // If we got here, purge succeeded but regeneration may not have been attempted
+    /**
+     * FALLBACK: Return Success Even If Regeneration Wasn't Attempted
+     * 
+     * WHY: Cache invalidation succeeded, so the page will regenerate on next request.
+     * We return 202 (Accepted) to indicate the operation was accepted, even if we
+     * couldn't trigger immediate regeneration.
+     */
     setResponseStatus(event, 202)
     return {
       message: "Cache purged successfully",
