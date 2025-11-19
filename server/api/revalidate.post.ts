@@ -188,22 +188,22 @@ export default defineEventHandler(async (event) => {
       console.log(`✅ CDN cache purged successfully for tag: ${tag} (via helper)`)
       
       // Always purge by path (construct from tag if not provided)
-      // try {
-      //   console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
-      //   await purgeCache({ paths: [path] })
-      //   console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
-      // } catch (pathPurgeError) {
-      //   const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
-      //   if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
-      //     console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
-      //   } else {
-      //     console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
-      //   }
-      // }
+      try {
+        console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
+        await purgeCache({ paths: [path] })
+        console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
+      } catch (pathPurgeError) {
+        const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
+        if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
+          console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
+        } else {
+          console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
+        }
+      }
       
       // Method 2: Purge using direct API call (CDN cache + Cache API)
       // This ensures we also clear any Cache API entries
-      // await purgeViaDirectAPI(tag, path)
+      await purgeViaDirectAPI(tag, path)
       
       purgeSuccess = true
     } catch (purgeError) {
