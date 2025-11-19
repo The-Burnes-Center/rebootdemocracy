@@ -388,6 +388,7 @@ export default defineEventHandler(async (event) => {
         await new Promise(resolve => setTimeout(resolve, waitTime))
       }
       
+      
       /**
        * Step 5: Trigger Regeneration (Aggressive Cache-Busting to Bypass Edge Cache)
        * 
