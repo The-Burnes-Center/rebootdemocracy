@@ -8,15 +8,15 @@
  * FLOW OVERVIEW:
  * 1. Parse request → Extract blog cache tag from webhook/API payload
  * 2. Validate tag → Ensure tag starts with "blog/" (e.g., "blog/my-post-slug")
- * 3. Invalidate cache → Mark cached blog page as stale by tag AND path (for reliability)
+ * 3. Invalidate cache → Mark cached blog page as stale by tag ONLY (CRITICAL: no path purging)
  * 4. Check status → Verify invalidation worked by reading Cache-Status header
- * 5. Wait if needed → If cache still shows "hit", wait for invalidation to propagate
+ * 5. Wait and retry → If cache still shows "hit", wait then retry purge and check again
  * 6. Regenerate → Force fresh SSR with cache-busting headers
  * 7. Cache result → Make normal request to populate cache with new content
  * 
  * WHY THIS APPROACH:
  * - Blog-only: Only handles blog routes (tags starting with "blog/")
- * - Dual purge (tag + path): Ensures invalidation works even if one method fails
+ * - Tag-only purge: CRITICAL - There is NO "paths" key in purgeCache, using it would invalidate entire site
  * - Tag format: "blog/{slug}" (no leading slash) - matches server/plugins/cache-tag.ts
  * - Cache-Status header: Ground truth for CDN cache (not Cache API)
  * - Conditional wait: Only waits if invalidation hasn't propagated yet
@@ -128,19 +128,18 @@ export default defineEventHandler(async (event) => {
     }
 
     /**
-     * STEP 4: Invalidate Cache by Blog Tag and Path
+     * STEP 4: Invalidate Cache by Blog Tag Only
      * 
      * WHAT: Marks the cached blog page as stale, so the next request triggers regeneration.
      * 
-     * WHY DUAL PURGE (tag + path):
+     * WHY TAG-ONLY PURGE:
      * - Tag purge: Invalidates by Netlify-Cache-Tag header (matches "blog/{slug}" format)
-     * - Path purge: Invalidates by URL path (backup method, some cache layers use path-based invalidation)
-     * - Both methods: Ensures invalidation works even if one method fails
+     * - CRITICAL: There is NO "paths" key in purgeCache - using it would invalidate entire site
      * - Fine-grained: Only the specified blog post is invalidated, other pages remain cached
      * 
      * WHY DUAL API CALLS (helper + direct):
-     * - Helper (purgeCache): Clears CDN cache via @netlify/functions
-     * - Direct API: Also clears Cache API entries (programmatic cache layer)
+     * - Helper (purgeCache): Clears CDN cache via @netlify/functions (tag only)
+     * - Direct API: Also clears Cache API entries (programmatic cache layer, tag only)
      * 
      * RATE LIMIT: 2 purges per tag/site per 5 seconds (handled below)
      */
@@ -151,6 +150,32 @@ export default defineEventHandler(async (event) => {
     // Netlify automatically provides these in environment variables
     const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID
     const siteSlug = process.env.NETLIFY_SITE_NAME || process.env.SITE_NAME
+    
+    /**
+     * Helper: Perform Complete Purge (Tag Only + Direct API)
+     * 
+     * WHY: Centralized purge function that we can call multiple times in retry loops.
+     * CRITICAL: Only purge by tag (with tags key) to avoid invalidating entire site.
+     * There is NO "paths" key in purgeCache - using it would invalidate the full cache.
+     */
+    const performPurge = async (tag: string) => {
+      try {
+        // Purge by tag ONLY (CRITICAL: must include tags key to avoid full site invalidation)
+        // NOTE: There is no "paths" key in purgeCache - using it would invalidate entire site
+        console.log(`🔄 Purging CDN cache via helper for tag: ${tag}`)
+        await purgeCache({ tags: [tag] })
+        console.log(`✅ CDN cache purged successfully for tag: ${tag} (via helper)`)
+        
+        // Also purge via direct API (also uses tags only)
+        await purgeViaDirectAPI(tag)
+        
+        return true
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        console.error(`❌ Purge failed: ${errorMsg}`)
+        return false
+      }
+    }
     
     /**
      * Helper: Purge via Direct Netlify API
@@ -203,31 +228,8 @@ export default defineEventHandler(async (event) => {
     }
     
     try {
-      // Method 1: Purge using purgeCache helper (CDN cache) - by tag
-      console.log(`🔄 Purging CDN cache via helper for tag: ${normalizedTag}`)
-      await purgeCache({ tags: [normalizedTag] })
-      console.log(`✅ CDN cache purged successfully for tag: ${normalizedTag} (via helper)`)
-      
-      // Also purge by path (construct from tag: "blog/my-post" -> "/blog/my-post")
-      // WHY: Some cache layers may use path-based invalidation, so we purge both for reliability
-      // try {
-      //   console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
-      //   await purgeCache({ paths: [path] })
-      //   console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
-      // } catch (pathPurgeError) {
-      //   const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
-      //   if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
-      //     console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
-      //   } else {
-      //     console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
-      //   }
-      // }
-      
-      // Method 2: Purge using direct API call (CDN cache + Cache API)
-      // This ensures we also clear any Cache API entries
-      await purgeViaDirectAPI(normalizedTag)
-      
-      purgeSuccess = true
+      // Initial purge attempt (tag only - no path purging to avoid full site invalidation)
+      purgeSuccess = await performPurge(normalizedTag)
     } catch (purgeError) {
       const errorMsg =
         purgeError instanceof Error
@@ -260,22 +262,7 @@ export default defineEventHandler(async (event) => {
         
         try {
           console.log(`🔄 Retrying cache purge for blog tag: ${normalizedTag}`)
-          // Retry tag purge
-          await purgeCache({ tags: [normalizedTag] })
-          console.log(`✅ Cache purged successfully for blog tag: ${normalizedTag} (after retry via helper)`)
-          
-          // Also retry path purge
-          // try {
-          //   // await purgeCache({ paths: [path] })
-          //   console.log(`✅ Cache purged successfully for path: ${path} (after retry via helper)`)
-          // } catch (pathRetryError) {
-          //   console.warn(`⚠️ Path purge retry failed (non-critical): ${pathRetryError instanceof Error ? pathRetryError.message : String(pathRetryError)}`)
-          // }
-          
-          // Also retry direct API call
-          // await purgeViaDirectAPI(normalizedTag)
-          
-          purgeSuccess = true
+          purgeSuccess = await performPurge(normalizedTag)
         } catch (retryError) {
           const retryErrorMsg = retryError instanceof Error ? retryError.message : String(retryError)
           console.error(`❌ Retry also failed:`, retryErrorMsg)
@@ -314,7 +301,9 @@ export default defineEventHandler(async (event) => {
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       /**
-       * Read Cache-Status Header (Ground Truth for CDN Cache)
+       * Helper: Check Cache Status
+       * 
+       * Returns the overall cache status after making a test request.
        * 
        * WHY: Cache-Status is the actual CDN cache status, not the Cache API status.
        * We use this to determine if invalidation worked.
@@ -326,98 +315,129 @@ export default defineEventHandler(async (event) => {
        * 
        * We check both "Netlify Edge" (local node cache) and "Netlify Durable" (shared cache).
        */
-      const testResponse = await fetch(`${siteUrl}${path}`, {
-        method: "GET",
-        headers: {
-          "User-Agent": "Netlify-Revalidate-Check/1.0",
-          "Cache-Control": "no-cache", // Bypass browser cache, but CDN will still check its cache
-        },
-      })
-      console.log(`🔍 Test response: ${testResponse}`)
-      // Get Cache-Status header (ground truth for CDN cache)
-      const cacheStatusHeader = testResponse.headers.get("Cache-Status") || ""
-      
-      // Parse Cache-Status header(s)
-      // WHY: Netlify sends separate headers for Edge and Durable, but fetch API
-      // may combine them. We handle both single and combined formats.
-      let cacheStatusHeaders: string[] = []
-      if (cacheStatusHeader) {
-        // Check if it contains both "Netlify Edge" and "Netlify Durable" (combined)
-        // If so, split by looking for "Netlify" as delimiter
-        if (cacheStatusHeader.includes('"Netlify Edge') && cacheStatusHeader.includes('"Netlify Durable')) {
-          // Split by "Netlify" (but keep the prefix)
-          const parts = cacheStatusHeader.split(/(?="Netlify)/)
-          cacheStatusHeaders = parts.filter(p => p.trim().startsWith('"Netlify'))
+      const checkCacheStatus = async (): Promise<{ overall: string; edge: string; durable: string; headers: string[] }> => {
+        const testResponse = await fetch(`${siteUrl}${path}`, {
+          method: "GET",
+          headers: {
+            "User-Agent": "Netlify-Revalidate-Check/1.0",
+            "Cache-Control": "no-cache", // Bypass browser cache, but CDN will still check its cache
+          },
+        })
+        
+        const cacheStatusHeader = testResponse.headers.get("Cache-Status") || ""
+        
+        // Parse Cache-Status header(s)
+        let cacheStatusHeaders: string[] = []
+        if (cacheStatusHeader) {
+          if (cacheStatusHeader.includes('"Netlify Edge') && cacheStatusHeader.includes('"Netlify Durable')) {
+            const parts = cacheStatusHeader.split(/(?="Netlify)/)
+            cacheStatusHeaders = parts.filter(p => p.trim().startsWith('"Netlify'))
+          } else {
+            cacheStatusHeaders = cacheStatusHeader.split(',').map(h => h.trim()).filter(Boolean)
+          }
+        }
+        
+        // Parse Cache-Status headers
+        let edgeStatus = "unknown"
+        let durableStatus = "unknown"
+        let overallStatus = "unknown"
+        
+        for (const header of cacheStatusHeaders) {
+          if (header.includes("Netlify Edge")) {
+            if (header.includes("hit") && !header.includes("fwd=stale")) {
+              edgeStatus = "hit"
+            } else if (header.includes("fwd=stale")) {
+              edgeStatus = "stale"
+            } else if (header.includes("fwd=miss")) {
+              edgeStatus = "miss"
+            }
+          }
+          if (header.includes("Netlify Durable")) {
+            if (header.includes("hit") && !header.includes("fwd=stale")) {
+              durableStatus = "hit"
+            } else if (header.includes("fwd=stale")) {
+              durableStatus = "stale"
+            } else if (header.includes("fwd=miss")) {
+              durableStatus = "miss"
+            }
+          }
+        }
+        
+        // Determine overall status
+        if (edgeStatus === "hit" || durableStatus === "hit") {
+          overallStatus = "hit"
+        } else if (edgeStatus === "stale" || durableStatus === "stale") {
+          overallStatus = "stale"
         } else {
-          // Single header or comma-separated
-          cacheStatusHeaders = cacheStatusHeader.split(',').map(h => h.trim()).filter(Boolean)
+          overallStatus = "miss"
+        }
+        
+        return {
+          overall: overallStatus,
+          edge: edgeStatus,
+          durable: durableStatus,
+          headers: cacheStatusHeaders,
         }
       }
       
-      // Parse Cache-Status headers
-      let edgeStatus = "unknown"
-      let durableStatus = "unknown"
-      let overallStatus = "unknown"
-      
-      for (const header of cacheStatusHeaders) {
-        if (header.includes("Netlify Edge")) {
-          if (header.includes("hit") && !header.includes("fwd=stale")) {
-            edgeStatus = "hit"
-          } else if (header.includes("fwd=stale")) {
-            edgeStatus = "stale"
-          } else if (header.includes("fwd=miss")) {
-            edgeStatus = "miss"
-          }
-        }
-        if (header.includes("Netlify Durable")) {
-          if (header.includes("hit") && !header.includes("fwd=stale")) {
-            durableStatus = "hit"
-          } else if (header.includes("fwd=stale")) {
-            durableStatus = "stale"
-          } else if (header.includes("fwd=miss")) {
-            durableStatus = "miss"
-          }
-        }
-      }
-      
-      // Determine overall status
-      if (edgeStatus === "hit" || durableStatus === "hit") {
-        overallStatus = "hit"
-      } else if (edgeStatus === "stale" || durableStatus === "stale") {
-        overallStatus = "stale"
-      } else {
-        overallStatus = "miss"
-      }
-      
-      const cacheStatus = {
-        overall: overallStatus,
-        edge: edgeStatus,
-        durable: durableStatus,
-        headers: cacheStatusHeaders, // Include raw headers for debugging
-      }
-      
-      console.log(`🔍 CDN Cache status after purge: ${overallStatus} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`)
-      console.log(`📋 Cache-Status headers: ${cacheStatusHeaders.join(", ")}`)
+      // Initial cache status check
+      console.log(`🔍 Checking cache status after purge...`)
+      let cacheStatus = await checkCacheStatus()
+      console.log(`🔍 CDN Cache status after purge: ${cacheStatus.overall} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`)
+      console.log(`📋 Cache-Status headers: ${cacheStatus.headers.join(", ")}`)
       
       /**
-       * STEP 7: Wait Based on Cache Status
+       * STEP 7: Wait and Retry Based on Cache Status
        * 
        * WHY: If cache still shows "hit", invalidation hasn't propagated across all
-       * CDN nodes yet. We wait 20s to give it time. If "stale" or "miss", we proceed
-       * immediately because invalidation worked.
+       * CDN nodes yet. We wait, then CHECK AGAIN. If still "hit", we retry the purge.
        * 
        * LOGIC:
        * - "stale" or "miss" → Invalidation worked → Proceed immediately (0s wait)
-       * - "hit" → Invalidation hasn't propagated → Wait 20s for propagation
+       * - "hit" → Wait 20s, then CHECK cache status again
+       * - If still "hit" after wait → Retry purge, then check again
+       * - Max 3 retries to avoid infinite loops
        */
-      const purgeWorked = overallStatus === 'stale' || overallStatus === 'miss'
-      if (purgeWorked) {
-        console.log(`✅ Purge worked (CDN cache: ${overallStatus}) - proceeding immediately to regeneration`)
+      const MAX_RETRIES = 3
+      let currentCacheStatus = cacheStatus
+      let retryCount = 0
+      
+      while (currentCacheStatus.overall === 'hit' && retryCount < MAX_RETRIES) {
+        if (retryCount === 0) {
+          // First time: just wait
+          const waitTime = 20000 // 20s if still hit
+          console.log(`⏳ Waiting ${waitTime/1000}s before checking cache status again (CDN cache: ${currentCacheStatus.overall}, purge propagating...)`)
+          await new Promise(resolve => setTimeout(resolve, waitTime))
+        } else {
+          // Subsequent times: retry purge first
+          console.log(`🔄 Cache still "hit" after ${retryCount} attempt(s) - retrying purge...`)
+          const purgeRetrySuccess = await performPurge(normalizedTag)
+          if (!purgeRetrySuccess) {
+            console.warn(`⚠️ Purge retry failed, but continuing to check cache status...`)
+          }
+          
+          // Wait a bit for purge to propagate
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        }
+        
+        // Check cache status again
+        console.log(`🔍 Re-checking cache status (attempt ${retryCount + 1}/${MAX_RETRIES})...`)
+        currentCacheStatus = await checkCacheStatus()
+        console.log(`🔍 CDN Cache status after ${retryCount === 0 ? 'wait' : 'retry'}: ${currentCacheStatus.overall} (edge: ${currentCacheStatus.edge}, durable: ${currentCacheStatus.durable})`)
+        console.log(`📋 Cache-Status headers: ${currentCacheStatus.headers.join(", ")}`)
+        
+        retryCount++
+      }
+      
+      // Update cacheStatus for return value
+      cacheStatus.overall = currentCacheStatus.overall
+      cacheStatus.edge = currentCacheStatus.edge
+      cacheStatus.durable = currentCacheStatus.durable
+      
+      if (currentCacheStatus.overall === 'stale' || currentCacheStatus.overall === 'miss') {
+        console.log(`✅ Purge worked (CDN cache: ${currentCacheStatus.overall}) - proceeding to regeneration`)
       } else {
-        // Only wait if cache is still "hit" (purge hasn't propagated yet)
-        const waitTime = 20000 // 20s if still hit
-        console.log(`⏳ Waiting ${waitTime/1000}s before regeneration (CDN cache: ${overallStatus}, purge propagating...)`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
+        console.warn(`⚠️ Cache still shows "hit" after ${MAX_RETRIES} attempts - proceeding anyway (may serve stale content)`)
       }
       
       
