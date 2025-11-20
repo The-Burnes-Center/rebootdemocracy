@@ -387,46 +387,34 @@ export default defineEventHandler(async (event) => {
       console.log(`📋 Cache-Status headers: ${cacheStatus.headers.join(", ")}`)
       
       /**
-       * STEP 7: Wait and Retry Based on Cache Status
+       * STEP 7: Wait and Re-check Cache Status
        * 
        * WHY: If cache still shows "hit", invalidation hasn't propagated across all
-       * CDN nodes yet. We wait, then CHECK AGAIN. If still "hit", we retry the purge.
+       * CDN nodes yet. We wait, then CHECK AGAIN. We do NOT re-purge, just wait and check.
        * 
        * LOGIC:
        * - "stale" or "miss" → Invalidation worked → Proceed immediately (0s wait)
        * - "hit" → Wait 20s, then CHECK cache status again
-       * - If still "hit" after wait → Retry purge, then check again
-       * - Max 3 retries to avoid infinite loops
+       * - If still "hit" after wait → Wait again and check (no re-purge)
+       * - Max 3 checks to avoid infinite loops
        */
-      const MAX_RETRIES = 3
+      const MAX_CHECKS = 3
       let currentCacheStatus = cacheStatus
-      let retryCount = 0
+      let checkCount = 0
       
-      while (currentCacheStatus.overall === 'hit' && retryCount < MAX_RETRIES) {
-        if (retryCount === 0) {
-          // First time: just wait
-          const waitTime = 20000 // 20s if still hit
-          console.log(`⏳ Waiting ${waitTime/1000}s before checking cache status again (CDN cache: ${currentCacheStatus.overall}, purge propagating...)`)
-          await new Promise(resolve => setTimeout(resolve, waitTime))
-        } else {
-          // Subsequent times: retry purge first
-          console.log(`🔄 Cache still "hit" after ${retryCount} attempt(s) - retrying purge...`)
-          const purgeRetrySuccess = await performPurge(normalizedTag)
-          if (!purgeRetrySuccess) {
-            console.warn(`⚠️ Purge retry failed, but continuing to check cache status...`)
-          }
-          
-          // Wait a bit for purge to propagate
-          await new Promise(resolve => setTimeout(resolve, 2000))
-        }
+      while (currentCacheStatus.overall === 'hit' && checkCount < MAX_CHECKS) {
+        // Wait before checking again (20s first time, then 10s for subsequent checks)
+        const waitTime = checkCount === 0 ? 20000 : 10000
+        console.log(`⏳ Waiting ${waitTime/1000}s before checking cache status again (CDN cache: ${currentCacheStatus.overall}, purge propagating...)`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
         
         // Check cache status again
-        console.log(`🔍 Re-checking cache status (attempt ${retryCount + 1}/${MAX_RETRIES})...`)
+        console.log(`🔍 Re-checking cache status (check ${checkCount + 1}/${MAX_CHECKS})...`)
         currentCacheStatus = await checkCacheStatus()
-        console.log(`🔍 CDN Cache status after ${retryCount === 0 ? 'wait' : 'retry'}: ${currentCacheStatus.overall} (edge: ${currentCacheStatus.edge}, durable: ${currentCacheStatus.durable})`)
+        console.log(`🔍 CDN Cache status after wait: ${currentCacheStatus.overall} (edge: ${currentCacheStatus.edge}, durable: ${currentCacheStatus.durable})`)
         console.log(`📋 Cache-Status headers: ${currentCacheStatus.headers.join(", ")}`)
         
-        retryCount++
+        checkCount++
       }
       
       // Update cacheStatus for return value
@@ -437,7 +425,7 @@ export default defineEventHandler(async (event) => {
       if (currentCacheStatus.overall === 'stale' || currentCacheStatus.overall === 'miss') {
         console.log(`✅ Purge worked (CDN cache: ${currentCacheStatus.overall}) - proceeding to regeneration`)
       } else {
-        console.warn(`⚠️ Cache still shows "hit" after ${MAX_RETRIES} attempts - proceeding anyway (may serve stale content)`)
+        console.warn(`⚠️ Cache still shows "hit" after ${MAX_CHECKS} checks - proceeding anyway (may serve stale content)`)
       }
       
       
