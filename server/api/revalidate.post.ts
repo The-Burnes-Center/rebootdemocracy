@@ -8,7 +8,7 @@
  * FLOW OVERVIEW:
  * 1. Parse request → Extract blog cache tag from webhook/API payload
  * 2. Validate tag → Ensure tag starts with "blog/" (e.g., "blog/my-post-slug")
- * 3. Invalidate cache → Mark cached blog page as stale by tag
+ * 3. Invalidate cache → Mark cached blog page as stale by tag AND path (for reliability)
  * 4. Check status → Verify invalidation worked by reading Cache-Status header
  * 5. Wait if needed → If cache still shows "hit", wait for invalidation to propagate
  * 6. Regenerate → Force fresh SSR with cache-busting headers
@@ -16,7 +16,7 @@
  * 
  * WHY THIS APPROACH:
  * - Blog-only: Only handles blog routes (tags starting with "blog/")
- * - Tag-based invalidation: Only affects the specific blog post, not entire site
+ * - Dual purge (tag + path): Ensures invalidation works even if one method fails
  * - Tag format: "blog/{slug}" (no leading slash) - matches server/plugins/cache-tag.ts
  * - Cache-Status header: Ground truth for CDN cache (not Cache API)
  * - Conditional wait: Only waits if invalidation hasn't propagated yet
@@ -128,12 +128,14 @@ export default defineEventHandler(async (event) => {
     }
 
     /**
-     * STEP 4: Invalidate Cache by Blog Tag
+     * STEP 4: Invalidate Cache by Blog Tag and Path
      * 
      * WHAT: Marks the cached blog page as stale, so the next request triggers regeneration.
      * 
-     * WHY TAG-BASED ONLY:
+     * WHY DUAL PURGE (tag + path):
      * - Tag purge: Invalidates by Netlify-Cache-Tag header (matches "blog/{slug}" format)
+     * - Path purge: Invalidates by URL path (backup method, some cache layers use path-based invalidation)
+     * - Both methods: Ensures invalidation works even if one method fails
      * - Fine-grained: Only the specified blog post is invalidated, other pages remain cached
      * 
      * WHY DUAL API CALLS (helper + direct):
@@ -201,10 +203,25 @@ export default defineEventHandler(async (event) => {
     }
     
     try {
-      // Method 1: Purge using purgeCache helper (CDN cache)
-      console.log(`🔄 Purging CDN cache via helper for blog tag: ${normalizedTag}`)
+      // Method 1: Purge using purgeCache helper (CDN cache) - by tag
+      console.log(`🔄 Purging CDN cache via helper for tag: ${normalizedTag}`)
       await purgeCache({ tags: [normalizedTag] })
-      console.log(`✅ CDN cache purged successfully for blog tag: ${normalizedTag} (via helper)`)
+      console.log(`✅ CDN cache purged successfully for tag: ${normalizedTag} (via helper)`)
+      
+      // Also purge by path (construct from tag: "blog/my-post" -> "/blog/my-post")
+      // WHY: Some cache layers may use path-based invalidation, so we purge both for reliability
+      try {
+        console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
+        await purgeCache({ paths: [path] })
+        console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
+      } catch (pathPurgeError) {
+        const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
+        if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
+          console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
+        } else {
+          console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
+        }
+      }
       
       // Method 2: Purge using direct API call (CDN cache + Cache API)
       // This ensures we also clear any Cache API entries
@@ -243,9 +260,17 @@ export default defineEventHandler(async (event) => {
         
         try {
           console.log(`🔄 Retrying cache purge for blog tag: ${normalizedTag}`)
-          // Retry both methods
+          // Retry tag purge
           await purgeCache({ tags: [normalizedTag] })
           console.log(`✅ Cache purged successfully for blog tag: ${normalizedTag} (after retry via helper)`)
+          
+          // Also retry path purge
+          try {
+            await purgeCache({ paths: [path] })
+            console.log(`✅ Cache purged successfully for path: ${path} (after retry via helper)`)
+          } catch (pathRetryError) {
+            console.warn(`⚠️ Path purge retry failed (non-critical): ${pathRetryError instanceof Error ? pathRetryError.message : String(pathRetryError)}`)
+          }
           
           // Also retry direct API call
           await purgeViaDirectAPI(normalizedTag)
