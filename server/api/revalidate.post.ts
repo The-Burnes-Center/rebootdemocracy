@@ -333,7 +333,7 @@ export default defineEventHandler(async (event) => {
           "Cache-Control": "no-cache", // Bypass browser cache, but CDN will still check its cache
         },
       })
-      
+      console.log(`🔍 Test response: ${testResponse}`)
       // Get Cache-Status header (ground truth for CDN cache)
       const cacheStatusHeader = testResponse.headers.get("Cache-Status") || ""
       
