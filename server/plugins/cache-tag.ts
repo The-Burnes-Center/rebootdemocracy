@@ -14,18 +14,27 @@
  * - For blog posts: tag format is "blog/{slug}" (e.g., "blog/my-post-slug")
  * - Use the same tag when calling /api/revalidate endpoint
  * 
+ * IMPORTANT: This plugin runs on every request. For ISR pages, it runs when the page
+ * is generated on-demand (first request) and the header is included in the cached response.
+ * 
  * References:
  * - Netlify Cache Tags: https://docs.netlify.com/build/caching/caching-overview/#cache-tags
  * - Nuxt Server Plugins: https://nuxt.com/docs/guide/directory-structure/server#server-plugins
  */
 export default defineEventHandler((event) => {
   try {
+    // Get URL from event - try multiple methods to ensure we get the path
+    // For ISR pages, event.path should be available
+    const url = event.path || event.node?.req?.url || ""
     
-    // Get URL from event - handle both node and web standard formats
-    const url = event.node?.req?.url || event.path || ""
+    // Debug: Log all blog requests to verify plugin is running
+    if (url && url.includes("/blog/")) {
+      console.log(`🔍 Cache tag plugin running - URL: ${url}, path: ${event.path}`)
+    }
     
-    // Only set cache tag if not during prerendering
-    if (!import.meta.prerender && url.startsWith("/blog/")) {
+    // Check if this is a blog route
+    // ISR pages are generated on-demand, not during prerender, so we don't need that check
+    if (url && url.startsWith("/blog/")) {
       // Extract slug from URL (e.g., /blog/my-post-slug -> my-post-slug)
       // Remove query parameters if present
       const urlWithoutQuery = url.split('?')[0]
@@ -36,14 +45,23 @@ export default defineEventHandler((event) => {
         // Set cache tag as "blog/{slug}" (e.g., "blog/my-post-slug")
         // This matches the format expected by the revalidate endpoint
         const cacheTag = `blog/${slug}`
+        
+        // Set the header using Nuxt's helper
         setResponseHeader(event, "Netlify-Cache-Tag", cacheTag)
         
-        console.log(`🏷️ Set cache tag for blog post: ${cacheTag}`)
+        // Also set directly on node response as backup
+        if (event.node?.res && !event.node.res.headersSent) {
+          event.node.res.setHeader("Netlify-Cache-Tag", cacheTag)
+        }
+        
+        console.log(`🏷️ ✅ Set cache tag for blog post: ${cacheTag} (URL: ${url})`)
+      } else {
+        console.warn(`⚠️ Cache tag plugin - Could not extract slug from URL: ${url}, pathParts: ${JSON.stringify(pathParts)}`)
       }
     }
   } catch (e) {
     // Non-critical - if cache tag setting fails, the page still works
     // Cache tags are optional, but required for on-demand revalidation
-    console.warn("Could not set cache tag:", e)
+    console.warn("❌ Could not set cache tag:", e)
   }
 })
