@@ -3,14 +3,19 @@
  * 
  * This plugin sets the dynamic Netlify-Cache-Tag header for blog posts using Nitro hooks.
  * 
+ * IMPORTANT: This plugin runs at RUNTIME (when requests come in), NOT during build.
+ * - ISR pages are NOT pre-rendered during build
+ * - Plugin runs when a user requests a blog page (first request triggers SSR)
+ * - Logs appear in Netlify function logs (runtime), not build logs
+ * 
  * Why use a Nitro plugin instead of nuxt.config.ts route rules?
  * - The cache tag is dynamic (needs the slug from the URL) - can't be set statically
  * - Route rules in nuxt.config.ts can set static headers, but not dynamic ones based on route params
  * 
- * Why use Nitro plugin with 'request' hook?
- * - Runs early in the request lifecycle, before rendering
- * - Ensures header is set on all responses (including cached ISR pages)
- * - Works reliably for both SSR and ISR pages
+ * Why use 'render:route' hook instead of 'request' hook?
+ * - 'render:route' runs when the route is being rendered, ensuring headers are set on the response
+ * - More reliable for ISR pages where the response is being cached
+ * - Headers set here are included in the cached response
  * 
  * Note: Cache-Control and Netlify-CDN-Cache-Control headers are set by the
  * "/blog/**" route rule in nuxt.config.ts, so we only set the dynamic tag here.
@@ -24,10 +29,20 @@
  * - Nitro Plugins: https://nitro.build/guide/plugins
  */
 export default defineNitroPlugin((nitroApp) => {
+  // Log plugin initialization (appears in function startup logs)
+  console.log('🔧 Cache tag plugin loaded and initialized')
+  
+  // Use 'request' hook - runs on every request
+  // This ensures headers are set before the response is sent
   nitroApp.hooks.hook('request', (event) => {
     try {
       // Get URL from event
       const url = event.path || event.node?.req?.url || ""
+      
+      // Debug: Log all blog requests to verify plugin is running
+      if (url && url.includes("/blog/")) {
+        console.log(`🔍 Cache tag plugin - request hook triggered for: ${url}`)
+      }
       
       // Check if this is a blog route
       if (url && url.startsWith("/blog/")) {

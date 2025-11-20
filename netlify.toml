@@ -1,12 +1,10 @@
 [build]
 command = "npm run build"
 publish = "dist"
+# Run cache warm-up automatically after successful deployment
+onSuccess = "npm run warm-cache"
 
 [build.environment]
 NODE_VERSION = "20.19.0"
-
-# Note: Deploy notifications are configured in Netlify Dashboard
-# Site Settings → Build & Deploy → Deploy Notifications
-# Add notification: POST https://your-site.netlify.app/api/warm-up
-# Event: "Deploy succeeded"
-# See WARM_UP_SETUP.md for detailed instructions
+# Optional: Override default limit (defaults to 40)
+# CACHE_WARM_LIMIT = "40"

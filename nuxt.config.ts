@@ -94,6 +94,10 @@ export default defineNuxtConfig({
         // Netlify CDN cache control with durable directive
         // This is the key header that enables shared durable cache across all edge nodes
         "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        
+        // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
+        // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
+        // The dynamic tag is set by server/plugins/cache-tag.ts
       },
     },
   },

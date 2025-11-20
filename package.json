@@ -6,7 +6,8 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "warm-cache": "node scripts/warm-cache.mjs"
   },
   "dependencies": {
     "@netlify/cache": "^1.11.2",
