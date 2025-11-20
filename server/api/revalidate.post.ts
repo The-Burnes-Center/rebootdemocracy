@@ -1,21 +1,23 @@
 /**
- * On-Demand Cache Revalidation Endpoint
+ * On-Demand Cache Revalidation Endpoint (Blog Posts Only)
  * 
- * PURPOSE: When content changes in your CMS (e.g., Directus), this endpoint invalidates
- * the cached page and immediately regenerates it with fresh content. This ensures users
+ * PURPOSE: When blog content changes in your CMS (e.g., Directus), this endpoint invalidates
+ * the cached blog page and immediately regenerates it with fresh content. This ensures users
  * see updated content without waiting for the next scheduled regeneration.
  * 
  * FLOW OVERVIEW:
- * 1. Parse request → Extract cache tag from webhook/API payload
- * 2. Invalidate cache → Mark cached page as stale (by tag + path for reliability)
- * 3. Check status → Verify invalidation worked by reading Cache-Status header
- * 4. Wait if needed → If cache still shows "hit", wait for invalidation to propagate
- * 5. Regenerate → Force fresh SSR with cache-busting headers
- * 6. Cache result → Make normal request to populate cache with new content
+ * 1. Parse request → Extract blog cache tag from webhook/API payload
+ * 2. Validate tag → Ensure tag starts with "blog/" (e.g., "blog/my-post-slug")
+ * 3. Invalidate cache → Mark cached blog page as stale by tag
+ * 4. Check status → Verify invalidation worked by reading Cache-Status header
+ * 5. Wait if needed → If cache still shows "hit", wait for invalidation to propagate
+ * 6. Regenerate → Force fresh SSR with cache-busting headers
+ * 7. Cache result → Make normal request to populate cache with new content
  * 
  * WHY THIS APPROACH:
- * - Tag-based invalidation: Only affects the specific page, not entire site
- * - Dual purge (tag + path): Ensures invalidation works even if tag isn't set correctly
+ * - Blog-only: Only handles blog routes (tags starting with "blog/")
+ * - Tag-based invalidation: Only affects the specific blog post, not entire site
+ * - Tag format: "blog/{slug}" (no leading slash) - matches server/plugins/cache-tag.ts
  * - Cache-Status header: Ground truth for CDN cache (not Cache API)
  * - Conditional wait: Only waits if invalidation hasn't propagated yet
  * - Cache-busting headers: Forces bypass of edge/durable cache during regeneration
@@ -24,6 +26,9 @@
  * USAGE:
  * POST /api/revalidate
  * Body: { tag: "blog/my-post-slug" }
+ * 
+ * TAG FORMAT: Must start with "blog/" (e.g., "blog/googleorg-support-to-train-more-government-workers-in-digital-skills")
+ * This matches the format set in server/plugins/cache-tag.ts
  * 
  * RATE LIMITS: 2 purges per tag/site per 5 seconds (auto-retry with 6s wait)
  * 
@@ -83,9 +88,27 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Construct path from tag if not provided (e.g., "blog/my-post" -> "/blog/my-post")
-    // WHY: We purge by both tag AND path for reliability (some caches may use one or the other)
-    const path = body?.path || body?.payload?.path || body?.data?.path || (tag.startsWith("/") ? tag : `/${tag}`)
+    /**
+     * Validate and process blog tags only
+     * 
+     * Blog tags use format: "blog/{slug}" (e.g., "blog/my-post-slug")
+     * This matches the format set in server/plugins/cache-tag.ts
+     * 
+     * WHY: We only handle blog routes. Other routes should use different revalidation logic.
+     */
+    if (!tag.startsWith("blog/")) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `Invalid tag format. Expected blog tag starting with "blog/" (e.g., "blog/my-post-slug"). Received: "${tag}"`,
+      })
+    }
+
+    // Construct path from blog tag (e.g., "blog/my-post" -> "/blog/my-post")
+    // WHY: Path needs leading slash for URL, but tag doesn't have it
+    const path = body?.path || body?.payload?.path || body?.data?.path || `/${tag}`
+    
+    // Use tag as-is (blog tags are "blog/{slug}" format, no leading slash)
+    const normalizedTag = tag
 
     /**
      * STEP 3: Verify Authentication
@@ -99,27 +122,23 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 202)
       return {
         message: "Cache purge simulated (NETLIFY_AUTH_TOKEN not configured)",
-        tag: body.tag,
+        tag: normalizedTag,
         note: "Set NETLIFY_AUTH_TOKEN in Netlify environment variables for actual cache purging",
       }
     }
 
     /**
-     * STEP 4: Invalidate Cache (Tag + Path)
+     * STEP 4: Invalidate Cache by Blog Tag
      * 
-     * WHAT: Marks the cached page as stale, so the next request triggers regeneration.
+     * WHAT: Marks the cached blog page as stale, so the next request triggers regeneration.
      * 
-     * WHY DUAL PURGE (tag + path):
-     * - Tag purge: Primary method, invalidates by Netlify-Cache-Tag header
-     * - Path purge: Backup method, invalidates by URL path (in case tag isn't set)
-     * - Both methods: Ensures invalidation works even if one method fails
+     * WHY TAG-BASED ONLY:
+     * - Tag purge: Invalidates by Netlify-Cache-Tag header (matches "blog/{slug}" format)
+     * - Fine-grained: Only the specified blog post is invalidated, other pages remain cached
      * 
      * WHY DUAL API CALLS (helper + direct):
      * - Helper (purgeCache): Clears CDN cache via @netlify/functions
      * - Direct API: Also clears Cache API entries (programmatic cache layer)
-     * 
-     * IMPORTANT: This is fine-grained - only the specified page is invalidated.
-     * Other pages with different tags/paths remain cached.
      * 
      * RATE LIMIT: 2 purges per tag/site per 5 seconds (handled below)
      */
@@ -137,7 +156,7 @@ export default defineEventHandler(async (event) => {
      * WHY: The purgeCache helper may not clear Cache API entries (programmatic cache).
      * This direct API call ensures both CDN cache AND Cache API are cleared.
      */
-    const purgeViaDirectAPI = async (purgeTag: string, purgePath?: string) => {
+    const purgeViaDirectAPI = async (purgeTag: string) => {
       if (!siteId && !siteSlug) {
         console.warn(`⚠️ Site ID/Slug not found - skipping direct API purge. Set NETLIFY_SITE_ID or NETLIFY_SITE_NAME env var.`)
         return false
@@ -183,28 +202,13 @@ export default defineEventHandler(async (event) => {
     
     try {
       // Method 1: Purge using purgeCache helper (CDN cache)
-      console.log(`🔄 Purging CDN cache via helper for tag: ${tag}`)
-      await purgeCache({ tags: [tag] })
-      console.log(`✅ CDN cache purged successfully for tag: ${tag} (via helper)`)
-      
-      // Always purge by path (construct from tag if not provided)
-      try {
-        console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
-        await purgeCache({ paths: [path] })
-        console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
-      } catch (pathPurgeError) {
-        const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
-        if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
-          console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
-        } else {
-          console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
-        }
-      }
-      
+      console.log(`🔄 Purging CDN cache via helper for blog tag: ${normalizedTag}`)
+      await purgeCache({ tags: [normalizedTag] })
+      console.log(`✅ CDN cache purged successfully for blog tag: ${normalizedTag} (via helper)`)
       
       // Method 2: Purge using direct API call (CDN cache + Cache API)
       // This ensures we also clear any Cache API entries
-      await purgeViaDirectAPI(tag, path)
+      await purgeViaDirectAPI(normalizedTag)
       
       purgeSuccess = true
     } catch (purgeError) {
@@ -212,7 +216,7 @@ export default defineEventHandler(async (event) => {
         purgeError instanceof Error
           ? purgeError.message
           : String(purgeError)
-      console.error(`❌ purgeCache error for tag ${tag}:`, errorMsg)
+      console.error(`❌ purgeCache error for blog tag ${normalizedTag}:`, errorMsg)
 
       // If it's an auth token error, provide helpful message
       if (errorMsg.includes("token") || errorMsg.includes("auth")) {
@@ -238,13 +242,13 @@ export default defineEventHandler(async (event) => {
         await new Promise(resolve => setTimeout(resolve, 6000))
         
         try {
-          console.log(`🔄 Retrying cache purge for tag: ${tag}`)
+          console.log(`🔄 Retrying cache purge for blog tag: ${normalizedTag}`)
           // Retry both methods
-          await purgeCache({ tags: [tag] })
-          console.log(`✅ Cache purged successfully for tag: ${tag} (after retry via helper)`)
+          await purgeCache({ tags: [normalizedTag] })
+          console.log(`✅ Cache purged successfully for blog tag: ${normalizedTag} (after retry via helper)`)
           
           // Also retry direct API call
-          await purgeViaDirectAPI(tag, path)
+          await purgeViaDirectAPI(normalizedTag)
           
           purgeSuccess = true
         } catch (retryError) {
@@ -448,7 +452,7 @@ export default defineEventHandler(async (event) => {
         setResponseStatus(event, 202)
         return {
           message: "Cache purged and page regenerated successfully",
-          tag: tag,
+          tag: normalizedTag,
           path: path,
           regenerated: true,
           cacheStatus: cacheStatus,
@@ -481,7 +485,7 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 202)
     return {
       message: "Cache purged successfully",
-      tag: tag,
+      tag: normalizedTag,
       path: path,
       note: "The cache has been purged. Page will regenerate on next request.",
     }
