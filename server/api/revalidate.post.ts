@@ -323,9 +323,9 @@ export default defineEventHandler(async (event) => {
             "Cache-Control": "no-cache", // Bypass browser cache, but CDN will still check its cache
           },
         })
-        console.log(`🔍 Test response: ${JSON.stringify(testResponse, null, 2)}`)
-        const cacheStatusHeader = testResponse.headers.get("Cache-Status") || ""
         
+        const cacheStatusHeader = testResponse.headers.get("Cache-Status") || ""
+        console.log(`🔍 Cache-Status header: ${cacheStatusHeader}`)
         // Parse Cache-Status header(s)
         let cacheStatusHeaders: string[] = []
         if (cacheStatusHeader) {
