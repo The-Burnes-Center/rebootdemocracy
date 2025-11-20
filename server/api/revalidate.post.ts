@@ -163,7 +163,7 @@ export default defineEventHandler(async (event) => {
         console.warn(`⚠️ Site ID/Slug not found - skipping direct API purge. Set NETLIFY_SITE_ID or NETLIFY_SITE_NAME env var.`)
         return false
       }
-      
+      console.log(`🔄 Purging CDN cache via direct API for tag: ${purgeTag}`)
       try {
         const purgeApiUrl = "https://api.netlify.com/api/v1/purge"
         const purgePayload: any = {
@@ -210,18 +210,18 @@ export default defineEventHandler(async (event) => {
       
       // Also purge by path (construct from tag: "blog/my-post" -> "/blog/my-post")
       // WHY: Some cache layers may use path-based invalidation, so we purge both for reliability
-      try {
-        console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
-        await purgeCache({ paths: [path] })
-        console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
-      } catch (pathPurgeError) {
-        const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
-        if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
-          console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
-        } else {
-          console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
-        }
-      }
+      // try {
+      //   console.log(`🔄 Purging CDN cache via helper for path: ${path}`)
+      //   await purgeCache({ paths: [path] })
+      //   console.log(`✅ CDN cache purged successfully for path: ${path} (via helper)`)
+      // } catch (pathPurgeError) {
+      //   const pathErrorMsg = pathPurgeError instanceof Error ? pathPurgeError.message : String(pathPurgeError)
+      //   if (pathErrorMsg.includes("rate limit") || pathErrorMsg.includes("429")) {
+      //     console.warn(`⚠️ Path purge rate limited (non-critical): ${pathErrorMsg}`)
+      //   } else {
+      //     console.warn(`⚠️ Path purge failed (non-critical): ${pathErrorMsg}`)
+      //   }
+      // }
       
       // Method 2: Purge using direct API call (CDN cache + Cache API)
       // This ensures we also clear any Cache API entries
@@ -265,15 +265,15 @@ export default defineEventHandler(async (event) => {
           console.log(`✅ Cache purged successfully for blog tag: ${normalizedTag} (after retry via helper)`)
           
           // Also retry path purge
-          try {
-            await purgeCache({ paths: [path] })
-            console.log(`✅ Cache purged successfully for path: ${path} (after retry via helper)`)
-          } catch (pathRetryError) {
-            console.warn(`⚠️ Path purge retry failed (non-critical): ${pathRetryError instanceof Error ? pathRetryError.message : String(pathRetryError)}`)
-          }
+          // try {
+          //   // await purgeCache({ paths: [path] })
+          //   console.log(`✅ Cache purged successfully for path: ${path} (after retry via helper)`)
+          // } catch (pathRetryError) {
+          //   console.warn(`⚠️ Path purge retry failed (non-critical): ${pathRetryError instanceof Error ? pathRetryError.message : String(pathRetryError)}`)
+          // }
           
           // Also retry direct API call
-          await purgeViaDirectAPI(normalizedTag)
+          // await purgeViaDirectAPI(normalizedTag)
           
           purgeSuccess = true
         } catch (retryError) {
