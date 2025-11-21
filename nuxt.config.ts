@@ -24,32 +24,28 @@ export default defineNuxtConfig({
       failOnError: false,
       concurrency: 1,
       routes: []
-    },
-    output: {
-      dir: '.output',
-      publicDir: '.output/public',
-      serverDir: '.output/server'
+      // NOTE: ISR routes (/blog/**) should NOT be in prerender.routes
+      // They are generated on-demand (first request), not during build
     }
-  },
-  generate: {
-    cache: false
+    // NOTE: Don't override output settings - let the netlify preset handle it
+    // The preset automatically configures the correct output structure for Netlify
   },
 
-  hooks: {
-    async 'nitro:config'(nitroConfig) {
-      const blogRoutes = await getStaticBlogRoutes();
-      const categoryRoutes = await getStaticCategoryRoutes();
-      const newsRoutes = await getStaticNewsRoutes();
+  // hooks: {
+  //   async 'nitro:config'(nitroConfig) {
+  //     const blogRoutes = await getStaticBlogRoutes();
+  //     const categoryRoutes = await getStaticCategoryRoutes();
+  //     const newsRoutes = await getStaticNewsRoutes();
       
-      nitroConfig.prerender = nitroConfig.prerender ?? {};
-      nitroConfig.prerender.routes = [
-        ...(nitroConfig.prerender.routes ?? []),
-        ...blogRoutes,
-        ...categoryRoutes,
-        ...newsRoutes
-      ];
-    }
-  },
+  //     nitroConfig.prerender = nitroConfig.prerender ?? {};
+  //     nitroConfig.prerender.routes = [
+  //       ...(nitroConfig.prerender.routes ?? []),
+  //       ...blogRoutes,
+  //       ...categoryRoutes,
+  //       ...newsRoutes
+  //     ];
+  //   }
+  // },
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
     applicationId: process.env.ALGOLIA_APP_ID,
@@ -63,6 +59,7 @@ export default defineNuxtConfig({
     '/blog': { prerender: true },
      "/blog/**": {
       isr: true, // Enable ISR (never considers cache stale)
+      
       headers: {
         // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
         "Cache-Control": "public, max-age=0, must-revalidate",
