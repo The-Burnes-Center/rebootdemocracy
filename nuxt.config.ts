@@ -31,6 +31,7 @@ export default defineNuxtConfig({
   generate: {
     cache: false
   },
+
   hooks: {
     async 'nitro:config'(nitroConfig) {
       const blogRoutes = await getStaticBlogRoutes();
@@ -57,7 +58,21 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true },
     '/blog': { prerender: true },
-    '/blog/**': { prerender: true },
+     "/blog/**": {
+      isr: true, // Enable ISR (never considers cache stale)
+      headers: {
+        // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        
+        // Netlify CDN cache control with durable directive
+        // This is the key header that enables shared durable cache across all edge nodes
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        
+        // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
+        // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
+        // The dynamic tag is set by server/plugins/cache-tag.ts
+      },  
+    },
     '/events': { prerender: true },
     '/more-resources': { prerender: true },
     '/newsthatcaughtoureye/**': { prerender: true },
