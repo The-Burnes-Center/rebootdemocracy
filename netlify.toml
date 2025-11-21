@@ -4,9 +4,10 @@
 # 'generate' only creates static files and doesn't build server routes
 command = "rm -rf .output .nuxt && npm ci && npm run build"
 publish = ".output/public/"
-# Note: Don't set 'functions' here - Netlify auto-detects:
-# 1. Server handler from .output/server (includes server/api/ routes)
-# 2. Custom functions from netlify/functions
+# CRITICAL: Don't set 'functions' here - it prevents Netlify from detecting the server handler
+# Netlify will auto-detect:
+# 1. Server handler from .output/server (includes server/api/ routes) - shows as "server handler"
+# 2. Custom functions from netlify/functions (if directory exists)
 # onSuccess = "npm run warm-cache"  # Uncomment when warm-cache endpoint is ready
 
 [build.environment]
@@ -15,11 +16,14 @@ publish = ".output/public/"
   NPM_FLAGS = "--no-audit --no-fund --verbose"
   NETLIFY_BUILD_DEBUG = "true"
 
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
-  # Custom functions directory (server/api/ routes are in .output/server)
-  directory = "netlify/functions"
+# NOTE: We're NOT setting [functions] directory here because:
+# - Setting it prevents Netlify from auto-detecting the server handler
+# - The server handler (with server/api/ routes) is in .output/server
+# - Custom functions in netlify/functions will still be detected automatically
+# If you need custom function settings, uncomment below but be aware it may affect server handler detection:
+# [functions]
+#   node_bundler = "esbuild"
+#   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
 
 [[redirects]]
 from = "/*"
