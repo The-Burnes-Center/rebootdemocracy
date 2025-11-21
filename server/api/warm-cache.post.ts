@@ -17,6 +17,7 @@
  * This should be called once after deployment to ensure existing blog posts
  * have cache tags set for on-demand revalidation.
  */
+
 export default defineEventHandler(async (event) => {
   try {
     // Get limit from request body (default to 40)
