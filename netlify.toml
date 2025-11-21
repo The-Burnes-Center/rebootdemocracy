@@ -34,10 +34,10 @@ publish = ".output/public"
 # This was interfering with ISR routes - the server handler needs to process blog routes
 # Nuxt handles routing internally, so we don't need this SPA-style redirect
 
-[[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/:splat"
-status = 200
+# NOTE: Removed "/api/*" redirect to "/.netlify/functions/:splat"
+# The server handler (from .netlify/functions-internal/server) handles /api/* routes directly
+# The redirect was trying to send /api/revalidate to /.netlify/functions/revalidate
+# but revalidate is part of the server handler, not a standalone function
 
 [[redirects]]
 from = "/newsoftheweek/feed/rss"
