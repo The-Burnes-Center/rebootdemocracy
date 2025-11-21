@@ -30,10 +30,9 @@ publish = ".output/public"
 #   node_bundler = "esbuild"
 #   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
 
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
+# NOTE: Removed catch-all redirect "/*" -> "/index.html"
+# This was interfering with ISR routes - the server handler needs to process blog routes
+# Nuxt handles routing internally, so we don't need this SPA-style redirect
 
 [[redirects]]
 from = "/api/*"
