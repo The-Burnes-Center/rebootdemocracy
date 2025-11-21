@@ -2,6 +2,7 @@
 command = "rm -rf .output .nuxt && npm ci && npm run generate"
 publish = ".output/public/"
 functions = "netlify/functions"
+onSuccess = "npm run warm-cache"
 
 [build.environment]
   NODE_VERSION = "20.12.2"
