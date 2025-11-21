@@ -2,8 +2,13 @@
 # Use 'build' instead of 'generate' for ISR support
 # 'build' creates the server handler that includes server/api/ routes
 # 'generate' only creates static files and doesn't build server routes
-command = "rm -rf .output .nuxt && npm ci && npm run build"
-publish = ".output/public/"
+command = "rm -rf .output .nuxt .netlify && npm ci && npm run build"
+# With netlify preset:
+# - Public files are in .output/public (static assets and prerendered pages)
+# - Server handler is in .netlify/functions-internal/server (auto-detected, includes server/api/ routes)
+#   This shows up as "server handler" (system) in Netlify Functions
+# - Custom functions are in netlify/functions (auto-detected)
+publish = ".output/public"
 # CRITICAL: Don't set 'functions' here - it prevents Netlify from detecting the server handler
 # Netlify will auto-detect:
 # 1. Server handler from .output/server (includes server/api/ routes) - shows as "server handler"

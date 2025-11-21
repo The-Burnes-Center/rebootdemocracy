@@ -26,9 +26,12 @@ export default defineNuxtConfig({
       routes: []
       // NOTE: ISR routes (/blog/**) should NOT be in prerender.routes
       // They are generated on-demand (first request), not during build
+    },
+    // Output configuration - netlify preset handles serverDir automatically
+    // We just ensure publicDir is set for static assets
+    output: {
+      publicDir: '.output/public'
     }
-    // NOTE: Don't override output settings - let the netlify preset handle it
-    // The preset automatically configures the correct output structure for Netlify
   },
 
   // hooks: {
