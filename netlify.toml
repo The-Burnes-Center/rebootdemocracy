@@ -1,8 +1,13 @@
 [build]
-command = "rm -rf .output .nuxt && npm ci && npm run generate"
+# Use 'build' instead of 'generate' for ISR support
+# 'build' creates the server handler that includes server/api/ routes
+# 'generate' only creates static files and doesn't build server routes
+command = "rm -rf .output .nuxt && npm ci && npm run build"
 publish = ".output/public/"
-functions = "netlify/functions"
-onSuccess = "npm run warm-cache"
+# Note: Don't set 'functions' here - Netlify auto-detects:
+# 1. Server handler from .output/server (includes server/api/ routes)
+# 2. Custom functions from netlify/functions
+# onSuccess = "npm run warm-cache"  # Uncomment when warm-cache endpoint is ready
 
 [build.environment]
   NODE_VERSION = "20.12.2"
@@ -13,6 +18,7 @@ onSuccess = "npm run warm-cache"
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
+  # Custom functions directory (server/api/ routes are in .output/server)
   directory = "netlify/functions"
 
 [[redirects]]
