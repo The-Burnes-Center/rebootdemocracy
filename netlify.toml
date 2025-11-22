@@ -11,9 +11,9 @@ command = "rm -rf .output .nuxt .netlify && npm ci && npm run build"
 publish = ".output/public"
 # CRITICAL: Don't set 'functions' here - it prevents Netlify from detecting the server handler
 # Netlify will auto-detect:
-# 1. Server handler from .output/server (includes server/api/ routes) - shows as "server handler"
+# 1. Server handler from .netlify/functions-internal/server (includes server/api/ routes) - shows as "server handler"
 # 2. Custom functions from netlify/functions (if directory exists)
-# onSuccess = "npm run warm-cache"  # Uncomment when warm-cache endpoint is ready
+onSuccess = "npm run warm-cache"  # Warm up cache for blog posts after successful deploy
 
 [build.environment]
   NODE_VERSION = "20.12.2"
