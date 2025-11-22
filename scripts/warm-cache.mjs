@@ -39,6 +39,7 @@ try {
   })
   const directusUrl = `${DIRECTUS_URL}?${queryParams.toString()}`
   
+  
   const directusResponse = await fetch(directusUrl, {
     method: 'GET',
     headers: {
