@@ -44,8 +44,7 @@ try {
     throw new Error(`HTTP ${response.status}: ${errorText}`)
   }
   
-  
-  const result = await response.json()
+    const result = await response.json()
   
   console.log(`✅ Cache warm-up complete!`)
   console.log(`   - Total posts: ${result.total}`)
