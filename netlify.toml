@@ -13,7 +13,8 @@ publish = ".output/public"
 # Netlify will auto-detect:
 # 1. Server handler from .netlify/functions-internal/server (includes server/api/ routes) - shows as "server handler"
 # 2. Custom functions from netlify/functions (if directory exists)
-onSuccess = "npm run warm-cache"  # Warm up cache for blog posts after successful deploy
+# NOTE: Warm-cache script runs as part of build command (after build completes)
+# It waits for the site to be live before warming up the cache
 
 [build.environment]
   NODE_VERSION = "20.12.2"
