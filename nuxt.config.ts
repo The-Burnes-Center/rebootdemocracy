@@ -23,7 +23,9 @@ export default defineNuxtConfig({
       crawlLinks: false,
       failOnError: false,
       concurrency: 1,
-      routes: []
+      routes: [],
+      // Exclude scripts directory from route scanning
+      ignore: ['/scripts/**', '/api/warm-cache.mjs']
       // NOTE: ISR routes (/blog/**) should NOT be in prerender.routes
       // They are generated on-demand (first request), not during build
     },
