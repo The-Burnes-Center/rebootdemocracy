@@ -44,6 +44,7 @@ try {
     throw new Error(`HTTP ${response.status}: ${errorText}`)
   }
   
+  
     const result = await response.json()
   
   console.log(`✅ Cache warm-up complete!`)
@@ -56,7 +57,7 @@ try {
     // Don't exit with error - partial success is acceptable
   }
   
-  
+
   process.exit(0)
 } catch (error) {
   console.error('❌ Cache warm-up failed:', error.message)
