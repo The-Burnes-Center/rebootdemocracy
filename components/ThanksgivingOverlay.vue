@@ -447,12 +447,11 @@ onUnmounted(() => {
   position: absolute;
   user-select: none;
   pointer-events: none;
-  will-change: transform; /* Only transform for smooth animation */
+  will-change: transform, filter; /* Optimize for smooth animation */
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
   transform-origin: center center;
-  /* Reduced glow - subtle text shadow only */
-  text-shadow: 
-    0 0 3px rgba(255, 165, 0, 0.4);
+  /* Sparkling magic glow effect */
+  animation: sparkleGlow 3s ease-in-out infinite;
   transition: none; /* No transitions - all animation via JS for smoothness */
   backface-visibility: hidden; /* Prevent flicker */
   -webkit-font-smoothing: antialiased; /* Smooth text rendering */
@@ -471,6 +470,56 @@ onUnmounted(() => {
 }
 
 
-/* Glow animation removed - using subtle static text-shadow instead */
+/* Sparkling magic glow animation */
+@keyframes sparkleGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 5px rgba(255, 215, 0, 0.8),
+      0 0 10px rgba(255, 165, 0, 0.6),
+      0 0 15px rgba(255, 140, 0, 0.4),
+      0 0 20px rgba(255, 215, 0, 0.3),
+      2px 2px 0px rgba(255, 255, 255, 0.2),
+      -2px -2px 0px rgba(255, 255, 255, 0.2);
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))
+            drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))
+            drop-shadow(0 0 12px rgba(255, 165, 0, 0.4));
+  }
+  25% {
+    text-shadow: 
+      0 0 8px rgba(255, 192, 203, 0.9),
+      0 0 12px rgba(255, 165, 0, 0.7),
+      0 0 18px rgba(255, 140, 0, 0.5),
+      0 0 25px rgba(255, 215, 0, 0.4),
+      3px 3px 0px rgba(255, 255, 255, 0.3),
+      -3px -3px 0px rgba(255, 255, 255, 0.3);
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))
+            drop-shadow(0 0 10px rgba(255, 192, 203, 0.7))
+            drop-shadow(0 0 15px rgba(255, 165, 0, 0.5));
+  }
+  50% {
+    text-shadow: 
+      0 0 6px rgba(255, 255, 255, 0.9),
+      0 0 12px rgba(255, 215, 0, 0.8),
+      0 0 18px rgba(255, 165, 0, 0.6),
+      0 0 24px rgba(255, 140, 0, 0.4),
+      2px 2px 0px rgba(255, 215, 0, 0.4),
+      -2px -2px 0px rgba(255, 215, 0, 0.4);
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))
+            drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
+            drop-shadow(0 0 18px rgba(255, 215, 0, 0.6));
+  }
+  75% {
+    text-shadow: 
+      0 0 7px rgba(255, 215, 0, 0.9),
+      0 0 14px rgba(255, 192, 203, 0.7),
+      0 0 20px rgba(255, 165, 0, 0.5),
+      0 0 26px rgba(255, 140, 0, 0.4),
+      2px 2px 0px rgba(255, 255, 255, 0.3),
+      -2px -2px 0px rgba(255, 255, 255, 0.3);
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))
+            drop-shadow(0 0 11px rgba(255, 215, 0, 0.7))
+            drop-shadow(0 0 16px rgba(255, 192, 203, 0.5));
+  }
+}
 </style>
 
