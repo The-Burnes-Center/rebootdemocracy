@@ -69,7 +69,11 @@
               :aria-label="`Featured post: ${featuredPost.title || 'Untitled'} by ${getAuthorName(featuredPost)}`"
               @click="navigateToBlogPost(featuredPost)"
               @keydown="handleKeyboardNavigation($event, () => navigateToBlogPost(featuredPost))"
-            />
+            >
+              <template #overlay>
+                <ThanksgivingOverlay />
+              </template>
+            </FeatureCard>
 
             <!-- RECENT POSTS -->
             <div class="postcards-column" role="list" aria-label="Recent posts">

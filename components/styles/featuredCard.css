@@ -36,7 +36,7 @@
   height: 0;
   padding-bottom: 56.25%;
   aspect-ratio: 16 / 9;
-  overflow: hidden;
+  overflow: hidden; /* Acts as mask - only turkeys within image bounds are visible */
   background: #f8f9fa;
   background-size: cover;
   background-position: center;

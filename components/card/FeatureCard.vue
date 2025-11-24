@@ -11,6 +11,7 @@
     @keydown="handleKeydown"
   >
     <div class="featured-card__image-wrapper" :style="{ '--bg-image': `url(${imageUrl})` }">
+      <slot name="overlay"></slot>
       <img 
         :src="imageUrl" 
         :alt="`Featured image for article: ${title}`" 
