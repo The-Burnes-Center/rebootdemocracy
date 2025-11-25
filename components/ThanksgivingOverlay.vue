@@ -11,7 +11,7 @@
       :style="turkey.style"
       @click="popTurkey(index)"
     >
-      🦃
+      {{ turkey.emoji }}
     </div>
   </div>
 </template>
@@ -36,6 +36,10 @@ const createTurkey = () => {
   // Randomly choose which side to peek in from
   const sides = ['top', 'bottom', 'left', 'right']
   const side = sides[Math.floor(Math.random() * sides.length)]
+  
+  // Randomly choose emoji type - mix of turkeys and corn
+  const emojiTypes = ['🦃', '🌽']
+  const emoji = emojiTypes[Math.floor(Math.random() * emojiTypes.length)]
   
   // Calculate starting and target positions based on side
   // CRITICAL: Full body must be visible, peek out by exactly body height
@@ -104,6 +108,7 @@ const createTurkey = () => {
   
   return {
     side: side,
+    emoji: emoji, // Store emoji type (🦃 or 🌽)
     startLeft: startLeft,
     startTop: startTop,
     targetLeft: targetLeft,
@@ -237,7 +242,8 @@ const animateTurkeys = () => {
       // Start position transform (off-screen, further out)
       // Top: Start further UP (more negative) and move DOWN (towards 0) to peek in
       const peekInAmountTop = 8 + Math.random() * 2 // 8-10px visible for top (just head)
-      const peekInAmountOther = 12 + Math.random() * 3 // 12-15px for other sides
+      const peekInAmountBottom = 28 + Math.random() * 4 // 28-32px for bottom (come up much higher)
+      const peekInAmountOther = 12 + Math.random() * 3 // 12-15px for left/right sides
       
       // For top: Start further out (more negative), end at target position (less negative)
       const topStartTranslateY = -(turkey.peekAmountPx + 30) // Start further up/outside
@@ -253,8 +259,9 @@ const animateTurkeys = () => {
                                turkey.side === 'right' ? -peekInAmountOther : // Small translate left
                                0
       // Top: Move from further up to target position (downward movement)
+      // Bottom: Translate up more to come out higher
       const targetTranslateY = turkey.side === 'top' ? topTargetTranslateY : // Move down to peek in
-                              turkey.side === 'bottom' ? -peekInAmountOther : // Small translate up
+                              turkey.side === 'bottom' ? -peekInAmountBottom : // Translate up more for bottom
                               0
       
       // Interpolate transform
@@ -302,14 +309,18 @@ const animateTurkeys = () => {
         
         // Calculate transform offset for peeking position
         // Top: Position bottom at edge, translate UP to pull back - only 8-10px visible
+        // Bottom: Come out much higher - 28-32px visible
         const peekInAmountTop = 8 + (turkey.size - 50) * 0.1 // 8-9px visible for top
-        const peekInAmountOther = 12 + (turkey.size - 50) * 0.1 // 12-13px for other sides
+        const peekInAmountBottom = 28 + (turkey.size - 50) * 0.2 // 28-30px visible for bottom
+        const peekInAmountOther = 12 + (turkey.size - 50) * 0.1 // 12-13px for left/right sides
         
         const translateX = turkey.side === 'left' ? peekInAmountOther :
                           turkey.side === 'right' ? -peekInAmountOther : 0
         // Top: Translate UP (negative) to pull turkey back so only peekInAmountTop is visible
+        // Bottom: Translate UP more to come out higher
         const translateY = turkey.side === 'top' ? -(turkey.peekAmountPx - peekInAmountTop) : // Translate up to pull back
-                          turkey.side === 'bottom' ? -peekInAmountOther : 0
+                          turkey.side === 'bottom' ? -peekInAmountBottom : // Translate up more for bottom
+                          0
         
         // Shake/bob animation while visible (prairie dog behavior) - smoother calculation
         const shakeTime = now * 0.003 // Slower, smoother timing
@@ -360,8 +371,10 @@ const animateTurkeys = () => {
         
         // Calculate transform offsets for reverse
         // Top: Move back from peek position to further up/outside
+        // Bottom: Come out much higher - 28-32px visible
         const peekInAmountTop = 8 + (turkey.size - 50) * 0.1 // 8-9px visible for top
-        const peekInAmountOther = 12 + (turkey.size - 50) * 0.1 // 12-13px for other sides
+        const peekInAmountBottom = 28 + (turkey.size - 50) * 0.2 // 28-30px visible for bottom
+        const peekInAmountOther = 12 + (turkey.size - 50) * 0.1 // 12-13px for left/right sides
         
         // For top: Start at peek position, move back to further up/outside
         const topTargetTranslateY = -(turkey.peekAmountPx - peekInAmountTop) // Current peek position
@@ -370,7 +383,8 @@ const animateTurkeys = () => {
         const targetTranslateX = turkey.side === 'left' ? peekInAmountOther :
                                 turkey.side === 'right' ? -peekInAmountOther : 0
         const targetTranslateY = turkey.side === 'top' ? topTargetTranslateY : // Current position
-                                turkey.side === 'bottom' ? -peekInAmountOther : 0
+                                turkey.side === 'bottom' ? -peekInAmountBottom : // Translate up more for bottom
+                                0
         
         const startOffset = 30 // Additional offset for reverse animation start
         const startTranslateX = turkey.side === 'left' ? -startOffset :
