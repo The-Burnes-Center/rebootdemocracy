@@ -178,7 +178,7 @@
                 :onClick="onClick"
                 aria-label="Sign up for weekly updates about democracy and governance"
               >
-                Sign up for updates
+                Sign up for the Reboot Weekly
               </Button>
             </div>
           </div>
