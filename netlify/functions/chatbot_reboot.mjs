@@ -109,6 +109,204 @@ const youtubeVideoFields = `
 
 
 /*********************************************
+ *  Author name search using LIKE filters    *
+ *  Searches across ALL collections          *
+ *********************************************/
+async function searchAuthorByName(authorName) {
+  const allAuthorHits = [];
+  
+  try {
+    // 1. Search RebootWeeklyNewsItem - has 'author' and 'itemAuthor' fields
+    try {
+      const newsQuery = weaviateClient.graphql
+        .get()
+        .withClassName('RebootWeeklyNewsItem')
+        .withFields(weeklyNewsItemFields)
+        .withWhere({
+          operator: 'Or',
+          operands: [
+            {
+              path: ['author'],
+              operator: 'Like',
+              valueText: `*${authorName}*`
+            },
+            {
+              path: ['itemAuthor'],
+              operator: 'Like',
+              valueText: `*${authorName}*`
+            }
+          ]
+        })
+        .withLimit(10);
+
+      const newsRes = await newsQuery.do();
+      const newsHits = newsRes?.data?.Get?.RebootWeeklyNewsItem ?? [];
+      
+      if (newsHits.length > 0) {
+        console.log(`Author LIKE search (RebootWeeklyNewsItem) found ${newsHits.length} results for: "${authorName}"`);
+        allAuthorHits.push(...newsHits.map(h => ({ ...h, _className: 'RebootWeeklyNewsItem' })));
+      }
+    } catch (newsErr) {
+      console.warn(`Author LIKE search failed for RebootWeeklyNewsItem:`, newsErr);
+    }
+
+    // 2. Search RebootBlogPostChunk - has 'authors' array field
+    try {
+      const blogQuery = weaviateClient.graphql
+        .get()
+        .withClassName('RebootBlogPostChunk')
+        .withFields(blogPostChunkFields)
+        .withWhere({
+          path: ['authors'],
+          operator: 'Like',
+          valueText: `*${authorName}*`
+        })
+        .withLimit(10);
+
+      const blogRes = await blogQuery.do();
+      const blogHits = blogRes?.data?.Get?.RebootBlogPostChunk ?? [];
+      
+      if (blogHits.length > 0) {
+        console.log(`Author LIKE search (RebootBlogPostChunk) found ${blogHits.length} results for: "${authorName}"`);
+        allAuthorHits.push(...blogHits.map(h => ({ ...h, _className: 'RebootBlogPostChunk' })));
+      }
+    } catch (blogErr) {
+      console.warn(`Author LIKE search failed for RebootBlogPostChunk:`, blogErr);
+    }
+
+    // 3. Search RagDocument - check if it has author fields in metadata
+    try {
+      const ragDocQuery = weaviateClient.graphql
+        .get()
+        .withClassName('RagDocument')
+        .withFields(ragDocumentFields)
+        .withWhere({
+          path: ['title'],
+          operator: 'Like',
+          valueText: `*${authorName}*`
+        })
+        .withLimit(5);
+
+      const ragDocRes = await ragDocQuery.do();
+      const ragDocHits = ragDocRes?.data?.Get?.RagDocument ?? [];
+      
+      // Filter to only include if author name appears in description/content
+      const filteredRagDocHits = ragDocHits.filter(hit => {
+        const searchText = [
+          hit.title,
+          hit.description,
+          hit.shortDescription,
+          hit.fullDescriptionOfAllContents
+        ].filter(Boolean).join(' ').toLowerCase();
+        return searchText.includes(authorName.toLowerCase());
+      });
+      
+      if (filteredRagDocHits.length > 0) {
+        console.log(`Author LIKE search (RagDocument) found ${filteredRagDocHits.length} results for: "${authorName}"`);
+        allAuthorHits.push(...filteredRagDocHits.map(h => ({ ...h, _className: 'RagDocument' })));
+      }
+    } catch (ragDocErr) {
+      console.warn(`Author LIKE search failed for RagDocument:`, ragDocErr);
+    }
+
+    // 4. Search RagDocumentChunk - check content for author mentions
+    try {
+      const ragChunkQuery = weaviateClient.graphql
+        .get()
+        .withClassName('RagDocumentChunk')
+        .withFields(ragDocumentChunkFields)
+        .withWhere({
+          operator: 'Or',
+          operands: [
+            {
+              path: ['uncompressedContent'],
+              operator: 'Like',
+              valueText: `*${authorName}*`
+            },
+            {
+              path: ['compressedContent'],
+              operator: 'Like',
+              valueText: `*${authorName}*`
+            },
+            {
+              path: ['shortSummary'],
+              operator: 'Like',
+              valueText: `*${authorName}*`
+            },
+            {
+              path: ['fullSummary'],
+              operator: 'Like',
+              valueText: `*${authorName}*`
+            }
+          ]
+        })
+        .withLimit(5);
+
+      const ragChunkRes = await ragChunkQuery.do();
+      const ragChunkHits = ragChunkRes?.data?.Get?.RagDocumentChunk ?? [];
+      
+      if (ragChunkHits.length > 0) {
+        console.log(`Author LIKE search (RagDocumentChunk) found ${ragChunkHits.length} results for: "${authorName}"`);
+        allAuthorHits.push(...ragChunkHits.map(h => ({ ...h, _className: 'RagDocumentChunk' })));
+      }
+    } catch (ragChunkErr) {
+      console.warn(`Author LIKE search failed for RagDocumentChunk:`, ragChunkErr);
+    }
+
+    // 5. Search Youtube_videos - check title and text for author mentions
+    try {
+      const youtubeQuery = weaviateClient.graphql
+        .get()
+        .withClassName('Youtube_videos')
+        .withFields(youtubeVideoFields)
+        .withWhere({
+          operator: 'And',
+          operands: [
+            {
+              path: ['category'],
+              operator: 'Equal',
+              valueText: 'reboot'
+            },
+            {
+              operator: 'Or',
+              operands: [
+                {
+                  path: ['title'],
+                  operator: 'Like',
+                  valueText: `*${authorName}*`
+                },
+                {
+                  path: ['text'],
+                  operator: 'Like',
+                  valueText: `*${authorName}*`
+                }
+              ]
+            }
+          ]
+        })
+        .withLimit(5);
+
+      const youtubeRes = await youtubeQuery.do();
+      const youtubeHits = youtubeRes?.data?.Get?.Youtube_videos ?? [];
+      
+      if (youtubeHits.length > 0) {
+        console.log(`Author LIKE search (Youtube_videos) found ${youtubeHits.length} results for: "${authorName}"`);
+        allAuthorHits.push(...youtubeHits.map(h => ({ ...h, _className: 'Youtube_videos' })));
+      }
+    } catch (youtubeErr) {
+      console.warn(`Author LIKE search failed for Youtube_videos:`, youtubeErr);
+    }
+
+    console.log(`Total author search results across all collections: ${allAuthorHits.length} for "${authorName}"`);
+    return allAuthorHits;
+    
+  } catch (err) {
+    console.warn(`Author search failed for "${authorName}":`, err);
+    return allAuthorHits; // Return whatever we found so far
+  }
+}
+
+/*********************************************
  *  Search helper – BM25 then nearText       *
  *********************************************/
 async function searchWeaviate(className, fields, query) {
@@ -210,6 +408,38 @@ export async function searchContent(query) {
   try {
     // Search across all available collections in the migrated instance
     console.log('Starting search for query:', query);
+    
+    // First, try author name search using LIKE filters (more precise for author names)
+    // Extract potential author names from query (look for capitalized words that might be names)
+    const authorNameMatch = query.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b/);
+    let authorHits = [];
+    
+    if (authorNameMatch) {
+      const potentialAuthorName = authorNameMatch[1].trim();
+      console.log('Detected potential author name:', potentialAuthorName);
+      authorHits = await searchAuthorByName(potentialAuthorName);
+    }
+    
+    // Also try searching with the full query as author name (in case user asks "articles by X")
+    if (authorHits.length === 0) {
+      // Check if query contains author-related keywords
+      const authorKeywords = ['author', 'by', 'written by', 'article by'];
+      const hasAuthorKeyword = authorKeywords.some(keyword => 
+        query.toLowerCase().includes(keyword)
+      );
+      
+      if (hasAuthorKeyword) {
+        // Extract name after the keyword
+        const nameAfterKeyword = query.match(/(?:author|by|written by|article by)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+        if (nameAfterKeyword) {
+          const authorName = nameAfterKeyword[1].trim();
+          console.log('Extracted author name from query:', authorName);
+          authorHits = await searchAuthorByName(authorName);
+        }
+      }
+    }
+    
+    // Regular search across all collections
     const [newsHits, blogHits, ragDocHits, ragChunkHits, youtubeHits] = await Promise.all([
       searchWeaviate('RebootWeeklyNewsItem', weeklyNewsItemFields, query),
       searchWeaviate('RebootBlogPostChunk',  blogPostChunkFields,  query),
@@ -221,8 +451,12 @@ export async function searchContent(query) {
       })
     ]);
     
-    const allResults = [...newsHits, ...blogHits, ...ragDocHits, ...ragChunkHits, ...youtubeHits];
+    // Combine results, prioritizing author matches
+    // Mark author hits for prioritization
+    const markedAuthorHits = authorHits.map(hit => ({ ...hit, _isAuthorMatch: true }));
+    const allResults = [...markedAuthorHits, ...newsHits, ...blogHits, ...ragDocHits, ...ragChunkHits, ...youtubeHits];
     
+    console.log('Author hits found:', authorHits.length);
     console.log('YouTube hits found:', youtubeHits.length);
     console.log('YouTube hits details:', youtubeHits);
     
@@ -236,7 +470,34 @@ export async function searchContent(query) {
         videoId: hit.videoId
       });
     });
-    console.log('Total results:', allResults.length);
+    console.log('Total results before deduplication:', allResults.length);
+
+    // Deduplicate by objectId, keeping author matches when duplicates exist
+    const seenIds = new Map();
+    const deduplicatedResults = [];
+    for (const hit of allResults) {
+      const id = hit.objectId || hit._additional?.id;
+      if (!id) {
+        deduplicatedResults.push(hit);
+        continue;
+      }
+      if (!seenIds.has(id)) {
+        seenIds.set(id, hit);
+        deduplicatedResults.push(hit);
+      } else {
+        // If duplicate found, keep the one marked as author match
+        const existing = seenIds.get(id);
+        if (hit._isAuthorMatch && !existing._isAuthorMatch) {
+          const index = deduplicatedResults.indexOf(existing);
+          if (index !== -1) {
+            deduplicatedResults[index] = hit;
+            seenIds.set(id, hit);
+          }
+        }
+      }
+    }
+    
+    console.log('Total results after deduplication:', deduplicatedResults.length);
 
     // 1. Filter for exact matches in relevant fields
     const lowerQuery = query.toLowerCase();
@@ -265,20 +526,26 @@ export async function searchContent(query) {
         field.toLowerCase().includes(lowerQuery)
       );
     };
-    const exactMatches = allResults.filter(isExactMatch);
-    console.log('Total results:', allResults.length);
+    const exactMatches = deduplicatedResults.filter(isExactMatch);
     console.log('Exact matches:', exactMatches.length);
 
-    // 2. Take up to 5, prioritizing exact matches
+    // 2. Take up to 5, prioritizing author matches and exact matches
     let topChunks = [];
-    if (exactMatches.length > 0) {
-      // Sort exact matches by distance/certainty
-      topChunks = exactMatches.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
-      console.log('Using exact matches');
+    if (exactMatches.length > 0 || authorHits.length > 0) {
+      // Combine exact matches and author matches, prioritizing author matches
+      const authorMatches = deduplicatedResults.filter(hit => hit._isAuthorMatch);
+      const otherExactMatches = exactMatches.filter(hit => !hit._isAuthorMatch);
+      
+      // Sort: author matches first (by distance), then other exact matches
+      topChunks = [
+        ...authorMatches.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1)),
+        ...otherExactMatches.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1))
+      ];
+      console.log('Using author matches and exact matches');
     } else {
-      // If no exact matches, use top 5 by distance/certainty
-      topChunks = allResults.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
-      console.log('Using all results (no exact matches)');
+      // If no exact matches or author matches, use top 5 by distance/certainty
+      topChunks = deduplicatedResults.sort((a, b) => (a._additional?.distance ?? 1) - (b._additional?.distance ?? 1));
+      console.log('Using all results (no exact matches or author matches)');
     }
 
     // Take top 5 results for main content
