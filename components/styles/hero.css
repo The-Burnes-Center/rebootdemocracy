@@ -5,11 +5,11 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 6rem 0;
+  padding: 4rem 0;
   box-sizing: border-box;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.15);
-  background: url(https://directus.theburnescenter.org/assets/ed1a3e5a-4c25-42ea-bbde-3ed10b4cb52a) center -50px / cover no-repeat;
+  background: url("/images/hero-background.png") no-repeat center center;
   background-size: cover;
   overflow: hidden;
   z-index: 0;
@@ -19,8 +19,8 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    #003468b4,
-    rgba(0, 0, 0, 0.3)
+    #003468,
+    rgba(0, 0, 0, 0.4)
   );
   z-index: 1;
 }
@@ -65,17 +65,10 @@
   color: #ffffff !important;
 }
 
-@media (max-width: 1280px) {
-  .hero__container {
-    padding: 3rem 0;
-    background: url(https://directus.theburnescenter.org/assets/ed1a3e5a-4c25-42ea-bbde-3ed10b4cb52a) top  / cover no-repeat;
-  }
-}
 /* Tablet Media Query */
 @media (max-width: 768px) {
   .hero__container {
     padding: 3rem 0;
-    background: url(https://directus.theburnescenter.org/assets/ed1a3e5a-4c25-42ea-bbde-3ed10b4cb52a) -100px 0px / cover no-repeat;
   }
 
   .hero__content {
