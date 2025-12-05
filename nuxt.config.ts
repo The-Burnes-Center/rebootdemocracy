@@ -1,6 +1,6 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
-import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
+// import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
 
@@ -36,21 +36,21 @@ export default defineNuxtConfig({
     }
   },
 
-  // hooks: {
-  //   async 'nitro:config'(nitroConfig) {
-  //     const blogRoutes = await getStaticBlogRoutes();
-  //     const categoryRoutes = await getStaticCategoryRoutes();
-  //     const newsRoutes = await getStaticNewsRoutes();
+  hooks: {
+    async 'nitro:config'(nitroConfig) {
+      // const blogRoutes = await getStaticBlogRoutes();
+      const categoryRoutes = await getStaticCategoryRoutes();
+      const newsRoutes = await getStaticNewsRoutes();
       
-  //     nitroConfig.prerender = nitroConfig.prerender ?? {};
-  //     nitroConfig.prerender.routes = [
-  //       ...(nitroConfig.prerender.routes ?? []),
-  //       ...blogRoutes,
-  //       ...categoryRoutes,
-  //       ...newsRoutes
-  //     ];
-  //   }
-  // },
+      nitroConfig.prerender = nitroConfig.prerender ?? {};
+      nitroConfig.prerender.routes = [
+        ...(nitroConfig.prerender.routes ?? []),
+        // ...blogRoutes,
+        ...categoryRoutes,
+        ...newsRoutes
+      ];
+    }
+  },
   algolia: {
     apiKey: process.env.ALGOLIA_API_KEY,
     applicationId: process.env.ALGOLIA_APP_ID,

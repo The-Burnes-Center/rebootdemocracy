@@ -27,9 +27,9 @@ publish = ".output/public"
 # - The server handler (with server/api/ routes) is in .output/server
 # - Custom functions in netlify/functions will still be detected automatically
 # If you need custom function settings, uncomment below but be aware it may affect server handler detection:
-# [functions]
-#   node_bundler = "esbuild"
-#   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
 
 # NOTE: Removed catch-all redirect "/*" -> "/index.html"
 # This was interfering with ISR routes - the server handler needs to process blog routes
@@ -45,6 +45,8 @@ from = "/newsoftheweek/feed/rss"
 to = "/.netlify/functions/newsoftheweek"
 status = 200
 force = true
+
+
 
 [dev]
 command = "npm run dev"
