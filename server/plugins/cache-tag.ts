@@ -1,11 +1,11 @@
 /**
- * Nitro Plugin: Set Netlify-Cache-Tag Header for ISR Blog Pages
+ * Nitro Plugin: Set Netlify-Cache-Tag Header for ISR Pages
  * 
- * This plugin sets the dynamic Netlify-Cache-Tag header for blog posts using Nitro hooks.
+ * This plugin sets the dynamic Netlify-Cache-Tag header for ISR pages using Nitro hooks.
  * 
  * IMPORTANT: This plugin runs at RUNTIME (when requests come in), NOT during build.
  * - ISR pages are NOT pre-rendered during build
- * - Plugin runs when a user requests a blog page (first request triggers SSR)
+ * - Plugin runs when a user requests a page (first request triggers SSR)
  * - Logs appear in Netlify function logs (runtime), not build logs
  * 
  * Why use a Nitro plugin instead of nuxt.config.ts route rules?
@@ -18,10 +18,12 @@
  * - Works reliably for both SSR and ISR pages
  * 
  * Note: Cache-Control and Netlify-CDN-Cache-Control headers are set by the
- * "/blog/**" route rule in nuxt.config.ts, so we only set the dynamic tag here.
+ * route rules in nuxt.config.ts, so we only set the dynamic tag here.
  * 
  * Usage:
- * - For blog posts: tag format is "blog/{slug}" (e.g., "blog/my-post-slug")
+ * - Home page (/): tag format is "home"
+ * - Blog listing page (/blog): tag format is "blog"
+ * - Blog posts (/blog/{slug}): tag format is "blog/{slug}" (e.g., "blog/my-post-slug")
  * - Use the same tag when calling /api/revalidate endpoint
  * 
  * References:
@@ -39,36 +41,44 @@ export default defineNitroPlugin((nitroApp) => {
       // Get URL from event
       const url = event.path || event.node?.req?.url || ""
       
-      // Debug: Log all blog requests to verify plugin is running
-      if (url && url.includes("/blog/")) {
-        console.log(`🔍 Cache tag plugin - request hook triggered for: ${url}`)
-      }
+      // Remove query parameters for path matching
+      const urlWithoutQuery = url.split('?')[0]
+      const pathParts = urlWithoutQuery.split('/').filter(Boolean)
       
-      // Check if this is a blog route
-      if (url && url.startsWith("/blog/")) {
-        // Extract slug from URL (e.g., /blog/my-post-slug -> my-post-slug)
-        // Remove query parameters if present
-        const urlWithoutQuery = url.split('?')[0]
-        const pathParts = urlWithoutQuery.split('/').filter(Boolean) // ['blog', 'slug']
-        
+      let cacheTag: string | null = null
+      
+      // Home page: /
+      if (urlWithoutQuery === "/" || urlWithoutQuery === "") {
+        cacheTag = "home"
+        console.log(`🔍 Cache tag plugin - request hook triggered for home page: ${url}`)
+      }
+      // Blog listing page: /blog
+      else if (urlWithoutQuery === "/blog") {
+        cacheTag = "blog"
+        console.log(`🔍 Cache tag plugin - request hook triggered for blog listing: ${url}`)
+      }
+      // Blog post: /blog/{slug}
+      else if (urlWithoutQuery.startsWith("/blog/")) {
         if (pathParts.length >= 2 && pathParts[0] === 'blog') {
           const slug = pathParts[1]
-          // Set cache tag as "blog/{slug}" (e.g., "blog/my-post-slug")
-          // This matches the format expected by the revalidate endpoint
-          const cacheTag = `blog/${slug}`
-          
-          // Set the header using Nuxt's helper
-          setResponseHeader(event, "Netlify-Cache-Tag", cacheTag)
-          
-          // Also set directly on node response as backup
-          if (event.node?.res && !event.node.res.headersSent) {
-            event.node.res.setHeader("Netlify-Cache-Tag", cacheTag)
-          }
-          
-          console.log(`🏷️ ✅ Set cache tag for blog post: ${cacheTag} (URL: ${url})`)
+          cacheTag = `blog/${slug}`
+          console.log(`🔍 Cache tag plugin - request hook triggered for blog post: ${url}`)
         } else {
           console.warn(`⚠️ Cache tag plugin - Could not extract slug from URL: ${url}, pathParts: ${JSON.stringify(pathParts)}`)
         }
+      }
+      
+      // Set the cache tag header if we determined one
+      if (cacheTag) {
+        // Set the header using Nuxt's helper
+        setResponseHeader(event, "Netlify-Cache-Tag", cacheTag)
+        
+        // Also set directly on node response as backup
+        if (event.node?.res && !event.node.res.headersSent) {
+          event.node.res.setHeader("Netlify-Cache-Tag", cacheTag)
+        }
+        
+        console.log(`🏷️ ✅ Set cache tag: ${cacheTag} (URL: ${url})`)
       }
     } catch (e) {
       // Non-critical - if cache tag setting fails, the page still works

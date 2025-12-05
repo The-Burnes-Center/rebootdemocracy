@@ -1,23 +1,25 @@
 /**
- * On-Demand Cache Revalidation Endpoint (Blog Posts Only)
+ * On-Demand Cache Revalidation Endpoint (Blog Posts + Related Pages)
  * 
  * PURPOSE: When blog content changes in your CMS (e.g., Directus), this endpoint invalidates
- * the cached blog page and immediately regenerates it with fresh content. This ensures users
- * see updated content without waiting for the next scheduled regeneration.
+ * the cached blog page, home page, and blog listing page, then immediately regenerates them
+ * with fresh content. This ensures users see updated content without waiting for the next
+ * scheduled regeneration.
  * 
  * FLOW OVERVIEW:
  * 1. Parse request → Extract blog cache tag from webhook/API payload
  * 2. Validate tag → Ensure tag starts with "blog/" (e.g., "blog/my-post-slug")
- * 3. Invalidate cache → Mark cached blog page as stale by tag ONLY (CRITICAL: no path purging)
+ * 3. Invalidate cache → Mark cached pages as stale by tag (blog post + home + blog listing)
  * 4. Check status → Verify invalidation worked by reading Cache-Status header
  * 5. Wait and retry → If cache still shows "hit", wait then retry purge and check again
- * 6. Regenerate → Force fresh SSR with cache-busting headers
+ * 6. Regenerate → Force fresh SSR with cache-busting headers for all three pages
  * 7. Cache result → Make normal request to populate cache with new content
  * 
  * WHY THIS APPROACH:
- * - Blog-only: Only handles blog routes (tags starting with "blog/")
+ * - Blog posts trigger full refresh: When a blog post changes, home page and blog listing
+ *   may also need updates (e.g., featured posts, recent posts lists)
  * - Tag-only purge: CRITICAL - There is NO "paths" key in purgeCache, using it would invalidate entire site
- * - Tag format: "blog/{slug}" (no leading slash) - matches server/plugins/cache-tag.ts
+ * - Tag format: "blog/{slug}", "home", "blog" - matches server/plugins/cache-tag.ts
  * - Cache-Status header: Ground truth for CDN cache (not Cache API)
  * - Conditional wait: Only waits if invalidation hasn't propagated yet
  * - Cache-busting headers: Forces bypass of edge/durable cache during regeneration
@@ -29,6 +31,11 @@
  * 
  * TAG FORMAT: Must start with "blog/" (e.g., "blog/googleorg-support-to-train-more-government-workers-in-digital-skills")
  * This matches the format set in server/plugins/cache-tag.ts
+ * 
+ * WHAT GETS REVALIDATED:
+ * - The specific blog post (tag: "blog/{slug}")
+ * - Home page (tag: "home")
+ * - Blog listing page (tag: "blog")
  * 
  * RATE LIMITS: 2 purges per tag/site per 5 seconds (auto-retry with 6s wait)
  * 
@@ -105,10 +112,15 @@ export default defineEventHandler(async (event) => {
 
     // Construct path from blog tag (e.g., "blog/my-post" -> "/blog/my-post")
     // WHY: Path needs leading slash for URL, but tag doesn't have it
-    const path = body?.path || body?.payload?.path || body?.data?.path || `/${tag}`
+    const blogPostPath = body?.path || body?.payload?.path || body?.data?.path || `/${tag}`
     
     // Use tag as-is (blog tags are "blog/{slug}" format, no leading slash)
     const normalizedTag = tag
+    
+    // When revalidating a blog post, we also need to revalidate home and blog listing
+    // Tags: "home" and "blog" (matches cache-tag.ts plugin)
+    const relatedTags = ["home", "blog", normalizedTag]
+    const pathsToRegenerate = ["/", "/blog", blogPostPath]
 
     /**
      * STEP 3: Verify Authentication
@@ -123,19 +135,22 @@ export default defineEventHandler(async (event) => {
       return {
         message: "Cache purge simulated (NETLIFY_AUTH_TOKEN not configured)",
         tag: normalizedTag,
+        relatedTags: relatedTags,
         note: "Set NETLIFY_AUTH_TOKEN in Netlify environment variables for actual cache purging",
       }
     }
 
     /**
-     * STEP 4: Invalidate Cache by Blog Tag Only
+     * STEP 4: Invalidate Cache by Tags (Blog Post + Home + Blog Listing)
      * 
-     * WHAT: Marks the cached blog page as stale, so the next request triggers regeneration.
+     * WHAT: Marks the cached pages as stale, so the next request triggers regeneration.
+     * When a blog post changes, we also invalidate home page and blog listing since
+     * they may display blog content (featured posts, recent posts, etc.).
      * 
      * WHY TAG-ONLY PURGE:
-     * - Tag purge: Invalidates by Netlify-Cache-Tag header (matches "blog/{slug}" format)
+     * - Tag purge: Invalidates by Netlify-Cache-Tag header (matches "blog/{slug}", "home", "blog" formats)
      * - CRITICAL: There is NO "paths" key in purgeCache - using it would invalidate entire site
-     * - Fine-grained: Only the specified blog post is invalidated, other pages remain cached
+     * - Fine-grained: Only the specified pages are invalidated, other pages remain cached
      * 
      * WHY DUAL API CALLS (helper + direct):
      * - Helper (purgeCache): Clears CDN cache via @netlify/functions (tag only)
@@ -157,17 +172,19 @@ export default defineEventHandler(async (event) => {
      * WHY: Centralized purge function that we can call multiple times in retry loops.
      * CRITICAL: Only purge by tag (with tags key) to avoid invalidating entire site.
      * There is NO "paths" key in purgeCache - using it would invalidate the full cache.
+     * 
+     * UPDATED: Now accepts multiple tags to purge home, blog listing, and blog post together.
      */
-    const performPurge = async (tag: string) => {
+    const performPurge = async (tags: string[]) => {
       try {
-        // Purge by tag ONLY (CRITICAL: must include tags key to avoid full site invalidation)
+        // Purge by tags ONLY (CRITICAL: must include tags key to avoid full site invalidation)
         // NOTE: There is no "paths" key in purgeCache - using it would invalidate entire site
-        console.log(`🔄 Purging CDN cache via helper for tag: ${tag}`)
-        await purgeCache({ tags: [tag] })
-        console.log(`✅ CDN cache purged successfully for tag: ${tag} (via helper)`)
+        console.log(`🔄 Purging CDN cache via helper for tags: ${tags.join(", ")}`)
+        await purgeCache({ tags: tags })
+        console.log(`✅ CDN cache purged successfully for tags: ${tags.join(", ")} (via helper)`)
         
         // Also purge via direct API (also uses tags only)
-        await purgeViaDirectAPI(tag)
+        await purgeViaDirectAPI(tags)
         
         return true
       } catch (error) {
@@ -182,17 +199,19 @@ export default defineEventHandler(async (event) => {
      * 
      * WHY: The purgeCache helper may not clear Cache API entries (programmatic cache).
      * This direct API call ensures both CDN cache AND Cache API are cleared.
+     * 
+     * UPDATED: Now accepts multiple tags to purge home, blog listing, and blog post together.
      */
-    const purgeViaDirectAPI = async (purgeTag: string) => {
+    const purgeViaDirectAPI = async (purgeTags: string[]) => {
       if (!siteId && !siteSlug) {
         console.warn(`⚠️ Site ID/Slug not found - skipping direct API purge. Set NETLIFY_SITE_ID or NETLIFY_SITE_NAME env var.`)
         return false
       }
-      console.log(`🔄 Purging CDN cache via direct API for tag: ${purgeTag}`)
+      console.log(`🔄 Purging CDN cache via direct API for tags: ${purgeTags.join(", ")}`)
       try {
         const purgeApiUrl = "https://api.netlify.com/api/v1/purge"
         const purgePayload: any = {
-          cache_tags: [purgeTag],
+          cache_tags: purgeTags,
         }
         
         // Add site identifier (either site_id or site_slug)
@@ -212,7 +231,7 @@ export default defineEventHandler(async (event) => {
         })
         
         if (apiResponse.ok) {
-          console.log(`✅ Cache purged successfully via direct API for tag: ${purgeTag}`)
+          console.log(`✅ Cache purged successfully via direct API for tags: ${purgeTags.join(", ")}`)
           return true
         } else {
           const errorText = await apiResponse.text()
@@ -228,14 +247,16 @@ export default defineEventHandler(async (event) => {
     }
     
     try {
-      // Initial purge attempt (tag only - no path purging to avoid full site invalidation)
-      purgeSuccess = await performPurge(normalizedTag)
+      // Initial purge attempt (tags only - no path purging to avoid full site invalidation)
+      // Purge home, blog listing, and the specific blog post
+      console.log(`🔄 Purging cache for blog post and related pages: ${relatedTags.join(", ")}`)
+      purgeSuccess = await performPurge(relatedTags)
     } catch (purgeError) {
       const errorMsg =
         purgeError instanceof Error
           ? purgeError.message
           : String(purgeError)
-      console.error(`❌ purgeCache error for blog tag ${normalizedTag}:`, errorMsg)
+      console.error(`❌ purgeCache error for tags ${relatedTags.join(", ")}:`, errorMsg)
 
       // If it's an auth token error, provide helpful message
       if (errorMsg.includes("token") || errorMsg.includes("auth")) {
@@ -261,8 +282,8 @@ export default defineEventHandler(async (event) => {
         await new Promise(resolve => setTimeout(resolve, 6000))
         
         try {
-          console.log(`🔄 Retrying cache purge for blog tag: ${normalizedTag}`)
-          purgeSuccess = await performPurge(normalizedTag)
+          console.log(`🔄 Retrying cache purge for tags: ${relatedTags.join(", ")}`)
+          purgeSuccess = await performPurge(relatedTags)
         } catch (retryError) {
           const retryErrorMsg = retryError instanceof Error ? retryError.message : String(retryError)
           console.error(`❌ Retry also failed:`, retryErrorMsg)
@@ -314,9 +335,11 @@ export default defineEventHandler(async (event) => {
        * - "fwd=miss": Cache is empty → invalidation worked
        * 
        * We check both "Netlify Edge" (local node cache) and "Netlify Durable" (shared cache).
+       * 
+       * UPDATED: Now checks the blog post path (primary page being revalidated).
        */
-      const checkCacheStatus = async (): Promise<{ overall: string; edge: string; durable: string; headers: string[] }> => {
-        const testResponse = await fetch(`${siteUrl}${path}`, {
+      const checkCacheStatus = async (checkPath: string): Promise<{ overall: string; edge: string; durable: string; headers: string[] }> => {
+        const testResponse = await fetch(`${siteUrl}${checkPath}`, {
           method: "GET",
           headers: {
             "User-Agent": "Netlify-Revalidate-Check/1.0",
@@ -380,9 +403,9 @@ export default defineEventHandler(async (event) => {
         }
       }
       
-      // Initial cache status check
-      console.log(`🔍 Checking cache status after purge...`)
-      let cacheStatus = await checkCacheStatus()
+      // Initial cache status check (check blog post as primary)
+      console.log(`🔍 Checking cache status after purge for blog post: ${blogPostPath}`)
+      let cacheStatus = await checkCacheStatus(blogPostPath)
       console.log(`🔍 CDN Cache status after purge: ${cacheStatus.overall} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`)
       console.log(`📋 Cache-Status headers: ${cacheStatus.headers.join(", ")}`)
       
@@ -410,7 +433,7 @@ export default defineEventHandler(async (event) => {
         
         // Check cache status again
         console.log(`🔍 Re-checking cache status (check ${checkCount + 1}/${MAX_CHECKS})...`)
-        currentCacheStatus = await checkCacheStatus()
+        currentCacheStatus = await checkCacheStatus(blogPostPath)
         console.log(`🔍 CDN Cache status after wait: ${currentCacheStatus.overall} (edge: ${currentCacheStatus.edge}, durable: ${currentCacheStatus.durable})`)
         console.log(`📋 Cache-Status headers: ${currentCacheStatus.headers.join(", ")}`)
         
@@ -430,10 +453,11 @@ export default defineEventHandler(async (event) => {
       
       
       /**
-       * STEP 8: Trigger Regeneration (Force Fresh SSR)
+       * STEP 8: Trigger Regeneration (Force Fresh SSR for All Pages)
        * 
-       * WHY: We need to force a fresh server-side render, bypassing any remaining
-       * cache entries. Aggressive cache-busting headers ensure we get fresh content.
+       * WHY: We need to force a fresh server-side render for home page, blog listing,
+       * and the specific blog post, bypassing any remaining cache entries. Aggressive
+       * cache-busting headers ensure we get fresh content.
        * 
        * HEADERS EXPLAINED:
        * - Cache-Control: no-cache, no-store, must-revalidate → Bypass all caches
@@ -442,59 +466,83 @@ export default defineEventHandler(async (event) => {
        * - X-Cache-Bypass: timestamp → Unique value to prevent cache matching
        * - cache: 'no-store' → Don't store response in any cache
        */
-      console.log(`🔄 Triggering regeneration for: ${path}`)
-      const regenerateResponse = await fetch(`${siteUrl}${path}`, {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate', // Aggressive: bypass all caches
-          'Pragma': 'no-cache', // HTTP/1.0 cache control
-          'Expires': '0', // Tell caches content is expired
-          'X-Cache-Bypass': Date.now().toString(), // Unique header to force bypass
-        },
-        cache: 'no-store' // Don't store in any cache
-      })
-      
-      const regenerateStatus = regenerateResponse.status
-      const regenerateText = await regenerateResponse.text()
-      const hasContent = regenerateText.length > 0
-      
-      if (regenerateStatus === 200 && hasContent) {
-        console.log(`✅ Page regenerated successfully: ${path} (${regenerateText.length} bytes)`)
-        
-        /**
-         * STEP 9: Cache the Regenerated Page
-         * 
-         * WHY: The regeneration request used cache-busting headers, so it wasn't cached.
-         * We make a normal request (without cache-busting) to populate the cache with
-         * the fresh content for future visitors.
-         */
-        console.log(`🔄 Caching regenerated page...`)
-        const cacheRequest = await fetch(`${siteUrl}${path}`, {
+      const regeneratePage = async (pagePath: string, pageName: string) => {
+        console.log(`🔄 Triggering regeneration for ${pageName}: ${pagePath}`)
+        const regenerateResponse = await fetch(`${siteUrl}${pagePath}`, {
           method: 'GET',
           headers: {
-            'User-Agent': 'Netlify-Revalidate-Cache/1.0',
+            'Cache-Control': 'no-cache, no-store, must-revalidate', // Aggressive: bypass all caches
+            'Pragma': 'no-cache', // HTTP/1.0 cache control
+            'Expires': '0', // Tell caches content is expired
+            'X-Cache-Bypass': Date.now().toString(), // Unique header to force bypass
           },
+          cache: 'no-store' // Don't store in any cache
         })
         
-        // Check if the page is cached
-        const cacheCheckHeader = cacheRequest.headers.get("Cache-Status") || ""
-        const isCached = cacheCheckHeader.includes('hit') && !cacheCheckHeader.includes('fwd=stale')
-        console.log(`📋 Cache check: ${isCached ? '✅ Page is cached' : '⚠️ Page may not be cached yet'} (Cache-Status: ${cacheCheckHeader})`)
+        const regenerateStatus = regenerateResponse.status
+        const regenerateText = await regenerateResponse.text()
+        const hasContent = regenerateText.length > 0
         
+        if (regenerateStatus === 200 && hasContent) {
+          console.log(`✅ ${pageName} regenerated successfully: ${pagePath} (${regenerateText.length} bytes)`)
+          
+          /**
+           * STEP 9: Cache the Regenerated Page
+           * 
+           * WHY: The regeneration request used cache-busting headers, so it wasn't cached.
+           * We make a normal request (without cache-busting) to populate the cache with
+           * the fresh content for future visitors.
+           */
+          console.log(`🔄 Caching regenerated ${pageName}...`)
+          const cacheRequest = await fetch(`${siteUrl}${pagePath}`, {
+            method: 'GET',
+            headers: {
+              'User-Agent': 'Netlify-Revalidate-Cache/1.0',
+            },
+          })
+          
+          // Check if the page is cached
+          const cacheCheckHeader = cacheRequest.headers.get("Cache-Status") || ""
+          const isCached = cacheCheckHeader.includes('hit') && !cacheCheckHeader.includes('fwd=stale')
+          console.log(`📋 Cache check for ${pageName}: ${isCached ? '✅ Page is cached' : '⚠️ Page may not be cached yet'} (Cache-Status: ${cacheCheckHeader})`)
+          
+          return { success: true, isCached, cacheCheckHeader }
+        } else {
+          console.warn(`⚠️ ${pageName} regeneration returned status ${regenerateStatus} or empty content`)
+          return { success: false, isCached: false, cacheCheckHeader: "" }
+        }
+      }
+      
+      // Regenerate all three pages: home, blog listing, and blog post
+      const regenerationResults = {
+        home: await regeneratePage("/", "Home page"),
+        blogListing: await regeneratePage("/blog", "Blog listing page"),
+        blogPost: await regeneratePage(blogPostPath, "Blog post"),
+      }
+      
+      const allRegenerated = regenerationResults.home.success && 
+                             regenerationResults.blogListing.success && 
+                             regenerationResults.blogPost.success
+      
+      if (allRegenerated) {
         // Return success with cache status
         setResponseStatus(event, 202)
         return {
-          message: "Cache purged and page regenerated successfully",
+          message: "Cache purged and all pages regenerated successfully",
           tag: normalizedTag,
-          path: path,
+          relatedTags: relatedTags,
+          paths: pathsToRegenerate,
           regenerated: true,
           cacheStatus: cacheStatus,
-          isCached: isCached,
-          cacheCheckHeader: cacheCheckHeader,
-          note: "✅ Page regenerated (same process as button click)",
+          regenerationResults: {
+            home: { cached: regenerationResults.home.isCached },
+            blogListing: { cached: regenerationResults.blogListing.isCached },
+            blogPost: { cached: regenerationResults.blogPost.isCached },
+          },
+          note: "✅ All pages regenerated (home, blog listing, and blog post)",
         }
       } else {
-        console.warn(`⚠️ Regeneration returned status ${regenerateStatus} or empty content`)
+        console.warn(`⚠️ Some pages failed to regenerate. Home: ${regenerationResults.home.success}, Blog: ${regenerationResults.blogListing.success}, Post: ${regenerationResults.blogPost.success}`)
       }
     } catch (regenerateError) {
       /**
@@ -511,7 +559,7 @@ export default defineEventHandler(async (event) => {
     /**
      * FALLBACK: Return Success Even If Regeneration Wasn't Attempted
      * 
-     * WHY: Cache invalidation succeeded, so the page will regenerate on next request.
+     * WHY: Cache invalidation succeeded, so the pages will regenerate on next request.
      * We return 202 (Accepted) to indicate the operation was accepted, even if we
      * couldn't trigger immediate regeneration.
      */
@@ -519,8 +567,9 @@ export default defineEventHandler(async (event) => {
     return {
       message: "Cache purged successfully",
       tag: normalizedTag,
-      path: path,
-      note: "The cache has been purged. Page will regenerate on next request.",
+      relatedTags: relatedTags,
+      paths: pathsToRegenerate,
+      note: "The cache has been purged for home page, blog listing, and blog post. Pages will regenerate on next request.",
     }
   } catch (error) {
     console.error("Revalidation error:", error)
