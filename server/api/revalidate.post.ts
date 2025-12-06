@@ -525,6 +525,37 @@ export default defineEventHandler(async (event) => {
                              regenerationResults.blogPost.success
       
       if (allRegenerated) {
+        /**
+         * STEP 10: Warm up the specific blog post page
+         * 
+         * WHY: After revalidation, we want to ensure the specific page is properly
+         * warmed up in the cache. We call the warm-cache endpoint with the tag
+         * to warm up only that specific page (not all 40 posts).
+         */
+        try {
+          console.log(`🔥 Warming up cache for revalidated blog post: ${normalizedTag}`)
+          const warmCacheUrl = `${siteUrl}/api/warm-cache`
+          const warmCacheResponse = await fetch(warmCacheUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'Netlify-Revalidate/1.0',
+            },
+            body: JSON.stringify({ tag: normalizedTag }),
+          })
+          
+          if (warmCacheResponse.ok) {
+            const warmCacheData = await warmCacheResponse.json()
+            console.log(`✅ Cache warmed up for blog post: ${normalizedTag}`)
+          } else {
+            console.warn(`⚠️ Cache warm-up returned status ${warmCacheResponse.status} (non-critical)`)
+          }
+        } catch (warmError) {
+          // Non-critical - page is already regenerated and cached
+          const warmErrorMsg = warmError instanceof Error ? warmError.message : String(warmError)
+          console.warn(`⚠️ Could not warm up cache (non-critical): ${warmErrorMsg}`)
+        }
+        
         // Return success with cache status
         setResponseStatus(event, 202)
         return {
@@ -539,14 +570,14 @@ export default defineEventHandler(async (event) => {
             blogListing: { cached: regenerationResults.blogListing.isCached },
             blogPost: { cached: regenerationResults.blogPost.isCached },
           },
-          note: "✅ All pages regenerated (home, blog listing, and blog post)",
+          note: "✅ All pages regenerated and warmed up (home, blog listing, and blog post)",
         }
       } else {
         console.warn(`⚠️ Some pages failed to regenerate. Home: ${regenerationResults.home.success}, Blog: ${regenerationResults.blogListing.success}, Post: ${regenerationResults.blogPost.success}`)
       }
     } catch (regenerateError) {
       /**
-       * STEP 10: Handle Regeneration Errors (Non-Critical)
+       * STEP 11: Handle Regeneration Errors (Non-Critical)
        * 
        * WHY: If regeneration fails, we still return success because the cache was
        * invalidated. The page will regenerate automatically on the next user request.
