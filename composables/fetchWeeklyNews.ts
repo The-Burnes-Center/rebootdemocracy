@@ -9,58 +9,20 @@ const directus = createDirectus(API_URL).with(rest());
 
 export async function fetchLatestWeeklyNews(): Promise<WeeklyNews | null> {
   try {
-
-    const titleVariations = [
-      'News that Caught Our Eye',  
-      'News that caught our eye',  
-      'News That Caught Our Eye'   
-    ];
-
-    for (const titlePattern of titleVariations) {
-      const response = await directus.request<WeeklyNews[]>(
-        readItems('reboot_democracy_weekly_news', {
-          fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
-        filter: {
-          _and: [
-            { status: { _eq: 'published' } },
-            { date: { _nnull: true } },
-            { title: { _contains: titlePattern } }
-          ]
-        },
-          sort: ['-date', '-id'],
-          limit: 1
-        })
-      );
-
-      if (response && response.length > 0) {
-        return response[0];
-      }
-    }
-
-    const allResponse = await directus.request<WeeklyNews[]>(
+    const response = await directus.request<WeeklyNews[]>(
       readItems('reboot_democracy_weekly_news', {
         fields: ['id', 'edition', 'title', 'summary', 'author', 'status', 'date'],
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _nnull: true } }  
+            { date: { _nnull: true } }
           ]
         },
         sort: ['-date', '-id'],
-        limit: 20
       })
     );
 
-    const newsEntry = allResponse.find(item => 
-      item.title?.toLowerCase().includes('news that caught our eye') ||
-      item.title?.toLowerCase().includes('caught our eye')
-    );
-
-    if (newsEntry) {
-      return newsEntry;
-    }
-
-    return null;
+    return (response && response.length > 0) ? response[0] : null;
   } catch (error) {
     console.error('Error fetching latest weekly news:', error);
     return null;
@@ -97,15 +59,7 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _nnull: true } }, 
-            {
-              _or: [
-                { title: { _contains: 'News that Caught Our Eye' } },
-                { title: { _contains: 'News That Caught Our Eye' } },
-                { title: { _contains: 'News that caught our eye' } },
-                { title: { _contains: 'news that caught our eye' } }
-              ]
-            }
+            { date: { _nnull: true } }
           ]
         }
       })
