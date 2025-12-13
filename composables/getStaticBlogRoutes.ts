@@ -9,8 +9,7 @@ export const getStaticBlogRoutes = async (): Promise<string[]> => {
     readItems('reboot_democracy_blog', {
       fields: ['slug'],
       filter: {
-        status: { _eq: 'published' },
-        date: { _lte: '$NOW' },
+        status: { _eq: 'published' }
       },
       limit: -1,
     })
