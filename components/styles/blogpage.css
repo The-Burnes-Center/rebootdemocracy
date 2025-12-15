@@ -189,16 +189,16 @@
 /* Excerpt */
 p.excerpt-paragraph {
   font-size: 20px;
-  line-height: 30px;
-  font-family: var(--font-habibi);
+  line-height: 35px;
+  font-family: var(--font-merriweather);
   font-weight: 400;
   margin: 0;
 }
 
 /* Main Content */
 .blog-content {
-  font-family: var(--font-habibi);
-  line-height: 30px;
+  font-family: var(--font-merriweather);
+  line-height: 35px;
 }
 
 .blog-content h1 {
@@ -230,14 +230,14 @@ p.excerpt-paragraph {
 }
 
 .blog-content li {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
 }
 
 .blog-content p em {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px;
   font-style: italic;
   font-weight: 400;
@@ -245,20 +245,20 @@ p.excerpt-paragraph {
 
 p {
   font-size: 20px;
-  line-height: 30px;
+  line-height: 35px;
 }
 
 /* Strong Text */
-.blog-content :is(strong, b, em, i, u, span, mark, cite, q, s, small, sub, sup, code, kbd, var, dfn, time, ins, del) {
-  font: inherit;
+/* .blog-content :is(strong, b, em, i, u, span, mark, cite, q, s, small, sub, sup, code, kbd, var, dfn, time, ins, del) {
+  font-weight: inherit;
   line-height: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
   color: inherit;
-}
+} */
 
 .blog-content span:not([style]) {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px;
   font-style: normal;
   font-weight: 400;

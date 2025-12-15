@@ -17,7 +17,7 @@
         weight="bold"
         fontStyle="italic"
         class="curator-badge__label"
-        fontFamily="habibi"
+        fontFamily="merriweather"
         role="text"
       >
         Curated by
@@ -38,7 +38,7 @@
         size="xs"
         weight="normal"
         class="curator-badge__title"
-        fontFamily="habibi"
+        fontFamily="merriweather"
         role="text"
         :aria-label="`Position: ${title}`"
       >

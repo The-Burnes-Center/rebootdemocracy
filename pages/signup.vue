@@ -158,7 +158,7 @@ export default {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .signup-form h3 {
@@ -174,7 +174,7 @@ export default {
   font-size: 0.85rem;
   margin-bottom: 1.5rem;
   color: #003366;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .mc-field-group {
@@ -187,7 +187,7 @@ export default {
 .mc-field-group label {
   font-weight: 600;
   font-size: 1rem;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #003366;
 }
 
@@ -195,7 +195,7 @@ export default {
 .mc-field-group input[type="email"] {
   padding: 0.6rem 0.75rem;
   font-size: 1rem;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   background-color: #fff;
   border: 1px solid #000;
   border-radius: 4px;
@@ -218,7 +218,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #ffffff;
   background: #fc6423;
   border: 1px solid #000000;
@@ -238,7 +238,7 @@ export default {
 .response {
   font-size: 0.9rem;
   margin-top: 1rem;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 #mce-error-response {

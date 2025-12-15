@@ -28,7 +28,7 @@
   height: 24px;
   color: #000;
   text-align: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 16px;
   font-weight: 700;
   line-height: 24px;
@@ -50,7 +50,7 @@
   border-radius: 3px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 14px;
 }
 

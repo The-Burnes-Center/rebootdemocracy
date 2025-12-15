@@ -24,7 +24,7 @@
             v-if="searchQuery" 
             size="lg" 
             weight="normal" 
-            fontFamily="habibi"
+            fontFamily="merriweather"
             class="search-query-display"
           >
             Showing results for: <strong>"{{ searchQuery }}"</strong>
@@ -33,7 +33,7 @@
             v-if="totalResults !== undefined" 
             size="base" 
             weight="normal" 
-            fontFamily="habibi"
+            fontFamily="merriweather"
             class="search-count-display"
           >
             {{ totalResults }} {{ totalResults === 1 ? 'result' : 'results' }} found
@@ -131,14 +131,14 @@
                     as="span"
                     weight="normal"
                     color="text-primary-light"
-                    fontFamily="habibi"
+                    fontFamily="merriweather"
                     class="book-author-text"
                   >
                     by <Text
                       as="span"
                       weight="semibold"
                       color="text-primary-light"
-                      fontFamily="habibi"
+                      fontFamily="merriweather"
                       class="author-name"
                     >Beth Simone Noveck</Text>
                   </Text>
@@ -164,7 +164,7 @@
                   as="p"
                   weight="normal"
                   color="text-primary-light"
-                  fontFamily="habibi"
+                  fontFamily="merriweather"
                   lineHeight="normal"
                   class="subscription-description"
                 >
@@ -257,7 +257,7 @@
                         weight="medium"
                         color="text-primary"
                         class="card-description"
-                        fontFamily="habibi"
+                        fontFamily="merriweather"
                         lineHeight="normal"
                       >
                         {{ post.excerpt }}
@@ -267,7 +267,7 @@
                         size="xs"
                         fontStyle="italic"
                         weight="bold"
-                        fontFamily="habibi"
+                        fontFamily="merriweather"
                         class="card-meta"
                         v-if="post.date"
                         role="text"

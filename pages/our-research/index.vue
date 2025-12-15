@@ -222,7 +222,7 @@ useSeoMeta({
 
 /* Typography Styles */
 .our-research-page h1 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 62.5px;
   font-style: normal;
   font-weight: 700;
@@ -233,13 +233,13 @@ useSeoMeta({
 }
 
 .our-research-page h2 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   margin: 0;
   padding: 0;
 }
 
 .our-research-page h4 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 18px;
   margin: 0;
   padding: 0;
@@ -255,7 +255,7 @@ useSeoMeta({
 .our-research-page p,
 .our-research-page ul,
 .our-research-page li {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 500;
   margin: 0;
   padding: 0;
@@ -265,7 +265,7 @@ useSeoMeta({
 .our-research-page .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   letter-spacing: 2.4px;
 }
 
@@ -280,7 +280,7 @@ useSeoMeta({
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #000000;
 }
 
@@ -311,7 +311,7 @@ useSeoMeta({
 .our-research-page .no-content {
   padding: 2rem;
   text-align: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 500;
   width: 100%;
 }
@@ -371,7 +371,7 @@ useSeoMeta({
 }
 
 .resource-description p {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px;
 }
 
@@ -406,7 +406,7 @@ useSeoMeta({
   margin-left: -12rem;
 }
 .resource-menu li {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px;
   font-style: normal;
   font-weight: 700;
@@ -471,7 +471,7 @@ useSeoMeta({
 
 .research-questions-description p {
   line-height: 1.5;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .research-questions-content {
@@ -484,7 +484,7 @@ useSeoMeta({
   border: 1px solid #000000;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   gap: 20px;
   padding: 2rem 4rem;
   line-height: 2;
@@ -537,7 +537,7 @@ useSeoMeta({
 @media (max-width: 768px) {
   .our-research-page h1 {
     font-size: 30px;
-    font-family: var(--font-habibi);
+    font-family: var(--font-merriweather);
   }
 
   .resource-page {

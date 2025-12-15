@@ -289,7 +289,7 @@ useSeoMeta({
 }
 .events-page p,
 .events-page li {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 500;
   margin: 0;
   font-size: 1rem;
@@ -313,7 +313,7 @@ useSeoMeta({
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #FFFFFF;
 }
 
@@ -357,7 +357,7 @@ useSeoMeta({
   padding: 0.75rem 1.5rem;
   background-color: #003366;
   color: #ffffff;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
@@ -486,7 +486,7 @@ h2.red-subtitle span:after {
 }
 
 .event-information h1 {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-style: normal;
   font-weight: 700;
   line-height: normal;
@@ -1079,7 +1079,7 @@ img.partner-logo-img {
   }
   .events-page h1 {
     font-size: 30px;
-    font-family: var(--font-habibi);
+    font-family: var(--font-merriweather);
   }
 
   h2.red-subtitle span:before {
@@ -1133,7 +1133,7 @@ img.partner-logo-img {
   }
 
   .events-hero h1 {
-    font-family: var(--font-habibi);
+    font-family: var(--font-merriweather);
   }
 
   .events-row {

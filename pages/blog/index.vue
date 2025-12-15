@@ -52,7 +52,7 @@
               >
                 <Text
                   as="h2"
-                  fontFamily="habibi"
+                  fontFamily="merriweather"
                   size="lg"
                   color="text-primary"
                   weight="bold"
@@ -120,7 +120,7 @@
               >
                 <Text
                   as="h2"
-                  fontFamily="habibi"
+                  fontFamily="merriweather"
                   size="lg"
                   color="text-primary"
                   weight="bold"
@@ -184,7 +184,7 @@
             <div class="results-count" role="status" aria-live="polite">
               <Text
                 as="h2"
-                fontFamily="habibi"
+                fontFamily="merriweather"
                 size="lg"
                 color="text-primary"
                 weight="bold"

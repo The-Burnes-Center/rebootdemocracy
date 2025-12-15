@@ -1,7 +1,7 @@
 <template>
   <div class="about-container">
-    <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">About Us</TitleText>
-    <Text margin="md" fontFamily="habibi">
+    <TitleText level="h1" weight="bold" fontFamily="var(--font-merriweather)">About Us</TitleText>
+    <Text margin="md" fontFamily="merriweather">
       <p>Democracy is in crisis, but not beyond repair. At Reboot, we explore how artificial intelligence—if designed and governed wisely—can help strengthen our democratic institutions rather than weaken them.</p>
       <p>Where commercial AI often optimizes for profit or control, we are interested in Democratic AI: tools, policies and practices that expand our collective ability to gather knowledge, deliberate choices, and deliver public action.</p>
               <p>This blog is edited by <strong>Beth Simone Noveck,</strong> with contributions from <a href="/about#team-editorial-section">colleagues</a> at the <strong>GovLab and the Burnes Center for Social Change. The Reboot Blog</strong> is a partner project of <strong>InnovateUS</strong>.</p>
@@ -22,7 +22,7 @@
     </Text>
     
     <div class="team-section" id="team-editorial-section">
-      <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">Editorial Team</TitleText>
+      <TitleText level="h1" weight="bold" fontFamily="var(--font-merriweather)">Editorial Team</TitleText>
   
       <div class="team-editorial-grid" id="team-editorial-grid">
         <div 
@@ -30,7 +30,7 @@
           :key="member.id" 
           class="team-member"
         >
-          <div class="member-photo" fontFamily="var(--font-habibi)">
+          <div class="member-photo" fontFamily="var(--font-merriweather)">
             <img
               v-if="member.Headshot"
               :src="getImageUrl(member.Headshot, 512)"
@@ -46,7 +46,7 @@
               class="member-title" 
               color="text-tertiary" 
               size="sm"
-              fontFamily="habibi"
+              fontFamily="merriweather"
               marginBottom="md"
             >{{ member.Title }}</Text>
             
@@ -56,7 +56,7 @@
               rel="noopener noreferrer"
               class="bio-link"
             >
-              <Text as="span" color="link-primary" weight="medium" size="sm" fontFamily="habibi">View Bio</Text>
+              <Text as="span" color="link-primary" weight="medium" size="sm" fontFamily="merriweather">View Bio</Text>
             </a>
           </div>
         </div>
@@ -66,7 +66,7 @@
     </div>
 
     <div class="team-section">
-      <TitleText level="h1" weight="bold" fontFamily="var(--font-habibi)">Production Team</TitleText>
+      <TitleText level="h1" weight="bold" fontFamily="var(--font-merriweather)">Production Team</TitleText>
       
       <div class="team-production-grid" id="team-production-grid">
         <div 
@@ -74,7 +74,7 @@
           :key="member.id" 
           class="team-member"
         >
-          <div class="member-photo" fontFamily="var(--font-habibi)">
+          <div class="member-photo" fontFamily="var(--font-merriweather)">
             <img
               v-if="member.Headshot"
               :src="getImageUrl(member.Headshot, 512)"
@@ -90,7 +90,7 @@
               class="member-title" 
               color="text-tertiary" 
               size="sm"
-              fontFamily="habibi"
+              fontFamily="merriweather"
               marginBottom="md"
             >{{ member.Title }}</Text>
             
@@ -100,7 +100,7 @@
               rel="noopener noreferrer"
               class="bio-link"
             >
-              <Text as="span" color="link-primary" weight="medium" size="sm" fontFamily="habibi">View Bio</Text>
+              <Text as="span" color="link-primary" weight="medium" size="sm" fontFamily="merriweather">View Bio</Text>
             </a>
           </div>
         </div>
@@ -182,8 +182,8 @@ watch(validEditorialTeamMembers, async (isLoading) => {
 <style>
 .about-container ul li{
   font-size: 20px;
-  line-height: 30px;
-  font-family: var(--font-habibi);
+  line-height: 35px;
+  font-family: var(--font-merriweather);
   color: #333333;
   margin: 0.5rem 0;
   padding: 0.25rem 0;

@@ -98,7 +98,7 @@
 }
 
 .curator-badge__label {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.75rem;
   font-weight: 600;
   font-style: italic;
@@ -114,7 +114,7 @@
 }
 
 .curator-badge__title {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
@@ -124,7 +124,7 @@
 }
 
 .curator-badge__more {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.75rem;
   font-weight: 400;
   font-style: italic;

@@ -93,10 +93,10 @@ const fontStyleMap = {
 };
 
 const fontFamilyMap = {
-  habibi: "var( --font-habibi)",
+  merriweather: "var(--font-merriweather)",
   // inria: "var(--font-inria)",
   sora: "var(--font-sora)",
-  "habibi-bold": "var(--font-habibi-bold)",
+  "merriweather-bold": "var(--font-merriweather)",
 };
 
 const transformMap = {
@@ -158,7 +158,7 @@ const props = withDefaults(defineProps<TextProps>(), {
   color: "text-primary",
   align: "left",
   fontStyle: "normal",
-  fontFamily: "habibi",
+  fontFamily: "merriweather",
   class: "",
   transform: "none",
   text: "",

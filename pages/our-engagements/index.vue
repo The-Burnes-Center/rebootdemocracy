@@ -200,7 +200,7 @@ useSeoMeta({
 
 .our-engagements-page p,
 .our-engagements-page li {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 500;
   margin: 0;
   padding: 0;
@@ -224,7 +224,7 @@ useSeoMeta({
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #000000;
 }
 
@@ -251,7 +251,7 @@ useSeoMeta({
 .our-engagements-page .no-content {
   padding: 2rem;
   text-align: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 500;
   width: 100%;
 }
@@ -311,7 +311,7 @@ useSeoMeta({
 }
 
 .resource-description p {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px;
 }
 
@@ -347,7 +347,7 @@ useSeoMeta({
 }
 
 .resource-menu li {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px;
   font-style: normal;
   font-weight: 700;

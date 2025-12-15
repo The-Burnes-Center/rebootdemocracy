@@ -126,7 +126,7 @@ describe('Text Component', () => {
       }   
       })
     // Assuming your component applies a class like "italic" for italic styling
-    expect(wrapper.attributes('style')).toContain('font-family: var( --font-habibi);')
+    expect(wrapper.attributes('style')).toContain('font-family: var(--font-merriweather);')
   })  
 
   it('applies custom class when class prop is provided', async () => {
