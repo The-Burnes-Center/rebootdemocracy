@@ -10,7 +10,6 @@ export const getStaticBlogRoutes = async (): Promise<string[]> => {
       fields: ['slug'],
       filter: {
         status: { _eq: 'published' },
-        date: { _lte: '$NOW' },
       },
       limit: -1,
     })
