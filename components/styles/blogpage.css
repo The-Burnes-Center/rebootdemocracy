@@ -229,20 +229,6 @@ p.excerpt-paragraph {
   margin: 0;
 }
 
-.blog-content :is(h1, h2, h3, h4) span {
-  font-family: inherit !important;
-  font-size: inherit !important;
-  font-style: inherit !important;
-  font-weight: inherit !important;
-}
-
-.blog-content span {
-  font-family: var(--font-habibi);
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 400;
-}
-
 .blog-content li {
   font-family: var(--font-habibi);
   font-size: 20px;
@@ -263,11 +249,19 @@ p {
 }
 
 /* Strong Text */
-p>strong {
-  color: #003366;
-  font-weight: 500;
+.blog-content :is(strong, b, em, i, u, span, mark, cite, q, s, small, sub, sup, code, kbd, var, dfn, time, ins, del) {
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.blog-content span:not([style]) {
+  font-family: var(--font-habibi);
   font-size: 20px;
-  line-height: 30px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 /* Media Embeds */
