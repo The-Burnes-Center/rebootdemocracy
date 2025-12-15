@@ -723,7 +723,7 @@ function useSample(q: string) {
 }
 
 .header-subtitle {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   font-weight: 400;
   margin: 0;
@@ -758,7 +758,7 @@ function useSample(q: string) {
   border: none;
   padding: 6px 8px;
   border-radius: 6px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.8rem;
   color: #111827;
   cursor: pointer;
@@ -776,7 +776,7 @@ function useSample(q: string) {
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 700;
   font-size: 1rem;
   padding: 4px 8px;
@@ -855,7 +855,7 @@ function useSample(q: string) {
 
 .welcome-subtitle {
   margin: 0;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   opacity: 0.9;
 }
@@ -885,7 +885,7 @@ function useSample(q: string) {
 }
 
 .welcome-text {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   line-height: 1.5;
   margin: 0 0 8px 0;
@@ -957,7 +957,7 @@ function useSample(q: string) {
   border-radius: 18px 18px 4px 18px;
   max-width: 80%;
   margin-left: auto;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   line-height: 1.4;
   word-wrap: break-word;
@@ -1037,7 +1037,7 @@ function useSample(q: string) {
 }
 
 .bot-content :deep(p) {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   line-height: 1.5;
   margin: 0 0 8px 0;
@@ -1054,7 +1054,7 @@ function useSample(q: string) {
 .bot-content :deep(h4),
 .bot-content :deep(h5),
 .bot-content :deep(h6) {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 600;
   margin: 12px 0 8px 0;
   color: #111827;
@@ -1074,7 +1074,7 @@ function useSample(q: string) {
 }
 
 .bot-content :deep(li) {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   line-height: 1.5;
   margin-bottom: 4px;
@@ -1084,7 +1084,7 @@ function useSample(q: string) {
   background: #f3f4f6;
   padding: 2px 6px;
   border-radius: 4px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   color: #dc2626;
 }
@@ -1117,7 +1117,7 @@ function useSample(q: string) {
   color: #003366;
   border-radius: 6px;
   padding: 6px 10px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   display: inline-flex;
   align-items: center;
@@ -1140,7 +1140,7 @@ function useSample(q: string) {
 }
 
 .sources-title {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 8px 0;
@@ -1160,7 +1160,7 @@ function useSample(q: string) {
 }
 
 .source-link {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   color: #0d63eb;
   text-decoration: none;
@@ -1179,7 +1179,7 @@ function useSample(q: string) {
 }
 
 .youtube-title {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 12px 0;
@@ -1224,7 +1224,7 @@ function useSample(q: string) {
 }
 
 .youtube-video-title {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 8px 0;
@@ -1233,7 +1233,7 @@ function useSample(q: string) {
 }
 
 .youtube-link {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.875rem;
   color: #0d63eb;
   text-decoration: none;
@@ -1270,7 +1270,7 @@ function useSample(q: string) {
   padding: 12px 50px 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 14px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   line-height: 1.45;
   background: white;
@@ -1317,7 +1317,7 @@ function useSample(q: string) {
   padding: 12px 50px 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 24px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   line-height: 1.4;
   background: white;
@@ -1427,7 +1427,7 @@ function useSample(q: string) {
 }
 
 .loading-title {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   font-weight: 600;
   color: #003366;
@@ -1435,7 +1435,7 @@ function useSample(q: string) {
 }
 
 .loading-subtitle {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   color: #6b7280;
   line-height: 1.3;
@@ -1572,7 +1572,7 @@ function useSample(q: string) {
 }
 
 .hint {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.75rem;
   color: #6b7280;
 }
@@ -1583,7 +1583,7 @@ function useSample(q: string) {
   color: #003366;
   border-radius: 8px;
   padding: 6px 10px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;

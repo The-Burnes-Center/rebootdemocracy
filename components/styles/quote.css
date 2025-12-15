@@ -12,7 +12,7 @@ blockquote:not(.quote-block) {
   background-color: #fafafa;
   font-weight: 400;
   border-radius: 0.25rem;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 blockquote.quote-block::before,
@@ -31,7 +31,7 @@ blockquote:not(.quote-block)::before {
 
 blockquote.quote-block p,
 blockquote:not(.quote-block) p {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 24px;
   font-weight: 400;
   line-height: 120%;

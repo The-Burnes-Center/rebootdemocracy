@@ -13,7 +13,7 @@
 .result-category-title {
   font-size: 1rem;
   font-weight: 600;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #0d63eb;
   background: linear-gradient(to right, #e6f0ff, #ffffff);
   padding: 1rem 1rem;
@@ -51,7 +51,7 @@
   width: fit-content;
   background: white;
   font-size: small;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .blog-list {
@@ -106,7 +106,7 @@
   font-weight: 300;
   padding: 0.2rem 1rem;
   border: 0.5px solid grey;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .search-pagination {

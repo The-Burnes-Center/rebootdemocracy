@@ -68,7 +68,7 @@
               lineHeight="normal"
               :lineClamp="3"
               weight="medium"
-              fontFamily="habibi"
+              fontFamily="merriweather"
               role="text"
               :aria-label="`Article excerpt: ${excerpt}`"
             >
@@ -80,7 +80,7 @@
                 size="xs" 
                 weight="normal" 
                 fontStyle="italic" 
-                fontFamily="habibi"
+                fontFamily="merriweather"
                 role="text"
                 :aria-label="`Published on ${formatDate(date)} by ${author}`"
               >
@@ -103,12 +103,12 @@
                     size="xs" 
                     weight="bold" 
                     fontStyle="italic" 
-                    fontFamily="habibi"
+                    fontFamily="merriweather"
                   >{{ formatDate(date) }}</Text>
                 </template>
                 <template v-else-if="author">
                   Published by
-                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="habibi">{{ author }}</Text>
+                  <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="merriweather">{{ author }}</Text>
                 </template>
               </Text>
             </div>
@@ -191,7 +191,7 @@
               lineHeight="normal"
               :lineClamp="3"
               weight="medium"
-              fontFamily="habibi"
+              fontFamily="merriweather"
             >
               {{ one_line || excerpt }}
             </BodyText>

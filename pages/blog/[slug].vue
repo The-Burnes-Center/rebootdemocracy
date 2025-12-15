@@ -23,7 +23,7 @@
                 v-if="searchQuery" 
                 size="lg" 
                 weight="normal" 
-                fontFamily="habibi"
+                fontFamily="merriweather"
                 class="search-query-display"
               >
                 Showing results for: <strong>"{{ searchQuery }}"</strong>
@@ -32,7 +32,7 @@
                 v-if="totalResults !== undefined" 
                 size="base" 
                 weight="normal" 
-                fontFamily="habibi"
+                fontFamily="merriweather"
                 class="search-count-display"
               >
                 {{ totalResults }} {{ totalResults === 1 ? 'result' : 'results' }} found
@@ -110,7 +110,7 @@
                         fill="currentColor"
                       />
                     </svg>
-                    <Text as="span" weight="bold" marginLeft="sm" fontFamily="habibi">
+                    <Text as="span" weight="bold" marginLeft="sm" fontFamily="merriweather">
                       Blog
                     </Text>
                   </button>
@@ -159,7 +159,7 @@
                 <!-- Publication info -->
                 <div class="publication-info" role="region" aria-label="Publication details">
                   <div class="publication-date">
-                    <Text size="base" weight="normal" fontFamily="habibi">
+                    <Text size="base" weight="normal" fontFamily="merriweather">
                       Published on
                       <Text 
                         as="span" 
@@ -191,7 +191,7 @@
                         loading="lazy"
                       />
                       <div class="author-details">
-                        <Text size="base" weight="bold" fontFamily="habibi">
+                        <Text size="base" weight="bold" fontFamily="merriweather">
                           {{ getAuthorName(author.team_id) }}
                         </Text>
                         <Text

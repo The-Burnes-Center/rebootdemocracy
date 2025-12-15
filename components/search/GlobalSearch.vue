@@ -418,7 +418,7 @@ function getImageUrl(image: { id?: string; filename_disk?: string }, width?: num
 }
 
 .results-info {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 0.9rem;
   color: #666;
   text-align: center;
