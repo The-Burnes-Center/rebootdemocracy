@@ -26,10 +26,10 @@
             size="3xl"
             weight="bold"
             fontFamily="sora"
-            class="modal-title"
+            class="modal-title text-center"
             lineHeight="more-loose"
             color="text-primary-light"
-            textAlign="center" 
+            
           >
             {{ modalData?.title }}
           </Text>
