@@ -242,7 +242,7 @@ const closeModal = () => {
 .modal-body {
   color: #ffffff !important;
   line-height: 1.6;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1.3rem;
   font-weight: 400;
 }
@@ -250,7 +250,7 @@ const closeModal = () => {
 .modal-body :deep(p) {
   margin: 0 0 1rem 0;
   color: #ffffff;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1.1rem;
   font-weight: 400;
   line-height: 1.6;
