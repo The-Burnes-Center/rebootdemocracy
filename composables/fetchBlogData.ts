@@ -94,14 +94,15 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
           '*.*',
           'authors.team_id.*',
           'authors.team_id.Headshot.*',
-          'image.*'
+          'image.*',
+          'audio_version.*'
         ],
         filter
       })
     );
 
     const blogs = response as BlogPost[];
-    return blogs.length ? blogs[0] : null;
+    return blogs.length > 0 && blogs[0] ? blogs[0] : null;
   } catch (error) {
     console.error(`Error fetching blog with slug ${slug}:`, error);
     return null;
