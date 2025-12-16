@@ -17,6 +17,7 @@
         class="featured-card__image"
         loading="lazy"
       />
+      sdfsdf
     </div>
     
     <div class="featured-card__body">

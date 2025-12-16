@@ -7,18 +7,61 @@
             <NuxtPage />
             <ChatWidget/>
         </NuxtLayout>
-      
+        <RebootDemocracyModal 
+          v-if="modalData && showModal" 
+          :modal-data="modalData" 
+          @close="closeModal"
+        />
     </div>
 </template>
 
 <script setup>
-import { useState } from '#app'
-import { ref, onMounted } from 'vue'
+import { useState, useAsyncData } from '#app'
+import { ref, onMounted, watch } from 'vue'
+import { fetchModalData } from '@/composables/fetchModalData'
+
 const routeLoading = useState('routeLoading', () => false)
 const hydrated = ref(false)
+const showModal = ref(false)
+
+// Fetch modal data
+const { data: modalData } = await useAsyncData('modal-data', fetchModalData)
+
+// Watch for modal data and show modal when available
+watch(modalData, (newData) => {
+  console.log('[App] Modal data changed:', newData)
+  if (newData) {
+    console.log('[App] Modal status:', newData.status)
+    console.log('[App] Modal visibility:', newData.visibility)
+    
+    // Show modal if status is published
+    if (newData.status === 'published') {
+      console.log('[App] Setting showModal to true (from watcher)')
+      showModal.value = true
+    }
+  } else {
+    console.log('[App] No modal data available')
+    showModal.value = false
+  }
+}, { immediate: true })
+
 onMounted(() => {
   hydrated.value = true
+  
+  // Also check on mount in case data was already available
+  console.log('[App] Checking modal on mount:', modalData.value)
+  if (modalData.value && modalData.value.status === 'published') {
+    console.log('[App] Setting showModal to true (from onMounted)')
+    showModal.value = true
+  } else {
+    console.log('[App] Modal not shown on mount - data:', modalData.value, 'status:', modalData.value?.status)
+  }
 })
+
+const closeModal = () => {
+  console.log('[App] Closing modal')
+  showModal.value = false
+}
 </script>
 
 <style>
