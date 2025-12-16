@@ -29,6 +29,7 @@
             class="modal-title"
             lineHeight="more-loose"
             color="text-primary-light"
+            textAlign="center" 
           >
             {{ modalData?.title }}
           </Text>
@@ -159,7 +160,7 @@ const closeModal = () => {
 
 .modal-card {
   position: relative;
-  max-width: 600px;
+  max-width: 800px;
   width: 100%;
   height: fit-content;
   animation: slideUp 0.3s ease-out;
@@ -250,9 +251,10 @@ const closeModal = () => {
   margin: 0 0 1rem 0;
   color: #ffffff;
   font-family: var(--font-habibi);
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 400;
-  line-height: 2;
+  line-height: 1.6;
+  
 }
 
 .modal-body :deep(a) {

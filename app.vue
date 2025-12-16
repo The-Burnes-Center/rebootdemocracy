@@ -16,45 +16,40 @@
 </template>
 
 <script setup>
-import { useState, useAsyncData } from '#app'
-import { ref, onMounted, watch } from 'vue'
+import { useState, useRoute } from '#app'
+import { ref, onMounted, computed } from 'vue'
 import { fetchModalData } from '@/composables/fetchModalData'
 
+const route = useRoute()
 const routeLoading = useState('routeLoading', () => false)
 const hydrated = ref(false)
 const showModal = ref(false)
+const modalData = ref(null)
 
-// Fetch modal data
-const { data: modalData } = await useAsyncData('modal-data', fetchModalData)
+// Only fetch and show modal on homepage
+const isHomepage = computed(() => route.path === '/')
 
-// Watch for modal data and show modal when available
-watch(modalData, (newData) => {
-  console.log('[App] Modal data changed:', newData)
-  if (newData) {
-    console.log('[App] Modal status:', newData.status)
-    console.log('[App] Modal visibility:', newData.visibility)
-    
-    // Show modal if status is published
-    if (newData.status === 'published') {
-      console.log('[App] Setting showModal to true (from watcher)')
-      showModal.value = true
-    }
-  } else {
-    console.log('[App] No modal data available')
-    showModal.value = false
-  }
-}, { immediate: true })
-
-onMounted(() => {
+onMounted(async () => {
   hydrated.value = true
   
-  // Also check on mount in case data was already available
-  console.log('[App] Checking modal on mount:', modalData.value)
-  if (modalData.value && modalData.value.status === 'published') {
-    console.log('[App] Setting showModal to true (from onMounted)')
-    showModal.value = true
+  // Only fetch modal data on client-side and only on homepage
+  if (isHomepage.value) {
+    console.log('[App] On homepage, fetching modal data client-side...')
+    try {
+      const data = await fetchModalData()
+      modalData.value = data
+      
+      if (data && data.status === 'published') {
+        console.log('[App] Modal data fetched, showing modal')
+        showModal.value = true
+      } else {
+        console.log('[App] Modal not shown - data:', data, 'status:', data?.status)
+      }
+    } catch (error) {
+      console.error('[App] Error fetching modal data:', error)
+    }
   } else {
-    console.log('[App] Modal not shown on mount - data:', modalData.value, 'status:', modalData.value?.status)
+    console.log('[App] Not on homepage, skipping modal fetch')
   }
 })
 
