@@ -11,8 +11,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "test": "vitest",
-    "warm-cache": "node scripts/warm-cache.mjs"
+    "test": "vitest"
   },
   "dependencies": {
     "@directus/sdk": "^18.0.3",
