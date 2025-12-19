@@ -108,15 +108,21 @@
                   @error="handleImageError"
                 />
                 <div class="book-thumbnail-caption">
-                  <Text
-                    as="span"
-                    weight="bold"
-                    color="text-primary-light"
-                    fontFamily="sora"
-                    class="book-coming-soon"
+                  <NuxtLink
+                    to="/signup"
+                    class="book-coming-soon-link"
+                    aria-label="Sign up for weekly updates about democracy and governance"
                   >
-                    Coming Soon
-                  </Text>
+                    <Text
+                      as="span"
+                      weight="bold"
+                      color="text-primary-light"
+                      fontFamily="sora"
+                      class="book-coming-soon"
+                    >
+                      Coming Soon
+                    </Text>
+                  </NuxtLink>
                   <Text
                     as="span"
                     weight="semibold"
