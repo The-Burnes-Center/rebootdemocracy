@@ -453,6 +453,20 @@
   border: 1px solid rgba(252, 100, 35, 0.3);
 }
 
+.book-coming-soon-link {
+  text-decoration: none;
+}
+
+.book-coming-soon-link:hover .book-coming-soon {
+  background: rgba(252, 100, 35, 0.25);
+  box-shadow: 0 0 0 1px rgba(252, 100, 35, 0.55);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.book-coming-soon-link {
+  text-decoration: none;
+}
+
 .book-title-text {
   display: block;
   font-size: 1rem;
