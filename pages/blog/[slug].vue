@@ -6,7 +6,7 @@
   <div class="blog-gradient-background">
     <div class="blog-gradient-inner">
       <section class="blog-section">
-        <main id="main-content" class="left-content-blog" role="main">
+        <main id="main-content" class="left-content-blog" role="main" :class="{ 'search-mode': showSearchResults }">
           <div v-if="showSearchResults" class="search-results-fullpage" role="search" aria-label="Search results">
             <!-- Search Results Header -->
             <div class="search-results-header">
@@ -586,11 +586,12 @@ onBeforeUnmount(() => {
 }
 
 .search-results-fullpage {
-  min-height: 70vh;
+  min-height: calc(100vh - 200px);
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   padding: 2rem;
   background: #f8fafc;
+  margin-bottom: 0;
 }
 
 .search-results-header {
@@ -622,6 +623,8 @@ onBeforeUnmount(() => {
 .search-results-content {
   max-width: 720px;
   margin: 0 auto;
+  flex: 1;
+  padding-bottom: 2rem;
 }
 
 /* Enhanced focus indicators using box-shadow */
@@ -725,11 +728,18 @@ onBeforeUnmount(() => {
   border-radius: 6px;
 }
 
+.left-content-blog.search-mode {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+}
+
 /* Responsive adjustments for search results */
 @media (max-width: 768px) {
   .search-results-fullpage {
     padding: 1rem;
     margin-left: calc(-50vw + 50%);
+    min-height: calc(100vh - 150px);
   }
   
   .search-results-header {
@@ -740,6 +750,10 @@ onBeforeUnmount(() => {
   .search-results-content {
     max-width: 100%;
     padding: 0 1rem;
+  }
+  
+  .left-content-blog.search-mode {
+    min-height: calc(100vh - 150px);
   }
 }
 
