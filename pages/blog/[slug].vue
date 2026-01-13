@@ -7,42 +7,8 @@
     <div class="blog-gradient-inner">
       <section class="blog-section">
         <main id="main-content" class="left-content-blog" role="main">
-          <div v-if="showSearchResults" class="search-results-fullpage" role="search" aria-label="Search results">
-            <!-- Search Results Header -->
-            <div class="search-results-header">
-              <TitleText
-                :level="'h1'"
-                size="3xl"
-                weight="bold"
-                fontFamily="sora"
-                class="search-results-title"
-              >
-                Search Results
-              </TitleText>
-              <Text 
-                v-if="searchQuery" 
-                size="lg" 
-                weight="normal" 
-                fontFamily="merriweather"
-                class="search-query-display"
-              >
-                Showing results for: <strong>"{{ searchQuery }}"</strong>
-              </Text>
-              <Text 
-                v-if="totalResults !== undefined" 
-                size="base" 
-                weight="normal" 
-                fontFamily="merriweather"
-                class="search-count-display"
-              >
-                {{ totalResults }} {{ totalResults === 1 ? 'result' : 'results' }} found
-              </Text>
-            </div>
-            
-            <!-- Search Results Content -->
-            <div class="search-results-content">
-              <GlobalSearch />
-            </div>
+          <div v-if="showSearchResults" role="search" aria-label="Search results">
+            <GlobalSearch />
           </div>
 
           <!-- Loading state -->
@@ -110,7 +76,7 @@
                         fill="currentColor"
                       />
                     </svg>
-                    <Text as="span" weight="bold" marginLeft="sm" fontFamily="merriweather">
+                    <Text as="span" weight="bold" marginLeft="sm" fontFamily="habibi">
                       Blog
                     </Text>
                   </button>
@@ -159,7 +125,7 @@
                 <!-- Publication info -->
                 <div class="publication-info" role="region" aria-label="Publication details">
                   <div class="publication-date">
-                    <Text size="base" weight="normal" fontFamily="merriweather">
+                    <Text size="base" weight="normal" fontFamily="habibi">
                       Published on
                       <Text 
                         as="span" 
@@ -191,7 +157,7 @@
                         loading="lazy"
                       />
                       <div class="author-details">
-                        <Text size="base" weight="bold" fontFamily="merriweather">
+                        <Text size="base" weight="bold" fontFamily="habibi">
                           {{ getAuthorName(author.team_id) }}
                         </Text>
                         <Text
@@ -217,77 +183,75 @@
     </div>
   </div>
 
-  <!-- Blog main content: plain white background - Only show when NOT showing search results -->
-  <template v-if="!showSearchResults">
-    <section class="blog-detail" role="region" aria-labelledby="article-title">
-      <div 
-        v-if="blog?.audio_version" 
-        class="audio-version"
-        role="region"
-        aria-label="Audio version of this article"
-      >
-        <p>
-          <em>Listen to the AI-generated audio version of this piece.</em>
-        </p>
-        <AudioPlayer
-          :audioSrc="`https://burnes-center.directus.app/assets/${blog.audio_version.id}`"
-          :aria-label="`Audio version of ${blog.title}`"
-        />
-      </div>
-
-      <!-- Main article content -->
-      <div class="blog-content-container">
-        <article 
-          v-if="blog?.content" 
-          class="blog-content" 
-          v-html="blog.content"
-          role="article"
-          aria-labelledby="article-title"
-        ></article>
-      </div>
-    </section>
-
-    <!-- Tags section -->
-    <section 
-      v-if="blog && blog.Tags && blog.Tags.length > 0" 
-      class="blog-tags-section" 
-      role="region" 
-      aria-label="Article tags"
+  <!-- Blog main content: plain white background -->
+  <section class="blog-detail" role="region" aria-labelledby="article-title">
+    <div 
+      v-if="blog?.audio_version" 
+      class="audio-version"
+      role="region"
+      aria-label="Audio version of this article"
     >
-      <div class="blog-tags-container">
-        <TitleText
-          :level="'h2'"
-          size="2xl"
-          weight="bold"
-          fontFamily="sora"
-          class="tags-heading"
-        >
-          Tags
-        </TitleText>
-        
-        <div class="blog-tags-list">
-          <nav aria-label="Article tags">
-            <button
-              v-for="(tag, index) in blog.Tags"
-              :key="index"
-              class="tag-button"
-              @click="navigateToCategory(tag)"
-              @keydown="handleKeydown($event, () => navigateToCategory(tag))"
-              :aria-label="`View all articles in category: ${tag}`"
-              type="button"
-            >
-              {{ tag }}
-            </button>
-          </nav>
-        </div>
-      </div>
-    </section>
+      <p>
+        <em>Listen to the AI-generated audio version of this piece.</em>
+      </p>
+      <AudioPlayer
+        :audioSrc="`https://burnes-center.directus.app/assets/${blog.audio_version.id}`"
+        :aria-label="`Audio version of ${blog.title}`"
+      />
+    </div>
 
-    <!-- Related articles -->
-    <aside role="complementary" aria-label="Related articles">
-      <RelatedBlogCards :relatedBlogs="relatedBlogs" />
-    </aside>
-  </template>
+    <!-- Main article content -->
+    <div class="blog-content-container">
+      <article 
+        v-if="blog?.content" 
+        class="blog-content" 
+        v-html="blog.content"
+        role="article"
+        aria-labelledby="article-title"
+      ></article>
+    </div>
+  </section>
+
+  <!-- Tags section -->
+  <section 
+    v-if="blog && blog.Tags && blog.Tags.length > 0" 
+    class="blog-tags-section" 
+    role="region" 
+    aria-label="Article tags"
+  >
+    <div class="blog-tags-container">
+      <TitleText
+        :level="'h2'"
+        size="2xl"
+        weight="bold"
+        fontFamily="sora"
+        class="tags-heading"
+      >
+        Tags
+      </TitleText>
+      
+      <div class="blog-tags-list">
+        <nav aria-label="Article tags">
+          <button
+            v-for="(tag, index) in blog.Tags"
+            :key="index"
+            class="tag-button"
+            @click="navigateToCategory(tag)"
+            @keydown="handleKeydown($event, () => navigateToCategory(tag))"
+            :aria-label="`View all articles in category: ${tag}`"
+            type="button"
+          >
+            {{ tag }}
+          </button>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related articles -->
+  <aside role="complementary" aria-label="Related articles">
+    <RelatedBlogCards :relatedBlogs="relatedBlogs" />
+  </aside>
 </template>
 
 <script setup lang="ts">
@@ -295,16 +259,27 @@ definePageMeta({
   layout: "blog",
 });
 
-import { onMounted, onBeforeUnmount, ref, computed } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { BlogPost } from "@/types/BlogPost";
 import { format } from "date-fns";
+import { 
+  fetchBlogBySlug, 
+  fetchRelatedBlogsByTags 
+} from "../../src/helpers/blogHelper";
 
-const { showSearchResults, setIndexNames, resetSearch, searchQuery, totalResults } = useSearchState();
+const { showSearchResults, setIndexNames, resetSearch } = useSearchState();
 
 const route = useRoute();
 const router = useRouter();
 
+// Reactive data
+const blog = ref<BlogPost | null>(null);
+const relatedBlogs = ref<BlogPost[]>([]);
+const isLoading = ref(true);
+const error = ref<Error | null>(null);
+
+// Computed slug from route params
 const blogslug = computed(() => route.params.slug as string);
 
 // Accessibility: Keyboard navigation handler
@@ -315,34 +290,65 @@ const handleKeydown = (event: KeyboardEvent, callback: () => void): void => {
   }
 };
 
-const {
-  data: blogData,
-  pending,
-  error,
-} = await useAsyncData(`blog-${route.params.slug}`, async () => {
-  if (!route.params.slug) return { blog: null, relatedBlogs: [] };
+// Function to load blog data
+async function loadBlogData() {
+  try {
+    isLoading.value = true;
+    error.value = null;
+    
+    if (!blogslug.value) {
+      blog.value = null;
+      relatedBlogs.value = [];
+      return;
+    }
 
-  // Get main blog post
-  const blogPost = await fetchBlogBySlug(route.params.slug as string);
+    // Fetch main blog post
+    const blogPost = await fetchBlogBySlug(blogslug.value);
+    
+    if (!blogPost) {
+      blog.value = null;
+      relatedBlogs.value = [];
+      isLoading.value = false;
+      return;
+    }
+    
+    blog.value = blogPost;
 
-  // Get related blogs in the same server request
-  let relatedPostsList: BlogPost[] = [];
-  if (blogPost?.Tags?.length) {
-    relatedPostsList = await fetchRelatedBlogsByTags(
-      blogPost.Tags,
-      route.params.slug as string
-    );
+    // Fetch related blogs if the current blog has tags
+    if (blogPost.Tags && blogPost.Tags.length > 0) {
+      const relatedPostsList = await fetchRelatedBlogsByTags(
+        blogPost.Tags,
+        blogslug.value
+      );
+      relatedBlogs.value = relatedPostsList;
+    } else {
+      relatedBlogs.value = [];
+    }
+
+  } catch (err) {
+    console.error("Error loading blog data:", err);
+    error.value = err as Error;
+    blog.value = null;
+    relatedBlogs.value = [];
+  } finally {
+    isLoading.value = false;
   }
+}
 
-  return {
-    blog: blogPost,
-    relatedBlogs: relatedPostsList,
-  };
+// Watch for route changes to reload data
+watch(blogslug, async (newSlug, oldSlug) => {
+  if (newSlug !== oldSlug) {
+    await loadBlogData();
+    // Update SEO meta after loading new blog
+    updateSeoMeta();
+    // Enhance accessibility after content loads
+    await nextTick(() => {
+      enhanceContentAccessibility();
+    });
+  }
 });
 
-const blog = computed(() => blogData.value?.blog || null);
-const relatedBlogs = computed(() => blogData.value?.relatedBlogs || []);
-
+// SEO Meta helper functions
 function getSocialImageUrl(image: any): string {
   const imageId = image?.id || image?.filename_disk;
   return imageId
@@ -350,7 +356,7 @@ function getSocialImageUrl(image: any): string {
     : "https://burnes-center.directus.app/assets/5c6c2a6c-d68d-43e3-b14a-89da9e881cc3";
 }
 
-if (import.meta.server) {
+function updateSeoMeta() {
   useSeoMeta({
     title: () => blog.value?.title || "RebootDemocracy.AI",
     description: () =>
@@ -361,7 +367,7 @@ if (import.meta.server) {
     ogImage: () => getSocialImageUrl(blog.value?.image),
     ogImageWidth: '1200',
     ogImageHeight: '630',
-    ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
+    ogUrl: () => `https://rebootdemocracy.ai/blog/${blogslug.value}`,
     ogType: 'article',
     twitterTitle: () => blog.value?.title || "RebootDemocracy.AI",
     twitterDescription: () =>
@@ -369,58 +375,13 @@ if (import.meta.server) {
     twitterImage: () => getSocialImageUrl(blog.value?.image),
     twitterCard: "summary_large_image",
   });
+
+  useHead({
+    link: [
+      { rel: 'canonical', href: `https://rebootdemocracy.ai/blog/${blogslug.value}` }
+    ]
+  });
 }
-
-useSeoMeta({
-  title: () => blog.value?.title || "RebootDemocracy.AI",
-  description: () =>
-    blog.value?.excerpt ||
-    `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to:
-
-1. Better governance
-2. Better outcomes
-3. Increased trust in institutions
-4. And in one another
-
-As researchers, we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
-  ogTitle: () => blog.value?.title || "RebootDemocracy.AI",
-  ogDescription: () =>
-    blog.value?.excerpt ||
-    `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to:
-
-1. Better governance
-2. Better outcomes
-3. Increased trust in institutions
-4. And in one another
-
-As researchers, we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
-  ogImage: () => getSocialImageUrl(blog.value?.image),
-  ogImageWidth: '1200',
-  ogImageHeight: '630',
-  ogUrl: () => `https://rebootdemocracy.ai/blog/${route.params.slug}`,
-  ogType: 'article',
-  twitterTitle: () => blog.value?.title || "RebootDemocracy.AI",
-  twitterDescription: () =>
-    blog.value?.excerpt ||
-    `RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy. Done well, participation and engagement lead to:
-
-1. Better governance
-2. Better outcomes
-3. Increased trust in institutions
-4. And in one another
-
-As researchers, we want to understand how best to "do democracy" in practice. Emboldened by the advent of generative AI, we are excited about the future possibilities for reimagining democracy in practice and at scale.`,
-  twitterImage: () => getSocialImageUrl(blog.value?.image),
-  twitterCard: "summary_large_image",
-});
-
-useHead({
-  link: [
-    { rel: 'canonical', href: `https://rebootdemocracy.ai/blog/${route.params.slug}` }
-  ]
-});
-
-const isLoading = ref(true);
 
 // Function to navigate to blogs filtered by category
 function navigateToCategory(category: string) {
@@ -475,18 +436,6 @@ function formatDate(dateValue: Date | string) {
     return "invalid date";
   }
 }
-
-// Reset search results when component is mounted
-onMounted(async () => {
-  resetSearch();
-  setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
-  isLoading.value = false;
-  
-  // Enhance accessibility of dynamically loaded content
-  await nextTick(() => {
-    enhanceContentAccessibility();
-  });
-});
 
 // Function to enhance accessibility of the blog content after it's loaded
 function enhanceContentAccessibility() {
@@ -545,16 +494,30 @@ function enhanceContentAccessibility() {
   });
 }
 
-// Clean up when navigating away from this component
+// Load data when component is mounted
+onMounted(async () => {
+  resetSearch();
+  setIndexNames(["reboot_democracy_blog", "reboot_democracy_weekly_news"]);
+  
+  // Load blog data
+  await loadBlogData();
+  
+  // Update SEO meta
+  updateSeoMeta();
+  
+  // Enhance accessibility of dynamically loaded content
+  await nextTick(() => {
+    enhanceContentAccessibility();
+  });
+});
+
 onBeforeUnmount(() => {
   resetSearch();
 });
 </script>
 
 <style>
-/* Accessibility enhancements - additive only */
 
-/* Screen reader only content */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -583,45 +546,6 @@ onBeforeUnmount(() => {
 
 .skip-link:focus {
   top: 6px;
-}
-
-.search-results-fullpage {
-  min-height: 70vh;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  padding: 2rem;
-  background: #f8fafc;
-}
-
-.search-results-header {
-  text-align: center;
-  margin-bottom: 3rem;
-  padding: 1rem 2rem;
-}
-
-.search-results-title {
-  margin-bottom: 1rem !important;
-  color: rgb(0, 51, 102) !important;
-}
-
-.search-query-display {
-  margin-bottom: 0.5rem !important;
-  color: #475569 !important;
-}
-
-.search-query-display strong {
-  color: #1e293b !important;
-  font-weight: 600 !important;
-}
-
-.search-count-display {
-  color: #64748b;
-  font-style: italic;
-}
-
-.search-results-content {
-  max-width: 720px;
-  margin: 0 auto;
 }
 
 /* Enhanced focus indicators using box-shadow */
@@ -723,24 +647,6 @@ onBeforeUnmount(() => {
   outline: none;
   box-shadow: 0 0 0 2px #4a6b8a;
   border-radius: 6px;
-}
-
-/* Responsive adjustments for search results */
-@media (max-width: 768px) {
-  .search-results-fullpage {
-    padding: 1rem;
-    margin-left: calc(-50vw + 50%);
-  }
-  
-  .search-results-header {
-    padding: 0 1rem;
-    margin-bottom: 2rem;
-  }
-  
-  .search-results-content {
-    max-width: 100%;
-    padding: 0 1rem;
-  }
 }
 
 /* Responsive adjustments for tags section */

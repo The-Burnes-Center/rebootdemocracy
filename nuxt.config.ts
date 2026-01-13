@@ -1,6 +1,5 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
-import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
 
@@ -28,19 +27,14 @@ export default defineNuxtConfig({
       serverDir: '.output/server'
     }
   },
-  generate: {
-    cache: false
-  },
   hooks: {
     async 'nitro:config'(nitroConfig) {
-      const blogRoutes = await getStaticBlogRoutes();
       const categoryRoutes = await getStaticCategoryRoutes();
       const newsRoutes = await getStaticNewsRoutes();
       
       nitroConfig.prerender = nitroConfig.prerender ?? {};
       nitroConfig.prerender.routes = [
         ...(nitroConfig.prerender.routes ?? []),
-        ...blogRoutes,
         ...categoryRoutes,
         ...newsRoutes
       ];
@@ -56,8 +50,12 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
-    '/blog': { prerender: true },
-    '/blog/**': { prerender: true },
+    '/blog': { prerender: true},
+    '/blog/**': { prerender: false, 
+      headers: { 
+        'cache-control': 'no-cache, no-store, must-revalidate'  
+      }
+    },
     '/events': { prerender: true },
     '/more-resources': { prerender: true },
     '/newsthatcaughtoureye/**': { prerender: true },
@@ -104,7 +102,7 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: "anonymous" },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Lexend:wght@100..900&family=Outfit:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Sora:wght@100..800&display=swap'
+          href: 'https://fonts.googleapis.com/css2?family=Habibi&family=Lexend:wght@100..900&family=Outfit:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Sora:wght@100..800&display=swap'
         },
         {
           rel: 'stylesheet',
