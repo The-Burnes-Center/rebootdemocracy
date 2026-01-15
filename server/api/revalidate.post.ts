@@ -126,13 +126,14 @@ export default defineEventHandler(async (event) => {
       body?.path || body?.payload?.path || body?.data?.path || derivedPath
 
     // Build related tags + pages to regenerate by content type
+    // NOTE: Weekly news can surface on "/" and "/blog" (combined feed), so we purge those too.
     const relatedTags = isBlog
       ? ["home", "blog", normalizedTag]
-      : ["weekly-news", "weekly-news/latest", normalizedTag]
+      : ["home", "blog", "weekly-news", "weekly-news/latest", normalizedTag]
 
     const pathsToRegenerate = isBlog
       ? ["/", "/blog", primaryPath]
-      : ["/newsthatcaughtoureye", "/newsthatcaughtoureye/latest", primaryPath]
+      : ["/", "/blog", "/newsthatcaughtoureye", "/newsthatcaughtoureye/latest", primaryPath]
 
     /**
      * STEP 3: Verify Authentication
@@ -532,6 +533,8 @@ export default defineEventHandler(async (event) => {
             { path: primaryPath, name: "Blog post", key: "primary" },
           ]
         : [
+            { path: "/", name: "Home page", key: "home" },
+            { path: "/blog", name: "Blog listing page", key: "blogListing" },
             { path: "/newsthatcaughtoureye", name: "Weekly news listing page", key: "weeklyListing" },
             { path: "/newsthatcaughtoureye/latest", name: "Weekly news latest page", key: "weeklyLatest" },
             { path: primaryPath, name: "Weekly news edition page", key: "primary" },
@@ -589,6 +592,8 @@ export default defineEventHandler(async (event) => {
                   blogPost: { cached: regenerationResults.primary.isCached },
                 }
               : {
+                  home: { cached: regenerationResults.home.isCached },
+                  blogListing: { cached: regenerationResults.blogListing.isCached },
                   weeklyListing: { cached: regenerationResults.weeklyListing.isCached },
                   weeklyLatest: { cached: regenerationResults.weeklyLatest.isCached },
                   weeklyEdition: { cached: regenerationResults.primary.isCached },

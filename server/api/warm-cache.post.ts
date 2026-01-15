@@ -26,7 +26,7 @@
  * WHAT GETS WARMED:
  * - Full mode: Home page, blog listing, and last N blog posts (default: 40)
  * - Single mode (blog): Home page, blog listing, and the specific blog post (NOT the full 40)
- * - Single mode (weekly): Weekly listing, weekly latest, and the specific weekly edition page
+ * - Single mode (weekly): Home, blog listing, weekly listing, weekly latest, and the specific weekly edition page
  */
 
 const DIRECTUS_URL = 'https://directus.theburnescenter.org/items/reboot_democracy_blog/'
@@ -167,6 +167,16 @@ export default defineEventHandler(async (event) => {
       if (isWeekly) {
         const edition = tag.replace("weekly-news/", "")
 
+        // Step 0: Warm home page (weekly items can appear on homepage)
+        console.log(`🏠 Warming up home page...`)
+        await warmUpPage('/', 'home')
+        await new Promise(resolve => setTimeout(resolve, 200))
+
+        // Step 0b: Warm blog listing page (combined feed can include weekly items)
+        console.log(`📝 Warming up blog listing page...`)
+        await warmUpPage('/blog', 'blog-listing')
+        await new Promise(resolve => setTimeout(resolve, 200))
+
         // Step 1: Warm weekly listing page
         console.log(`🗞️  Warming up weekly news listing page...`)
         await warmUpPage('/newsthatcaughtoureye', 'weekly-listing')
@@ -182,9 +192,9 @@ export default defineEventHandler(async (event) => {
         console.log(`🔥 Warming up specific weekly edition: ${editionPath}`)
         await warmUpPage(editionPath, 'weekly-edition', { edition })
 
-        const totalPages = 3
+        const totalPages = 5
         console.log(`✅ Single weekly cache warm-up complete!`)
-        console.log(`   - Total pages: ${totalPages} (weekly listing + latest + edition)`)
+        console.log(`   - Total pages: ${totalPages} (home + blog + weekly listing + latest + edition)`)
         console.log(`   - Succeeded: ${totalSuccessCount}`)
         console.log(`   - Failed: ${totalErrorCount}`)
 
@@ -198,6 +208,8 @@ export default defineEventHandler(async (event) => {
           succeeded: totalSuccessCount,
           failed: totalErrorCount,
           breakdown: {
+            home: results.filter(r => r.type === 'home').length,
+            blogListing: results.filter(r => r.type === 'blog-listing').length,
             weeklyListing: results.filter(r => r.type === 'weekly-listing').length,
             weeklyLatest: results.filter(r => r.type === 'weekly-latest').length,
             weeklyEdition: results.filter(r => r.type === 'weekly-edition').length,
