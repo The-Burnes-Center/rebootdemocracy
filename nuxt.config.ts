@@ -2,7 +2,7 @@ import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
 // import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
 import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
-import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
+// import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -40,14 +40,15 @@ export default defineNuxtConfig({
     async 'nitro:config'(nitroConfig) {
       // const blogRoutes = await getStaticBlogRoutes();
       const categoryRoutes = await getStaticCategoryRoutes();
-      const newsRoutes = await getStaticNewsRoutes();
+      // Weekly News is served via ISR (not prerender) so Netlify-Cache-Tag can be set dynamically.
+      // const newsRoutes = await getStaticNewsRoutes();
       
       nitroConfig.prerender = nitroConfig.prerender ?? {};
       nitroConfig.prerender.routes = [
         ...(nitroConfig.prerender.routes ?? []),
         // ...blogRoutes,
         ...categoryRoutes,
-        ...newsRoutes
+        // ...newsRoutes
       ];
     }
   },
@@ -110,16 +111,29 @@ export default defineNuxtConfig({
         // The dynamic tag is set by server/plugins/cache-tag.ts
       },  
     },
+
+    // Weekly News (News That Caught Our Eye)
+    "/newsthatcaughtoureye": {
+      isr: true,
+      headers: {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        // Dynamic Netlify-Cache-Tag is set by server/plugins/cache-tag.ts
+      },
+    },
+    "/newsthatcaughtoureye/**": {
+      isr: true,
+      headers: {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        // Dynamic Netlify-Cache-Tag is set by server/plugins/cache-tag.ts
+      },
+    },
     '/events': { prerender: true },
     '/more-resources': { prerender: true },
-    '/newsthatcaughtoureye/**': { prerender: true },
     '/about': { prerender: true },
     '/our-research': { prerender: true },
     '/our-engagements': { prerender: true },
-    '/newsthatcaughtoureye/latest': { 
-    prerender: false,  
-    headers: { 'cache-control': 's-maxage=60' } 
-  },
     '/events/reboot-democracy': {
       redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
       prerender: true
