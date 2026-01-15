@@ -2,7 +2,7 @@
   <header class="header-content__section" role="banner">
     <div class="header__logo">
       <div class="hero__first-partner">
-        <a
+        <!-- <a
           href="https://burnes.northeastern.edu/"
           aria-label="Visit Burnes Center for Social Change website"
           class="logo-link"
@@ -17,23 +17,29 @@
             tabindex="-1"
             role="presentation"
           />
-        </a>
-      </div>
-      <div class="hero__second-partner">
+        </a> -->
         <a
-          href="https://thegovlab.org/"
-          aria-label="Visit The GovLab website"
+          href="/"
           class="logo-link"
-          target="_blank"
-          rel="noopener noreferrer"
+          aria-label="Visit Reboot Democracy website"
         >
           <img
-            src="/images/the-govlab-logo-white.png"
-            alt="The GovLab logo"
-            width="100"
-            height="40"
+            src="/images/logo.svg"
+            alt="Reboot Democracy logo"
+            width="187"
+            height="50"
             tabindex="-1"
             role="presentation"
+            class="logo-img"
+          />
+          <img
+            src="/images/version=default.svg"
+            alt="Reboot Democracy logo"
+            width="187"
+            height="50"
+            tabindex="-1"
+            role="presentation"
+            class="logo-img-hover"
           />
         </a>
       </div>
@@ -215,8 +221,16 @@ const menuItems = computed<MenuItem[]>(() => {
       label: "About",
       name: "about",
       children: [
-        { label: "About the Reboot Democracy Blog", name: "about", to: "/about" },
-        { label: "Our Team", name: "team", to: "/about#team-editorial-section" },
+        {
+          label: "About the Reboot Democracy Blog",
+          name: "about",
+          to: "/about",
+        },
+        {
+          label: "Our Team",
+          name: "team",
+          to: "/about#team-editorial-section",
+        },
         {
           label: "About Beth Simone Noveck",
           name: "research",
@@ -288,23 +302,46 @@ onUnmounted(() => {
   display: inline-block;
   transition: all 0.2s ease-in-out;
   border-radius: 4px;
-  padding: 4px;
+  position: relative;
+  height: 40px;
+  width: 187px;
 }
 
 .logo-link:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #e3d9d9;
+  /* box-shadow: 0 0 0 2px #e3d9d9; */
 }
 
-.logo-link:hover {
+/* .logo-link:hover {
   box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
-}
+} */
 
 .logo-link img {
   display: block;
   max-width: 100%;
   height: auto;
   pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.logo-img-hover {
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease-in-out;
+}
+
+.logo-link:hover .logo-img-hover {
+  opacity: 1;
+}
+
+.logo-link:hover .logo-img {
+  opacity: 0;
 }
 
 .mobile-menu-toggle svg {
