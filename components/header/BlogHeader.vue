@@ -363,4 +363,11 @@ onUnmounted(() => {
     transition: none;
   }
 }
+
+/* Mobile adjustments */
+@media (max-width: 1049px) {
+  .logo-link img {
+    left: 35%;
+  }
+}
 </style>
