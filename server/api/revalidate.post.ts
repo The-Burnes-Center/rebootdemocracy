@@ -545,10 +545,10 @@ export default defineEventHandler(async (event) => {
       const allRegenerated = regenTargets.every((t) => regenerationResults[t.key]?.success)
       
       if (allRegenerated) {
-        // Optional warm-up: only applies to blog right now (warm-cache is blog-tag focused)
-        if (isBlog) {
+        // Optional warm-up: apply to both blog + weekly-news
+        if (isBlog || isWeekly) {
           try {
-            console.log(`🔥 Warming up cache for revalidated blog post: ${normalizedTag}`)
+            console.log(`🔥 Warming up cache for revalidated tag: ${normalizedTag}`)
             const warmCacheUrl = `${siteUrl}/api/warm-cache`
             const warmCacheResponse = await fetch(warmCacheUrl, {
               method: 'POST',
@@ -561,7 +561,7 @@ export default defineEventHandler(async (event) => {
             
             if (warmCacheResponse.ok) {
               await warmCacheResponse.json().catch(() => null)
-              console.log(`✅ Cache warmed up for blog post: ${normalizedTag}`)
+              console.log(`✅ Cache warmed up for tag: ${normalizedTag}`)
             } else {
               console.warn(`⚠️ Cache warm-up returned status ${warmCacheResponse.status} (non-critical)`)
             }
