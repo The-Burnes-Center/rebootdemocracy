@@ -1,6 +1,6 @@
 .menu__section {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
   align-items: center;
   width: 100%;
   position: relative;

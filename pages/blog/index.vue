@@ -1,8 +1,5 @@
 <template>
   <div class="all-posts-page">
-    <!-- Skip link for keyboard users -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
     <Hero
       title="Rebooting Democracy in the Age of AI"
       subtitle="Insights on AI, Governance and Democracy"
@@ -233,7 +230,11 @@
             role="region"
             aria-label="Blog posts"
           >
-            <div id = "blogcard-grid-wrapper" class="blogcard-grid-wrapper" role="list">
+            <div
+              id="blogcard-grid-wrapper"
+              class="blogcard-grid-wrapper"
+              role="list"
+            >
               <article
                 v-for="post in displayedPosts"
                 :key="getPostKey(post)"
@@ -722,7 +723,9 @@ const filteredPosts = computed(() => {
   if (selectedCategory.value) {
     filtered = filtered.filter((post) => {
       if ("Tags" in post && Array.isArray(post.Tags)) {
-        return post.Tags.some((t: string) => normalizeTagLabel(t) === selectedCategory.value);
+        return post.Tags.some(
+          (t: string) => normalizeTagLabel(t) === selectedCategory.value
+        );
       } else if ("category" in post && post.category) {
         return normalizeTagLabel(post.category) === selectedCategory.value;
       }
@@ -734,14 +737,14 @@ const filteredPosts = computed(() => {
       filtered = filtered.sort((a, b) => {
         const tagA = getOriginalTag(a);
         const tagB = getOriginalTag(b);
-        
+
         // Prioritize "News that Caught Our Eye" (capitalized) over "news that caught our eye" (lowercase)
         const isCapitalizedA = tagA === "News that Caught Our Eye";
         const isCapitalizedB = tagB === "News that Caught Our Eye";
-        
+
         if (isCapitalizedA && !isCapitalizedB) return -1; // A comes first
-        if (!isCapitalizedA && isCapitalizedB) return 1;  // B comes first
-        
+        if (!isCapitalizedA && isCapitalizedB) return 1; // B comes first
+
         // If both same variant, sort by date (newest first)
         const dateA = new Date((a as any).date || 0).getTime();
         const dateB = new Date((b as any).date || 0).getTime();
@@ -783,7 +786,9 @@ const hasMorePosts = computed(
 // Helper functions for handling both blog posts and news items
 const getPostKey = (post: any): string => {
   if (post?.type === "news") {
-    return `news-${post.id ?? post.edition ?? Math.random().toString(36).slice(2)}`;
+    return `news-${
+      post.id ?? post.edition ?? Math.random().toString(36).slice(2)
+    }`;
   }
   return `blog-${post.id ?? post.slug ?? Math.random().toString(36).slice(2)}`;
 };
@@ -791,19 +796,21 @@ const getPostKey = (post: any): string => {
 const getPostTag = (post: BlogPost | NewsItem): string => {
   // If a specific category is selected and the post contains that category, show it
   if (selectedCategory.value && "Tags" in post && Array.isArray(post.Tags)) {
-    const hasSelectedCategory = post.Tags.some(tag => normalizeTagLabel(tag) === selectedCategory.value);
+    const hasSelectedCategory = post.Tags.some(
+      (tag) => normalizeTagLabel(tag) === selectedCategory.value
+    );
     if (hasSelectedCategory) {
       return selectedCategory.value;
     }
   }
-  
+
   // If a specific category is selected and the post's category matches, show it
   if (selectedCategory.value && "category" in post && post.category) {
     if (normalizeTagLabel(post.category) === selectedCategory.value) {
       return selectedCategory.value;
     }
   }
-  
+
   // Otherwise fall back to the original logic
   if ("Tags" in post && Array.isArray(post.Tags) && post.Tags.length > 0) {
     return normalizeTagLabel(post.Tags[0]);
@@ -884,7 +891,10 @@ const selectCategory = (category: string) => {
   } else {
     // Wait for posts to finish rendering before scrolling to grid
     const stop = watch(
-      () => ({ loading: isPostsLoading.value, length: displayedPosts.value.length }),
+      () => ({
+        loading: isPostsLoading.value,
+        length: displayedPosts.value.length,
+      }),
       (state) => {
         if (!state.loading && state.length > 0) {
           nextTick(() => {
@@ -908,7 +918,10 @@ const selectAuthor = (author: string) => {
   } else {
     // Wait for posts to finish rendering before scrolling to grid
     const stop = watch(
-      () => ({ loading: isPostsLoading.value || isFilteringByAuthor.value, length: displayedPosts.value.length }),
+      () => ({
+        loading: isPostsLoading.value || isFilteringByAuthor.value,
+        length: displayedPosts.value.length,
+      }),
       (state) => {
         if (!state.loading && state.length > 0) {
           nextTick(() => {
@@ -986,24 +999,6 @@ onUnmounted(() => {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* Skip link for keyboard users */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 6px;
-  background: #4a6b8a;
-  color: white;
-  padding: 8px 16px;
-  text-decoration: none;
-  z-index: 1000;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-.skip-link:focus {
-  top: 6px;
 }
 
 .toggle-button:focus,
