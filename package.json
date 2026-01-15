@@ -11,7 +11,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "test": "vitest"
+    "test": "vitest",
+    "directus:create-revalidate-flow-v2": "node ./directus-create-revalidate-flow-v2.js"
   },
   "dependencies": {
     "@directus/sdk": "^18.0.3",

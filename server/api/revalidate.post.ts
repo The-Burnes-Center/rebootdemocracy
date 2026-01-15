@@ -1,25 +1,24 @@
 /**
- * On-Demand Cache Revalidation Endpoint (Blog Posts + Related Pages)
+ * On-Demand Cache Revalidation Endpoint (Blog Posts + Weekly News Editions)
  * 
- * PURPOSE: When blog content changes in your CMS (e.g., Directus), this endpoint invalidates
- * the cached blog page, home page, and blog listing page, then immediately regenerates them
- * with fresh content. This ensures users see updated content without waiting for the next
- * scheduled regeneration.
+ * PURPOSE: When content changes in your CMS (e.g., Directus), this endpoint invalidates the
+ * cached page(s) by Netlify cache tag, then attempts to regenerate key routes so users see
+ * updated content quickly (without waiting for scheduled regeneration).
  * 
  * FLOW OVERVIEW:
- * 1. Parse request → Extract blog cache tag from webhook/API payload
- * 2. Validate tag → Ensure tag starts with "blog/" (e.g., "blog/my-post-slug")
- * 3. Invalidate cache → Mark cached pages as stale by tag (blog post + home + blog listing)
+ * 1. Parse request → Extract cache tag from webhook/API payload
+ * 2. Validate tag → Ensure tag starts with "blog/" or "weekly-news/"
+ * 3. Invalidate cache → Mark cached pages as stale by tag (plus related tags for listings)
  * 4. Check status → Verify invalidation worked by reading Cache-Status header
  * 5. Wait and retry → If cache still shows "hit", wait then retry purge and check again
- * 6. Regenerate → Force fresh SSR with cache-busting headers for all three pages
+ * 6. Regenerate → Force fresh SSR with cache-busting headers for related pages
  * 7. Cache result → Make normal request to populate cache with new content
  * 
  * WHY THIS APPROACH:
- * - Blog posts trigger full refresh: When a blog post changes, home page and blog listing
- *   may also need updates (e.g., featured posts, recent posts lists)
  * - Tag-only purge: CRITICAL - There is NO "paths" key in purgeCache, using it would invalidate entire site
- * - Tag format: "blog/{slug}", "home", "blog" - matches server/plugins/cache-tag.ts
+ * - Tag formats:
+ *   - Blog: "blog/{slug}", plus related "home" + "blog" (matches cache-tag.ts)
+ *   - Weekly: "weekly-news/{edition|latest}", plus related "weekly-news" + "weekly-news/latest" (matches cache-tag.ts)
  * - Cache-Status header: Ground truth for CDN cache (not Cache API)
  * - Conditional wait: Only waits if invalidation hasn't propagated yet
  * - Cache-busting headers: Forces bypass of edge/durable cache during regeneration
@@ -27,15 +26,19 @@
  * 
  * USAGE:
  * POST /api/revalidate
- * Body: { tag: "blog/my-post-slug" }
+ * Body: { tag: "blog/my-post-slug" } OR { tag: "weekly-news/85" }
  * 
- * TAG FORMAT: Must start with "blog/" (e.g., "blog/googleorg-support-to-train-more-government-workers-in-digital-skills")
+ * TAG FORMAT:
+ * - Must start with "blog/" or "weekly-news/"
  * This matches the format set in server/plugins/cache-tag.ts
  * 
  * WHAT GETS REVALIDATED:
  * - The specific blog post (tag: "blog/{slug}")
  * - Home page (tag: "home")
  * - Blog listing page (tag: "blog")
+ * - Weekly news listing page (tag: "weekly-news")
+ * - Weekly news latest page (tag: "weekly-news/latest")
+ * - Weekly news edition page (tag: "weekly-news/{edition}")
  * 
  * RATE LIMITS: 2 purges per tag/site per 5 seconds (auto-retry with 6s wait)
  * 
@@ -96,31 +99,40 @@ export default defineEventHandler(async (event) => {
     }
 
     /**
-     * Validate and process blog tags only
-     * 
-     * Blog tags use format: "blog/{slug}" (e.g., "blog/my-post-slug")
-     * This matches the format set in server/plugins/cache-tag.ts
-     * 
-     * WHY: We only handle blog routes. Other routes should use different revalidation logic.
+     * Validate and process supported tags only
+     *
+     * Supported tag formats (see cache-tag.ts):
+     * - Blog: "blog/{slug}"
+     * - Weekly: "weekly-news/{edition|latest}"
      */
-    if (!tag.startsWith("blog/")) {
+    const isBlog = tag.startsWith("blog/")
+    const isWeekly = tag.startsWith("weekly-news/")
+    if (!isBlog && !isWeekly) {
       throw createError({
         statusCode: 400,
-        statusMessage: `Invalid tag format. Expected blog tag starting with "blog/" (e.g., "blog/my-post-slug"). Received: "${tag}"`,
+        statusMessage: `Invalid tag format. Expected tag starting with "blog/" or "weekly-news/" (e.g., "blog/my-post-slug" or "weekly-news/85"). Received: "${tag}"`,
       })
     }
 
-    // Construct path from blog tag (e.g., "blog/my-post" -> "/blog/my-post")
-    // WHY: Path needs leading slash for URL, but tag doesn't have it
-    const blogPostPath = body?.path || body?.payload?.path || body?.data?.path || `/${tag}`
-    
-    // Use tag as-is (blog tags are "blog/{slug}" format, no leading slash)
+    // Use tag as-is (no leading slash)
     const normalizedTag = tag
-    
-    // When revalidating a blog post, we also need to revalidate home and blog listing
-    // Tags: "home" and "blog" (matches cache-tag.ts plugin)
-    const relatedTags = ["home", "blog", normalizedTag]
-    const pathsToRegenerate = ["/", "/blog", blogPostPath]
+
+    // Allow explicit path override from webhook payloads, otherwise derive from tag
+    const derivedPath = isBlog
+      ? `/${normalizedTag}` // blog/{slug} -> /blog/{slug}
+      : `/newsthatcaughtoureye/${normalizedTag.replace(/^weekly-news\//, "")}` // weekly-news/85 -> /newsthatcaughtoureye/85
+
+    const primaryPath =
+      body?.path || body?.payload?.path || body?.data?.path || derivedPath
+
+    // Build related tags + pages to regenerate by content type
+    const relatedTags = isBlog
+      ? ["home", "blog", normalizedTag]
+      : ["weekly-news", "weekly-news/latest", normalizedTag]
+
+    const pathsToRegenerate = isBlog
+      ? ["/", "/blog", primaryPath]
+      : ["/newsthatcaughtoureye", "/newsthatcaughtoureye/latest", primaryPath]
 
     /**
      * STEP 3: Verify Authentication
@@ -248,8 +260,7 @@ export default defineEventHandler(async (event) => {
     
     try {
       // Initial purge attempt (tags only - no path purging to avoid full site invalidation)
-      // Purge home, blog listing, and the specific blog post
-      console.log(`🔄 Purging cache for blog post and related pages: ${relatedTags.join(", ")}`)
+      console.log(`🔄 Purging cache for tags: ${relatedTags.join(", ")}`)
       purgeSuccess = await performPurge(relatedTags)
     } catch (purgeError) {
       const errorMsg =
@@ -403,9 +414,9 @@ export default defineEventHandler(async (event) => {
         }
       }
       
-      // Initial cache status check (check blog post as primary)
-      console.log(`🔍 Checking cache status after purge for blog post: ${blogPostPath}`)
-      let cacheStatus = await checkCacheStatus(blogPostPath)
+      // Initial cache status check (check primary page)
+      console.log(`🔍 Checking cache status after purge for: ${primaryPath}`)
+      let cacheStatus = await checkCacheStatus(primaryPath)
       console.log(`🔍 CDN Cache status after purge: ${cacheStatus.overall} (edge: ${cacheStatus.edge}, durable: ${cacheStatus.durable})`)
       console.log(`📋 Cache-Status headers: ${cacheStatus.headers.join(", ")}`)
       
@@ -433,7 +444,7 @@ export default defineEventHandler(async (event) => {
         
         // Check cache status again
         console.log(`🔍 Re-checking cache status (check ${checkCount + 1}/${MAX_CHECKS})...`)
-        currentCacheStatus = await checkCacheStatus(blogPostPath)
+        currentCacheStatus = await checkCacheStatus(primaryPath)
         console.log(`🔍 CDN Cache status after wait: ${currentCacheStatus.overall} (edge: ${currentCacheStatus.edge}, durable: ${currentCacheStatus.durable})`)
         console.log(`📋 Cache-Status headers: ${currentCacheStatus.headers.join(", ")}`)
         
@@ -514,46 +525,51 @@ export default defineEventHandler(async (event) => {
       }
       
       // Regenerate all three pages: home, blog listing, and blog post
-      const regenerationResults = {
-        home: await regeneratePage("/", "Home page"),
-        blogListing: await regeneratePage("/blog", "Blog listing page"),
-        blogPost: await regeneratePage(blogPostPath, "Blog post"),
+      const regenTargets = isBlog
+        ? [
+            { path: "/", name: "Home page", key: "home" },
+            { path: "/blog", name: "Blog listing page", key: "blogListing" },
+            { path: primaryPath, name: "Blog post", key: "primary" },
+          ]
+        : [
+            { path: "/newsthatcaughtoureye", name: "Weekly news listing page", key: "weeklyListing" },
+            { path: "/newsthatcaughtoureye/latest", name: "Weekly news latest page", key: "weeklyLatest" },
+            { path: primaryPath, name: "Weekly news edition page", key: "primary" },
+          ]
+
+      const regenerationResults: Record<string, any> = {}
+      for (const t of regenTargets) {
+        regenerationResults[t.key] = await regeneratePage(t.path, t.name)
       }
-      
-      const allRegenerated = regenerationResults.home.success && 
-                             regenerationResults.blogListing.success && 
-                             regenerationResults.blogPost.success
+
+      const allRegenerated = regenTargets.every((t) => regenerationResults[t.key]?.success)
       
       if (allRegenerated) {
-        /**
-         * STEP 10: Warm up the specific blog post page
-         * 
-         * WHY: After revalidation, we want to ensure the specific page is properly
-         * warmed up in the cache. We call the warm-cache endpoint with the tag
-         * to warm up only that specific page (not all 40 posts).
-         */
-        try {
-          console.log(`🔥 Warming up cache for revalidated blog post: ${normalizedTag}`)
-          const warmCacheUrl = `${siteUrl}/api/warm-cache`
-          const warmCacheResponse = await fetch(warmCacheUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'User-Agent': 'Netlify-Revalidate/1.0',
-            },
-            body: JSON.stringify({ tag: normalizedTag }),
-          })
-          
-          if (warmCacheResponse.ok) {
-            const warmCacheData = await warmCacheResponse.json()
-            console.log(`✅ Cache warmed up for blog post: ${normalizedTag}`)
-          } else {
-            console.warn(`⚠️ Cache warm-up returned status ${warmCacheResponse.status} (non-critical)`)
+        // Optional warm-up: only applies to blog right now (warm-cache is blog-tag focused)
+        if (isBlog) {
+          try {
+            console.log(`🔥 Warming up cache for revalidated blog post: ${normalizedTag}`)
+            const warmCacheUrl = `${siteUrl}/api/warm-cache`
+            const warmCacheResponse = await fetch(warmCacheUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Netlify-Revalidate/1.0',
+              },
+              body: JSON.stringify({ tag: normalizedTag }),
+            })
+            
+            if (warmCacheResponse.ok) {
+              await warmCacheResponse.json().catch(() => null)
+              console.log(`✅ Cache warmed up for blog post: ${normalizedTag}`)
+            } else {
+              console.warn(`⚠️ Cache warm-up returned status ${warmCacheResponse.status} (non-critical)`)
+            }
+          } catch (warmError) {
+            // Non-critical - page is already regenerated and cached
+            const warmErrorMsg = warmError instanceof Error ? warmError.message : String(warmError)
+            console.warn(`⚠️ Could not warm up cache (non-critical): ${warmErrorMsg}`)
           }
-        } catch (warmError) {
-          // Non-critical - page is already regenerated and cached
-          const warmErrorMsg = warmError instanceof Error ? warmError.message : String(warmError)
-          console.warn(`⚠️ Could not warm up cache (non-critical): ${warmErrorMsg}`)
         }
         
         // Return success with cache status
@@ -566,14 +582,24 @@ export default defineEventHandler(async (event) => {
           regenerated: true,
           cacheStatus: cacheStatus,
           regenerationResults: {
-            home: { cached: regenerationResults.home.isCached },
-            blogListing: { cached: regenerationResults.blogListing.isCached },
-            blogPost: { cached: regenerationResults.blogPost.isCached },
+            ...(isBlog
+              ? {
+                  home: { cached: regenerationResults.home.isCached },
+                  blogListing: { cached: regenerationResults.blogListing.isCached },
+                  blogPost: { cached: regenerationResults.primary.isCached },
+                }
+              : {
+                  weeklyListing: { cached: regenerationResults.weeklyListing.isCached },
+                  weeklyLatest: { cached: regenerationResults.weeklyLatest.isCached },
+                  weeklyEdition: { cached: regenerationResults.primary.isCached },
+                }),
           },
-          note: "✅ All pages regenerated and warmed up (home, blog listing, and blog post)",
+          note: isBlog
+            ? "✅ All pages regenerated and warmed up (home, blog listing, and blog post)"
+            : "✅ All pages regenerated (weekly listing, weekly latest, and edition page)",
         }
       } else {
-        console.warn(`⚠️ Some pages failed to regenerate. Home: ${regenerationResults.home.success}, Blog: ${regenerationResults.blogListing.success}, Post: ${regenerationResults.blogPost.success}`)
+        console.warn(`⚠️ Some pages failed to regenerate. Targets: ${regenTargets.map((t) => `${t.key}=${regenerationResults[t.key]?.success}`).join(", ")}`)
       }
     } catch (regenerateError) {
       /**

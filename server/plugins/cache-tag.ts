@@ -24,6 +24,8 @@
  * - Home page (/): tag format is "home"
  * - Blog listing page (/blog): tag format is "blog"
  * - Blog posts (/blog/{slug}): tag format is "blog/{slug}" (e.g., "blog/my-post-slug")
+ * - Weekly news listing (/newsthatcaughtoureye): tag format is "weekly-news"
+ * - Weekly news edition (/newsthatcaughtoureye/{edition|latest}): tag format is "weekly-news/{edition|latest}"
  * - Use the same tag when calling /api/revalidate endpoint
  * 
  * References:
@@ -65,6 +67,21 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(`🔍 Cache tag plugin - request hook triggered for blog post: ${url}`)
         } else {
           console.warn(`⚠️ Cache tag plugin - Could not extract slug from URL: ${url}, pathParts: ${JSON.stringify(pathParts)}`)
+        }
+      }
+      // Weekly news listing page: /newsthatcaughtoureye
+      else if (urlWithoutQuery === "/newsthatcaughtoureye") {
+        cacheTag = "weekly-news"
+        console.log(`🔍 Cache tag plugin - request hook triggered for weekly news listing: ${url}`)
+      }
+      // Weekly news edition page: /newsthatcaughtoureye/{edition|latest}
+      else if (urlWithoutQuery.startsWith("/newsthatcaughtoureye/")) {
+        if (pathParts.length >= 2 && pathParts[0] === "newsthatcaughtoureye") {
+          const edition = pathParts[1]
+          cacheTag = `weekly-news/${edition}`
+          console.log(`🔍 Cache tag plugin - request hook triggered for weekly news edition: ${url}`)
+        } else {
+          console.warn(`⚠️ Cache tag plugin - Could not extract weekly news slug from URL: ${url}, pathParts: ${JSON.stringify(pathParts)}`)
         }
       }
       
