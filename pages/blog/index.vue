@@ -611,7 +611,6 @@ const extractAuthorsWithCounts = (posts: (BlogPost | NewsItem)[]): Author[] => {
   }
 };
 
-// ... (keeping all your existing data fetching logic exactly the same) ...
 const { data: allPostsData, pending: isPostsLoading } = await useAsyncData(
   "all-blog-posts",
   async () => {
