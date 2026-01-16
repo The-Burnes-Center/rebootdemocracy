@@ -127,13 +127,18 @@ export default defineEventHandler(async (event) => {
 
     // Build related tags + pages to regenerate by content type
     // NOTE: Weekly news can surface on "/" and "/blog" (combined feed), so we purge those too.
+    const NTCOE_CATEGORY = "News That Caught Our Eye"
+    const NTCOE_CATEGORY_SEGMENT = encodeURIComponent(NTCOE_CATEGORY)
+    const NTCOE_CATEGORY_TAG = `blog-category/${NTCOE_CATEGORY_SEGMENT}`
+    const NTCOE_CATEGORY_PATH = `/blog/category/${NTCOE_CATEGORY_SEGMENT}`
+
     const relatedTags = isBlog
       ? ["home", "blog", normalizedTag]
-      : ["home", "blog", "weekly-news", "weekly-news/latest", normalizedTag]
+      : ["home", "blog", NTCOE_CATEGORY_TAG, "weekly-news", "weekly-news/latest", normalizedTag]
 
     const pathsToRegenerate = isBlog
       ? ["/", "/blog", primaryPath]
-      : ["/", "/blog", "/newsthatcaughtoureye", "/newsthatcaughtoureye/latest", primaryPath]
+      : ["/", "/blog", NTCOE_CATEGORY_PATH, "/newsthatcaughtoureye", "/newsthatcaughtoureye/latest", primaryPath]
 
     /**
      * STEP 3: Verify Authentication
@@ -535,6 +540,7 @@ export default defineEventHandler(async (event) => {
         : [
             { path: "/", name: "Home page", key: "home" },
             { path: "/blog", name: "Blog listing page", key: "blogListing" },
+            { path: NTCOE_CATEGORY_PATH, name: `Blog category page (${NTCOE_CATEGORY})`, key: "ntcoeCategory" },
             { path: "/newsthatcaughtoureye", name: "Weekly news listing page", key: "weeklyListing" },
             { path: "/newsthatcaughtoureye/latest", name: "Weekly news latest page", key: "weeklyLatest" },
             { path: primaryPath, name: "Weekly news edition page", key: "primary" },
@@ -594,6 +600,7 @@ export default defineEventHandler(async (event) => {
               : {
                   home: { cached: regenerationResults.home.isCached },
                   blogListing: { cached: regenerationResults.blogListing.isCached },
+                  ntcoeCategory: { cached: regenerationResults.ntcoeCategory.isCached },
                   weeklyListing: { cached: regenerationResults.weeklyListing.isCached },
                   weeklyLatest: { cached: regenerationResults.weeklyLatest.isCached },
                   weeklyEdition: { cached: regenerationResults.primary.isCached },

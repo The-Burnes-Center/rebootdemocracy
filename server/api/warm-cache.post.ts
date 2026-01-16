@@ -26,7 +26,7 @@
  * WHAT GETS WARMED:
  * - Full mode: Home page, blog listing, and last N blog posts (default: 40)
  * - Single mode (blog): Home page, blog listing, and the specific blog post (NOT the full 40)
- * - Single mode (weekly): Home, blog listing, weekly listing, weekly latest, and the specific weekly edition page
+ * - Single mode (weekly): Home, blog listing, NTCOE category page, weekly listing, weekly latest, and the specific weekly edition page
  */
 
 const DIRECTUS_URL = 'https://directus.theburnescenter.org/items/reboot_democracy_blog/'
@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
     let totalErrorCount = 0
     const results: Array<{ 
       path: string; 
-      type: 'home' | 'blog-listing' | 'blog-post' | 'weekly-listing' | 'weekly-latest' | 'weekly-edition'; 
+      type: 'home' | 'blog-listing' | 'blog-post' | 'blog-category' | 'weekly-listing' | 'weekly-latest' | 'weekly-edition'; 
       status: number; 
       cached: boolean; 
       error?: string;
@@ -102,7 +102,7 @@ export default defineEventHandler(async (event) => {
      */
     const warmUpPage = async (
       path: string,
-      type: 'home' | 'blog-listing' | 'blog-post' | 'weekly-listing' | 'weekly-latest' | 'weekly-edition',
+      type: 'home' | 'blog-listing' | 'blog-post' | 'blog-category' | 'weekly-listing' | 'weekly-latest' | 'weekly-edition',
       meta?: { slug?: string; edition?: string }
     ) => {
       const pageUrl = `${siteUrl}${path}`
@@ -166,6 +166,8 @@ export default defineEventHandler(async (event) => {
     if (isSinglePageWarmUp) {
       if (isWeekly) {
         const edition = tag.replace("weekly-news/", "")
+        const ntcoeCategorySegment = encodeURIComponent("News That Caught Our Eye")
+        const ntcoeCategoryPath = `/blog/category/${ntcoeCategorySegment}`
 
         // Step 0: Warm home page (weekly items can appear on homepage)
         console.log(`🏠 Warming up home page...`)
@@ -175,6 +177,11 @@ export default defineEventHandler(async (event) => {
         // Step 0b: Warm blog listing page (combined feed can include weekly items)
         console.log(`📝 Warming up blog listing page...`)
         await warmUpPage('/blog', 'blog-listing')
+        await new Promise(resolve => setTimeout(resolve, 200))
+
+        // Step 0c: Warm NTCOE category page (weekly items also surface under this category)
+        console.log(`🏷️  Warming up category page: ${ntcoeCategoryPath}`)
+        await warmUpPage(ntcoeCategoryPath, 'blog-category')
         await new Promise(resolve => setTimeout(resolve, 200))
 
         // Step 1: Warm weekly listing page
@@ -192,9 +199,9 @@ export default defineEventHandler(async (event) => {
         console.log(`🔥 Warming up specific weekly edition: ${editionPath}`)
         await warmUpPage(editionPath, 'weekly-edition', { edition })
 
-        const totalPages = 5
+        const totalPages = 6
         console.log(`✅ Single weekly cache warm-up complete!`)
-        console.log(`   - Total pages: ${totalPages} (home + blog + weekly listing + latest + edition)`)
+        console.log(`   - Total pages: ${totalPages} (home + blog + category + weekly listing + latest + edition)`)
         console.log(`   - Succeeded: ${totalSuccessCount}`)
         console.log(`   - Failed: ${totalErrorCount}`)
 
@@ -210,6 +217,7 @@ export default defineEventHandler(async (event) => {
           breakdown: {
             home: results.filter(r => r.type === 'home').length,
             blogListing: results.filter(r => r.type === 'blog-listing').length,
+            blogCategory: results.filter(r => r.type === 'blog-category').length,
             weeklyListing: results.filter(r => r.type === 'weekly-listing').length,
             weeklyLatest: results.filter(r => r.type === 'weekly-latest').length,
             weeklyEdition: results.filter(r => r.type === 'weekly-edition').length,

@@ -83,7 +83,8 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
     const weeklyNewsEntries = await directus.request(
       readItems('reboot_democracy_weekly_news', {
         limit: -1,
-        sort: ['-date'],
+        // Some older entries can have null dates; sort primarily by edition to keep ordering stable.
+        sort: ['-edition', '-date'],
         fields: [
           'id',
           'edition', 
@@ -92,20 +93,13 @@ export async function fetchWeeklyNewsEntries(): Promise<WeeklyNews[]> {
           'author',
           'date',
           'status',
-          'image.*' 
+          'image.*',
         ],
         filter: {
           _and: [
             { status: { _eq: 'published' } },
-            { date: { _nnull: true } }, 
-            {
-              _or: [
-                { title: { _contains: 'News that Caught Our Eye' } },
-                { title: { _contains: 'News That Caught Our Eye' } },
-                { title: { _contains: 'News that caught our eye' } },
-                { title: { _contains: 'news that caught our eye' } }
-              ]
-            }
+            // Ensure it's a real edition entry
+            { edition: { _nnull: true } },
           ]
         }
       })
@@ -134,7 +128,7 @@ export async function fetchWeeklyNewsItems(): Promise<any[]> {
       excerpt: entry.summary, 
       authors: entry.author, 
       author: entry.author, 
-      date: entry.date,
+      date: (entry as any).date ?? null,
       edition: entry.edition,
       slug: null, 
       image: entry.image, 

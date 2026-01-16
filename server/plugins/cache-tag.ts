@@ -24,6 +24,8 @@
  * - Home page (/): tag format is "home"
  * - Blog listing page (/blog): tag format is "blog"
  * - Blog posts (/blog/{slug}): tag format is "blog/{slug}" (e.g., "blog/my-post-slug")
+ * - Blog category page (/blog/category/{category}): tags are "blog" and "blog-category/{category}"
+ *   - category uses the URL segment (already URL-encoded in the path)
  * - Weekly news listing (/newsthatcaughtoureye): tag format is "weekly-news"
  * - Weekly news edition (/newsthatcaughtoureye/{edition|latest}): tag format is "weekly-news/{edition|latest}"
  * - Use the same tag when calling /api/revalidate endpoint
@@ -58,6 +60,17 @@ export default defineNitroPlugin((nitroApp) => {
       else if (urlWithoutQuery === "/blog") {
         cacheTag = "blog"
         console.log(`🔍 Cache tag plugin - request hook triggered for blog listing: ${url}`)
+      }
+      // Blog category page: /blog/category/{category}
+      else if (urlWithoutQuery.startsWith("/blog/category/")) {
+        if (pathParts.length >= 3 && pathParts[0] === "blog" && pathParts[1] === "category") {
+          const categorySegment = pathParts[2] // already URL-encoded in the URL
+          // Multiple tags are supported by Netlify as a comma-separated list.
+          cacheTag = `blog,blog-category/${categorySegment}`
+          console.log(`🔍 Cache tag plugin - request hook triggered for blog category: ${url}`)
+        } else {
+          console.warn(`⚠️ Cache tag plugin - Could not extract category from URL: ${url}, pathParts: ${JSON.stringify(pathParts)}`)
+        }
       }
       // Blog post: /blog/{slug}
       else if (urlWithoutQuery.startsWith("/blog/")) {
