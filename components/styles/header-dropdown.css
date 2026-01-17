@@ -27,7 +27,7 @@
 }
 
 .header-dropdown__itemLabel {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #1e1e1e;
   font-size: 1rem;
   font-weight: 700;

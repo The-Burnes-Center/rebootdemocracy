@@ -24,7 +24,7 @@ a {
    =================================== */
 
 .header-content__section {
-  padding: 0.9rem 4rem;
+  padding: 10px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -107,7 +107,7 @@ a {
 /* Base Search Input */
 .header__search,
 .search-container input {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   transition: all 0.3s ease;
 }
 
@@ -136,7 +136,7 @@ a {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.9);
   transition: all 0.3s ease;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   width: 250px;
 }
 

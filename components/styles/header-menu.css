@@ -1,6 +1,6 @@
 .menu__section {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
   align-items: center;
   width: 100%;
   position: relative;
@@ -73,7 +73,7 @@
 }
 
 .header-dropdown__itemLabel-mobile {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #1e1e1e;
   font-size: 0.9rem;
   font-weight: 500;

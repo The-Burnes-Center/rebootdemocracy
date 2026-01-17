@@ -23,7 +23,7 @@ h3.author-name {
 h4.author-title {
   font-size: 0.75rem;
   line-height: 18px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 400;
   color: #000000;
   margin: 0%;
@@ -32,7 +32,7 @@ h4.author-title {
 p.author-bio {
   font-size: 14px;
   line-height: 17.5px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 300;
   color: #000000;
   margin: 0%;
@@ -68,7 +68,7 @@ p.author-bio {
 }
 
 .author-card__name {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 14px;
   font-weight: 700;
   line-height: 21px;
@@ -78,7 +78,7 @@ p.author-bio {
 }
 
 .author-card__title {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 11px;
   font-weight: 400;
   line-height: 13.75px;
@@ -93,7 +93,7 @@ p.author-bio {
 }
 
 .author-card__bio {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 14px;
   font-weight: 300;
   line-height: 17.5px;
@@ -107,7 +107,7 @@ p.author-bio {
 }
 
 .author-card__link {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 16px;
   font-weight: 700;
   line-height: 20px;

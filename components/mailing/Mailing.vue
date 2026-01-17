@@ -65,7 +65,7 @@ a.btn {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: #ffffff;
   border: none;
 }

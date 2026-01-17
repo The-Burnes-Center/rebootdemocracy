@@ -7,18 +7,56 @@
             <NuxtPage />
             <ChatWidget/>
         </NuxtLayout>
-      
+        <RebootDemocracyModal 
+          v-if="modalData && showModal" 
+          :modal-data="modalData" 
+          @close="closeModal"
+        />
     </div>
 </template>
 
 <script setup>
-import { useState } from '#app'
-import { ref, onMounted } from 'vue'
+import { useState, useRoute } from '#app'
+import { ref, onMounted, computed } from 'vue'
+import { fetchModalData } from '@/composables/fetchModalData'
+
+const route = useRoute()
 const routeLoading = useState('routeLoading', () => false)
 const hydrated = ref(false)
-onMounted(() => {
+const showModal = ref(false)
+const modalData = ref(null)
+
+// Only fetch and show modal on homepage
+const isHomepage = computed(() => route.path === '/')
+
+onMounted(async () => {
   hydrated.value = true
+  
+  // Only fetch modal data on client-side and only on homepage
+  if (isHomepage.value) {
+    console.log('[App] On homepage, fetching modal data client-side...')
+    try {
+      const data = await fetchModalData()
+      modalData.value = data
+      
+      if (data && data.status === 'published') {
+        console.log('[App] Modal data fetched, showing modal')
+        showModal.value = true
+      } else {
+        console.log('[App] Modal not shown - data:', data, 'status:', data?.status)
+      }
+    } catch (error) {
+      console.error('[App] Error fetching modal data:', error)
+    }
+  } else {
+    console.log('[App] Not on homepage, skipping modal fetch')
+  }
 })
+
+const closeModal = () => {
+  console.log('[App] Closing modal')
+  showModal.value = false
+}
 </script>
 
 <style>

@@ -1,6 +1,6 @@
 # Nuxt 3 Project Setup Guide for Beginners
 
-This guide will walk you through setting up a Nuxt 3 project with the same configuration as the RebootDemocracy project. Follow these steps carefully to ensure your project is set up correctly.
+This guide will walk you through setting up a Nuxt 3 project with the same configuration as the RebootDemocracy project. Follow these steps carefully to ensure your project is set up correctly
 
 
 ## Prerequisites

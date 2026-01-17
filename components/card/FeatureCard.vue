@@ -18,6 +18,7 @@
         class="featured-card__image"
         loading="lazy"
       />
+      
     </div>
     
     <div class="featured-card__body">
@@ -51,7 +52,7 @@
           as="p"
           size="1.5xl"
           weight="medium"
-          fontFamily="habibi"
+          fontFamily="merriweather"
           color="text-primary-light"
           class="featured-card__description clamp-5"
           lineHeight="loose"

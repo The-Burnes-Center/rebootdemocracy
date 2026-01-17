@@ -50,7 +50,7 @@
         size="xs"
         fontStyle="italic"
         class="blogcard-meta"
-        fontFamily="habibi"
+        fontFamily="merriweather"
       >
         Published on
         <Text as="span" size="xs" weight="bold" fontStyle="italic" fontFamily="sora">

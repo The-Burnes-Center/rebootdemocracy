@@ -88,7 +88,7 @@
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   transition: border-color 0.2s ease;
 }
@@ -208,7 +208,7 @@
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 1rem;
   resize: vertical;
   min-height: 60px;

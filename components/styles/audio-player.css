@@ -8,7 +8,7 @@
 }
 
 .audio-version p em {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .audio-player {
@@ -56,7 +56,7 @@
 }
 
 .audio-player__time {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;

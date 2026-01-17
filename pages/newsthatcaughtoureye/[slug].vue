@@ -505,7 +505,7 @@ html {
   color: #ffffff;
   font-weight: 600;
   margin: 0.5rem auto 0 auto;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   text-align: center;
   width: 100%;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -537,7 +537,7 @@ html {
   border: 1px solid #e6e6e6;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   line-height: 1.4;
   transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
@@ -645,21 +645,21 @@ html {
   color: rgb(0, 51, 102);
   font-family: var(--font-sora);
   font-size: 22px;
-  line-height: 30px;
+  line-height: 35px;
   margin: 0;
   font-weight: 600;
 }
 
 .item-meta {
   margin: 0;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 16px;
   line-height: 18px;
 
 }
 
 .item-excerpt {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   margin: 0;
 }
 
@@ -671,7 +671,7 @@ html {
   padding: 0.5rem 0.5rem;
   width: fit-content;
   font-size: 15px;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-weight: 600;
   border-radius: 4px;
   margin-top: 0.25rem;
@@ -687,7 +687,7 @@ html {
 
 .weekly-news-related-articles p {
   margin: 0 0 0.5rem 0;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .weekly-news-related-articles ul {
@@ -697,13 +697,13 @@ html {
 
 .weekly-news-related-articles li {
   margin-bottom: 0.25rem;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .weekly-news-related-articles a {
   color: rgb(0, 51, 102);
   text-decoration: none;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
 }
 
 .weekly-news-related-articles a:hover {
@@ -812,7 +812,7 @@ html {
 
 p{
   font-size: 20px;
-  line-height: 30px;
+  line-height: 35px;
   margin: 0;
 }
 
@@ -856,7 +856,7 @@ p{
 .innovate-intro {
   font-size: 20px !important;
   line-height: 32px !important;
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   color: rgb(0, 51, 102);
   margin: 0 !important;
   padding: 1.25rem 1.5rem;
@@ -882,9 +882,9 @@ p{
 }
 
 .innovate-events-content p {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px !important;
-  line-height: 30px !important;
+  line-height: 35px !important;
   color: #333333;
   margin: 0.75rem 0 !important;
   padding: 0.5rem 1rem;
@@ -904,9 +904,9 @@ p{
 }
 
 .innovate-events-content li {
-  font-family: var(--font-habibi);
+  font-family: var(--font-merriweather);
   font-size: 20px !important;
-  line-height: 30px !important;
+  line-height: 35px !important;
   color: #333333;
   margin: 0.5rem 0;
   padding: 0.25rem 0;
