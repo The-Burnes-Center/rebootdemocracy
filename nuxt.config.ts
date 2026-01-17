@@ -1,11 +1,14 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
-import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
-import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
-import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
+// import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
+// import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
+// import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
+  future: {
+    compatibilityVersion: 4,
+  },
   devtools: { enabled: true },
   ssr: true,
   
@@ -20,29 +23,33 @@ export default defineNuxtConfig({
       crawlLinks: false,
       failOnError: false,
       concurrency: 1,
-      routes: []
+      routes: [],
+      // Exclude scripts directory from route scanning
+      ignore: ['/scripts/**']
+      // NOTE: ISR routes (/blog/**) should NOT be in prerender.routes
+      // They are generated on-demand (first request), not during build
     },
+    // Output configuration - netlify preset handles serverDir automatically
+    // We just ensure publicDir is set for static assets
     output: {
-      dir: '.output',
-      publicDir: '.output/public',
-      serverDir: '.output/server'
+      publicDir: '.output/public'
     }
   },
-  generate: {
-    cache: false
-  },
+
   hooks: {
     async 'nitro:config'(nitroConfig) {
-      const blogRoutes = await getStaticBlogRoutes();
-      const categoryRoutes = await getStaticCategoryRoutes();
-      const newsRoutes = await getStaticNewsRoutes();
+      // const blogRoutes = await getStaticBlogRoutes();
+      // Category pages are served via ISR (not prerender) so Netlify-Cache-Tag can be set dynamically.
+      // const categoryRoutes = await getStaticCategoryRoutes();
+      // Weekly News is served via ISR (not prerender) so Netlify-Cache-Tag can be set dynamically.
+      // const newsRoutes = await getStaticNewsRoutes();
       
       nitroConfig.prerender = nitroConfig.prerender ?? {};
       nitroConfig.prerender.routes = [
         ...(nitroConfig.prerender.routes ?? []),
-        ...blogRoutes,
-        ...categoryRoutes,
-        ...newsRoutes
+        // ...blogRoutes,
+        // ...categoryRoutes,
+        // ...newsRoutes
       ];
     }
   },
@@ -55,19 +62,79 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
-    '/': { prerender: true },
-    '/blog': { prerender: true },
-    '/blog/**': { prerender: true },
+    // '/': { prerender: true },
+    // '/blog': { prerender: true },
+    "/": {
+      isr: true, // Enable ISR (never considers cache stale)
+      
+      headers: {
+        // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        
+        // Netlify CDN cache control with durable directive
+        // This is the key header that enables shared durable cache across all edge nodes
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        
+        // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
+        // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
+        // The dynamic tag is set by server/plugins/cache-tag.ts
+      },  
+    },
+    "/blog": {
+      isr: true, // Enable ISR (never considers cache stale)
+      
+      headers: {
+        // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        
+        // Netlify CDN cache control with durable directive
+        // This is the key header that enables shared durable cache across all edge nodes
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        
+        // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
+        // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
+        // The dynamic tag is set by server/plugins/cache-tag.ts
+      },  
+    },
+     "/blog/**": {
+      isr: true, // Enable ISR (never considers cache stale)
+      
+      headers: {
+        // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        
+        // Netlify CDN cache control with durable directive
+        // This is the key header that enables shared durable cache across all edge nodes
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        
+        // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
+        // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
+        // The dynamic tag is set by server/plugins/cache-tag.ts
+      },  
+    },
+
+    // Weekly News (News That Caught Our Eye)
+    "/newsthatcaughtoureye": {
+      isr: true,
+      headers: {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        // Dynamic Netlify-Cache-Tag is set by server/plugins/cache-tag.ts
+      },
+    },
+    "/newsthatcaughtoureye/**": {
+      isr: true,
+      headers: {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
+        // Dynamic Netlify-Cache-Tag is set by server/plugins/cache-tag.ts
+      },
+    },
     '/events': { prerender: true },
     '/more-resources': { prerender: true },
-    '/newsthatcaughtoureye/**': { prerender: true },
     '/about': { prerender: true },
     '/our-research': { prerender: true },
     '/our-engagements': { prerender: true },
-    '/newsthatcaughtoureye/latest': { 
-    prerender: false,  
-    headers: { 'cache-control': 's-maxage=60' } 
-  },
     '/events/reboot-democracy': {
       redirect: '/events?Reboot%20Democracy%20Lecture%20Series',
       prerender: true

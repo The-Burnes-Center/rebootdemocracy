@@ -9,6 +9,7 @@
     tabindex="0"
     @click="$emit('click')"
     @keydown="handleKeydown"
+    
   >
     <div class="featured-card__image-wrapper" :style="{ '--bg-image': `url(${imageUrl})` }">
       <img 
