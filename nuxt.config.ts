@@ -1,7 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
 import '@nuxtjs/algolia';
 // import { getStaticBlogRoutes } from './composables/getStaticBlogRoutes';
-import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
+// import { getStaticCategoryRoutes } from './composables/getStaticCategoryRoutes';
 // import { getStaticNewsRoutes } from './composables/getStaticNewsRoutes';
 
 export default defineNuxtConfig({
@@ -39,7 +39,8 @@ export default defineNuxtConfig({
   hooks: {
     async 'nitro:config'(nitroConfig) {
       // const blogRoutes = await getStaticBlogRoutes();
-      const categoryRoutes = await getStaticCategoryRoutes();
+      // Category pages are served via ISR (not prerender) so Netlify-Cache-Tag can be set dynamically.
+      // const categoryRoutes = await getStaticCategoryRoutes();
       // Weekly News is served via ISR (not prerender) so Netlify-Cache-Tag can be set dynamically.
       // const newsRoutes = await getStaticNewsRoutes();
       
@@ -47,7 +48,7 @@ export default defineNuxtConfig({
       nitroConfig.prerender.routes = [
         ...(nitroConfig.prerender.routes ?? []),
         // ...blogRoutes,
-        ...categoryRoutes,
+        // ...categoryRoutes,
         // ...newsRoutes
       ];
     }
