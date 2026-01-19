@@ -1,7 +1,21 @@
 [build]
-command = "rm -rf .output .nuxt && npm ci && npm run generate"
-publish = ".output/public/"
-functions = "netlify/functions"
+# Use 'build' instead of 'generate' for ISR support
+# 'build' creates the server handler that includes server/api/ routes
+# 'generate' only creates static files and doesn't build server routes
+command = "rm -rf .output .nuxt .netlify && npm ci && npm run build"
+# With netlify preset:
+# - Public files are in .output/public (static assets and prerendered pages)
+# - Server handler is in .netlify/functions-internal/server (auto-detected, includes server/api/ routes)
+#   This shows up as "server handler" (system) in Netlify Functions
+# - Custom functions are in netlify/functions (auto-detected)
+publish = ".output/public"
+# CRITICAL: Don't set 'functions' here - it prevents Netlify from detecting the server handler
+# Netlify will auto-detect:
+# 1. Server handler from .netlify/functions-internal/server (includes server/api/ routes) - shows as "server handler"
+# 2. Custom functions from netlify/functions (if directory exists)
+# NOTE: Cache warm-up is handled via /api/warm-cache endpoint
+# - After deploy: Netlify webhook calls POST /api/warm-cache (full warm-up)
+# - After revalidation: /api/revalidate calls POST /api/warm-cache with tag (single page warm-up)
 
 [build.environment]
   NODE_VERSION = "20.12.2"
@@ -9,20 +23,23 @@ functions = "netlify/functions"
   NPM_FLAGS = "--no-audit --no-fund --verbose"
   NETLIFY_BUILD_DEBUG = "true"
 
+# NOTE: We're NOT setting [functions] directory here because:
+# - Setting it prevents Netlify from auto-detecting the server handler
+# - The server handler (with server/api/ routes) is in .output/server
+# - Custom functions in netlify/functions will still be detected automatically
+# If you need custom function settings, uncomment below but be aware it may affect server handler detection:
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@directus/sdk", "jstoxml", "he", "jsdom"]
-  directory = "netlify/functions"
 
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
+# NOTE: Removed catch-all redirect "/*" -> "/index.html"
+# This was interfering with ISR routes - the server handler needs to process blog routes
+# Nuxt handles routing internally, so we don't need this SPA-style redirect
 
-[[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/:splat"
-status = 200
+# NOTE: Removed "/api/*" redirect to "/.netlify/functions/:splat"
+# The server handler (from .netlify/functions-internal/server) handles /api/* routes directly
+# The redirect was trying to send /api/revalidate to /.netlify/functions/revalidate
+# but revalidate is part of the server handler, not a standalone function
 
 [[redirects]]
 from = "/newsoftheweek/feed/rss"
