@@ -7,11 +7,11 @@
             <NuxtPage />
             <ChatWidget/>
         </NuxtLayout>
-        <RebootDemocracyModal 
+        <!-- <RebootDemocracyModal 
           v-if="modalData && showModal" 
           :modal-data="modalData" 
           @close="closeModal"
-        />
+        /> -->
     </div>
 </template>
 
