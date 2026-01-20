@@ -30,11 +30,11 @@ jobs:
           git merge main --no-commit --no-ff || true
 
           # Restore draft-specific files to prevent them from being overwritten
-          git checkout origin/draft -- src/helpers/blogHelper.ts
-          git checkout origin/draft -- src/helpers/weeklyNewsHelper.ts
-          git checkout origin/draft -- pages/blog/[slug].vue
-          git checkout origin/draft -- pages/newsthatcaughtoureye/[slug].vue
-          git checkout origin/draft -- nuxt.config.ts
+          # git checkout origin/draft -- src/helpers/blogHelper.ts
+          # git checkout origin/draft -- src/helpers/weeklyNewsHelper.ts
+          # git checkout origin/draft -- pages/blog/[slug].vue
+          # git checkout origin/draft -- pages/newsthatcaughtoureye/[slug].vue
+          # git checkout origin/draft -- nuxt.config.ts
 
           # Commit the merge
           git commit -m "Merge main into draft without overwriting draft-specific files" || echo "No changes to commit"
