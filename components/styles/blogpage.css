@@ -222,6 +222,19 @@ p.excerpt-paragraph {
   font-weight: 700;
 }
 
+.blog-content h1 span:not([style]),
+.blog-content h2 span:not([style]),
+.blog-content h3 span:not([style]),
+.blog-content h4 span:not([style]),
+.blog-content h5 span:not([style]),
+.blog-content h6 span:not([style]) {
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
 .blog-content p {
   font-size: 20px;
   font-style: normal;
