@@ -24,7 +24,7 @@ export default defineNuxtConfig({
       failOnError: false,
       concurrency: 1,
       routes: [],
-      // Exclude scripts directory from route scanning
+      // Exclude scripts directory from route scanning and scripting
       ignore: ['/scripts/**']
       // NOTE: ISR routes (/blog/**) should NOT be in prerender.routes
       // They are generated on-demand (first request), not during build
