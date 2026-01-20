@@ -86,7 +86,7 @@
           </h2>
           <div class="items-grid">
             <article
-              v-for="item in getItemsByCategory(cat)"
+              v-for="item in getItemsByCategoryWrapper(cat)"
               :key="item.reboot_democracy_weekly_news_items_id.id"
               class="news-item"
             >
@@ -147,7 +147,7 @@
               class="toc-chip"
               :href="'#' + cat.toLowerCase().replace(/\s+/g, '')"
             >
-              {{ cat }} <span class="toc-count">({{ getItemsByCategory(cat).length }})</span>
+              {{ cat }} <span class="toc-count">({{ getItemsByCategoryWrapper(cat).length }})</span>
             </a>
           </div>
         </nav>
@@ -159,158 +159,66 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { useRoute, useRouter, navigateTo } from "#imports";
 import { format } from "date-fns";
-import { createDirectus, rest, readItems } from "@directus/sdk";
-
-// Interfaces
-interface RelatedNewsItem {
-  reboot_weekly_news_related_news_id: {
-    title: string;
-    link: string;
-  };
-}
-
-interface WeeklyNewsItem {
-  id: string;
-  title: string;
-  author: string;
-  publication: string;
-  date: string;
-  excerpt: string;
-  url: string;
-  category?: string;
-  related_links?: RelatedNewsItem[] | '';
-}
-
-interface WeeklyNewsItemWrapper {
-  reboot_democracy_weekly_news_items_id: WeeklyNewsItem;
-}
-
-interface ImageItem {
-  id: string;
-  filename_disk: string;
-  width?: number;
-  height?: number;
-}
-
-interface WeeklyNewsPost {
-  id: string;
-  title: string;
-  summary: string;
-  author: string;
-  date: string;
-  edition: string;
-  status: string;
-  items: WeeklyNewsItemWrapper[];
-  image?: ImageItem;
-  events?: string;
-  announcements?: string;
-}
+import { 
+  fetchWeeklyNewsByEdition, 
+  fetchWeeklyNewsData, 
+  getLatestEdition,
+  getUniqueCategories,
+  getItemsByCategory
+} from "../../src/helpers/weeklyNewsHelper";
 
 // Constants
 const DIRECTUS_URL = "https://burnes-center.directus.app";
 
-// Directus
-const directus = createDirectus(DIRECTUS_URL).with(rest());
 const route = useRoute();
 const router = useRouter();
 const slug = computed(() => route.params.slug as string);
 
-// Helper function to get the latest edition
-const getLatestEdition = async () => {
+// Reactive data
+const postData = ref<any[]>([]);
+const isLoading = ref(true);
+const error = ref<Error | null>(null);
+
+// Function to load weekly news data
+async function loadWeeklyNewsData() {
   try {
-    const response = await directus.request(
-      readItems("reboot_democracy_weekly_news", {
-        fields: ["edition"],
-        filter: {
-          status: { _eq: "published" },
-        },
-        limit: -1,
-      })
-    );
-
-    if (response && response.length > 0) {
-      const editions = response
-        .map((item: any) => parseInt(item.edition))
-        .filter((edition: number) => !isNaN(edition))
-        .sort((a: number, b: number) => b - a);
-
-      if (editions.length > 0) {
-        return editions[0].toString();
+    isLoading.value = true;
+    error.value = null;
+    
+    let slugToUse = slug.value;
+    
+    // Check if the slug is "latest"
+    if (slug.value === "latest") {
+      const latestEdition = await getLatestEdition();
+      if (latestEdition) {
+        slugToUse = latestEdition;
+        // Replace the URL
+        await navigateTo(`/newsthatcaughtoureye/${latestEdition}`, { replace: true });
+      } else {
+        throw new Error("No published editions found");
       }
     }
 
-    return null;
-  } catch (error) {
-    console.error("Error fetching latest edition:", error);
-    return null;
-  }
-};
-
-// Handle "latest" slug
-let effectiveSlug = slug.value;
-if (slug.value === "latest") {
-  if (process.server) {
-    // Server-side: fetch latest edition
-    const latestEdition = await getLatestEdition();
-    if (latestEdition) {
-      effectiveSlug = latestEdition;
-    }
+    const response = await fetchWeeklyNewsData(slugToUse);
+    postData.value = response;
+  } catch (err) {
+    console.error('Error fetching weekly news:', err);
+    error.value = err as Error;
+    postData.value = [];
+  } finally {
+    isLoading.value = false;
   }
 }
 
-// Fetch post data with useAsyncData - optimized for build time
-const {
-  data: postData,
-  pending: isLoading,
-  error,
-} = await useAsyncData(
-  `weekly-news-${slug.value}`,
-  async () => {
-    try {
-      let slugToUse = slug.value;
-      
-      // Check if the slug is "latest"
-      if (slug.value === "latest") {
-        const latestEdition = await getLatestEdition();
-        if (latestEdition) {
-          slugToUse = latestEdition;
-          // On client side, replace the URL
-          if (process.client) {
-            await navigateTo(`/newsthatcaughtoureye/${latestEdition}`, { replace: true });
-          }
-        } else {
-          throw new Error("No published editions found");
-        }
-      }
-
-      const response = await directus.request(
-        readItems("reboot_democracy_weekly_news", {
-          meta: "total_count",
-          limit: -1,
-          fields: ["*.*,items.reboot_democracy_weekly_news_items_id.*,items.reboot_democracy_weekly_news_items_id.related_links.*.*"],
-          filter: {
-            _and: [
-              { edition: { _eq: slugToUse } },
-              { status: { _eq: "published" } },
-            ],
-          },
-        })
-      );
-      return response as WeeklyNewsPost[];
-    } catch (err) {
-      console.error('Error fetching weekly news:', err);
-      throw err;
-    }
-  },
-  { 
-    server: true,
-    lazy: false, 
-    transform: (data) => data, 
+// Watch for route changes to reload data
+watch(slug, async (newSlug, oldSlug) => {
+  if (newSlug !== oldSlug) {
+    await loadWeeklyNewsData();
   }
-);
+});
 
 // Format date
 const formatDateOnly = (date: Date): string => {
@@ -319,24 +227,14 @@ const formatDateOnly = (date: Date): string => {
 
 // Unique categories
 const uniqueCategories = computed(() => {
-  if (!postData.value?.length || !postData.value[0].items) return [];
-  const cats = postData.value[0].items.map(
-    (item) =>
-      item.reboot_democracy_weekly_news_items_id.category ||
-      "News that caught our eye"
-  );
-  return [...new Set(cats)];
+  if (!postData.value?.length || !postData.value[0]) return [];
+  return getUniqueCategories(postData.value[0]);
 });
 
-// Typed helper to get items by category (prevents implicit any in template)
-const getItemsByCategory = (category: string): WeeklyNewsItemWrapper[] => {
-  const items = postData.value?.[0]?.items ?? [];
-  return items.filter((wrapper: WeeklyNewsItemWrapper) => {
-    const itemCategory =
-      wrapper.reboot_democracy_weekly_news_items_id.category ||
-      "News that caught our eye";
-    return itemCategory === category;
-  });
+// Helper to get items by category
+const getItemsByCategoryWrapper = (category: string) => {
+  if (!postData.value?.length || !postData.value[0]) return [];
+  return getItemsByCategory(postData.value[0], category);
 };
 
 // Set up meta tags with reactive values
@@ -395,6 +293,11 @@ useSeoMeta({
   twitterDescription: () => metaDescription.value,
   twitterImage: () => metaImageUrl.value,
   twitterCard: () => 'summary_large_image',
+});
+
+// Load data when component is mounted
+onMounted(async () => {
+  await loadWeeklyNewsData();
 });
 </script>
 
@@ -460,7 +363,6 @@ html {
 .weeklynews-img {
   height: 250px;
   width: 100%;
-  aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 
@@ -505,7 +407,7 @@ html {
   color: #ffffff;
   font-weight: 600;
   margin: 0.5rem auto 0 auto;
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   text-align: center;
   width: 100%;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -537,7 +439,7 @@ html {
   border: 1px solid #e6e6e6;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   line-height: 1.4;
   transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
@@ -645,21 +547,21 @@ html {
   color: rgb(0, 51, 102);
   font-family: var(--font-sora);
   font-size: 22px;
-  line-height: 35px;
+  line-height: 30px;
   margin: 0;
   font-weight: 600;
 }
 
 .item-meta {
   margin: 0;
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   font-size: 16px;
   line-height: 18px;
 
 }
 
 .item-excerpt {
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   margin: 0;
 }
 
@@ -671,7 +573,7 @@ html {
   padding: 0.5rem 0.5rem;
   width: fit-content;
   font-size: 15px;
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   font-weight: 600;
   border-radius: 4px;
   margin-top: 0.25rem;
@@ -687,7 +589,7 @@ html {
 
 .weekly-news-related-articles p {
   margin: 0 0 0.5rem 0;
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles ul {
@@ -697,13 +599,13 @@ html {
 
 .weekly-news-related-articles li {
   margin-bottom: 0.25rem;
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles a {
   color: rgb(0, 51, 102);
   text-decoration: none;
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
 }
 
 .weekly-news-related-articles a:hover {
@@ -812,7 +714,7 @@ html {
 
 p{
   font-size: 20px;
-  line-height: 35px;
+  line-height: 30px;
   margin: 0;
 }
 
@@ -856,7 +758,7 @@ p{
 .innovate-intro {
   font-size: 20px !important;
   line-height: 32px !important;
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   color: rgb(0, 51, 102);
   margin: 0 !important;
   padding: 1.25rem 1.5rem;
@@ -882,9 +784,9 @@ p{
 }
 
 .innovate-events-content p {
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   font-size: 20px !important;
-  line-height: 35px !important;
+  line-height: 30px !important;
   color: #333333;
   margin: 0.75rem 0 !important;
   padding: 0.5rem 1rem;
@@ -904,9 +806,9 @@ p{
 }
 
 .innovate-events-content li {
-  font-family: var(--font-merriweather);
+  font-family: var(--font-habibi);
   font-size: 20px !important;
-  line-height: 35px !important;
+  line-height: 30px !important;
   color: #333333;
   margin: 0.5rem 0;
   padding: 0.25rem 0;

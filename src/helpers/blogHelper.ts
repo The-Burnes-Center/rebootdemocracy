@@ -27,9 +27,9 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPost | null> {
     );
 
     const blogs = response as BlogPost[];
-    return blogs.length > 0 && blogs[0] ? blogs[0] : null;
-  } catch (error: any) {
-    console.error(`Error fetching blog with slug ${slug}:`, error.message || error);
+    return blogs.length ? blogs[0] : null;
+  } catch (error) {
+    console.error(`Error fetching blog with slug ${slug}:`, error);
     return null;
   }
 }

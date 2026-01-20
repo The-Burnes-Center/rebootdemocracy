@@ -332,6 +332,10 @@ import { onMounted, onBeforeUnmount, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { BlogPost } from "@/types/BlogPost";
 import { format } from "date-fns";
+import {
+  fetchBlogBySlug,
+  fetchRelatedBlogsByTags,
+} from "../../src/helpers/blogHelper";
 
 const {
   showSearchResults,

@@ -11,7 +11,7 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
   ssr: true,
-  
+
   modules: ['@nuxt/test-utils/module', '@nuxtjs/algolia', 'nuxt-gtag', 'nuxt-build-cache', 'nuxt-lazy-hydrate'],
   gtag: {
     id: 'G-L78LX2HS2N',
@@ -43,7 +43,7 @@ export default defineNuxtConfig({
       // const categoryRoutes = await getStaticCategoryRoutes();
       // Weekly News is served via ISR (not prerender) so Netlify-Cache-Tag can be set dynamically.
       // const newsRoutes = await getStaticNewsRoutes();
-      
+
       nitroConfig.prerender = nitroConfig.prerender ?? {};
       nitroConfig.prerender.routes = [
         ...(nitroConfig.prerender.routes ?? []),
@@ -66,51 +66,51 @@ export default defineNuxtConfig({
     // '/blog': { prerender: true },
     "/": {
       isr: true, // Enable ISR (never considers cache stale)
-      
+
       headers: {
         // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
         "Cache-Control": "public, max-age=0, must-revalidate",
-        
+
         // Netlify CDN cache control with durable directive
         // This is the key header that enables shared durable cache across all edge nodes
         "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
-        
+
         // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
         // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
         // The dynamic tag is set by server/plugins/cache-tag.ts
-      },  
+      },
     },
     "/blog": {
       isr: true, // Enable ISR (never considers cache stale)
-      
+
       headers: {
         // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
         "Cache-Control": "public, max-age=0, must-revalidate",
-        
+
         // Netlify CDN cache control with durable directive
         // This is the key header that enables shared durable cache across all edge nodes
         "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
-        
+
         // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
         // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
         // The dynamic tag is set by server/plugins/cache-tag.ts
-      },  
+      },
     },
-     "/blog/**": {
+    "/blog/**": {
       isr: true, // Enable ISR (never considers cache stale)
-      
+
       headers: {
         // Browser cache control (browsers will revalidate, but CDN uses Netlify-CDN-Cache-Control)
         "Cache-Control": "public, max-age=0, must-revalidate",
-        
+
         // Netlify CDN cache control with durable directive
         // This is the key header that enables shared durable cache across all edge nodes
         "Netlify-CDN-Cache-Control": "public, durable, max-age=31536000, stale-while-revalidate=31536000",
-        
+
         // NOTE: Netlify-Cache-Tag cannot be set here because it needs to be dynamic per post
         // (e.g., "blog/post-1" vs "blog/post-2"). Route rules only support static headers.
         // The dynamic tag is set by server/plugins/cache-tag.ts
-      },  
+      },
     },
 
     // Weekly News (News That Caught Our Eye)
@@ -151,7 +151,7 @@ export default defineNuxtConfig({
     }
   ],
   app: {
-    head: {     
+    head: {
       meta: [
         { name: 'description', content: 'RebootDemocracy.AI - We believe that artificial intelligence can and should be harnessed to strengthen participatory democracy.' },
         { property: 'og:title', content: 'RebootDemocracy.AI' },

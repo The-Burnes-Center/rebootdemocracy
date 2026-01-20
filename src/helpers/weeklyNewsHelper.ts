@@ -1,3 +1,4 @@
+// src/helpers/weeklyNewsHelper.ts - DRAFT BRANCH VERSION (SIMPLIFIED - NO AUTH)
 import { createDirectus, rest, readItems } from '@directus/sdk';
 import type { WeeklyNews } from '@/types/WeeklyNews';
 
