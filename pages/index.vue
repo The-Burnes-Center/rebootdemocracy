@@ -156,24 +156,7 @@
                     lineHeight="relaxed"
                     class="book-title-text"
                   >
-                    "Reboot: AI and the Race to Save Democracy"
-                  </Text>
-                  <Text
-                    as="span"
-                    weight="normal"
-                    color="text-primary-light"
-                    fontFamily="merriweather"
-                    class="book-author-text"
-                  >
-                    by
-                    <Text
-                      as="span"
-                      weight="semibold"
-                      color="text-primary-light"
-                      fontFamily="merriweather"
-                      class="author-name"
-                      >Beth Simone Noveck</Text
-                    >
+                    Beth Simone Noveck, Reboot: AI and the Race to Save Democracy (Yale University Press, forthcoming)
                   </Text>
                 </div>
               </div>
